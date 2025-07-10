@@ -13,7 +13,6 @@ window.onresize = () => {
   isMobile.value = document.body.clientWidth <= 1024;
 };
 </script>
-
 <template>
   <header>
     <div class="header">
