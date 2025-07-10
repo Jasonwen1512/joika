@@ -79,6 +79,9 @@
   flex-direction: column;
   gap: 20px;
   font-size: 20px;
+  a {
+    color: inherit;
+  }
 }
 .member-services-contents,
 .norm-contents {
