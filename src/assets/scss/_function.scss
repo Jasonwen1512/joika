@@ -1,0 +1,5 @@
+@use "var" as *;
+
+@function m-menu-top($h: $header-h-m) {
+  @return $h;
+}

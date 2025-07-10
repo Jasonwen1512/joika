@@ -1,0 +1,30 @@
+@use "var" as *;
+
+// === RWD斷點 ===
+@mixin mobile() {
+  @media screen and (max-width: $device-m) {
+    @content;
+  }
+}
+@mixin tablet() {
+  @media screen and (min-width: $device-p) {
+    @content;
+  }
+}
+@mixin desktop() {
+  @media screen and (min-width: $device-d) {
+    @content;
+  }
+}
+
+// === flex置中 ===
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// === padding左右設置 ===
+@mixin padding-lr($i, $j) {
+  padding: $i $j;
+}
