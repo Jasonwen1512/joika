@@ -7,6 +7,7 @@
       <div class="company-address">公司地址：桃園市中壢區中山東路5號</div>
       <div class="company-business">營業時間：9:00~17:00</div>
       <div class="company-telephone">聯絡電話：03-976-9760</div>
+      <div class="company-information">聯絡我們</div>
     </div>
     <div class="norm_and_member-services">
       <div class="member-services">
@@ -49,7 +50,7 @@
   display: flex;
   flex-direction: column;
   gap: 50px;
-  padding: 10px 10px 10px 10px;
+  padding: 60px 20px;
   margin-bottom: 0;
   justify-content: center;
   background-color: $footer-bgc;
@@ -59,6 +60,7 @@
     font-size: 24px;
   }
   @include desktop() {
+    padding: 67px 0px;
     flex-direction: row;
     gap: 10vw;
   }
@@ -77,10 +79,11 @@
 .norm-contents {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 29px;
   font-size: 20px;
-  a {
+  & :not(span) {
     color: inherit;
+    font-size: 16px;
   }
 }
 .member-services-contents,
@@ -90,5 +93,10 @@
 }
 .follow-me .icons {
   margin-top: 20px;
+  display: flex;
+  gap: 6px;
+  @include desktop() {
+    gap: 7px;
+  }
 }
 </style>
