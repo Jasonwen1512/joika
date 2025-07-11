@@ -1,10 +1,5 @@
 <script setup>
 import { ref } from "vue";
-const isSearchClick = ref(false);
-const handleIsSearchClick = () => {
-  isSearchClick.value = !isSearchClick.value;
-};
-
 const isMobile = ref(true);
 window.onload = () => {
   isMobile.value = document.body.clientWidth <= 1024;
@@ -16,17 +11,10 @@ window.onresize = () => {
 <template>
   <header>
     <div class="header">
-      <a
-        href=""
-        class="header-img"
-        :class="{ 'search-open': isSearchClick && isMobile }"
-      >
+      <a href="" class="header-img">
         <img src="@/assets/img/icon/logo.svg" alt="" />
       </a>
-      <div
-        class="menu_and_nav"
-        :class="{ 'search-open': isSearchClick && isMobile }"
-      >
+      <div class="menu_and_nav">
         <input type="checkbox" id="switch-hamburger" />
         <div class="menu">
           <a href="">揪團探索</a>
@@ -36,14 +24,22 @@ window.onresize = () => {
           <a href="">我要揪團！！</a>
         </div>
         <nav>
-          <form action="">
-            <button class="search" @click="handleIsSearchClick" type="button">
-              <img src="@/assets/img/icon/search.svg" alt="" />
-            </button>
-          </form>
-
           <button class="avatar">
-            <img src="@/assets/img/icon/avatar.svg" alt="" />
+            <svg
+              width="21"
+              height="21"
+              viewBox="0 0 21 21"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10.5 8.38889C10.9852 8.38889 11.4656 8.29333 11.9138 8.10767C12.362 7.922 12.7693 7.64987 13.1124 7.30681C13.4554 6.96375 13.7276 6.55648 13.9132 6.10825C14.0989 5.66002 14.1944 5.17961 14.1944 4.69444C14.1944 4.20928 14.0989 3.72887 13.9132 3.28064C13.7276 2.83241 13.4554 2.42514 13.1124 2.08208C12.7693 1.73902 12.362 1.46689 11.9138 1.28122C11.4656 1.09556 10.9852 1 10.5 1C9.52017 1 8.58048 1.38924 7.88763 2.08208C7.19479 2.77492 6.80556 3.71462 6.80556 4.69444C6.80556 5.67427 7.19479 6.61397 7.88763 7.30681C8.58048 7.99965 9.52017 8.38889 10.5 8.38889ZM1 19.3667V20H20V19.3667C20 17.0022 20 15.82 19.5398 14.9164C19.135 14.122 18.4891 13.4761 17.6947 13.0713C16.7911 12.6111 15.6089 12.6111 13.2444 12.6111H7.75556C5.39111 12.6111 4.20889 12.6111 3.30533 13.0713C2.51091 13.4761 1.86501 14.122 1.46022 14.9164C1 15.82 1 17.0022 1 19.3667Z"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                :stroke="isMobile ? '#000' : '#4f8da8'"
+              />
+            </svg>
           </button>
 
           <label for="switch-hamburger" class="hamburger"
@@ -54,7 +50,7 @@ window.onresize = () => {
               viewBox="0 0 24 24"
               fill="none"
             >
-              <g stroke="#4F8DA8" stroke-width="2" stroke-linecap="round">
+              <g stroke="#000" stroke-width="2" stroke-linecap="round">
                 <line class="line1" x1="4" y1="6" x2="20" y2="6" />
                 <line class="line2" x1="4" y1="12" x2="20" y2="12" />
                 <line class="line3" x1="4" y1="18" x2="20" y2="18" />
@@ -91,9 +87,6 @@ window.onresize = () => {
     width: 50%;
     vertical-align: middle;
   }
-  &.search-open {
-    transform: translateX(calc(-50% - 10px));
-  }
   @include desktop() {
     img {
       width: 60%;
@@ -104,9 +97,6 @@ window.onresize = () => {
 .menu_and_nav {
   @include flex-center();
   transition: 0.3s;
-  &.search-open {
-    transform: translateX(calc(60% + 15px));
-  }
 }
 nav {
   display: flex;
