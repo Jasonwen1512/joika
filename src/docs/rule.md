@@ -55,6 +55,18 @@ if (hasData) {
 }
 ```
 
+## 🏗️ Vue 檔案基本樣式
+
+```vue
+<script setup></script>
+
+<template>
+  <div></div>
+</template>
+
+<style scoped lang="scss"></style>
+```
+
 ---
 
 ## 📁 其他規範

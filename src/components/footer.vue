@@ -7,24 +7,24 @@
       <div class="company-address">公司地址：桃園市中壢區中山東路5號</div>
       <div class="company-business">營業時間：9:00~17:00</div>
       <div class="company-telephone">聯絡電話：03-976-9760</div>
-      <div class="company-information">聯絡我們</div>
+      <router-link to="" class="company-information">聯絡我們</router-link>
     </div>
     <div class="norm_and_member-services">
       <div class="member-services">
         <span>會員服務</span>
         <div class="member-services-contents">
-          <a href="">會員制度</a>
-          <a href="">會員中心</a>
-          <a href="">點數中心</a>
+          <router-link to="">會員制度</router-link>
+          <router-link to="">會員中心</router-link>
+          <router-link to="">點數中心</router-link>
         </div>
       </div>
       <div class="norm">
         <span>平台規範</span>
         <div class="norm-contents">
-          <a href="">活動發起規範</a>
-          <a href="">活動參與規範</a>
-          <a href="">平台服務條款</a>
-          <a href="">隱私權政策</a>
+          <router-link to="">活動發起規範</router-link>
+          <router-link to="">活動參與規範</router-link>
+          <router-link to="">平台服務條款</router-link>
+          <router-link to="">隱私權政策</router-link>
         </div>
       </div>
     </div>

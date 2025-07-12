@@ -11,17 +11,17 @@ window.onresize = () => {
 <template>
   <header>
     <div class="header">
-      <router-link to="/index" class="header-img">
+      <router-link to="/home" class="header-img">
         <img src="@/assets/img/icon/logo.svg" alt="網站 Logo" />
       </router-link>
       <div class="menu_and_nav">
         <input type="checkbox" id="switch-hamburger" />
         <div class="menu">
-          <a href="">揪團探索</a>
-          <a href="">熱門文章</a>
-          <a href="">聊天大廳</a>
-          <a href="">幫助中心</a>
-          <a href="">我要揪團！！</a>
+          <router-link to="">揪團探索</router-link>
+          <router-link to="">熱門文章</router-link>
+          <router-link to="">聊天大廳</router-link>
+          <router-link to="">幫助中心</router-link>
+          <router-link to="">我要揪團！！</router-link>
         </div>
         <nav>
           <button class="avatar">
