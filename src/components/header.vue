@@ -1,18 +1,27 @@
 <script setup>
-import { ref } from "vue";
+import Logo from "@/components/logo.vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
+
 const isMobile = ref(true);
-window.onload = () => {
+
+const checkIsMobile = () => {
   isMobile.value = document.body.clientWidth <= 1024;
 };
-window.onresize = () => {
-  isMobile.value = document.body.clientWidth <= 1024;
-};
+
+onMounted(() => {
+  checkIsMobile();
+  window.addEventListener("resize", checkIsMobile);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", checkIsMobile);
+});
 </script>
 <template>
   <header>
     <div class="header">
       <router-link to="/home" class="header-img">
-        <img src="@/assets/img/icon/logo.svg" alt="網站 Logo" />
+        <Logo class="logo" />
       </router-link>
       <div class="menu_and_nav">
         <input type="checkbox" id="switch-hamburger" />
@@ -66,6 +75,7 @@ window.onresize = () => {
 
 <style scoped lang="scss">
 .header {
+  font-family: "Inter", sans-serif;
   width: 100%;
   height: $header-h-m;
   display: flex;
@@ -83,12 +93,12 @@ window.onresize = () => {
   display: flex;
   align-items: center;
   transition: 0.3s;
-  img {
+  .logo {
     width: 50%;
     vertical-align: middle;
   }
   @include desktop() {
-    img {
+    .logo {
       width: 80%;
     }
   }
@@ -135,8 +145,8 @@ nav {
   text-align: start;
   display: flex;
   flex-direction: column;
-  padding: 15px;
-  gap: 10px;
+  padding: 18px 8px 18px 15px;
+  gap: 25px;
   font-size: 20px;
   a {
     color: $header-text-color;
