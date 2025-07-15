@@ -4,6 +4,7 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 const isMobile = ref(true);
 const isTablet = ref(true);
 const joikaWidth = ref(360);
+const nowWidth = ref(0);
 const joikaBgcList_basic = [
   ["#FEF2C3", "#FAE4D2", "#DEF2C5", "#FAEBC6", "#FEF2C3"],
   ["#E8F8E8", "#FFDBC8", "#D9EAE0", "#E3D7E0", "#FAE4D2"],
@@ -12,16 +13,17 @@ const joikaBgcList_basic = [
 ];
 let joikaBgcList = ref([]);
 const computedBottomJoikaAmount = () => {
-  const clientWidth = document.body.clientWidth;
+  nowWidth.value = document.body.clientWidth;
   // 目前螢幕寬度，要產生幾個底部的joika
-  const joikaAmount = Math.ceil(clientWidth / joikaWidth.value);
+  const joikaAmount = Math.ceil(nowWidth.value / joikaWidth.value);
   joikaBgcList.value = [];
   const jbl = joikaBgcList_basic.length;
   for (let i = 0; i < joikaAmount + 2; i++) {
     joikaBgcList.value.push(joikaBgcList_basic[(i + jbl) % jbl]);
   }
-  console.log(joikaAmount);
-  console.log(joikaBgcList);
+  // console.log(joikaAmount);
+  // console.log(joikaBgcList);
+  // console.log(nowWidth.value);
 };
 const checkIsMobile = () => {
   // footer 則是寬度<=768的當手機（平板有特別樣式）
@@ -66,7 +68,13 @@ onBeforeUnmount(() => {
         </div>
         <div class="logo">
           <Logo
-            :width="isMobile ? 209 : isTablet ? 273 : 334"
+            :width="
+              isMobile || (nowWidth >= 768 && nowWidth <= 1500)
+                ? 209
+                : isTablet
+                ? 273
+                : 334
+            "
             :height="isMobile ? 94 : isTablet ? 123 : 154"
           />
           <div>揪一咖 就出發</div>
@@ -208,6 +216,10 @@ onBeforeUnmount(() => {
         bottom: 50px;
         font-size: 24px;
       }
+      @media screen and (width <= 1500px) and (width >= $device-d) {
+        bottom: 75px;
+        font-size: 16px;
+      }
     }
   }
   @include tablet() {
@@ -319,9 +331,8 @@ onBeforeUnmount(() => {
     position: relative;
   }
   @media screen and (width <= 1200px) and (width >= $device-d) {
-    flex-direction: row;
-    margin-top: 20px;
-    gap: 40px;
+    // margin-top: 20px;
+    // gap: 40px;
   }
 }
 
@@ -349,8 +360,8 @@ onBeforeUnmount(() => {
     right: 31px;
   }
   @media screen and (width <= 1200px) and (width >= $device-d) {
-    top: -10px;
-    right: -100px;
+    // top: -10px;
+    // right: -100px;
   }
 }
 
