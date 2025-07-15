@@ -129,6 +129,8 @@ onBeforeUnmount(() => {
           :color3="item[2]"
           :color4="item[3]"
           :color5="item[4]"
+          :width="isMobile ? 141 : isTablet ? 132 : 260"
+          :height="isMobile ? 49 : isTablet ? 44 : 87"
         />
       </div>
     </div>
@@ -179,7 +181,7 @@ onBeforeUnmount(() => {
   @include desktop() {
     width: 207px;
     top: 0;
-    right: 154px;
+    right: 150px;
     left: unset;
   }
   @media screen and (width <= 1500px) and (width >= $device-d) {
