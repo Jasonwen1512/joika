@@ -2,7 +2,8 @@
 import Logo from "@/components/logo.vue";
 import { ref, onMounted, onBeforeUnmount } from "vue";
 const isMobile = ref(true);
-const joikaWidth = 144.71;
+const isTablet = ref(true);
+const joikaWidth = ref(360);
 const joikaBgcList_basic = [
   ["#FEF2C3", "#FAE4D2", "#DEF2C5", "#FAEBC6", "#FEF2C3"],
   ["#E8F8E8", "#FFDBC8", "#D9EAE0", "#E3D7E0", "#FAE4D2"],
@@ -13,17 +14,24 @@ let joikaBgcList = ref([]);
 const computedBottomJoikaAmount = () => {
   const clientWidth = document.body.clientWidth;
   // 目前螢幕寬度，要產生幾個底部的joika
-  const joikaAmount = Math.ceil(clientWidth / joikaWidth);
+  const joikaAmount = Math.ceil(clientWidth / joikaWidth.value);
   joikaBgcList.value = [];
   const jbl = joikaBgcList_basic.length;
-  for (let i = 0; i < joikaAmount; i++) {
+  for (let i = 0; i < joikaAmount + 2; i++) {
     joikaBgcList.value.push(joikaBgcList_basic[(i + jbl) % jbl]);
   }
-  // console.log(joikaAmount);
-  // console.log(joikaBgcList);
+  console.log(joikaAmount);
+  console.log(joikaBgcList);
 };
 const checkIsMobile = () => {
-  isMobile.value = document.body.clientWidth <= 1024;
+  // footer 則是寬度<=768的當手機（平板有特別樣式）
+  isMobile.value = document.body.clientWidth <= 768;
+  joikaWidth.value = 141;
+};
+const checkisTablet = () => {
+  const width = document.body.clientWidth;
+  isTablet.value = width > 768 && width < 1024;
+  joikaWidth.value = 182;
 };
 const scrollToTop = () => {
   window.scrollTo({
@@ -32,13 +40,16 @@ const scrollToTop = () => {
   });
 };
 onMounted(() => {
+  checkisTablet();
   checkIsMobile();
   computedBottomJoikaAmount();
   window.addEventListener("resize", checkIsMobile);
+  window.addEventListener("resize", checkisTablet);
   window.addEventListener("resize", computedBottomJoikaAmount);
 });
 onBeforeUnmount(() => {
   window.removeEventListener("resize", checkIsMobile);
+  window.removeEventListener("resize", checkisTablet);
   window.removeEventListener("resize", computedBottomJoikaAmount);
 });
 </script>
@@ -46,12 +57,18 @@ onBeforeUnmount(() => {
 <template>
   <footer class="footer">
     <div class="footer-area">
+      <div class="card" v-if="!isMobile && !isTablet">
+        <img src="@/assets/img/icon/footer-card.svg" alt="" />
+      </div>
       <div class="footer-icon">
-        <div class="card">
+        <div class="card" v-if="isMobile || isTablet">
           <img src="@/assets/img/icon/footer-card.svg" alt="" />
         </div>
         <div class="logo">
-          <Logo :width="209" :height="94" />
+          <Logo
+            :width="isMobile ? 209 : isTablet ? 273 : 334"
+            :height="isMobile ? 94 : isTablet ? 123 : 154"
+          />
           <div>揪一咖 就出發</div>
         </div>
       </div>
@@ -94,10 +111,10 @@ onBeforeUnmount(() => {
             <img src="@/assets/img/icon/instagram.svg" alt="" />
           </a>
         </div>
-      </div>
-      <div class="top-button" @click="scrollToTop">
-        <img src="@/assets/img/icon/footer-back-to-top.svg" alt="" />
-        <span>TOP</span>
+        <div class="top-button" @click="scrollToTop">
+          <img src="@/assets/img/icon/footer-back-to-top.svg" alt="" />
+          <span>TOP</span>
+        </div>
       </div>
     </div>
     <div class="bottom-decoration">
@@ -131,20 +148,42 @@ onBeforeUnmount(() => {
   justify-content: center;
   background-color: $footer-bgc;
   color: $footer-text-color;
-  @include desktop() {
-    padding: 67px 60px;
+  @include tablet() {
     flex-direction: row;
-    gap: 10vw;
+    justify-content: space-between;
+    padding: 50px 114px 0 114px;
+  }
+  @include desktop() {
+    justify-content: center;
+    gap: 7%;
+    padding: 200px 0 0 0;
+  }
+  @media screen and (width <= 1500px) and (width >= $device-d) {
+    padding: 150px 0 0 0;
+    gap: 3.5%;
   }
 }
 .card {
   position: absolute;
-  width: 75px;
-  left: 56%;
+  width: 82px;
+  right: 60px;
   transform: translate(80px, -80px);
-
   img {
     width: 100%;
+  }
+  @include tablet() {
+    width: 144px;
+    top: -40%;
+    left: 70%;
+  }
+  @include desktop() {
+    width: 207px;
+    top: 0;
+    right: 154px;
+    left: unset;
+  }
+  @media screen and (width <= 1500px) and (width >= $device-d) {
+    width: 170px;
   }
 }
 .footer-icon {
@@ -157,7 +196,26 @@ onBeforeUnmount(() => {
       left: 55%;
       bottom: -15%;
       font-size: 15px;
+      @include tablet() {
+        left: 53%;
+        font-size: 20px;
+      }
+      @include desktop() {
+        width: 100%;
+        left: 57%;
+        bottom: 50px;
+        font-size: 24px;
+      }
     }
+  }
+  @include tablet() {
+    width: 100%;
+  }
+  @include desktop() {
+    width: auto;
+  }
+  @media screen and (width <= 1200px) and (width >= $device-d) {
+    // width: 100%;
   }
 }
 
@@ -177,6 +235,9 @@ onBeforeUnmount(() => {
     color: inherit;
     font-size: 16px;
     font-weight: 400;
+    @include tablet() {
+      flex-direction: column;
+    }
   }
   @include desktop() {
     & :not(span) {
@@ -184,6 +245,7 @@ onBeforeUnmount(() => {
     }
   }
 }
+
 .company {
   gap: 15px;
   text-align: center;
@@ -195,7 +257,20 @@ onBeforeUnmount(() => {
     top: 2px;
     left: 7px;
   }
+  @include tablet() {
+    width: 100%;
+    text-align: left;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); // 2欄
+    grid-template-rows: repeat(3, auto); // 3列
+    gap: 23px 87px;
+    span {
+      grid-column: span 2;
+    }
+  }
   @include desktop() {
+    display: flex;
+    width: auto;
     img {
       top: 0px;
     }
@@ -216,6 +291,9 @@ onBeforeUnmount(() => {
   @media screen and (max-width: 370px) {
     grid-template-columns: repeat(2, 1fr);
   }
+  @include tablet() {
+    display: flex;
+  }
 }
 .follow-me {
   display: flex;
@@ -235,8 +313,13 @@ onBeforeUnmount(() => {
       gap: 7px;
     }
   }
-  @include desktop() {
-    margin-top: auto;
+  @include tablet() {
+    position: relative;
+  }
+  @media screen and (width <= 1200px) and (width >= $device-d) {
+    flex-direction: row;
+    margin-top: 20px;
+    gap: 40px;
   }
 }
 
@@ -254,6 +337,18 @@ onBeforeUnmount(() => {
   gap: 2px;
   span {
     font-size: 14px;
+  }
+  @include tablet() {
+    right: 34px;
+  }
+  @include desktop() {
+    width: 60px;
+    height: 60px;
+    right: 31px;
+  }
+  @media screen and (width <= 1200px) and (width >= $device-d) {
+    top: -10px;
+    right: -100px;
   }
 }
 
@@ -273,6 +368,12 @@ onBeforeUnmount(() => {
   }
   &::-webkit-scrollbar {
     display: none;
+  }
+  @include desktop() {
+    padding-top: 100px;
+  }
+  @media screen and (width <= 1200px) and (width >= $device-d) {
+    padding-top: 20px;
   }
 }
 </style>

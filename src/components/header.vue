@@ -5,7 +5,8 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 const isMobile = ref(true);
 
 const checkIsMobile = () => {
-  isMobile.value = document.body.clientWidth <= 1024;
+  // header 寬度<=1024的一律當作手機（平板沿用手機版）
+  isMobile.value = document.body.clientWidth < 1024;
 };
 
 onMounted(() => {
