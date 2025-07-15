@@ -385,7 +385,7 @@ onBeforeUnmount(() => {
   @include desktop() {
     padding-top: 100px;
   }
-  @media screen and (width <= 1200px) and (width >= $device-d) {
+  @media screen and (width <= 1500px) and (width >= $device-d) {
     padding-top: 20px;
   }
 }
