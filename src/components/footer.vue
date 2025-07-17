@@ -340,7 +340,7 @@ onBeforeUnmount(() => {
   position: absolute;
   bottom: 0;
   right: 30px;
-  background-color: $color-higtight;
+  background-color: $color-highlight;
   width: 52px;
   height: 52px;
   border: 1px solid #4f8da8;

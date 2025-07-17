@@ -5,9 +5,9 @@ $default-text: #000;
 $color-primary: #81bfda;
 $color-secondary: #b1f0f7;
 $color-neutral: #fffce2;
-$color-higtight: #fada7a;
+$color-highlight: #fada7a;
 
-// === heaer  ===
+// === header ===
 $header-bgc: $color-neutral;
 $header-text-color: #4f8da8;
 
@@ -15,4 +15,5 @@ $header-text-color: #4f8da8;
 $footer-bgc: $color-neutral;
 $footer-text-color: #4f8da8;
 
-$tp: transparent; //透明
+// === 透明色 ===
+$tp: transparent;
