@@ -3,6 +3,7 @@ import Logo from "@/components/logo.vue";
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const isMobile = ref(true);
+const shStatus = ref(false);
 
 const checkIsMobile = () => {
   // header 寬度<=1024的一律當作手機（平板沿用手機版）
@@ -21,20 +22,34 @@ onBeforeUnmount(() => {
 <template>
   <header>
     <div class="header">
-      <router-link to="/home" class="header-img">
+      <router-link to="/home" class="header-img" @click="shStatus = false">
         <Logo class="logo" />
       </router-link>
       <div class="menu_and_nav">
-        <input type="checkbox" id="switch-hamburger" />
+        <input type="checkbox" id="switch-hamburger" v-model="shStatus" />
         <div class="menu">
-          <router-link to="">揪團探索</router-link>
-          <router-link to="">熱門文章</router-link>
-          <router-link to="">聊天大廳</router-link>
-          <router-link to="">幫助中心</router-link>
-          <router-link to="">我要揪團！！</router-link>
+          <router-link to="/group/group-explore" @click="shStatus = false"
+            >揪團探索</router-link
+          >
+          <router-link to="/article/article" @click="shStatus = false"
+            >熱門文章</router-link
+          >
+          <router-link to="/chat" @click="shStatus = false"
+            >聊天大廳</router-link
+          >
+          <router-link to="/support" @click="shStatus = false"
+            >幫助中心</router-link
+          >
+          <router-link to="/group/group-create" @click="shStatus = false"
+            >我要揪團！！</router-link
+          >
         </div>
         <nav>
-          <button class="avatar">
+          <router-link
+            to="/auth/signup"
+            class="avatar"
+            @click="shStatus = false"
+          >
             <svg
               viewBox="0 0 21 21"
               fill="none"
@@ -50,7 +65,7 @@ onBeforeUnmount(() => {
                 :stroke="isMobile ? '#000' : '#4f8da8'"
               />
             </svg>
-          </button>
+          </router-link>
 
           <label for="switch-hamburger" class="hamburger"
             ><svg
@@ -136,7 +151,7 @@ nav {
 }
 .menu {
   position: fixed;
-  top: m-menu-top();
+  top: $header-h-m;
   right: 0;
   transform: translateX(100%);
   transition: 0.3s;

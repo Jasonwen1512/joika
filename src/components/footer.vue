@@ -345,6 +345,7 @@ onBeforeUnmount(() => {
   height: 52px;
   border: 1px solid #4f8da8;
   border-radius: 50%;
+  cursor: pointer;
   @include flex-center();
   flex-direction: column;
   gap: 2px;
