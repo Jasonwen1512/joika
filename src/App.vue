@@ -39,8 +39,8 @@ main {
 }
 body {
   background-image: url("@/assets/img/bgc.jpg");
-  background-repeat: repeat; /* 預設就是 repeat，但寫出來比較明確 */
-  background-size: auto; /* 預設值，保持原圖尺寸 */
-  background-position: top left; /* 可省略，從左上角開始鋪 */
+  background-repeat: repeat;
+  background-size: auto;
+  background-position: top left;
 }
 </style>
