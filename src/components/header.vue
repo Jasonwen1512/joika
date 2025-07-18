@@ -28,14 +28,14 @@ onBeforeUnmount(() => {
       <div class="menu_and_nav">
         <input type="checkbox" id="switch-hamburger" v-model="shStatus" />
         <div class="menu">
-          <router-link to="/group/group-explore" @click="shStatus = false"
-            >揪團探索</router-link
-          >
           <router-link to="/article/article" @click="shStatus = false"
             >熱門文章</router-link
           >
           <router-link to="/chat" @click="shStatus = false"
             >聊天大廳</router-link
+          >
+          <router-link to="/group/group-explore" @click="shStatus = false"
+            >揪團探索</router-link
           >
           <router-link to="/support" @click="shStatus = false"
             >幫助中心</router-link
