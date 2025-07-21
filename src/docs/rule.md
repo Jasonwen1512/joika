@@ -67,9 +67,22 @@ if (hasData) {
 <style scoped lang="scss"></style>
 ```
 
+## 📁 新增檔案規範
+
+新增檔案時，請依照以下規則建立於對應路徑中：
+
+- **元件（Components）**  
+  若你負責開發 `group-explore`，並要新增頁面的元件，請放於：
+  `src/components/group/group-explore/`
+- **圖片（Images）**  
+  若需新增 `group-explore` 相關的圖片，請放於：
+  `src/assets/img/group/group-explore/`
+
+以此類推，所有新增檔案請放置在所屬功能模組的資料夾內。
+
 ---
 
-## 📁 其他規範
+## 📝 其他規範
 
 | 類別            | 規範說明                                           |
 | --------------- | -------------------------------------------------- |

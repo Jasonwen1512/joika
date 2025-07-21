@@ -1,9 +1,11 @@
 <script setup>
 import Carousel from "@/components/group/group-explore/carousel.vue";
+import Taiwan from "@/components/group/group-explore/taiwan.vue";
 </script>
 
 <template>
   <Carousel />
+  <Taiwan />
 </template>
 
 <style scoped lang="scss">

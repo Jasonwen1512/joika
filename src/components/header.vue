@@ -4,6 +4,13 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const isMobile = ref(true);
 const shStatus = ref(false);
+// const isScrolled = ref(false);
+// const headerZIndex = ref(0);
+
+// const handleScroll = () => {
+//   isScrolled.value = window.scrollY > 200;
+//   headerZIndex.value = isScrolled.value ? 5 : 0;
+// };
 
 const checkIsMobile = () => {
   // header 寬度<=1024的一律當作手機（平板沿用手機版）
@@ -13,10 +20,12 @@ const checkIsMobile = () => {
 onMounted(() => {
   checkIsMobile();
   window.addEventListener("resize", checkIsMobile);
+  // window.addEventListener("scroll", handleScroll);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("resize", checkIsMobile);
+  // window.removeEventListener("scroll", handleScroll);
 });
 </script>
 <template>
@@ -46,7 +55,7 @@ onBeforeUnmount(() => {
         </div>
         <nav>
           <router-link
-            to="/auth/signup"
+            to="/auth/login"
             class="avatar"
             @click="shStatus = false"
           >
@@ -100,6 +109,7 @@ onBeforeUnmount(() => {
   z-index: 5;
   background-color: $header-bgc;
   padding: $header-pd-tb $header-pd-lr;
+  transform-style: preserve-3d; // 加上這行才不會閃爍，重要
   @include desktop() {
     height: $header-h-d;
     padding: 0 90px 0 50px;
