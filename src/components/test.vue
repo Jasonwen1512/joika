@@ -24,4 +24,8 @@ const aloha = () => {
 .test {
   width: 100%;
 }
+.ActivityCard {
+  display: grid;
+  grid-template-columns: 1fr repeat(4, 5px);
+}
 </style>

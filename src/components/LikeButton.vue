@@ -28,15 +28,14 @@ const props = defineProps({
 .icon-button {
   color: $red;
   cursor: pointer;
-  padding: 5px;
-
+  display: flex;
   &:hover {
     color: $pink;
   }
 
   .icon {
-    width: 40px;
-    height: 40px;
+    width: 100%;
+    height: 38px;
     fill: $red;
   }
 }

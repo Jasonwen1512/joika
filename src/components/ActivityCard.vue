@@ -42,28 +42,35 @@ const aloha = () => {
 .activity_card {
   max-width: 295px;
   width: 100%;
-  border: red solid 2px;
   display: flex;
   flex-direction: column;
+  padding: 5px;
 }
-
+.activity_img img {
+  width: 100%;
+  object-fit: contain;
+}
 .activity_img {
-  border: blue solid 2px;
-  justify-content: center;
-  align-items: center;
+  @include flex-center;
 }
 
 .activity_title {
-  border: green solid 2px;
+  font-size: $font-size-h4;
+  padding: 2px 0;
+  letter-spacing: 1px;
+  line-height: 1.7;
 }
 .activity_intro {
-  border: purple solid 2px;
+  font-size: $font-size-p;
+  padding: 2px 0;
+  letter-spacing: 1px;
+  line-height: 1.7;
 }
 
 .button {
-  border: yellow solid 2px;
   display: flex;
   justify-content: space-between;
-  padding: 5px 10px;
+  align-items: center;
+  padding: 2px 0px;
 }
 </style>
