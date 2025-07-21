@@ -23,8 +23,3 @@
   justify-content: center;
   align-items: center;
 }
-
-// === padding左右設置 ===
-@mixin padding-lr($i, $j) {
-  padding: $i $j;
-}
