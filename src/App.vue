@@ -1,11 +1,16 @@
 <script setup>
-import BasicLayout from "./layout/basic-layout.vue";
+import Header from "@/components/header.vue";
+import Footer from "@/components/footer.vue";
 </script>
 
 <template>
-  <BasicLayout>
-    <main class="home"></main>
-  </BasicLayout>
+  <div>
+    <Header></Header>
+    <main class="main">
+      <router-view></router-view>
+    </main>
+    <Footer></Footer>
+  </div>
 </template>
 
 <style lang="scss">
@@ -26,10 +31,16 @@ select {
   background: none;
   color: inherit;
 }
-.home {
+main {
   padding-top: $header-h-m;
   @include desktop() {
     padding-top: $header-h-d;
   }
+}
+body {
+  background-image: url("@/assets/img/bgc.jpg");
+  background-repeat: repeat;
+  background-size: auto;
+  background-position: top left;
 }
 </style>

@@ -4,7 +4,7 @@ $default-text: #000;
 
 $color-primary: #81bfda;
 $color-secondary: #b1f0f7;
-$color-neutral: #f5f0cd;
+$color-neutral: #fffce2;
 $color-highlight: #fada7a;
 
 $yellow: #f9ff4d;
@@ -18,12 +18,13 @@ $gray-disabled: #d0d0d0;
 $red: #fb0c0c;
 $pink: #ffa4a4;
 
-// === heaer  ===
+// === header ===
 $header-bgc: $color-neutral;
 $header-text-color: #4f8da8;
 
 // === footer ===
-$footer-bgc: $default-bgc;
-$footer-text-color: $default-text;
+$footer-bgc: $color-neutral;
+$footer-text-color: #4f8da8;
 
-$tp: transparent; //透明
+// === 透明色 ===
+$tp: transparent;

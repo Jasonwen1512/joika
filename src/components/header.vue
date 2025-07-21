@@ -1,51 +1,80 @@
 <script setup>
-import { ref } from "vue";
-const isSearchClick = ref(false);
-const handleIsSearchClick = () => {
-  isSearchClick.value = !isSearchClick.value;
-};
+import Logo from "@/components/logo.vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const isMobile = ref(true);
-window.onload = () => {
-  isMobile.value = document.body.clientWidth <= 1024;
-};
-window.onresize = () => {
-  isMobile.value = document.body.clientWidth <= 1024;
-};
-</script>
+const shStatus = ref(false);
+// const isScrolled = ref(false);
+// const headerZIndex = ref(0);
 
+// const handleScroll = () => {
+//   isScrolled.value = window.scrollY > 200;
+//   headerZIndex.value = isScrolled.value ? 5 : 0;
+// };
+
+const checkIsMobile = () => {
+  // header 寬度<=1024的一律當作手機（平板沿用手機版）
+  isMobile.value = document.body.clientWidth < 1024;
+};
+
+onMounted(() => {
+  checkIsMobile();
+  window.addEventListener("resize", checkIsMobile);
+  // window.addEventListener("scroll", handleScroll);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", checkIsMobile);
+  // window.removeEventListener("scroll", handleScroll);
+});
+</script>
 <template>
   <header>
     <div class="header">
-      <a
-        href=""
-        class="header-img"
-        :class="{ 'search-open': isSearchClick && isMobile }"
-      >
-        <img src="@/assets/img/icon/logo.svg" alt="" />
-      </a>
-      <div
-        class="menu_and_nav"
-        :class="{ 'search-open': isSearchClick && isMobile }"
-      >
-        <input type="checkbox" id="switch-hamburger" />
+      <router-link to="/home" class="header-img" @click="shStatus = false">
+        <Logo class="logo" />
+      </router-link>
+      <div class="menu_and_nav">
+        <input type="checkbox" id="switch-hamburger" v-model="shStatus" />
         <div class="menu">
-          <a href="">揪團探索</a>
-          <a href="">熱門文章</a>
-          <a href="">聊天大廳</a>
-          <a href="">幫助中心</a>
-          <a href="">我要揪團！！</a>
+          <router-link to="/article/article" @click="shStatus = false"
+            >熱門文章</router-link
+          >
+          <router-link to="/chat" @click="shStatus = false"
+            >聊天大廳</router-link
+          >
+          <router-link to="/group/group-explore" @click="shStatus = false"
+            >揪團探索</router-link
+          >
+          <router-link to="/support" @click="shStatus = false"
+            >幫助中心</router-link
+          >
+          <router-link to="/group/group-create" @click="shStatus = false"
+            >我要揪團！！</router-link
+          >
         </div>
         <nav>
-          <form action="">
-            <button class="search" @click="handleIsSearchClick" type="button">
-              <img src="@/assets/img/icon/search.svg" alt="" />
-            </button>
-          </form>
-
-          <button class="avatar">
-            <img src="@/assets/img/icon/avatar.svg" alt="" />
-          </button>
+          <router-link
+            to="/auth/login"
+            class="avatar"
+            @click="shStatus = false"
+          >
+            <svg
+              viewBox="0 0 21 21"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              :width="isMobile ? '21' : '30'"
+              :height="isMobile ? '21' : '30'"
+            >
+              <path
+                d="M10.5 8.38889C10.9852 8.38889 11.4656 8.29333 11.9138 8.10767C12.362 7.922 12.7693 7.64987 13.1124 7.30681C13.4554 6.96375 13.7276 6.55648 13.9132 6.10825C14.0989 5.66002 14.1944 5.17961 14.1944 4.69444C14.1944 4.20928 14.0989 3.72887 13.9132 3.28064C13.7276 2.83241 13.4554 2.42514 13.1124 2.08208C12.7693 1.73902 12.362 1.46689 11.9138 1.28122C11.4656 1.09556 10.9852 1 10.5 1C9.52017 1 8.58048 1.38924 7.88763 2.08208C7.19479 2.77492 6.80556 3.71462 6.80556 4.69444C6.80556 5.67427 7.19479 6.61397 7.88763 7.30681C8.58048 7.99965 9.52017 8.38889 10.5 8.38889ZM1 19.3667V20H20V19.3667C20 17.0022 20 15.82 19.5398 14.9164C19.135 14.122 18.4891 13.4761 17.6947 13.0713C16.7911 12.6111 15.6089 12.6111 13.2444 12.6111H7.75556C5.39111 12.6111 4.20889 12.6111 3.30533 13.0713C2.51091 13.4761 1.86501 14.122 1.46022 14.9164C1 15.82 1 17.0022 1 19.3667Z"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                :stroke="isMobile ? '#000' : '#4f8da8'"
+              />
+            </svg>
+          </router-link>
 
           <label for="switch-hamburger" class="hamburger"
             ><svg
@@ -55,7 +84,7 @@ window.onresize = () => {
               viewBox="0 0 24 24"
               fill="none"
             >
-              <g stroke="#4F8DA8" stroke-width="2" stroke-linecap="round">
+              <g stroke="#000" stroke-width="2" stroke-linecap="round">
                 <line class="line1" x1="4" y1="6" x2="20" y2="6" />
                 <line class="line2" x1="4" y1="12" x2="20" y2="12" />
                 <line class="line3" x1="4" y1="18" x2="20" y2="18" />
@@ -71,6 +100,7 @@ window.onresize = () => {
 
 <style scoped lang="scss">
 .header {
+  font-family: "Inter", sans-serif;
   width: 100%;
   height: $header-h-m;
   display: flex;
@@ -78,26 +108,24 @@ window.onresize = () => {
   position: fixed;
   z-index: 5;
   background-color: $header-bgc;
-  @include padding-lr($header-pd-tb, $header-pd-lr);
+  padding: $header-pd-tb $header-pd-lr;
+  transform-style: preserve-3d; // 加上這行才不會閃爍，重要
   @include desktop() {
     height: $header-h-d;
-    @include padding-lr(0px, 20px);
+    padding: 0 90px 0 50px;
   }
 }
 .header-img {
   display: flex;
   align-items: center;
   transition: 0.3s;
-  img {
+  .logo {
     width: 50%;
     vertical-align: middle;
   }
-  &.search-open {
-    transform: translateX(calc(-50% - 10px));
-  }
   @include desktop() {
-    img {
-      width: 60%;
+    .logo {
+      width: 80%;
     }
   }
 }
@@ -105,17 +133,14 @@ window.onresize = () => {
 .menu_and_nav {
   @include flex-center();
   transition: 0.3s;
-  &.search-open {
-    transform: translateX(calc(60% + 15px));
-  }
 }
 nav {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  .search,
   .avatar,
   .hamburger {
+    cursor: pointer;
     @include flex-center();
   }
   .hamburger {
@@ -136,17 +161,19 @@ nav {
 }
 .menu {
   position: fixed;
-  top: m-menu-top();
+  top: $header-h-m;
   right: 0;
   transform: translateX(100%);
   transition: 0.3s;
   // border: 1px solid #000;
-  background-color: $default-bgc;
-  text-align: center;
+  background-color: #fff;
+  border: 1px solid $color-neutral;
+  text-align: start;
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  gap: 10px;
+  padding: 18px 8px 18px 15px;
+  gap: 25px;
+  font-size: 20px;
   a {
     color: $header-text-color;
   }
@@ -157,7 +184,7 @@ nav {
     background-color: $tp;
     flex-direction: row;
     padding: 0;
-    gap: 60px;
+    gap: 40px;
     margin-right: 40px;
     border: none;
     a {
