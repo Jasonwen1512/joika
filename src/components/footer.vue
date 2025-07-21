@@ -1,5 +1,6 @@
 <script setup>
 import Logo from "@/components/logo.vue";
+
 import { ref, onMounted, onBeforeUnmount } from "vue";
 const isMobile = ref(true);
 const isTablet = ref(true);
@@ -60,11 +61,11 @@ onBeforeUnmount(() => {
   <footer class="footer">
     <div class="footer-area">
       <div class="card" v-if="!isMobile && !isTablet">
-        <img src="@/assets/img/icon/footer-card.svg" alt="" />
+        <img src="@/assets/img/icon/footer-card.svg?url" alt="" />
       </div>
       <div class="footer-icon">
         <div class="card" v-if="isMobile || isTablet">
-          <img src="@/assets/img/icon/footer-card.svg" alt="" />
+          <img src="@/assets/img/icon/footer-card.svg?url" alt="" />
         </div>
         <div class="logo">
           <Logo
@@ -86,7 +87,7 @@ onBeforeUnmount(() => {
         <div class="company-business">營業時間：09:00~17:00</div>
         <div class="company-telephone">聯絡電話：03-425-1108</div>
         <router-link to="" class="company-information"
-          >聯絡我們<img src="@/assets/img/icon/email.svg" alt=""
+          >聯絡我們<img src="@/assets/img/icon/email.svg?url" alt=""
         /></router-link>
       </div>
       <div class="member-services">
@@ -110,17 +111,17 @@ onBeforeUnmount(() => {
         <span>追蹤我們</span>
         <div class="icons">
           <a href="">
-            <img src="@/assets/img/icon/facebook.svg" alt="" />
+            <img src="@/assets/img/icon/facebook.svg?url" alt="" />
           </a>
           <a href="">
-            <img src="@/assets/img/icon/line.svg" alt="" />
+            <img src="@/assets/img/icon/line.svg?url" alt="" />
           </a>
           <a href="">
-            <img src="@/assets/img/icon/instagram.svg" alt="" />
+            <img src="@/assets/img/icon/instagram.svg?url" alt="" />
           </a>
         </div>
         <div class="top-button" @click="scrollToTop">
-          <img src="@/assets/img/icon/footer-back-to-top.svg" alt="" />
+          <img src="@/assets/img/icon/footer-back-to-top.svg?url" alt="" />
           <span>TOP</span>
         </div>
       </div>
