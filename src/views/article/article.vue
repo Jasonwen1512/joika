@@ -4,7 +4,7 @@
   <!-- 這是熱門文章頁 -->
   <div>這是熱門文章頁</div>
   <div class="banner">
-    <img src ="assets/Image/文章分類banner.jpg">
+    <img src ="src/assets/img/article/banner.jpg">
   </div>
   
 </template>
