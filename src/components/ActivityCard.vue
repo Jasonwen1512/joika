@@ -1,8 +1,8 @@
 <script setup>
 import LikeButton from "./LikeButton.vue";
 import Button from "./Button.vue";
-import { FakeActivity } from "@/assets/data/fake_activity";
 import { ref } from "vue";
+
 defineProps({
   item: Object,
 });
@@ -18,33 +18,30 @@ const aloha = () => {
 </script>
 
 <template>
-  <ul>
-    <li v-for="item in FakeActivity" :key="item.activity_id" v-if="item">
-      <div class="activity_card">
-        <div class="activity_img">
-          <img :src="item.img_url" :alt="item.title" />
-        </div>
-        <h4 class="activity_title">{{ item.title }}</h4>
-        <p class="activity_intro">{{ item.intro }}</p>
-        <div class="button">
-          <Button :onClick="aloha" theme="primary" size="md">我要跟團!</Button>
-          <LikeButton
-            :isActive="likeMap[item.activity_id]"
-            @click="toggleLike(item.activity_id)"
-          ></LikeButton>
-        </div>
-      </div>
-    </li>
-  </ul>
+  <div class="activity_card" v-if="item">
+    <div class="activity_img">
+      <img :src="item.img_url" :alt="item.title" />
+    </div>
+    <h4 class="activity_title">{{ item.title }}</h4>
+    <p class="activity_intro">{{ item.intro }}</p>
+    <div class="button">
+      <Button :onClick="aloha" theme="primary" size="md">我要跟團!</Button>
+      <LikeButton
+        :isActive="likeMap[item.activity_id]"
+        @click="toggleLike(item.activity_id)"
+      ></LikeButton>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
 .activity_card {
-  max-width: 295px;
+  max-width: 284px;
   width: 100%;
   display: flex;
   flex-direction: column;
   padding: 5px;
+  min-height: 390px;
 }
 .activity_img img {
   width: 100%;
@@ -52,25 +49,28 @@ const aloha = () => {
 }
 .activity_img {
   @include flex-center;
+  border: black solid 1px;
 }
 
 .activity_title {
   font-size: $font-size-h4;
-  padding: 2px 0;
-  letter-spacing: 1px;
+  padding: 14px 0 0px;
   line-height: 1.7;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .activity_intro {
   font-size: $font-size-p;
-  padding: 2px 0;
-  letter-spacing: 1px;
+  padding: 10px 0 0;
   line-height: 1.7;
+  flex-grow: 1;
 }
 
 .button {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 2px 0px;
+  align-items: end;
+  padding-bottom: 10px;
 }
 </style>

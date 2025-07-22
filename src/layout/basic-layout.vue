@@ -1,7 +1,6 @@
 <script setup>
 import Header from "@/components/header.vue";
 import Footer from "@/components/footer.vue";
-import TestButton from "@/components/test.vue";
 </script>
 
 <template>
@@ -9,7 +8,6 @@ import TestButton from "@/components/test.vue";
   <main>
     <slot> </slot>
   </main>
-  <TestButton></TestButton>
   <Footer></Footer>
 </template>
 

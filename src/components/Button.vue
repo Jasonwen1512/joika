@@ -121,7 +121,7 @@ $buttonThemes: (
 // sizes
 $buttonSizes: (
   sm: (
-    font-size: 16px,
+    font-size: $font-size-p,
     min-width: 86px,
     min-height: 38px,
     padding-horizontal: 16px,
@@ -131,7 +131,7 @@ $buttonSizes: (
     mobile-padding-horizontal: 16px,
   ),
   md: (
-    font-size: 24px,
+    font-size: $font-size-h4,
     min-width: 158px,
     min-height: 38px,
     padding-horizontal: 16px,
@@ -141,7 +141,7 @@ $buttonSizes: (
     mobile-padding-horizontal: 16px,
   ),
   lg: (
-    font-size: 20px,
+    font-size: $font-size-h4,
     min-width: 142px,
     min-height: 50px,
     padding-horizontal: 16px,
@@ -189,9 +189,7 @@ $buttonSizes: (
 
 .button {
   width: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   border: 1px solid;
   cursor: pointer;
   gap: 5px;
