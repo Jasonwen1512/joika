@@ -2,11 +2,6 @@
 import HeartOutlineIcon from "@/assets/img/icon/heart_outline.svg";
 import HeartFilled from "@/assets/img/icon/heart_filled.svg";
 const props = defineProps({
-  icon: {
-    type: Object,
-    required: true,
-  },
-
   isActive: {
     type: Boolean,
     default: false,

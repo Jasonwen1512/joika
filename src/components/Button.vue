@@ -235,5 +235,6 @@ $buttonSizes: (
 
 .button[data-is-full="true"] {
   width: 100%;
+  border: 2px solid black;
 }
 </style>

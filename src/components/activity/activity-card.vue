@@ -24,11 +24,13 @@ const aloha = () => {
     </div>
     <h4 class="activity-title">{{ item.title }}</h4>
     <p class="activity-intro">{{ item.intro }}</p>
-    <div class="button">
-      <Button :onClick="aloha" theme="primary" size="md">我要跟團!</Button>
+    <div class="button" @click.stop.prevent>
+      <Button @click.stop.prevent="aloha" theme="primary" size="md"
+        >我要跟團!</Button
+      >
       <LikeButton
         :isActive="likeMap[item.activity_id]"
-        onClick.stop.prevent="toggleLike(item.activity_id)"
+        @click.stop.prevent="toggleLike(item.activity_id)"
       ></LikeButton>
     </div>
   </div>
@@ -42,6 +44,7 @@ const aloha = () => {
   flex-direction: column;
   padding: 5px;
   min-height: 390px;
+  color: black;
 }
 .activity-img img {
   width: 100%;
@@ -64,12 +67,15 @@ const aloha = () => {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  font-weight: unset;
 }
 .activity-intro {
   font-size: $font-size-p;
   padding: 10px 0 0;
   line-height: 1.7;
   flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .button {

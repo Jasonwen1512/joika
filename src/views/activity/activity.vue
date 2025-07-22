@@ -1,11 +1,37 @@
 <script setup>
 import ActivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
+import Button from "@/components/Button.vue";
+import AvartarIcon from "@/assets/img/icon/avatar.svg";
+import { ref } from "vue";
+const text = ref("");
+const selected = ref(1);
 </script>
 
 <template>
-  <div class="banner"></div>
+  <div class="hint">揪團探索/揪團列表</div>
+  <div class="container">
+    <div class="banner"></div>
+  </div>
 
+  <div class="search-bar-container">
+    <div class="search-bar">
+      <input v-model="text" />
+    </div>
+    <div class="calendar">
+      <input type="date" />
+    </div>
+    <div class="participants">
+      <img :src="AvartarIcon" alt="" class="icon" />
+
+      <select v-model="selected">
+        <option v-for="n in 10" :key="n">{{ n }}</option>
+      </select>
+    </div>
+    <div class="button-go">
+      <Button isFull theme="primary" size="sm">GO</Button>
+    </div>
+  </div>
   <div class="activity-list">
     <RouterLink
       v-for="item in FakeActivity"
@@ -19,15 +45,23 @@ import { FakeActivity } from "@/assets/data/fake-activity";
 </template>
 
 <style scoped lang="scss">
+.container {
+  margin: 0 auto;
+  width: 100%;
+}
 .banner {
-  max-width: 100%;
+  display: flex;
   background-position: center;
   border: 1px solid black;
-  width: 100%;
-  min-height: 414px;
+  width: 100vw;
+
   background-image: url(../../assets/img/activity/activity-banner.jpg);
+  background-size: contain;
+  background-repeat: no-repeat;
   @include mobile() {
     min-height: 212px;
+    background-position: left;
+    background-size: cover;
   }
 
   @include tablet() {
@@ -58,6 +92,36 @@ import { FakeActivity } from "@/assets/data/fake-activity";
     grid-template-columns: repeat(4, 1fr);
 
     justify-self: center;
+  }
+}
+
+.hint {
+  line-height: 27px;
+  margin: 29px auto 11px 18px;
+  @include mobile() {
+  }
+
+  @include tablet() {
+  }
+  @include desktop() {
+    display: none;
+    font-size: $font-size-p;
+  }
+}
+.search-bar-container {
+  display: grid;
+}
+.search-bar {
+}
+.search-bar input {
+  width: 100%;
+  @include mobile() {
+  }
+
+  @include tablet() {
+  }
+
+  @include desktop() {
   }
 }
 </style>
