@@ -44,7 +44,7 @@ const hoverOut = (e) => {
 
 onMounted(() => {
   gsap.set(".title", {
-    y: 100,
+    y: 250,
     opacity: 0,
   });
   gsap.to(".title", {

@@ -5,7 +5,7 @@ import Taiwan from "@/components/group/group-explore/taiwan.vue";
 
 <template>
   <Carousel />
-  <Taiwan />
+  <Taiwan class="taiwan" />
 </template>
 
 <style scoped lang="scss">
