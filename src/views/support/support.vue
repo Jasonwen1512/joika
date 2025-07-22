@@ -4,8 +4,8 @@
   <!-- 這是幫助中心頁 -->
   <div class="support">
     <div class="head">
-      <h1>Joika幫助中心</h1>
-      <h2>新手教學 & FAQ</h2>
+      <h3>Joika幫助中心</h3>
+      <h4>新手教學 & FAQ</h4>
     </div>
   </div>
 </template>
@@ -15,12 +15,10 @@
   position: relative;
   padding: 36px 0 54px 0;
   border-bottom: 3px dotted #a8a8a8;
-  h1 {
-    font-size: $font-size-h1;
+  h3 {
     margin-left: 5%;
   }
-  h2 {
-    font-size: $font-size-h2;
+  h4 {
     margin-top: 24px;
     margin-left: 5%;
   }

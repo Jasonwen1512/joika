@@ -1,3 +1,12 @@
+// 載入字型
+@font-face {
+  font-family: "MyFont";
+  src: url("@/assets/fonts/my-font.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 // === 字體大小 ===
 $font-size-h1: 36px;
 $font-size-h2: 32px;
