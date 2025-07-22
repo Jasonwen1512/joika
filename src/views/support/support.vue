@@ -11,16 +11,37 @@
 </template>
 
 <style scoped lang="scss">
+.support {
+  @include desktop() {
+    @include flex-center();
+  }
+}
 .head {
   position: relative;
-  padding: 36px 0 54px 0;
+  padding: 20px 0 54px 0;
   border-bottom: 3px dotted #a8a8a8;
+
+  flex-direction: column;
   h3 {
-    margin-left: 5%;
+    margin-left: 6%;
+    color: $banner-title;
+    @include desktop() {
+      font-size: $font-size-h2;
+      margin-left: 0;
+    }
   }
   h4 {
-    margin-top: 24px;
-    margin-left: 5%;
+    margin-top: 12px;
+    margin-left: 10%;
+    @include desktop() {
+      font-size: $font-size-h3;
+      margin-top: 50px;
+      margin-left: 8.5%;
+    }
+  }
+  @include desktop() {
+    width: 62.5%;
+    padding: 96px 0 54px 0;
   }
 }
 </style>
