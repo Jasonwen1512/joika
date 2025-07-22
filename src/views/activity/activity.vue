@@ -7,12 +7,13 @@ import { FakeActivity } from "@/assets/data/fake-activity";
   <div class="banner"></div>
 
   <div class="activity-list">
-    <RouterLink to="`/activity/activity-detail`">
-      <ActivityCard
-        v-for="item in FakeActivity"
-        :key="item.activity_id"
-        :item="item"
-      ></ActivityCard>
+    <RouterLink
+      v-for="item in FakeActivity"
+      :key="item.activity_id"
+      :to="`/activity/${item.activity_id}`"
+      class="activity-link"
+    >
+      <ActivityCard :item="item"></ActivityCard>
     </RouterLink>
   </div>
 </template>

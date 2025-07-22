@@ -1,6 +1,6 @@
 <script setup>
 import LikeButton from "./like-button.vue";
-import Button from "@/components/button.vue";
+import Button from "@/components/Button.vue";
 import { ref } from "vue";
 
 defineProps({
@@ -28,7 +28,7 @@ const aloha = () => {
       <Button :onClick="aloha" theme="primary" size="md">我要跟團!</Button>
       <LikeButton
         :isActive="likeMap[item.activity_id]"
-        @click="toggleLike(item.activity_id)"
+        onClick.stop.prevent="toggleLike(item.activity_id)"
       ></LikeButton>
     </div>
   </div>
