@@ -1,6 +1,6 @@
 <script setup>
-import ActivityCard from "./ActivityCard.vue";
-import { FakeActivity } from "@/assets/data/fake_activity";
+import ActivityCard from "./activity/activity-card.vue";
+import { FakeActivity } from "@/assets/data/fake-activity";
 
 const aloha = () => {
   alert("阿囉哈");

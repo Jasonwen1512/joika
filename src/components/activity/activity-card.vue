@@ -1,6 +1,6 @@
 <script setup>
-import LikeButton from "./LikeButton.vue";
-import Button from "./Button.vue";
+import LikeButton from "./like-button.vue";
+import Button from "@/components/button.vue";
 import { ref } from "vue";
 
 defineProps({
@@ -18,12 +18,12 @@ const aloha = () => {
 </script>
 
 <template>
-  <div class="activity_card" v-if="item">
-    <div class="activity_img">
+  <div class="activity-card" v-if="item">
+    <div class="activity-img">
       <img :src="item.img_url" :alt="item.title" />
     </div>
-    <h4 class="activity_title">{{ item.title }}</h4>
-    <p class="activity_intro">{{ item.intro }}</p>
+    <h4 class="activity-title">{{ item.title }}</h4>
+    <p class="activity-intro">{{ item.intro }}</p>
     <div class="button">
       <Button :onClick="aloha" theme="primary" size="md">我要跟團!</Button>
       <LikeButton
@@ -35,7 +35,7 @@ const aloha = () => {
 </template>
 
 <style lang="scss" scoped>
-.activity_card {
+.activity-card {
   max-width: 284px;
   width: 100%;
   display: flex;
@@ -43,16 +43,21 @@ const aloha = () => {
   padding: 5px;
   min-height: 390px;
 }
-.activity_img img {
+.activity-img img {
   width: 100%;
   object-fit: contain;
-}
-.activity_img {
-  @include flex-center;
   border: black solid 1px;
 }
+.activity-img {
+  @include flex-center;
+}
 
-.activity_title {
+.activity-img :hover {
+  transition: ease 0.5s;
+  transform: rotate(-5deg); //
+}
+
+.activity-title {
   font-size: $font-size-h4;
   padding: 14px 0 0px;
   line-height: 1.7;
@@ -60,7 +65,7 @@ const aloha = () => {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.activity_intro {
+.activity-intro {
   font-size: $font-size-p;
   padding: 10px 0 0;
   line-height: 1.7;
