@@ -67,6 +67,12 @@ if (hasData) {
 <style scoped lang="scss"></style>
 ```
 
+若要引入 Vue 元件檔，請使用 **大駝峰命名（PascalCase）**，例如：
+
+```js
+import Header from "@/components/header.vue";
+```
+
 ## 📁 新增檔案規範
 
 新增檔案時，請依照以下規則建立於對應路徑中：
@@ -86,8 +92,7 @@ if (hasData) {
 
 | 類別            | 規範說明                                           |
 | --------------- | -------------------------------------------------- |
-| Vue 元件檔名    | 使用 **大駝峰命名（PascalCase）**                  |
-| class / id 名稱 | 建議直接「複製貼上」，避免手打出錯導致找不到       |
+| class / id 名稱 | 建議直接「複製貼上」，並使用 **kebab-case**        |
 | 新增圖片        | 在 src/assets/img 底下新增，建立新資料夾後再新增   |
 | 圖片與檔案命名  | 一律使用 **kebab-case**                            |
 | 其他命名規範    | 若有連接詞則使用底線\_（例：`menu_and_nav`）       |

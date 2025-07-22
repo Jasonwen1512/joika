@@ -43,4 +43,24 @@ body {
   background-size: auto;
   background-position: top left;
 }
+h1 {
+  font-family: "MyFont", sans-serif;
+  font-size: $font-size-h1;
+  font-weight: 600;
+}
+h2 {
+  font-family: "MyFont", sans-serif;
+  font-size: $font-size-h2;
+  font-weight: 400;
+}
+h3 {
+  font-family: "MyFont", sans-serif;
+  font-size: $font-size-h3;
+  font-weight: 400;
+}
+h4 {
+  font-family: "MyFont", sans-serif;
+  font-size: $font-size-h4;
+  font-weight: 400;
+}
 </style>
