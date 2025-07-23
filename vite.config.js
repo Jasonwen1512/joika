@@ -6,7 +6,7 @@ import svgLoader from "vite-svg-loader";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueDevTools(), svgLoader()],
+  plugins: [vue(), svgLoader(), vueDevTools()],
   resolve: {
     alias: { "@": resolve(__dirname, "src") },
   },

@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
   transform-style: preserve-3d; // 加上這行才不會閃爍，重要
   @include desktop() {
     height: $header-h-d;
-    padding: 0 90px 0 50px;
+    padding: 0 4% 0 2.6%;
   }
 }
 .header-img {
