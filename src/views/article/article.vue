@@ -1,21 +1,29 @@
 <script setup>
-import Button from '@/components/Button.vue'
+import Button from "@/components/Button.vue";
 const activities = [
-  { class: 'camping', label: '露營', color: '#FFB6C1' },
-  { class: 'boardGames', label: '桌遊', color: '#ADD8E6' },
-  { class: 'ball', label: '籃球', color: '#90EE90' },
-  { class: 'movie', label: '電影', color: '#FFD700' },
-  { class: 'dinnerGathering', label: '聚餐', color: '#FFA07A' }
-]
-import { ref } from 'vue'
+  { class: "camping", label: "露營", color: "#FFB6C1" },
+  { class: "boardGames", label: "桌遊", color: "#ADD8E6" },
+  { class: "ball", label: "籃球", color: "#90EE90" },
+  { class: "movie", label: "電影", color: "#FFD700" },
+  { class: "dinnerGathering", label: "聚餐", color: "#FFA07A" },
+];
+import { ref } from "vue";
 
-const categories = ['全部', '潛水', '球類', '登山', '露營', '電影', '桌遊', '其他']
-const activeCategory = ref('全部')
+const categories = [
+  "全部",
+  "潛水",
+  "球類",
+  "登山",
+  "露營",
+  "電影",
+  "桌遊",
+  "其他",
+];
+const activeCategory = ref("全部");
 
 function setActive(category) {
-  activeCategory.value = category
+  activeCategory.value = category;
 }
-
 </script>
 
 <template>
@@ -34,7 +42,7 @@ function setActive(category) {
       </div>
     </div>
   </div>
-        <main class="artic">
+  <main class="artic">
     <div class="title">
       <h2>文章列表</h2>
     </div>
@@ -51,7 +59,7 @@ function setActive(category) {
         </div>
       </div>
 
-     <Button :onClick="ula" theme="primary" size="md">我要發文</Button>
+      <Button :onClick="ula" theme="primary" size="md">我要發文</Button>
     </section>
 
     <hr />
@@ -64,10 +72,10 @@ function setActive(category) {
 }
 
 .imglist {
-display: flex;
-    gap: 1vw;
-    margin: 4vw 2vw;
-    height: 30vh;
+  display: flex;
+  gap: 1vw;
+  margin: 4vw 2vw;
+  height: 30vh;
 }
 
 .activity {
@@ -82,39 +90,38 @@ display: flex;
   text-align: center;
 }
 
-
 .categoryLabel {
-    padding: 15px 25px;
-    background-color: #81bfda;
-    border: 1px black solid;
+  padding: 15px 25px;
+  background-color: #81bfda;
+  border: 1px black solid;
 }
 
-.active{
-  background-color: #4F8DA8;
-color: #fff;
+.active {
+  background-color: #4f8da8;
+  color: #fff;
 }
-  .categoryList {
- display: flex;
- gap: 18px;
+.categoryList {
+  display: flex;
+  gap: 18px;
 }
- .title {
- margin-block: 3vh;
- }
+.title {
+  margin-block: 3vh;
+}
 
 section.articleCategory {
-display: flex;
-justify-content: space-between;
-max-width: 1200px;
-width: 100%;
-align-items: center;
- }
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  width: 100%;
+  align-items: center;
+}
 
 main.artic {
-    max-width: 1200px;
-    align-content: center;
-    margin: auto;
+  max-width: 1200px;
+  align-content: center;
+  margin: auto;
 }
 hr {
-    margin-block: 5vh;
+  margin-block: 5vh;
 }
 </style>
