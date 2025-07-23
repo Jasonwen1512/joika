@@ -44,7 +44,7 @@ const hoverOut = (e) => {
 
 onMounted(() => {
   gsap.set(".title", {
-    y: 250,
+    y: 100,
     opacity: 0,
   });
   gsap.to(".title", {
@@ -65,10 +65,10 @@ onMounted(() => {
 
   // gsap區域
   updateCardPositions();
-  // 從y=800的位置位移上來
+  // 從y=300的位置位移上來
   gsap.fromTo(
     ".scene",
-    { y: 800 },
+    { y: 300 },
     {
       y: 0,
       duration: 1.2,
@@ -78,14 +78,14 @@ onMounted(() => {
 
   rotateTween.value = gsap.to(".content", {
     rotateY: "-=360",
-    duration: 5, // 初始旋轉速度
+    duration: 8, // 初始旋轉速度
     repeat: -1,
     ease: "linear",
     transformOrigin: "50% 50%",
   });
   setTimeout(() => {
     gsap.to(rotateTween.value, {
-      timeScale: 0.25, // 最後的旋轉速度
+      timeScale: 0.26, // 最後的旋轉速度
       duration: 1.2, // 幾秒後會從「初始旋轉速度」轉到「最後的旋轉速度」
       ease: "power2.out",
     });
@@ -146,7 +146,7 @@ onMounted(() => {
   // margin-bottom: 10px;
   @include desktop() {
     font-size: $font-size-h1;
-    margin-top: 100px;
+    margin-top: 150px;
   }
 }
 
@@ -155,7 +155,7 @@ onMounted(() => {
   @include flex-center();
   overflow: hidden;
   @include desktop() {
-    perspective: 700px;
+    perspective: 1200px;
   }
 }
 
@@ -168,7 +168,7 @@ onMounted(() => {
     height: 400px;
   }
   @include desktop() {
-    height: 600px;
+    height: 800px;
   }
 }
 
