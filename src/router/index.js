@@ -37,11 +37,11 @@ const routes = [
     component: () => import("@/views/article/article-create.vue"),
   },
   {
-    path: "/activity/activity",
+    path: "/activity",
     component: () => import("@/views/activity/activity.vue"),
   },
   {
-    path: "/activity/activity-detail",
+    path: "/activity/:activity_id",
     component: () => import("@/views/activity/activity-detail.vue"),
   },
 ];

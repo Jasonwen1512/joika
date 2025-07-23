@@ -1,6 +1,4 @@
-<script setup>
-import Test from "@/components/test.vue";
-</script>
+<script setup></script>
 
 <template>
   <!-- 這是發起揪團頁 -->
@@ -14,7 +12,7 @@ import Test from "@/components/test.vue";
   <div>這是發起揪團頁</div>
   <div>這是發起揪團頁</div>
   <div>這是發起揪團頁</div>
-  <Test />
+  <div class="test"></div>
 </template>
 
 <style scoped lang="scss"></style>

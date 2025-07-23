@@ -1,9 +1,7 @@
 <script setup>
-import Button from "@/components/Button.vue";
-import FilterIcon from "@/assets/img/icon/filter.svg";
-import EditIcon from "@/assets/img/icon/edit.svg";
-import NotifyIcon from "@/assets/img/icon/notification.svg";
-import SortIcon from "@/assets/img/icon/sort.svg";
+import ActivityCard from "./activity/activity-card.vue";
+import { FakeActivity } from "@/assets/data/fake-activity";
+
 const aloha = () => {
   alert("阿囉哈");
 };
@@ -11,23 +9,39 @@ const aloha = () => {
 
 <template>
   <div class="test">
-    <Button :onClick="aloha" theme="primary" size="md">送出</Button>
-    <br />
-    <Button theme="primary" size="md">評價</Button>
-    <Button theme="secondary" size="md" disabled="disabled">取消</Button>
-    <br />
-    <Button isFull theme="primary" size="md">GO</Button>
-    <br />
-    <Button :suffixIcon="FilterIcon" theme="secondary" size="sm">篩選</Button>
-    <Button :suffixIcon="SortIcon" theme="secondary" size="sm">排序</Button>
-    <br />
-    <Button :prefixIcon="NotifyIcon" theme="primary" size="lg">通知訊息</Button>
-    <Button :prefixIcon="EditIcon" theme="info" size="lg">編輯檔案</Button>
+    <ActivityCard
+      v-for="item in FakeActivity"
+      :key="item.activity_id"
+      :item="item"
+    ></ActivityCard>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .test {
   width: 100%;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  justify-items: center;
+  grid-template-columns: repeat(4, 1fr);
+  @include mobile() {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  @include tablet() {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @include desktop() {
+    .test {
+      max-width: 1200px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+
+      justify-self: center;
+    }
+  }
 }
 </style>
