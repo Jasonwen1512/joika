@@ -4,6 +4,7 @@ import { FakeActivity } from "@/assets/data/fake-activity";
 import Button from "@/components/Button.vue";
 import AvartarIcon from "@/assets/img/icon/avatar.svg";
 import { ref } from "vue";
+import Test from "@/components/test.vue";
 const text = ref("");
 const selected = ref(1);
 </script>

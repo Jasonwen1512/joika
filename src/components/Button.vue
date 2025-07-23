@@ -2,13 +2,17 @@
 const props = defineProps({
   isOutline: {
     type: Boolean,
-    default: faulse,
+    default: false,
+  },
+  isDisabled: {
+    type: Boolean,
+    default: false,
   },
   prefixIcon: {
-    type: String,
+    type: [String, Object],
   },
   suffixIcon: {
-    type: String,
+    type: [String, Object],
   },
   isFull: {
     type: Boolean,
@@ -29,10 +33,6 @@ const props = defineProps({
     type: String,
     default: "md",
   },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
 });
 </script>
 
@@ -42,9 +42,10 @@ const props = defineProps({
       class="button"
       :data-theme="theme"
       :data-size="size"
-      :disabled="disabled"
+      :disabled="isDisabled"
       @click="onClick"
       :data-is-full="isFull"
+      :data-is-outline="isOutline"
     >
       <div v-if="prefixIcon" class="icon prefix button-icon">
         <component :is="prefixIcon" />
@@ -77,11 +78,16 @@ $buttonThemes: (
     // outline
     outline-border-color: $color-highlight,
     outline-background-color: $white,
-    outline-color: outline-hover-color: $black,
-    outline-hover-border-color: $black,
+    outline-color: $color-highlight,
+    outline-hover-color: $yellow,
+    outline-hover-border-color: $yellow,
     outline-hover-background-color: $white,
-    outline-disabled-background-color: $gray-disabled,
-    outline-disabled-border-color: transparent,
+    outline-active-color: $orange,
+    outline-active-border-color: $orange,
+    outline-active-background-color: $white,
+    outline-disabled-background-color: $white,
+    outline-disabled-border-color: $gray-disabled,
+    outline-disabled-color: $gray-disabled,
 
     // icon顏色
     icon-color: $black,
@@ -89,10 +95,11 @@ $buttonThemes: (
     icon-active-color: $white,
     icon-disabled-color: $white,
     icon-outline-color: $color-highlight,
-    icon-outline-hover-color: $black,
+    icon-outline-hover-color: $yellow,
+    icon-outline-active-color: $orange,
   ),
 
-  info: (
+  secondary: (
     // 字體顏色
     color: $black,
     hover-color: $black,
@@ -107,29 +114,35 @@ $buttonThemes: (
     // 邊框色
     border-color: $black,
     // outline
-    outline-border-color: $color-highlight,
+    outline-border-color: $blue,
     outline-background-color: $white,
-    outline-color: outline-hover-color: $black,
-    outline-hover-border-color: $black,
-    outline-hover-background-color: $white,
-    outline-disabled-background-color: $gray-disabled,
-    outline-disabled-border-color: transparent,
+    outline-color: $blue,
+    outline-hover-color: $color-primary,
+    outline-hover-border-color: $color-primary,
+    outline-hover-background-color: $light-blue,
+    outline-active-color: $blue,
+    outline-active-border-color: $blue,
+    outline-active-background-color: $light-blue,
+    outline-disabled-background-color: $white,
+    outline-disabled-border-color: $gray-disabled,
+    outline-disabled-color: $gray-disabled,
     // icon顏色
     icon-color: $black,
     icon-hover-color: $black,
     icon-active-color: $white,
     icon-disabled-color: $white,
-    icon-outline-color: $color-primary,
-    icon-outline-hover-color: $black,
+    icon-outline-color: $blue,
+    icon-outline-hover-color: $color-primary,
+    icon-outline-active-color: $blue,
   ),
 
-  secondary: (
+  info: (
     // 字體顏色
     color: $black,
     hover-color: $black,
     active-color: $white,
     // 背景顏色
-    background-color: $color-neutral,
+    background-color: $lighter-yellow,
     hover-background-color: $light-yellow,
     active-background-color: $brown,
     // disabled設定
@@ -138,18 +151,26 @@ $buttonThemes: (
     // 邊框色
     border-color: $black,
     // outline
-    outline-border-color: outline-background-color: outline-color:
-      outline-hover-color: outline-hover-border-color:
-      outline-hover-background-color: outline-disabled-background-color:
-      $gray-disabled,
-    outline-disabled-border-color: transparent,
+    outline-border-color: $brown,
+    outline-background-color: $white,
+    outline-color: $brown,
+    outline-hover-color: $color-highlight,
+    outline-hover-border-color: $color-highlight,
+    outline-hover-background-color: $light-orange,
+    outline-active-color: $orange,
+    outline-active-border-color: $orange,
+    outline-active-background-color: $lighter-orange,
+    outline-disabled-background-color: $white,
+    outline-disabled-border-color: $gray-disabled,
+    outline-disabled-color: $gray-disabled,
     // icon顏色
     icon-color: $black,
     icon-hover-color: $black,
     icon-active-color: $white,
     icon-disabled-color: $white,
-    icon-outline-color: $color-neutral,
-    icon-outline-hover-color: $black,
+    icon-outline-color: $brown,
+    icon-outline-hover-color: $color-highlight,
+    icon-outline-active-color: $orange,
   ),
 );
 
@@ -266,20 +287,40 @@ $buttonSizes: (
       padding: 0 map-get($sizeStyles, padding-horizontal);
     }
   }
-}
 
-&[data-is-outline="true"] {
-  @each $theme, $styles in $buttonThemes {
-    &[data-theme="#{$theme}"] {
-      color: map-get($styles, outline-color);
-      background-color: map-get($styles, outline-background-color);
-      border: 1px solid map-get($styles, outline-border-color);
+  &[data-is-outline="true"] {
+    @each $theme, $styles in $buttonThemes {
+      &[data-theme="#{$theme}"] {
+        color: map-get($styles, outline-color);
+        background-color: map-get($styles, outline-background-color);
+        border: 1px solid map-get($styles, outline-border-color);
+        .button-icon {
+          color: map-get($styles, icon-outline-color);
+        }
 
-      &:disabled {
-        cursor: not-allowed;
-        color: map-get($styles, disabled-font-color);
-        border-color: map-get($styles, outline-disabled-border-color);
-        background-color: $white;
+        &:hover {
+          color: map-get($styles, outline-hover-color);
+          background-color: map-get($styles, outline-hover-background-color);
+          border-color: map-get($styles, outline-hover-border-color);
+          .button-icon {
+            color: map-get($styles, icon-outline-hover-color);
+          }
+        }
+
+        &:active {
+          color: map-get($styles, outline-active-color);
+          background-color: map-get($styles, outline-active-background-color);
+          border-color: map-get($styles, outline-active-border-color);
+          .button-icon {
+            color: map-get($styles, icon-outline-active-color);
+          }
+        }
+        &:disabled {
+          cursor: not-allowed;
+          color: map-get($styles, outline-disabled-color);
+          border-color: map-get($styles, outline-disabled-border-color);
+          background-color: map-get($styles, outline-disabled-background-color);
+        }
       }
     }
   }
@@ -289,5 +330,6 @@ $buttonSizes: (
   width: 100%;
   border: 2px solid black;
   height: auto;
+  border-radius: 3px;
 }
 </style>
