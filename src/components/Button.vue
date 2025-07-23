@@ -1,5 +1,9 @@
 <script setup>
 const props = defineProps({
+  isOutline: {
+    type: Boolean,
+    default: faulse,
+  },
   prefixIcon: {
     type: String,
   },
@@ -70,6 +74,15 @@ $buttonThemes: (
     disabled-font-color: $white,
     // 邊框色
     border-color: $black,
+    // outline
+    outline-border-color: $color-highlight,
+    outline-background-color: $white,
+    outline-color: outline-hover-color: $black,
+    outline-hover-border-color: $black,
+    outline-hover-background-color: $white,
+    outline-disabled-background-color: $gray-disabled,
+    outline-disabled-border-color: transparent,
+
     // icon顏色
     icon-color: $black,
     icon-hover-color: $black,
@@ -88,9 +101,20 @@ $buttonThemes: (
     background-color: $color-primary,
     hover-background-color: $color-secondary,
     active-background-color: $blue,
+    // disabled設定
     disabled-background-color: $gray-disabled,
     disabled-font-color: $white,
+    // 邊框色
     border-color: $black,
+    // outline
+    outline-border-color: $color-highlight,
+    outline-background-color: $white,
+    outline-color: outline-hover-color: $black,
+    outline-hover-border-color: $black,
+    outline-hover-background-color: $white,
+    outline-disabled-background-color: $gray-disabled,
+    outline-disabled-border-color: transparent,
+    // icon顏色
     icon-color: $black,
     icon-hover-color: $black,
     icon-active-color: $white,
@@ -100,15 +124,26 @@ $buttonThemes: (
   ),
 
   secondary: (
+    // 字體顏色
     color: $black,
     hover-color: $black,
     active-color: $white,
+    // 背景顏色
     background-color: $color-neutral,
     hover-background-color: $light-yellow,
     active-background-color: $brown,
+    // disabled設定
     disabled-background-color: $gray-disabled,
     disabled-font-color: $white,
+    // 邊框色
     border-color: $black,
+    // outline
+    outline-border-color: outline-background-color: outline-color:
+      outline-hover-color: outline-hover-border-color:
+      outline-hover-background-color: outline-disabled-background-color:
+      $gray-disabled,
+    outline-disabled-border-color: transparent,
+    // icon顏色
     icon-color: $black,
     icon-hover-color: $black,
     icon-active-color: $white,
@@ -233,8 +268,26 @@ $buttonSizes: (
   }
 }
 
+&[data-is-outline="true"] {
+  @each $theme, $styles in $buttonThemes {
+    &[data-theme="#{$theme}"] {
+      color: map-get($styles, outline-color);
+      background-color: map-get($styles, outline-background-color);
+      border: 1px solid map-get($styles, outline-border-color);
+
+      &:disabled {
+        cursor: not-allowed;
+        color: map-get($styles, disabled-font-color);
+        border-color: map-get($styles, outline-disabled-border-color);
+        background-color: $white;
+      }
+    }
+  }
+}
+
 .button[data-is-full="true"] {
   width: 100%;
   border: 2px solid black;
+  height: auto;
 }
 </style>
