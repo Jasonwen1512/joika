@@ -1,13 +1,27 @@
 <script setup>
+import { gsap } from "gsap";
+
 import North from "@/assets/img/group/group-explore/group-explore-taiwan/north.svg";
 import West from "@/assets/img/group/group-explore/group-explore-taiwan/west.svg";
 import East from "@/assets/img/group/group-explore/group-explore-taiwan/east.svg";
 import South from "@/assets/img/group/group-explore/group-explore-taiwan/south.svg";
 import BigTaiwan from "@/assets/img/group/group-explore/group-explore-taiwan/taiwan.svg";
 
-import { ref, reactive, onMounted, onBeforeUnmount, watchEffect } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  onBeforeUnmount,
+  watchEffect,
+  watch,
+} from "vue";
+
 const isMobile = ref(true);
 const isTablet = ref(false);
+
+const taiwanContent = ref(null);
+const isSelected = ref(false);
+
 const checkDeviceType = () => {
   isMobile.value = document.body.clientWidth < 768;
   isTablet.value =
@@ -18,6 +32,53 @@ const selectedRegion = ref(null);
 
 const toggleRegion = (region) => {
   selectedRegion.value = selectedRegion.value === region ? null : region;
+};
+
+const isNorth = ref(null);
+const isWest = ref(null);
+const isSouth = ref(null);
+const isEast = ref(null);
+const areaTemp = ref(null);
+const selectArea = (area) => {
+  switch (area) {
+    case "north":
+      isNorth.value = true;
+      isWest.value = false;
+      isSouth.value = false;
+      isEast.value = false;
+      break;
+    case "west":
+      isNorth.value = false;
+      isWest.value = true;
+      isSouth.value = false;
+      isEast.value = false;
+      break;
+    case "south":
+      isNorth.value = false;
+      isWest.value = false;
+      isSouth.value = true;
+      isEast.value = false;
+      break;
+    case "east":
+      isNorth.value = false;
+      isWest.value = false;
+      isSouth.value = false;
+      isEast.value = true;
+      break;
+    default:
+      isNorth.value = false;
+      isWest.value = false;
+      isSouth.value = false;
+      isEast.value = false;
+  }
+  if (areaTemp.value === area) {
+    isNorth.value = false;
+    isWest.value = false;
+    isSouth.value = false;
+    isEast.value = false;
+  } else {
+    areaTemp.value = area;
+  }
 };
 
 onMounted(() => {
@@ -38,6 +99,26 @@ onMounted(() => {
       toggleRegion(region);
     });
   });
+
+  svgEl.addEventListener("click", (e) => {
+    const target = e.target;
+    const regionElement = target.closest("[data-region]");
+    if (regionElement) {
+      const region = regionElement.getAttribute("data-region");
+      selectArea(region);
+    }
+  });
+});
+
+watch(isSelected, (val) => {
+  const el = taiwanContent.value;
+  const moveX = el.offsetWidth * 0.2;
+
+  gsap.to(".big-taiwan", {
+    x: val ? moveX : 0,
+    duration: 0.4,
+    ease: "power1.out",
+  });
 });
 
 watchEffect(() => {
@@ -47,9 +128,10 @@ watchEffect(() => {
   const allRegions = svg.querySelectorAll("[data-region]");
 
   if (!selectedRegion.value) {
-    // ✅ 沒有選擇任何區域，移除所有標記
+    // 沒有選擇任何區域，移除所有標記
     allRegions.forEach((el) => {
       el.classList.remove("dimmed", "selected");
+      isSelected.value = false;
     });
     return;
   }
@@ -59,6 +141,7 @@ watchEffect(() => {
 
     // 移除所有標記
     el.classList.remove("dimmed", "selected");
+    isSelected.value = false;
 
     if (selectedRegion.value && selectedRegion.value !== region) {
       el.classList.add("dimmed");
@@ -66,6 +149,7 @@ watchEffect(() => {
     } else {
       el.classList.remove("dimmed");
       el.classList.add("selected");
+      isSelected.value = true;
     }
   });
 });
@@ -75,7 +159,7 @@ onBeforeUnmount(() => {
 });
 
 // 比例
-const baseMobileRatio = 0.22;
+const baseMobileRatio = 0.18;
 const baseTabletRatio = 0.45;
 const baseDesktopRatio = 0.6;
 
@@ -166,11 +250,12 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 <template>
   <div class="taiwan">
     <h1 class="taiwan-title">JOIKA 揪遍全台灣</h1>
-    <div class="taiwan-content">
-      <div class="taiwan-area-nwes">
+    <div class="taiwan-content" ref="taiwanContent">
+      <div class="taiwan-area-news">
         <!-- 北部 原尺寸：349*245 -->
         <North
           class="north taiwan-area"
+          v-show="isNorth"
           :width="
             isMobile
               ? north.mobile.width
@@ -190,6 +275,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
         <!-- 西部 原尺寸：412*438 -->
         <West
           class="west taiwan-area"
+          v-show="isWest"
           :width="
             isMobile
               ? west.mobile.width
@@ -209,6 +295,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
         <!-- 東部 原尺寸：371*919 -->
         <East
           class="east taiwan-area"
+          v-show="isEast"
           :width="
             isMobile
               ? east.mobile.width
@@ -228,6 +315,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
         <!-- 南部 原尺寸：317*586 -->
         <South
           class="south taiwan-area"
+          v-show="isSouth"
           :width="
             isMobile
               ? south.mobile.width
@@ -288,15 +376,23 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 
   @include flex-center();
   @include desktop() {
-    padding: 150px 0;
+    padding: 7.8% 0;
   }
+}
+.taiwan-area-news {
+  position: relative;
+  left: -20%;
 }
 .taiwan-area {
   position: absolute;
 }
 .big-taiwan {
+  position: relative;
   pointer-events: none;
   overflow: visible;
+  transition: transform 0.4s ease;
+  transform: translateX(0);
+  transition: none;
   :deep([data-region]) {
     pointer-events: auto;
     cursor: pointer;
@@ -344,6 +440,10 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
       transform: translate(11px, -4px);
     }
   }
+
+  // &:has(.selected) {
+  //   left: 20%;
+  // }
 }
 // .taiwan-area {
 //   position: absolute;
