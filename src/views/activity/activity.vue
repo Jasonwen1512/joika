@@ -2,11 +2,13 @@
 import ActivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Button from "@/components/Button.vue";
-import AvartarIcon from "@/assets/img/icon/avatar.svg";
 import { ref } from "vue";
-import Test from "@/components/test.vue";
-const text = ref("");
-const selected = ref(1);
+import DatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+const SearchText = ref("");
+const dateRange = ref([]);
+const minDate = ref(new Date());
+const format = ref("yyyy-MM-dd");
 </script>
 
 <template>
@@ -17,27 +19,29 @@ const selected = ref(1);
 
   <div class="search-bar-container">
     <div class="search-bar">
-      <input v-model="text" />
+      <input v-model="SearchText" type="text" />
     </div>
     <div class="calendar">
-      <input type="date" />
-    </div>
-    <div class="participants">
-      <img :src="AvartarIcon" alt="" class="icon" />
-
-      <select v-model="selected">
-        <option v-for="n in 10" :key="n">{{ n }}</option>
-      </select>
+      <DatePicker
+        v-model="dateRange"
+        range
+        :min-date="minDate"
+        :format="format"
+        :enable-time-picker="false"
+      />
     </div>
     <div class="button-go">
       <Button isFull theme="primary" size="sm">GO</Button>
     </div>
   </div>
+
+  <div class="category"></div>
+
   <div class="activity-list">
     <RouterLink
       v-for="item in FakeActivity"
       :key="item.activity_id"
-      :to="`/activity/${item.activity_id}`"
+      :to="`/activity/${item.activity_no}`"
       class="activity-link"
     >
       <ActivityCard :item="item"></ActivityCard>
@@ -124,5 +128,21 @@ const selected = ref(1);
 
   @include desktop() {
   }
+}
+
+:deep(.dp__action_cancel) {
+  background-color: $white;
+  border: 1px solid $blue;
+}
+:deep(.dp__action_select) {
+  color: $color-highlight;
+}
+
+.dp__range_start,
+.dp__range_end {
+  background-color: $yellow;
+}
+
+.dp__range_between {
 }
 </style>
