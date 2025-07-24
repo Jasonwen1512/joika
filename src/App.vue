@@ -1,15 +1,21 @@
 <script setup>
 import Header from "@/components/header.vue";
 import Footer from "@/components/footer.vue";
+
+import { useRoute } from "vue-router";
+import { computed } from "vue";
+
+const route = useRoute();
+const hideLayout = computed(() => route.meta.hideLayout);
 </script>
 
 <template>
   <div>
-    <Header></Header>
-    <main class="main">
-      <router-view></router-view>
+    <Header v-if="!hideLayout" />
+    <main :class="['main', { 'with-header': !hideLayout }]">
+      <router-view />
     </main>
-    <Footer></Footer>
+    <Footer v-if="!hideLayout" />
   </div>
 </template>
 
@@ -31,7 +37,7 @@ select {
   background: none;
   color: inherit;
 }
-main {
+.with-header {
   padding-top: $header-h-m;
   @include desktop() {
     padding-top: $header-h-d;
