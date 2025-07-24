@@ -73,7 +73,7 @@ onMounted(() => {
     {
       y: 0,
       duration: 1.2,
-      
+
       ease: "power3.out",
     }
   );
@@ -87,7 +87,7 @@ onMounted(() => {
   });
   setTimeout(() => {
     gsap.to(rotateTween.value, {
-      timeScale: 0.25, // 最後的旋轉速度
+      timeScale: 0.26, // 最後的旋轉速度
       duration: 1.2, // 幾秒後會從「初始旋轉速度」轉到「最後的旋轉速度」
       ease: "power2.out",
     });
@@ -169,7 +169,7 @@ onMounted(() => {
   @include tablet() {
     height: 400px;
   }
-  
+
   @include desktop() {
     height: 800px;
   }
