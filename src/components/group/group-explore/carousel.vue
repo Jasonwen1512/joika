@@ -148,7 +148,7 @@ onMounted(() => {
   // margin-bottom: 10px;
   @include desktop() {
     font-size: $font-size-h1;
-    margin-top: 150px;
+    margin-top: 7.5vw;
   }
 }
 
