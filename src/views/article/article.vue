@@ -61,8 +61,7 @@ function setActive(category) {
 
       <Button :onClick="ula" theme="primary" size="md">我要發文</Button>
     </section>
-
-    <hr />
+    <hr/>
   </main>
 </template>
 
