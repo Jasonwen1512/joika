@@ -86,6 +86,10 @@ import Header from "@/components/header.vue";
 
 以此類推，所有新增檔案請放置在所屬功能模組的資料夾內。
 
+- 若是確定全域都會用到的元件、圖片，或是很多地方都會用到的
+  則不用建立資料夾，直接新增即可，例如：
+  `src/assets/img/bgc.jpg`
+
 ---
 
 ## 📝 其他規範

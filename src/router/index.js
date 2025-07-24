@@ -1,7 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
-  { path: "/", component: () => import("@/views/welcome/welcome.vue") },
+  {
+    path: "/",
+    component: () => import("@/views/welcome/welcome.vue"),
+    meta: { hideLayout: true },
+  },
   { path: "/home", component: () => import("@/views/home/home.vue") },
   { path: "/support", component: () => import("@/views/support/support.vue") },
   {

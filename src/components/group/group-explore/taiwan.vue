@@ -1,8 +1,8 @@
 <script setup>
-import North from "@/assets/img/group/group-explore/group-explore-taiwan/north-yellow.svg";
-import West from "@/assets/img/group/group-explore/group-explore-taiwan/west-green.svg";
-import East from "@/assets/img/group/group-explore/group-explore-taiwan/east-pink.svg";
-import South from "@/assets/img/group/group-explore/group-explore-taiwan/south-blue.svg";
+import North from "@/assets/img/group/group-explore/group-explore-taiwan/north.svg";
+import West from "@/assets/img/group/group-explore/group-explore-taiwan/west.svg";
+import East from "@/assets/img/group/group-explore/group-explore-taiwan/east.svg";
+import South from "@/assets/img/group/group-explore/group-explore-taiwan/south.svg";
 import BigTaiwan from "@/assets/img/group/group-explore/group-explore-taiwan/taiwan.svg";
 
 import { ref, reactive, onMounted, onBeforeUnmount, watchEffect } from "vue";
@@ -80,10 +80,10 @@ const baseTabletRatio = 0.45;
 const baseDesktopRatio = 0.6;
 
 // 北西東南 初始寬高
-const northOriginal = { width: 349, height: 245 };
-const westOriginal = { width: 412, height: 438 };
-const eastOriginal = { width: 371, height: 919 };
-const southOriginal = { width: 317, height: 586 };
+const northOriginal = { width: 700, height: 447 };
+const westOriginal = { width: 629, height: 439 };
+const eastOriginal = { width: 516, height: 919 };
+const southOriginal = { width: 627, height: 586 };
 
 const bigTaiwanOrginal = { width: 609, height: 1138 };
 
@@ -167,37 +167,84 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
   <div class="taiwan">
     <h1 class="taiwan-title">JOIKA 揪遍全台灣</h1>
     <div class="taiwan-content">
-      <!-- 北部 原尺寸：349*245 -->
+      <div class="taiwan-area-nwes">
+        <!-- 北部 原尺寸：349*245 -->
+        <North
+          class="north taiwan-area"
+          :width="
+            isMobile
+              ? north.mobile.width
+              : isTablet
+              ? north.tablet.width
+              : north.desktop.width
+          "
+          :height="
+            isMobile
+              ? north.mobile.height
+              : isTablet
+              ? north.tablet.height
+              : north.desktop.height
+          "
+        />
 
-      <!-- <North
-        class="north taiwan-area"
-        :width="isMobile ? north.mobile.width : north.desktop.width"
-        :height="isMobile ? north.mobile.height : north.desktop.height"
-      /> -->
+        <!-- 西部 原尺寸：412*438 -->
+        <West
+          class="west taiwan-area"
+          :width="
+            isMobile
+              ? west.mobile.width
+              : isTablet
+              ? west.tablet.width
+              : west.desktop.width
+          "
+          :height="
+            isMobile
+              ? west.mobile.height
+              : isTablet
+              ? west.tablet.height
+              : west.desktop.height
+          "
+        />
 
-      <!-- 西部 原尺寸：412*438 -->
+        <!-- 東部 原尺寸：371*919 -->
+        <East
+          class="east taiwan-area"
+          :width="
+            isMobile
+              ? east.mobile.width
+              : isTablet
+              ? east.tablet.width
+              : east.desktop.width
+          "
+          :height="
+            isMobile
+              ? east.mobile.height
+              : isTablet
+              ? east.tablet.height
+              : east.desktop.height
+          "
+        />
 
-      <!-- <West
-        class="west taiwan-area"
-        :width="isMobile ? west.mobile.width : west.desktop.width"
-        :height="isMobile ? west.mobile.height : west.desktop.height"
-      /> -->
+        <!-- 南部 原尺寸：317*586 -->
+        <South
+          class="south taiwan-area"
+          :width="
+            isMobile
+              ? south.mobile.width
+              : isTablet
+              ? south.tablet.width
+              : south.desktop.width
+          "
+          :height="
+            isMobile
+              ? south.mobile.height
+              : isTablet
+              ? south.tablet.height
+              : south.desktop.height
+          "
+        />
+      </div>
 
-      <!-- 東部 原尺寸：371*919 -->
-
-      <!-- <East
-        class="east taiwan-area"
-        :width="isMobile ? east.mobile.width : east.desktop.width"
-        :height="isMobile ? east.mobile.height : east.desktop.height"
-      /> -->
-
-      <!-- 南部 原尺寸：317*586 -->
-
-      <!-- <South
-        class="south taiwan-area"
-        :width="isMobile ? south.mobile.width : south.desktop.width"
-        :height="isMobile ? south.mobile.height : south.desktop.height"
-      /> -->
       <BigTaiwan
         ref="svgRef"
         class="big-taiwan"
@@ -222,7 +269,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 
 <style scoped lang="scss">
 .taiwan {
-  padding-top: 100px;
+  padding-top: 5vw;
 }
 .taiwan-title {
   @include flex-center();
@@ -233,12 +280,19 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 }
 .taiwan-content {
   position: relative;
-  padding-top: 35px;
+  padding: 35px 0;
+  background-image: url("@/assets/img/group/group-explore/group-explore-taiwan/bgc.svg");
+  background-repeat: no-repeat;
+  background-size: contain; /* 或 contain，根據你想要的填滿方式 */
+  background-position: center center;
 
   @include flex-center();
   @include desktop() {
-    padding-top: 150px;
+    padding: 150px 0;
   }
+}
+.taiwan-area {
+  position: absolute;
 }
 .big-taiwan {
   pointer-events: none;
@@ -253,7 +307,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
     }
   }
   :deep(.dimmed) {
-    opacity: 0.25;
+    opacity: 0.4;
     filter: none !important;
     transform: none !important;
     scale: none !important;
