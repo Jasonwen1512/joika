@@ -73,7 +73,7 @@ onMounted(() => {
     {
       y: 0,
       duration: 1.2,
-      duration: 1.2,
+      
       ease: "power3.out",
     }
   );
@@ -105,7 +105,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <p class="carousel-bar">揪團探索</p>
   <p class="carousel-bar">揪團探索</p>
   <h1 class="title">大家都在揪，就差你一咖</h1>
   <div class="scene">
