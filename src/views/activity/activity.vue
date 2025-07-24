@@ -5,6 +5,7 @@ import Button from "@/components/Button.vue";
 import { ref } from "vue";
 import DatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
+import Test from "@/components/test.vue";
 const SearchText = ref("");
 const dateRange = ref([]);
 const minDate = ref(new Date());
@@ -12,6 +13,7 @@ const format = ref("yyyy-MM-dd");
 </script>
 
 <template>
+  <Test />
   <div class="hint">揪團探索/揪團列表</div>
   <div class="container">
     <div class="banner"></div>
