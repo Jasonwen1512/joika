@@ -76,6 +76,7 @@ const selectArea = (area) => {
     isWest.value = false;
     isSouth.value = false;
     isEast.value = false;
+    areaTemp.value = null;
   } else {
     areaTemp.value = area;
   }
