@@ -42,7 +42,7 @@ const format = ref("yyyy-MM-dd");
   <div class="activity-list">
     <RouterLink
       v-for="item in FakeActivity"
-      :key="item.activity_id"
+      :key="item.activity_no"
       :to="`/activity/${item.activity_no}`"
       class="activity-link"
     >
