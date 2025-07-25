@@ -26,6 +26,7 @@ const props = defineProps({
   display: flex;
   &:hover {
     color: $pink;
+    transition: all 0.3s ease-in-out;
   }
 
   .icon {

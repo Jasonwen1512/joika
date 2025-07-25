@@ -212,36 +212,6 @@ $buttonSizes: (
 .button-wrapper {
   height: fit-content;
   width: auto;
-
-  .button {
-    @each $theme, $styles in $buttonThemes {
-      &[data-theme="#{$theme}"] {
-        &:hover {
-          color: map.get($styles, hover-color);
-          background-color: map.get($styles, hover-background-color);
-          border-color: map.get($styles, border-color);
-        }
-
-        &:active {
-          color: map.get($styles, active-color);
-          background-color: map.get($styles, active-background-color);
-          .button-icon {
-            color: map.get($styles, icon-active-color);
-          }
-        }
-
-        &:disabled {
-          background-color: map.get($styles, disabled-background-color);
-          color: map.get($styles, disabled-font-color);
-          cursor: default;
-
-          .button-icon {
-            color: map.get($styles, icon-disabled-color);
-          }
-        }
-      }
-    }
-  }
 }
 
 .button {
@@ -250,6 +220,7 @@ $buttonSizes: (
   border: 1px solid;
   cursor: pointer;
   gap: 5px;
+  transition: all 0.3s ease-in-out;
 
   &-icon {
     display: flex;
@@ -257,8 +228,8 @@ $buttonSizes: (
     justify-content: center;
     width: auto;
     max-height: 20px;
+    transition: all 0.3s ease-in-out;
   }
-
   @each $theme, $styles in $buttonThemes {
     &[data-theme="#{$theme}"] {
       color: map.get($styles, color);
@@ -268,27 +239,31 @@ $buttonSizes: (
       .button-icon {
         color: map.get($styles, icon-color);
       }
+      &:hover {
+        color: map.get($styles, hover-color);
+        background-color: map.get($styles, hover-background-color);
+        border-color: map.get($styles, border-color);
+      }
+
+      &:active {
+        color: map.get($styles, active-color);
+        background-color: map.get($styles, active-background-color);
+        .button-icon {
+          color: map.get($styles, icon-active-color);
+        }
+      }
 
       &:disabled {
         background-color: map.get($styles, disabled-background-color);
         color: map.get($styles, disabled-font-color);
         cursor: not-allowed;
+
         .button-icon {
           color: map.get($styles, icon-disabled-color);
         }
       }
     }
   }
-
-  @each $size, $sizeStyles in $buttonSizes {
-    &[data-size="#{$size}"] {
-      font-size: map.get($sizeStyles, font-size);
-      min-width: map.get($sizeStyles, min-width);
-      min-height: map.get($sizeStyles, min-height);
-      padding: 0 map.get($sizeStyles, padding-horizontal);
-    }
-  }
-
   &[data-is-outline="true"] {
     @each $theme, $styles in $buttonThemes {
       &[data-theme="#{$theme}"] {
@@ -323,6 +298,15 @@ $buttonSizes: (
           background-color: map.get($styles, outline-disabled-background-color);
         }
       }
+    }
+  }
+
+  @each $size, $sizeStyles in $buttonSizes {
+    &[data-size="#{$size}"] {
+      font-size: map.get($sizeStyles, font-size);
+      min-width: map.get($sizeStyles, min-width);
+      min-height: map.get($sizeStyles, min-height);
+      padding: 0 map.get($sizeStyles, padding-horizontal);
     }
   }
 }
