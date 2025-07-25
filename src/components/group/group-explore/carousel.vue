@@ -117,7 +117,10 @@ onMounted(() => {
         @mouseenter="hoverIn"
         @mouseleave="hoverOut"
       >
-        <img :src="img" :alt="`img-${index + 1}`" />
+        <!-- 先暫時都回到首頁，之後再改 -->
+        <router-link to="/home">
+          <img :src="img" :alt="`img-${index + 1}`" />
+        </router-link>
       </div>
       <!-- <img
         class="card"

@@ -19,7 +19,9 @@ import {
 const isMobile = ref(true);
 const isTablet = ref(false);
 
+// DOM：'.taiwan-content'
 const taiwanContent = ref(null);
+// 確認區塊被點擊狀態
 const isSelected = ref(false);
 
 const checkDeviceType = () => {
@@ -34,6 +36,7 @@ const toggleRegion = (region) => {
   selectedRegion.value = selectedRegion.value === region ? null : region;
 };
 
+// 確認目前點到的區域
 const isNorth = ref(null);
 const isWest = ref(null);
 const isSouth = ref(null);
@@ -162,7 +165,7 @@ onBeforeUnmount(() => {
 // 比例
 const baseMobileRatio = 0.18;
 const baseTabletRatio = 0.45;
-const baseDesktopRatio = 0.6;
+const baseDesktopRatio = 0.65;
 
 // 北西東南 初始寬高
 const northOriginal = { width: 700, height: 447 };
@@ -256,7 +259,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
         <!-- 北部 原尺寸：349*245 -->
         <North
           class="north taiwan-area"
-          v-show="isNorth"
+          :class="{ move: isNorth }"
           :width="
             isMobile
               ? north.mobile.width
@@ -276,7 +279,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
         <!-- 西部 原尺寸：412*438 -->
         <West
           class="west taiwan-area"
-          v-show="isWest"
+          :class="{ move: isWest }"
           :width="
             isMobile
               ? west.mobile.width
@@ -296,7 +299,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
         <!-- 東部 原尺寸：371*919 -->
         <East
           class="east taiwan-area"
-          v-show="isEast"
+          :class="{ move: isEast }"
           :width="
             isMobile
               ? east.mobile.width
@@ -316,7 +319,7 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
         <!-- 南部 原尺寸：317*586 -->
         <South
           class="south taiwan-area"
-          v-show="isSouth"
+          :class="{ move: isSouth }"
           :width="
             isMobile
               ? south.mobile.width
@@ -386,6 +389,14 @@ const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 }
 .taiwan-area {
   position: absolute;
+  opacity: 0;
+  // 設置0.3秒位移動畫，且延遲0.1秒
+  transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+  transform: translateY(0);
+  &.move {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
 }
 .big-taiwan {
   position: relative;
