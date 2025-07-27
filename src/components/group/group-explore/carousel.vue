@@ -146,6 +146,7 @@ onMounted(() => {
 
 .title {
   @include flex-center();
+  font-weight: 400;
   font-size: $font-size-h3;
   margin-top: 18px;
   // margin-bottom: 10px;
