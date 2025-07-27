@@ -668,6 +668,7 @@ const eastData = [
     display: none;
     bottom: -60%;
     right: 0;
+    z-index: -1;
     @include desktop() {
       display: block;
     }
