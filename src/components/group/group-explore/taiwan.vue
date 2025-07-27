@@ -544,6 +544,9 @@ const eastData = [
             : bigTaiwan.desktop.height
         "
       />
+      <div class="bg">
+        <img src="@/assets/img/bg-decorate3.png" alt="" />
+      </div>
     </div>
     <div class="region">
       <!-- 若要單純遮罩，則內容放這（決定在這） -->
@@ -660,7 +663,15 @@ const eastData = [
   background-repeat: no-repeat;
   background-size: contain; /* 或 contain，根據你想要的填滿方式 */
   background-position: center center;
-
+  .bg {
+    position: absolute;
+    display: none;
+    bottom: -50%;
+    right: 0;
+    @include desktop() {
+      display: block;
+    }
+  }
   @include flex-center();
   @include desktop() {
     padding: 7.8% 0;
