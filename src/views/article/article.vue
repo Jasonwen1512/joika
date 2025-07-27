@@ -2,15 +2,26 @@
 
 
 import Button from "@/components/Button.vue";
-const activities = [
-  { class: "camping", label: "露營", color: "#FFB6C1" },
-  { class: "boardGames", label: "桌遊", color: "#ADD8E6" },
-  { class: "ball", label: "籃球", color: "#90EE90" },
-  { class: "movie", label: "電影", color: "#FFD700" },
-  { class: "dinnerGathering", label: "聚餐", color: "#FFA07A" },
-];
-import { ref, computed ,watch} from "vue";
 
+import { ref, computed ,watch} from "vue";
+//banner的跑馬燈
+const baseActivities = [
+  { label: "登山", color: "#56DD61"},//,img:"@src/assets/img/article/banner/cpboy.svg"
+  { label: "水上活動", color: "#81BFDA"},
+  { label: "運動", color: "#567ADD"},
+  { label: "露營", color: "#F05ECC"},
+  { label: "唱歌", color: "#FADA7A" },
+  { label: "展覽", color: "#FF7F5B" },
+  { label: "聚餐", color: "#FFB65D" },
+  { label: "桌遊", color: "#F5F0CD" },
+  { label: "電影", color: "#B1F0F7"},
+  { label: "手作", color: "#DBF964"},
+  { label: "文化體驗", color: "#6AF6C5" },
+  { label: "演出表演", color: "#EA64FF",img:"src/assets/img/article/banner/gtboy.svg"},
+  { label: "其他", color: "#969696" }
+
+];
+const activities = [...baseActivities, ...baseActivities, ...baseActivities]
 
 //靜態資料文章分類
 const categories = [
@@ -333,19 +344,25 @@ watch(activeCategory, () => {
 <template>
   <!-- 熱門文章頁 -->
   <div>這是熱門文章頁</div>
+  <!-- banner的跑馬燈 -->
+    <section id="marquee">
+    <div class="view">
+      <div class="pic-container">
+        <div
+          class="pic"
+          v-for="(item, index) in activities"
+          :key="index"
+          :style="{ backgroundColor: item.color }"
 
-  <div class="banner">
-    <div class="imglist">
-      <div
-        v-for="(item, index) in activities"
-        :key="index"
-        :class="['activity', item.class]"
-        :style="{ backgroundColor: item.color }"
-      >
-        {{ item.label }}
+        >
+                {{ item.label }}
+
+          <img :src="item.img" :alt="item.label" />
+        </div>
       </div>
     </div>
-  </div>
+  </section>
+
   <main class="artic">
     <div class="title">
       <h2>文章列表</h2>
@@ -411,10 +428,51 @@ v-for="(article, index) in paginatedArticles"
 </template>
 
 <style scoped lang="scss">
-.banner {
+#marquee .view {
+  overflow: hidden;
   width: 100%;
 }
 
+.pic-container {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+}
+
+.pic {
+flex-shrink: 0;
+  width: 300px;
+  height: 300px;
+  margin-right: 10px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 6px;
+}
+
+// .pic img {
+//   width: 100%;
+//   height: 100%;
+//   object-fit: cover;
+// }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.3333%);
+  }
+}
+
+/*.banner {
+  width: 100%;
+}
+*/
 .imglist {
   display: flex;
   gap: 1vw;
