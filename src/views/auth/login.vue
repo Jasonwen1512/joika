@@ -1,4 +1,3 @@
-
 <script setup>
   import { reactive } from 'vue';
   import Button from '@/components/Button.vue';
@@ -67,56 +66,66 @@
 </template>
 
 <style scoped lang="scss">
-  /* --- Sass 變數定義 --- */
-  $bg-container: #ffffff;
-  $bg-image: #FEFDF9;
-  $primary-color: #F7D97A; // 登入按鈕
-  $secondary-color: #FDF5E6; // 註冊按鈕
-  $input-border-color: #81BFDA;
-  $secondary-border-color: #EADDC5;
-  $text-color: #333;
-  $label-color: #555;
-  $border-color: #ccc;
-  $link-color: #007bff;
-
-  /* --- 主要頁面樣式 --- */
-
+@use '@/style.scss' as *;
 
   .login-page {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin: 50px 0;
     padding: 20px;
     background-image:url(@/img/bgc.jpg);
+    position: relative;
   }
 
-  /* --- 登入容器樣式 --- */
+.login-page::before {
+  content: '';
+  position: absolute;
+  background-image: url(/src/assets/img/bg-decorate5.png);
+  background-size: contain;
+  background-repeat: no-repeat; 
+  width: 200px;
+  height: 200px;
+  top: -20px;
+  left: -50px;
+  z-index: -1;
+}
+
+.login-page::after {
+  content: '';
+  position: absolute;
+  background-image: url(/src/assets/img/bg-decorate7.png);
+  background-size: contain;
+  background-repeat: no-repeat; 
+  width: 200px; 
+  height: 200px;
+  bottom: -100px;
+  right: -50px;
+  z-index: -1;
+}
+
   .login-container {
     width: 100%;
-    max-width: 500px;
-    background-color: $bg-container;
-    padding: 30px;
-    border: 1px solid #EAEAEA;
+    max-width: 800px;
+    background-color: $white;
+    padding: 25px;
     border-radius: 3px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
     h1 {
       text-align: center;
-      font-size: 28px;
-      font-weight: 600;
+      font-size: $font-size-h3;
       margin-bottom: 30px;
-      color: #2c3e50;
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
     label {
       display: block;
       margin-bottom: 8px;
-      font-size: 14px;
-      color: $label-color;
+      font-size: $font-size-p;
     }
 
     input[type="text"],
@@ -124,15 +133,15 @@
     input[type="tel"] {
       width: 100%;
       padding: 12px 15px;
-      border: 1px solid $border-color;
-      border-radius: 4px;
-      font-size: 16px;
+      border: 1px solid $black;
+      border-radius: 3px;
+      font-size: $font-size-p;
       transition: border-color 0.2s, box-shadow 0.2s;
 
       &:focus {
         outline: none;
-        border-color: $input-border-color;
-        box-shadow: 0 0 0 2px rgba($input-border-color, 0.3);
+        border-color: $color-primary;
+        box-shadow: 0 0 0 2px rgba($color-primary, 0.3);
       }
     }
 
@@ -157,10 +166,8 @@
     .forgot-password {
       display: block;
       text-align: right;
-      margin-top: 10px;
-      margin-bottom: 25px;
-      font-size: 14px;
-      color: $link-color;
+      margin-bottom: 30px;
+      color: $blue;
       text-decoration: none;
 
       &:hover {
@@ -173,20 +180,49 @@
       justify-content: space-between;
       gap: 15px;
     }
-
   }
 
-  /* --- 響應式設計 (RWD) --- */
-  /* 當螢幕寬度大於等於 768px 時 (對應您提到的電腦版) */
   @media (min-width: 768px) {
 
     .login-container {
-      // 在大螢幕上，容器樣式不需大改，
-      // max-width 屬性會確保它不會變得過寬，
-      // 而 login-page 的 flex 屬性會讓它保持置中。
-      // 可以加個陰影讓它更立體
       border-radius: 6px;
+      padding: 50px 100px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+    h1 {
+      font-size: $font-size-h2;
+      font-weight: 600;
+      margin-bottom: 30px;
     }
+
+    // .button-group {
+    //   display: flex;
+    //   justify-content:center;
+    //   gap: 100px;
+    // }
+
+
+
+    }
+
+
+    .login-page::before {
+      top: 0px;
+      left: -300px;
+      width: 700px;
+      height: 400px;
+    }
+
+    .login-page::after {
+      bottom: 0px;
+      right: 0px;
+      width: 700px;
+      height: 400px;
+    }
+
+
+
+
+
   }
 </style>
