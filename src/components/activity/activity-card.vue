@@ -90,5 +90,6 @@ const aloha = () => {
   justify-content: space-between;
   align-items: end;
   padding-top: 10px;
+  max-width: 264px;
 }
 </style>

@@ -180,7 +180,7 @@ $buttonSizes: (
   sm: (
     font-size: $font-size-p,
     min-width: 86px,
-    min-height: 38px,
+    height: 38px,
     padding-horizontal: 16px,
     mobile-font-size: 14px,
     mobile-min-width: 86px,
@@ -313,8 +313,7 @@ $buttonSizes: (
 
 .button[data-is-full="true"] {
   width: 100%;
-  border: 2px solid black;
-  height: auto;
+  height: 34px;
   border-radius: 3px;
 }
 </style>

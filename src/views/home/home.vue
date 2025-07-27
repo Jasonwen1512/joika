@@ -3,6 +3,12 @@ import AtivityCard from '@/components/activity/activity-card.vue';
 import { FakeActivity } from '@/assets/data/fake-activity';
 import Marquee from '@/components/marquee.vue';
 import Marquee2 from '@/components/marquee2.vue';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/pagination';
+import { FreeMode, Pagination } from 'swiper/modules';
+const modules = [FreeMode, Pagination];
 
 const items = [
   {name:"水上活動", img:'/src/assets/img/index-img/diving.png', color:'#4F8DA8'},
@@ -12,16 +18,17 @@ const items = [
   {name:"露營", img:'/src/assets/img/index-img/camping3.png', color:'#A281DA'},
   {name:"桌遊", img:'/src/assets/img/index-img/board-games.png', color:'#F315BB'},
   {name:"展覽", img:'/src/assets/img/index-img/exhibition.png', color:'#FFFCE2'},
-  {name:"聚餐", img:'', color:'#FB900C'},
-  {name:"手作", img:'', color:'#81BFDA'},
-  {name:"文化體驗", img:'', color:'#1FB92C'},
-  {name:"演出表演", img:'', color:'#FFE100'},
-  {name:"唱歌", img:'', color:'#CDE9A0'},
+  {name:"聚餐", img:'/src/assets/img/index-img/gathering.png', color:'#FB900C'},
+  {name:"手作", img:'/src/assets/img/index-img/DIY.png', color:'#81BFDA'},
+  {name:"文化體驗", img:'/src/assets/img/index-img/cultural-experience.png', color:'#1FB92C'},
+  {name:"演出表演", img:'/src/assets/img/index-img/concert.png', color:'#FFE100'},
+  {name:"唱歌", img:'/src/assets/img/index-img/ktv.png', color:'#2AA9FF'},
 ]
 </script>
 
 <template>
   <Marquee2/>
+  <!-- 限時揪團區塊 -->
   <div> 
     <img class="bg-img2" src="/src/assets/img/bg-decorate2.png" alt="背景圖藍">
     <img class="bg-img" src="/src/assets/img/bg-decorate1.png" alt="背景圖黃">
@@ -37,6 +44,7 @@ const items = [
     <img class="bg-img3" src="/src/assets/img/bg-decorate3.png" alt="背景圖藍">
   </div>  
   <Marquee/>
+  <!-- 最新揪團卡片區塊 -->
     <div class="index-section-start">
       <img src=" @/assets/img/index-img/second-section-img.png" alt="最新揪團標題圖">
       <h2>最新揪團<br>差你一咖</h2>
@@ -45,20 +53,36 @@ const items = [
     <AtivityCard v-for="item in FakeActivity.slice(0, 8)" :key="item.activity_id" :item="item"/>
   </div>
   <Marquee2/>
+  <!-- 揪團推薦-分類框區塊 -->
   <div class="index-section-start">
       <img src="@/assets/img/index-img/third-section-img.png" alt="最新揪團標題圖">
       <h2>揪團推薦<br>差你一咖</h2>
   </div>
   <img class="bg-img4" src="/src/assets/img/bg-decorate4.png" alt="背景圖淺藍">
-  <div class="activity-recommendations" >
-    <div class="recommendations-card" v-for="(item, index) in items.slice(0, 6)" :key="index">
-      <div class="recommendations-pic" :style="{ backgroundColor: item.color }">
-      <img :src="item.img" :alt="item.name">
+  <Swiper
+    :slides-per-view="6"
+    :space-between="30"
+    :free-mode="true"
+    :pagination="{ clickable: true }"
+    :breakpoints="{
+      1024: { slidesPerView: 6 },
+      768: { slidesPerView: 3 },
+      480: { slidesPerView: 1 }
+    }"
+    :modules="modules"
+    class="recommendations-swiper"
+  >
+    <SwiperSlide v-for="(item, index) in items" :key="index">
+      <div class="recommendations-card">
+        <div class="recommendations-pic" :style="{ backgroundColor: item.color }">
+        <img :src="item.img" :alt="item.name">
+        </div>
+        <h3>{{item.name}}</h3>
       </div>
-      <h3>{{item.name}}</h3>
-    </div>
-  </div>
+    </SwiperSlide>
+  </Swiper>
   <Marquee/>
+  <!-- 品牌介紹區塊 -->
     <div class="index-section-start">
       <img src="@/assets/img/index-img/fourth-section-img.png" alt="品牌介紹標題圖">
       <h2>JOIKA<br>差你一咖</h2>
@@ -133,7 +157,7 @@ const items = [
 }
 .bg-img5{
   position: absolute;
-  top: 2700px;
+  top: 2800px;
   left: 0;
   width: 100%;
   height: 145%;
@@ -162,19 +186,20 @@ const items = [
   position: relative;
   z-index: 2;
 }
-.activity-recommendations{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  position: relative;
-  z-index: 1;
+.recommendations-swiper {
+  padding: 20px 0;
+  .swiper-slide {
+    display: flex;
+    justify-content: center;
+  }
+
 }
 .recommendations-card{
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  padding-bottom: 50px;
 }
 .recommendations-pic{
   display: flex;
@@ -184,6 +209,7 @@ const items = [
   height: 183px;
   border: 1px solid black;
   border-radius: 50%;
+  overflow: hidden;
   img{
     max-width: 100%;
     max-height: 100%;
