@@ -666,7 +666,7 @@ const eastData = [
   .bg {
     position: absolute;
     display: none;
-    bottom: -50%;
+    bottom: -60%;
     right: 0;
     @include desktop() {
       display: block;
