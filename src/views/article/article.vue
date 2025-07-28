@@ -5,6 +5,7 @@ import Button from "@/components/Button.vue";
 
 import { ref, computed ,watch} from "vue";
 import konanImage from '@/assets/img/article/movie_konan.jpg';
+import ArticleDetail from "./article-detail.vue";
 
 
 //banner的跑馬燈
@@ -267,6 +268,56 @@ image: konanImage,
     event:"電影",
 image: konanImage, 
     content:'光點台北重映黑澤明的《七武士》，真的是電影史上的經典！影評人的導讀分析很精彩，讓我對電影美學有了更深的理解。同場的電影愛好者提出的觀點都很有見地，討論過程很有收穫。<br>雖然是黑白片而且很長，但劇情緊湊完全不會無聊。映後座談讓大家交流感想，氣氛很棒<br>推薦給喜歡藝術電影的朋友！'},
+
+ {postId:"PST-000085", 
+    userId:	"M0020",
+    date:"2025/3/30 PM5:20",
+    title:"陶藝拉坯體驗超療癒",
+    event:"手作",
+image: konanImage, 
+    content:'在鶯歌老街的陶藝工坊體驗拉坯，真的很有禪意！<br>陶藝師一對一指導很有耐心，看著泥土在手中慢慢成形，整個人都很放鬆。<br>雖然我做出來的碗歪七扭八，但老師說這就是手作的魅力<br>同團的阿姨們手很巧，做出來的作品都很美。<br>老街導覽也很有趣，了解了陶瓷的歷史文化。<br>作品要等一個月燒製完成，很期待收到成品！'},
+
+     {postId:"PST-000086", 
+    userId:	"M0020",
+    date:"2025/4/19 PM9:33",
+    title:"皮革工藝製作有成就感",
+    event:"手作",
+image: konanImage, 
+    content:'手縫皮革錢包真的需要很大的耐心！義大利進口真皮質感很好，老師教的裁切和縫製技巧很實用。雖然手縫很累，但看著錢包一針一線成形很有成就感。同班的人都很認真，大家互相幫忙穿線打洞。<br>染色的部分很有趣，可以調出自己喜歡的顏色。雖然花了一整天，但完成的作品真的很有紀念價值，現在每天都在用自己做的錢包！'},
+
+      {postId:"PST-000093", 
+    userId:	"M0020",
+    date:"2025/3/21 PM3:42",
+    title:"文學館作家講座很有深度",
+    event:"文化體驗",
+image: konanImage, 
+    content:'知名作家親自分享創作歷程真的很難得！<br>從文學發展脈絡到個人創作理念，每個部分都很精彩。<br>Q&A時間作家回答問題很用心，還分享了很多寫作技巧。<br>同場的文學愛好者提出的問題都很有深度，討論很熱烈<br>簽書會排隊人很多，但作家很親切，還會跟每個人聊幾句。<br>文學紀念品質感不錯，整體活動很值得！'},
+
+    {postId:"PST-000094", 
+    userId:	"M0020",
+    date:"2025/4/16 PM8:25",
+    title:"新媒體藝術體驗前衛有趣",
+    event:"文化體驗",
+image: konanImage, 
+    content:'VR和AR藝術體驗真的開了眼界！<br>科技與藝術結合產生的效果超乎想像，互動投影讓人感覺置身另一個世界。技術講解很專業，了解了很多新媒體藝術的創作原理。工作坊讓我們親自操作設備，雖然有點複雜但很有趣同團的年輕人對科技都很敏感，交流起來很有趣。<br>這種前衛藝術確實需要時間消化理解'},
+
+      {postId:"PST-000101", 
+    userId:	"M0020",
+    date:"2025/4/16 PM8:25",
+    title:"街頭音樂會氣氛超棒",
+    event:"演出表演",
+    image: konanImage, 
+    content:'西門町的街頭音樂表演真的很有活力！<br>各種音樂風格都有，從民謠到搖滾應有盡有。<br>表演者都很有才華，現場演奏的感染力比錄音強太多<br>觀眾互動很熱烈，大家一起打拍子唱歌很嗨。<br>雖然站了兩小時有點累，但這種現場音樂的魅力無法抵擋。<br>小費箱裡投了200元支持音樂人，希望他們繼續創作！'},
+
+          {postId:"PST-000102", 
+    userId:	"M0020",
+    date:"2025/4/11 PM10:15",
+    title:"小劇場演出很有創意",
+    event:"演出表演",
+    image: konanImage, 
+    content:'黑盒子劇場的實驗性戲劇真的很前衛！<br>演員的表演很投入，雖然劇情有點抽象但很有想像空間。舞台設計簡約但很有意境，燈光音效配合得很好!同場觀眾的反應很熱烈，散場後大家都在討論劇情含義。雖然票價不便宜，但支持原創戲劇很有意義。演後座談讓觀眾和創作者直接對話，很珍貴的體驗！'},
+
+
   ]
 //分類顏色
   const eventColorMap = {
@@ -410,7 +461,10 @@ v-for="(article, index) in paginatedArticles"
       <div class="articleImg">
         <img :src="article.image" :alt="article.title" />
       </div>
-      <div class="articleText">
+
+      <router-link :to="`/article/${article-ArticleDetail}`" class="articleText-link">
+
+     <div class="articleText">
         <div class="articleHeader">
           <div class="articleDate">
           <span
@@ -429,6 +483,7 @@ v-for="(article, index) in paginatedArticles"
 
         </div>
       </div>
+      </router-link>
     </div>
   </section>
   <!-- 分頁按鈕 -->
@@ -457,18 +512,20 @@ v-for="(article, index) in paginatedArticles"
 }
 
 .pic {
+  padding: 20px;
     flex-shrink: 0;
     width: 300px;
     height: 300px;
     margin-right: 10px;
     border-radius: 10px;
     color: #000000;
-    display: flex;
+    display: flex
+;
     justify-content: space-evenly;
     text-align: center;
     border-radius: 6px;
-    flex-direction: column;
     align-items: center;
+    flex-direction: column;
 }
 
 .pic img {
@@ -574,10 +631,6 @@ section.articleList {
     margin: 5vh;
 }
 
-.articleImg {
-    /* display: flex; */
-    flex: 1;
-}
 
 .articleText {
     flex: 2;
@@ -617,6 +670,9 @@ section.articleList {
       color: #000;
     }
   }
+}
+.articleImg{
+  margin: 10px;
 }
 
 </style>
