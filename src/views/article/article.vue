@@ -6,27 +6,18 @@ import Button from "@/components/Button.vue";
 import { ref, computed ,watch} from "vue";
 import konanImage from '@/assets/img/article/movie_konan.jpg';
 import ArticleDetail from "./article-detail.vue";
-
+import preIcon from '@/assets/img/icon/pre-arrow.svg?url';
+import nextIcon from '@/assets/img/icon/next-arrow.svg?url';
 
 //banner的跑馬燈
 
-// ==========================================================
-//  Banner 跑馬燈的最終解決方案：使用 import.meta.glob
-// ==========================================================
 
-// 1. 使用 `@` 別名同步載入 banner 資料夾下的所有圖片模組。
-//    { eager: true } 是關鍵，它確保我們能立即拿到 URL。
 const imageModules = import.meta.glob('@/assets/img/article/banner/*', { eager: true });
-console.log("【Vite 找到的 Banner 圖片列表】:", imageModules);
 
 
-// 2. 建立一個新的 getImageUrl 函式，用來從上面的對照表中查找路徑。
 function getImageUrl(name) {
-  // 根據 console.log 的結果，我們知道 key 的格式是 `/src/assets/...`
-  // 所以我們拼接路徑時，也要使用相同的格式！
-  const path = `/src/assets/img/article/banner/${name}`; // <--- 這是唯一的修改！
 
-  // 後面的邏輯保持不變
+  const path = `/src/assets/img/article/banner/${name}`; // <--- 
   return imageModules[path]?.default || '';
 }
 
@@ -385,6 +376,8 @@ const paginatedArticles = computed(() => {
 
 
 // 換頁 function
+
+
 function goToPage(page) {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
@@ -398,7 +391,21 @@ function setActive(category) {
 watch(activeCategory, () => {
   currentPage.value = 1;
 });
+// 新增：判斷是否為第一頁的計算屬性
+const isFirstPage = computed(() => currentPage.value === 1);
 
+// 新增：判斷是否為最後一頁的計算屬性
+const isLastPage = computed(() => currentPage.value === totalPages.value);
+
+// 新增：跳轉到上一頁的方法
+function goToPreviousPage() {
+  goToPage(currentPage.value - 1);
+}
+
+// 新增：跳轉到下一頁的方法
+function goToNextPage() {
+  goToPage(currentPage.value + 1);
+}
 
 //我要發文按鈕
 const ula = () => {
@@ -410,6 +417,11 @@ const ula = () => {
 </script>
 
 <template>
+<!-- 背景色塊 -->
+<background>
+  <img class="bg-img2" src="/src/assets/img/bg-decorate2.png" alt="背景圖藍">
+  <img class="bg-img3" src="/src/assets/img/bg-decorate3.png" alt="背景圖黃">
+</background>
   <!-- 熱門文章頁 -->
   <div>這是熱門文章頁</div>
   <!-- banner的跑馬燈 -->
@@ -462,7 +474,7 @@ v-for="(article, index) in paginatedArticles"
         <img :src="article.image" :alt="article.title" />
       </div>
 
-      <router-link :to="`/article/${article-ArticleDetail}`" class="articleText-link">
+      <router-link :to="`/article/${article-detail}`" class="articleText-link">
 
      <div class="articleText">
         <div class="articleHeader">
@@ -481,14 +493,22 @@ v-for="(article, index) in paginatedArticles"
         <div class="articleBody">
 <p v-html="article.content"></p>
 
-        </div>
+        </div> 
+       
       </div>
+     
       </router-link>
-    </div>
+        
+ 
+    </div>  
+    <hr>
   </section>
   <!-- 分頁按鈕 -->
 <div class="pagination">
-  <button 
+<button class="pre" @click="goToPreviousPage"
+      :disabled="isFirstPage">
+  <img :src="preIcon" alt="上一張箭頭">
+</button >  <button class="page"
     v-for="page in totalPages" 
     :key="page" 
     @click="goToPage(page)"
@@ -496,10 +516,34 @@ v-for="(article, index) in paginatedArticles"
   >
     {{ page }}
   </button>
+<button class="next"  @click="goToNextPage"      :disabled="isLastPage">
+  <img :src="nextIcon" alt="下一張箭頭">
+</button>
 </div>  </main>
 </template>
 
 <style scoped lang="scss">
+body{
+  position: relative;
+}
+.bg-img3{
+     position: absolute;
+    bottom: -50vh;
+    right: 0;
+    width: 15%;
+    height: auto;
+    z-index: -999;
+}
+.bg-img2[data-v-fd3376ce] {
+    position: absolute;
+    top: 45vh;
+    left: 0;
+    width: 15%;
+    z-index: -999;
+}
+
+
+
 #marquee .view {
   overflow: hidden;
   width: 100%;
@@ -588,6 +632,9 @@ v-for="(article, index) in paginatedArticles"
 .categoryList {
   display: flex;
   gap: 10px;
+  @media screen {
+    
+  }
 }
 .title {
   margin-block: 3vh;
@@ -624,19 +671,22 @@ hr {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    margin: 10vh auto;
+    margin: 5vh auto;
 }
-
+.articleItem:hover{
+  color:#4f8da8;
+}
 section.articleList {
     margin: 5vh;
 }
 
 
 .articleText {
-    flex: 2;
+  flex: 2;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    /* gap: 20px; */
+    justify-content: space-around;
 }
 .eventLabel {
     text-align: center;
@@ -658,21 +708,44 @@ section.articleList {
   gap: 10px;
   justify-content: center;
   margin-bottom: 5vh;
-
-  button {
+ }
+  .page {
+    border: #4f8da8 2px solid;
+    border-radius: 6px;
     padding: 5px 10px;
-    border: 1px solid #000;
-    background: #eee;
+    background: #ffffff;
     cursor: pointer;
+    color: #4f8da8;
 
     &.active {
       background: #81bfda;
       color: #000;
     }
-  }
+ 
+}
+.articleTitle {
+    padding-block: 10px;
 }
 .articleImg{
   margin: 10px;
+  flex:1;
 }
+a.articleText-link {
+    flex: 2;
+    display: flex;
+    color: inherit;
+  text-decoration: none;
+  align-items: stretch;
+}
+.next:hover  {
+   transition: transform 0.5s ease; /* 設定位移變化的速度 */
 
+transform:translateX(5px)
+}
+.pre:hover{
+    transition: transform 0.5s ease; /* 設定位移變化的速度 */
+
+  transform:translateX(-5px)
+
+}
 </style>
