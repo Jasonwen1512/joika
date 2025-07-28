@@ -59,6 +59,7 @@ const props = defineProps({
 </template>
 
 <style lang="scss" scoped>
+@use "sass:map";
 // themes
 $buttonThemes: (
   primary: (
@@ -179,7 +180,7 @@ $buttonSizes: (
   sm: (
     font-size: $font-size-p,
     min-width: 86px,
-    min-height: 38px,
+    height: 38px,
     padding-horizontal: 16px,
     mobile-font-size: 14px,
     mobile-min-width: 86px,
@@ -211,36 +212,6 @@ $buttonSizes: (
 .button-wrapper {
   height: fit-content;
   width: auto;
-
-  .button {
-    @each $theme, $styles in $buttonThemes {
-      &[data-theme="#{$theme}"] {
-        &:hover {
-          color: map-get($styles, hover-color);
-          background-color: map-get($styles, hover-background-color);
-          border-color: map-get($styles, border-color);
-        }
-
-        &:active {
-          color: map-get($styles, active-color);
-          background-color: map-get($styles, active-background-color);
-          .button-icon {
-            color: map-get($styles, icon-active-color);
-          }
-        }
-
-        &:disabled {
-          background-color: map-get($styles, disabled-background-color);
-          color: map-get($styles, disabled-font-color);
-          cursor: default;
-
-          .button-icon {
-            color: map-get($styles, icon-disabled-color);
-          }
-        }
-      }
-    }
-  }
 }
 
 .button {
@@ -249,6 +220,7 @@ $buttonSizes: (
   border: 1px solid;
   cursor: pointer;
   gap: 5px;
+  transition: all 0.3s ease-in-out;
 
   &-icon {
     display: flex;
@@ -256,24 +228,74 @@ $buttonSizes: (
     justify-content: center;
     width: auto;
     max-height: 20px;
+    transition: all 0.3s ease-in-out;
   }
-
   @each $theme, $styles in $buttonThemes {
     &[data-theme="#{$theme}"] {
-      color: map-get($styles, color);
-      background-color: map-get($styles, background-color);
-      border-color: map-get($styles, border-color);
+      color: map.get($styles, color);
+      background-color: map.get($styles, background-color);
+      border-color: map.get($styles, border-color);
 
       .button-icon {
-        color: map-get($styles, icon-color);
+        color: map.get($styles, icon-color);
+      }
+      &:hover {
+        color: map.get($styles, hover-color);
+        background-color: map.get($styles, hover-background-color);
+        border-color: map.get($styles, border-color);
+      }
+
+      &:active {
+        color: map.get($styles, active-color);
+        background-color: map.get($styles, active-background-color);
+        .button-icon {
+          color: map.get($styles, icon-active-color);
+        }
       }
 
       &:disabled {
-        background-color: map-get($styles, disabled-background-color);
-        color: map-get($styles, disabled-font-color);
+        background-color: map.get($styles, disabled-background-color);
+        color: map.get($styles, disabled-font-color);
         cursor: not-allowed;
+
         .button-icon {
-          color: map-get($styles, icon-disabled-color);
+          color: map.get($styles, icon-disabled-color);
+        }
+      }
+    }
+  }
+  &[data-is-outline="true"] {
+    @each $theme, $styles in $buttonThemes {
+      &[data-theme="#{$theme}"] {
+        color: map.get($styles, outline-color);
+        background-color: map.get($styles, outline-background-color);
+        border: 1px solid map.get($styles, outline-border-color);
+        .button-icon {
+          color: map.get($styles, icon-outline-color);
+        }
+
+        &:hover {
+          color: map.get($styles, outline-hover-color);
+          background-color: map.get($styles, outline-hover-background-color);
+          border-color: map.get($styles, outline-hover-border-color);
+          .button-icon {
+            color: map.get($styles, icon-outline-hover-color);
+          }
+        }
+
+        &:active {
+          color: map.get($styles, outline-active-color);
+          background-color: map.get($styles, outline-active-background-color);
+          border-color: map.get($styles, outline-active-border-color);
+          .button-icon {
+            color: map.get($styles, icon-outline-active-color);
+          }
+        }
+        &:disabled {
+          cursor: not-allowed;
+          color: map.get($styles, outline-disabled-color);
+          border-color: map.get($styles, outline-disabled-border-color);
+          background-color: map.get($styles, outline-disabled-background-color);
         }
       }
     }
@@ -281,55 +303,17 @@ $buttonSizes: (
 
   @each $size, $sizeStyles in $buttonSizes {
     &[data-size="#{$size}"] {
-      font-size: map-get($sizeStyles, font-size);
-      min-width: map-get($sizeStyles, min-width);
-      min-height: map-get($sizeStyles, min-height);
-      padding: 0 map-get($sizeStyles, padding-horizontal);
-    }
-  }
-
-  &[data-is-outline="true"] {
-    @each $theme, $styles in $buttonThemes {
-      &[data-theme="#{$theme}"] {
-        color: map-get($styles, outline-color);
-        background-color: map-get($styles, outline-background-color);
-        border: 1px solid map-get($styles, outline-border-color);
-        .button-icon {
-          color: map-get($styles, icon-outline-color);
-        }
-
-        &:hover {
-          color: map-get($styles, outline-hover-color);
-          background-color: map-get($styles, outline-hover-background-color);
-          border-color: map-get($styles, outline-hover-border-color);
-          .button-icon {
-            color: map-get($styles, icon-outline-hover-color);
-          }
-        }
-
-        &:active {
-          color: map-get($styles, outline-active-color);
-          background-color: map-get($styles, outline-active-background-color);
-          border-color: map-get($styles, outline-active-border-color);
-          .button-icon {
-            color: map-get($styles, icon-outline-active-color);
-          }
-        }
-        &:disabled {
-          cursor: not-allowed;
-          color: map-get($styles, outline-disabled-color);
-          border-color: map-get($styles, outline-disabled-border-color);
-          background-color: map-get($styles, outline-disabled-background-color);
-        }
-      }
+      font-size: map.get($sizeStyles, font-size);
+      min-width: map.get($sizeStyles, min-width);
+      min-height: map.get($sizeStyles, min-height);
+      padding: 0 map.get($sizeStyles, padding-horizontal);
     }
   }
 }
 
 .button[data-is-full="true"] {
   width: 100%;
-  border: 2px solid black;
-  height: auto;
+  height: 34px;
   border-radius: 3px;
 }
 </style>

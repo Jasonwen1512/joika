@@ -20,17 +20,17 @@ const aloha = () => {
 <template>
   <div class="activity-card" v-if="item">
     <div class="activity-img">
-      <img :src="item.img_url" :alt="item.title" />
+      <img :src="item.activity_img" :alt="item.activity_name" />
     </div>
-    <h4 class="activity-title">{{ item.title }}</h4>
-    <p class="activity-intro">{{ item.intro }}</p>
-    <div class="button" @click.stop.prevent>
+    <h4 class="activity-name">{{ item.activity_name }}</h4>
+    <p class="activity-description">{{ item.activity_description }}</p>
+    <div class="button-group" @click.stop.prevent>
       <Button @click.stop.prevent="aloha" theme="primary" size="md"
         >我要跟團!</Button
       >
       <LikeButton
-        :isActive="likeMap[item.activity_id]"
-        @click.stop.prevent="toggleLike(item.activity_id)"
+        :isActive="likeMap[item.activity_no]"
+        @click.stop.prevent="toggleLike(item.activity_no)"
       ></LikeButton>
     </div>
   </div>
@@ -42,25 +42,29 @@ const aloha = () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding: 5px;
+  margin: 45px 5px;
   min-height: 390px;
   color: black;
 }
 .activity-img img {
   width: 100%;
-  object-fit: contain;
+  height: 100%;
   border: black solid 1px;
 }
 .activity-img {
-  @include flex-center;
+  max-width: 264px;
+  height: 200px;
+  object-fit: cover;
 }
 
-.activity-img :hover {
+.activity-img:hover {
   transition: ease 0.5s;
   transform: rotate(-5deg); //
 }
 
-.activity-title {
+.activity-name {
+  display: block;
+  max-width: 264px;
   font-size: $font-size-h4;
   padding: 14px 0 0px;
   line-height: 1.7;
@@ -68,20 +72,24 @@ const aloha = () => {
   white-space: nowrap;
   text-overflow: ellipsis;
   font-weight: unset;
+  letter-spacing: 0.5px;
 }
-.activity-intro {
+.activity-description {
   font-size: $font-size-p;
   padding: 10px 0 0;
   line-height: 1.7;
-  flex-grow: 1;
+  max-width: 264px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.button {
+.button-group {
   display: flex;
   justify-content: space-between;
   align-items: end;
-  padding-bottom: 10px;
+  padding-top: 10px;
+  max-width: 264px;
 }
 </style>

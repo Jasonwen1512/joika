@@ -70,11 +70,15 @@ const colorfulLetters = computed(() => {
 <style lang="scss" scoped>
 
 .marquee-wrapper {
+    margin-top: 50px;
+    margin-bottom: 50px;
     overflow: hidden;          
     white-space: nowrap;       
     width: 100%;               
     background-color: transparent; 
     box-sizing: border-box;
+    position: relative;
+    z-index: 2;
 }
 .marquee-content {
     display: inline-flex;           

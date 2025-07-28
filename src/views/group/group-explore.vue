@@ -1,11 +1,13 @@
 <script setup>
 import Carousel from "@/components/group/group-explore/carousel.vue";
 import Taiwan from "@/components/group/group-explore/taiwan.vue";
+import Recommend from "@/components/group/group-explore/recommend.vue";
 </script>
 
 <template>
   <Carousel />
   <Taiwan class="taiwan" />
+  <Recommend />
 </template>
 
 <style scoped lang="scss">
