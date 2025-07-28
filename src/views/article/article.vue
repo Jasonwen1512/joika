@@ -361,10 +361,6 @@ const filteredArticles = computed(() => {
     return reformatDate(b.date) - reformatDate(a.date);
   });
 });
-// 計算頁數
-const totalPages = computed(() =>
-  Math.ceil(filteredArticles.value.length / articlesPerPage)
-);
 
 
 // 取得當前頁要顯示的文章
@@ -387,10 +383,16 @@ function goToPage(page) {
 function setActive(category) {
   activeCategory.value = category;
 }
-//回第一頁
+//每跳一個分類回第一頁
 watch(activeCategory, () => {
   currentPage.value = 1;
 });
+
+// 計算頁數
+const totalPages = computed(() =>
+  Math.ceil(filteredArticles.value.length / articlesPerPage)
+);
+
 // 新增：判斷是否為第一頁的計算屬性
 const isFirstPage = computed(() => currentPage.value === 1);
 
@@ -407,9 +409,37 @@ function goToNextPage() {
   goToPage(currentPage.value + 1);
 }
 
+//只顯示+-1與頭尾頁
+const paginationList = computed(() => {
+  const pages = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) {
+      pages.push(i)
+    }
+  } else {
+    pages.push(1)
+
+    if (current > 3) pages.push('...')
+
+    for (let i = current - 1; i <= current + 1; i++) {
+      if (i > 1 && i < total) {
+        pages.push(i)
+      }
+    }
+
+    if (current < total - 2) pages.push('...')
+
+    pages.push(total)
+  }
+
+  return pages
+})
 //我要發文按鈕
 const ula = () => {
-  alert('我要發文烏拉');
+  alert('我要發文');
   // 在這裡可以加入跳轉到發文頁面的邏輯，例如使用 Vue Router
   // router.push('/create-post');
   }
@@ -435,7 +465,7 @@ const ula = () => {
           :style="{ backgroundColor: item.color }"
 
         >
-                <h3>{{ item.label }}</h3>
+                <h3 class="bannertext">{{ item.label }}</h3>
 
           <img :src="item.img" :alt="item.label" />
         </div>
@@ -460,7 +490,7 @@ const ula = () => {
         </div>
       </div>
 
-      <Button :onClick="ula" theme="primary" size="sm">我要發文</Button>
+      <Button :onClick="ula" theme="primary" size="md">我要發文</Button>
     </section>
     <hr/>
     <!-- 文章列表 -->
@@ -503,7 +533,7 @@ v-for="(article, index) in paginatedArticles"
     </div>  
     <hr>
   </section>
-  <!-- 分頁按鈕 -->
+  <!-- 分頁按鈕
 <div class="pagination">
 <button class="pre" @click="goToPreviousPage"
       :disabled="isFirstPage">
@@ -519,7 +549,30 @@ v-for="(article, index) in paginatedArticles"
 <button class="next"  @click="goToNextPage"      :disabled="isLastPage">
   <img :src="nextIcon" alt="下一張箭頭">
 </button>
-</div>  </main>
+</div>   -->
+
+<!-- 試試智慧分類...因應太多頁數的時候畫面不要太亂 -->
+<div class="pagination">
+  <button class="pre" @click="goToPreviousPage" :disabled="isFirstPage">
+    <img :src="preIcon" alt="上一張箭頭" />
+  </button>
+
+  <button
+    class="page"
+    v-for="(page, index) in paginationList"
+    :key="index"
+    @click="typeof page === 'number' && goToPage(page)"
+    :disabled="page === '...'"
+    :class="{ active: currentPage === page }"
+  >
+    {{ page }}
+  </button>
+
+  <button class="next" @click="goToNextPage" :disabled="isLastPage">
+    <img :src="nextIcon" alt="下一張箭頭" />
+  </button>
+</div>
+</main>
 </template>
 
 <style scoped lang="scss">
@@ -527,7 +580,7 @@ body{
   position: relative;
 }
 .bg-img3{
-     position: absolute;
+    position: absolute;
     bottom: -50vh;
     right: 0;
     width: 15%;
@@ -632,9 +685,7 @@ body{
 .categoryList {
   display: flex;
   gap: 10px;
-  @media screen {
-    
-  }
+ 
 }
 .title {
   margin-block: 3vh;
@@ -748,4 +799,46 @@ transform:translateX(5px)
   transform:translateX(-5px)
 
 }
+
+
+@media (max-width: 768px) {
+  .bg-img2,.bg-img3{
+    width: 50%!important;
+  }
+.pic{
+  width: 150px;
+  height: 150px;
+}
+.bannertext{
+  font-size: 1.25rem;
+}
+.categoryList {
+
+ gap: 10px;
+        flex-direction: row;
+        justify-content: left;
+        flex-wrap: wrap;
+        padding: 20px;
+}
+.button-wrapper {
+    margin: 3vh auto;
+}
+section.articleCategory {
+
+    flex-direction: column;
+}
+.title {
+text-align: center;
+}
+.articleItem{
+    flex-direction: column;
+}
+.articleTitle h3{
+  font-family: 'Noto Sans';
+  font-size: 1.25rem;
+}
+.articleBody{
+  display: none;
+}}
+
 </style>
