@@ -663,6 +663,7 @@ const eastData = [
   background-repeat: no-repeat;
   background-size: contain; /* 或 contain，根據你想要的填滿方式 */
   background-position: center center;
+  @include flex-center();
   .bg {
     position: absolute;
     display: none;
@@ -673,7 +674,6 @@ const eastData = [
       display: block;
     }
   }
-  @include flex-center();
   @include desktop() {
     padding: 7.8% 0;
   }
