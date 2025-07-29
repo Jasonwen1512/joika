@@ -125,7 +125,7 @@
     align-items: center;
     margin: 50px 0;
     padding: 20px;
-    background-image:url(@/img/bgc.jpg);
+    // background-image:url(@/img/bgc.jpg);
     position: relative;
   }
 

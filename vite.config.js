@@ -25,7 +25,8 @@ export default defineConfig(({ mode }) =>{
       }),
       vueDevTools(),
     ],
-      base: env.VITE_BASE || '/',
+      //base: env.VITE_BASE || '/',
+      base: "/cjd101/g2/front/",
       build: {
       outDir: env.VITE_OUT_DIR || 'dist'
     },
