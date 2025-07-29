@@ -204,7 +204,7 @@ onBeforeUnmount(() => {
 // 比例
 const baseMobileRatio = 0.18;
 const baseTabletRatio = 0.45;
-const baseDesktopRatio = 0.65;
+const baseDesktopRatio = 0.6;
 
 // 北西東南 初始寬高
 const northOriginal = { width: 700, height: 447 };
@@ -544,6 +544,9 @@ const eastData = [
             : bigTaiwan.desktop.height
         "
       />
+      <div class="bg">
+        <img src="@/assets/img/bg-decorate3.png" alt="" />
+      </div>
     </div>
     <div class="region">
       <!-- 若要單純遮罩，則內容放這（決定在這） -->
@@ -660,8 +663,17 @@ const eastData = [
   background-repeat: no-repeat;
   background-size: contain; /* 或 contain，根據你想要的填滿方式 */
   background-position: center center;
-
   @include flex-center();
+  .bg {
+    position: absolute;
+    display: none;
+    bottom: -60%;
+    right: 0;
+    z-index: -1;
+    @include desktop() {
+      display: block;
+    }
+  }
   @include desktop() {
     padding: 7.8% 0;
   }

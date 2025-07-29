@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const rawTags = [
     {
@@ -36,11 +37,36 @@ const colorfulLetters = computed(() => {
         return index < rawTags.length - 1 ? [...letterSpans, { ch: ' ', color: 'transparent' }] : letterSpans;
     }).filter(item => item.ch !== '' || item.color === 'transparent'); 
 });
+
+const marqueeContent = ref(null)
+
+function updateMarquee() {
+    const content = marqueeContent.value
+    const wrapperWidth = content.parentElement.offsetWidth
+
+    while (content.children.length > 1) {
+        content.removeChild(content.lastChild)
+    }
+
+    while (content.scrollWidth < wrapperWidth * 2) {
+        const clone = content.children[0].cloneNode(true)
+        content.appendChild(clone)
+    }
+    }
+
+    onMounted(() => {
+    updateMarquee()
+    window.addEventListener('resize', updateMarquee)
+    })
+
+    onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateMarquee)
+})
 </script>
 
 <template>
     <div class="marquee-wrapper">
-        <div class="marquee-content">
+        <div class="marquee-content" ref="marqueeContent">
             <div class="marquee-item">
                 <template v-for="(item, i) in colorfulLetters" :key="i">
                     <span

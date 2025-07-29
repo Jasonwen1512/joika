@@ -180,12 +180,14 @@ $buttonSizes: (
   sm: (
     font-size: $font-size-p,
     min-width: 86px,
-    height: 38px,
+    min-height: 38px,
     padding-horizontal: 16px,
     mobile-font-size: 14px,
     mobile-min-width: 86px,
     mobile-min-height: 38px,
     mobile-padding-horizontal: 16px,
+    border-radius: 6px,
+    mobile-border-radius: 3px,
   ),
   md: (
     font-size: $font-size-h4,
@@ -196,6 +198,8 @@ $buttonSizes: (
     mobile-min-width: 158px,
     mobile-min-height: 38px,
     mobile-padding-horizontal: 16px,
+    border-radius: 6px,
+    mobile-border-radius: 3px,
   ),
   lg: (
     font-size: $font-size-h4,
@@ -206,6 +210,8 @@ $buttonSizes: (
     mobile-min-width: 462px,
     mobile-min-height: 35px,
     mobile-padding-horizontal: 24px,
+    border-radius: 6px,
+    mobile-border-radius: 3px,
   ),
 );
 
@@ -306,14 +312,20 @@ $buttonSizes: (
       font-size: map.get($sizeStyles, font-size);
       min-width: map.get($sizeStyles, min-width);
       min-height: map.get($sizeStyles, min-height);
-      padding: 0 map.get($sizeStyles, padding-horizontal);
+      padding: 0px map.get($sizeStyles, padding-horizontal);
+      border-radius: map.get($sizeStyles, border-radius);
+    }
+
+    @include mobile {
+      &[data-size="#{$size}"] {
+        border-radius: map.get($sizeStyles, mobile-border-radius);
+      }
     }
   }
 }
 
 .button[data-is-full="true"] {
   width: 100%;
-  height: 34px;
   border-radius: 3px;
 }
 </style>
