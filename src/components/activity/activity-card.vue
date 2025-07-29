@@ -45,6 +45,12 @@ const aloha = () => {
   margin: 45px 5px;
   min-height: 390px;
   color: black;
+
+  @include tablet() {
+    margin: 45px 0;
+  }
+  @include desktop() {
+  }
 }
 .activity-img img {
   width: 100%;
