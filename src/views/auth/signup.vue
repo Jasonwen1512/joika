@@ -4,6 +4,13 @@
 
   const currentStep = ref(1)
 
+  const goNext = () => {
+    if (currentStep.value < 3) {
+      currentStep.value++
+      console.log(`Current Step: ${currentStep.value}`)
+    }
+  }
+
 </script>
 
 <template>
@@ -52,7 +59,7 @@
         </div>
 
         <div class="button-group">
-          <Button size="md" theme="primary" @click="currentStep++">下一步</Button>
+          <Button size="md" theme="primary" @click="goNext">送出</Button>
         </div>
       </form>
     </section>
@@ -95,7 +102,7 @@
             <input type="text" id="interests" name="interests" required>
         </div>
         <div class="button-group">
-          <Button size="md" theme="primary" @click="currentStep++">下一步</Button>
+          <Button size="md" theme="primary" @click="goNext">下一步</Button>
         </div>
       </form>
     </section>
@@ -125,7 +132,6 @@
     align-items: center;
     margin: 50px 0;
     padding: 20px;
-    background-image:url(@/img/bgc.jpg);
     position: relative;
   }
 

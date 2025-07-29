@@ -74,14 +74,13 @@
     align-items: center;
     margin: 50px 0;
     padding: 20px;
-    background-image:url(@/img/bgc.jpg);
     position: relative;
   }
 
 .login-page::before {
   content: '';
   position: absolute;
-  background-image: url(/src/assets/img/bg-decorate5.png);
+  background-image: url("/src/assets/img/bg-decorate5.png");
   background-size: contain;
   background-repeat: no-repeat; 
   width: 200px;
@@ -94,7 +93,7 @@
 .login-page::after {
   content: '';
   position: absolute;
-  background-image: url(/src/assets/img/bg-decorate7.png);
+  background-image: url("/src/assets/img/bg-decorate7.png");
   background-size: contain;
   background-repeat: no-repeat; 
   width: 200px; 
