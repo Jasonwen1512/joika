@@ -33,7 +33,7 @@ const routes = [
     component: () => import("@/views/article/article.vue"),
   },
   {
-    path: "/article/article-detail",
+    path: "/article/:postid",
     component: () => import("@/views/article/article-detail.vue"),
   },
   {
@@ -48,6 +48,9 @@ const routes = [
     path: "/activity/:activity_id",
     component: () => import("@/views/activity/activity-detail.vue"),
   },
+
+
+  
 ];
 
 const router = createRouter({
