@@ -1,36 +1,32 @@
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import vueDevTools from "vite-plugin-vue-devtools";
-import { resolve } from "path";
-import svgLoader from "vite-svg-loader";
+import { fileURLToPath, URL } from 'node:url'
+
+import { defineConfig, loadEnv } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-    svgLoader({
-      svgoConfig: {
-        plugins: [
-          {
-            name: "cleanupIds",
-            params: {
-              remove: false, // 不移除 ID
-              minify: false, // 不縮短 ID 名稱
-            },
-          },
-        ],
-      },
-    }),
-    vueDevTools(),
-  ],
-  resolve: {
-    alias: { "@": resolve(__dirname, "src") },
-  },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@use "@/style.scss" as *;`,
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd())
+  return {
+    plugins: [vue(), vueDevTools()],
+    base: env.VITE_BASE || '/',
+    build: {
+      outDir: env.VITE_OUT_DIR || 'dist',
+    },
+
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `
+            @use "@/assets/styles/page/index.scss" as *;
+          `,
+        },
       },
     },
-  },
-});
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
+  }
+})
