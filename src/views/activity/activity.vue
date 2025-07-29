@@ -9,12 +9,49 @@ import SearchIcon from "@/assets/img/icon/search1.svg";
 import CategoryTag from "@/components/activity/category-tag.vue";
 import PreArrow from "@/assets/img/icon/pre-arrow.svg";
 import NextArrow from "@/assets/img/icon/next-arrow.svg";
-
 const SearchText = ref("");
+const confirmedSearch = ref({
+  keyword: "",
+  dateRange: [],
+});
 const dateRange = ref([]);
+const isRangeComplete = computed(() => {
+  return Array.isArray(dateRange.value) && dateRange.value.length === 2;
+});
 const minDate = ref(new Date());
-const format = ref("yyyy-MM-dd");
-const activities = ref(FakeActivity);
+const searchTrigger = ref(0);
+const customFormat = (dates) => {
+  if (!dates || dates.length < 2) return "";
+  const [start, end] = dates;
+  return `${start.getFullYear()}/${start.getMonth() + 1}/${start.getDate()} - ${
+    end.getMonth() + 1
+  }/${end.getDate()}`;
+};
+const handleSearch = () => {
+  const safeDateRange = Array.isArray(dateRange.value) ? dateRange.value : [];
+
+  // 如果只選了一天，複製成 [start, start]
+  if (safeDateRange.length === 1) {
+    safeDateRange.push(safeDateRange[0]);
+  }
+
+  confirmedSearch.value = {
+    keyword: (SearchText.value || "").trim().toLowerCase(),
+    dateRange: safeDateRange,
+  };
+
+  SearchText.value = "";
+
+  searchTrigger.value++;
+};
+
+const activities = ref(
+  [...FakeActivity].sort(
+    (a, b) =>
+      new Date(a.activity_start_date).getTime() -
+      new Date(b.activity_start_date).getTime()
+  )
+);
 const categories = [
   { id: null, name: "全部" },
   { id: "CA001", name: "登山" },
@@ -34,16 +71,64 @@ const categories = [
 const activeCategory = ref(null);
 
 const selectCategory = (id) => {
-  activeCategory.value = activeCategory.value === id ? null : id;
+  if (id === null) {
+    activeCategory.value = null;
+    confirmedSearch.value = {
+      keyword: "",
+      dateRange: [],
+    };
+    SearchText.value = "";
+    dateRange.value = [];
+  } else {
+    activeCategory.value = activeCategory.value === id ? null : id;
+    confirmedSearch.value = {
+      keyword: "",
+      dateRange: [],
+    };
+    SearchText.value = "";
+    dateRange.value = [];
+    searchTrigger.value++;
+  }
 };
 
 const filterActivities = computed(() => {
-  if (!activeCategory.value) {
-    return activities.value;
-  }
-  return activities.value.filter(
-    (act) => act.category_no === activeCategory.value
-  );
+  searchTrigger.value; // 觸發重新計算
+
+  return activities.value.filter((act) => {
+    // 關鍵字搜尋
+    const keyword = confirmedSearch.value.keyword;
+    const matchKeyword =
+      !keyword || act.activity_name.toLowerCase().includes(keyword);
+
+    // 日期搜尋
+    let matchDate = true;
+    const safeDateRange = Array.isArray(confirmedSearch.value.dateRange)
+      ? confirmedSearch.value.dateRange
+      : [];
+
+    // 如果只選了一天，把它複製成 [start, start]
+    if (safeDateRange.length === 1) {
+      safeDateRange.push(safeDateRange[0]);
+    }
+
+    if (safeDateRange.length === 2) {
+      const [selectStart, selectEnd] = safeDateRange;
+
+      const activityStart = new Date(act.activity_start_date);
+      const activityEnd = new Date(act.activity_end_date);
+
+      // 檢查交集（包含單日）
+      matchDate =
+        activityEnd.getTime() >= selectStart.getTime() &&
+        activityStart.getTime() <= selectEnd.getTime();
+    }
+
+    // 分類搜尋
+    const matchCategory =
+      !activeCategory.value || act.category_no === activeCategory.value;
+
+    return matchKeyword && matchDate && matchCategory;
+  });
 });
 
 const itemsPerPage = 12;
@@ -78,130 +163,212 @@ const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
   window.scrollTo(0, 0);
 };
+
+const paginationPages = computed(() => {
+  const total = totalPages.value;
+  const current = currentPage.value;
+  const pages = [];
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+  } else {
+    pages.push(1);
+
+    if (current > 3) pages.push("...");
+
+    for (
+      let i = Math.max(2, current - 1);
+      i <= Math.min(total - 1, current + 1);
+      i++
+    ) {
+      pages.push(i);
+    }
+
+    if (current < total - 2) pages.push("...");
+
+    pages.push(total);
+  }
+
+  return pages;
+});
 </script>
 
 <template>
-  <div class="hint">揪團探索/揪團列表</div>
-  <div class="container">
-    <div class="banner"></div>
-  </div>
-
-  <div class="search-bar-container">
-    <div class="search-bar">
-      <input v-model="SearchText" type="text" />
-      <div class="search-icon">
-        <SearchIcon></SearchIcon>
+  <div class="activity-wrap">
+    <div class="hint">揪團探索/揪團列表</div>
+    <div class="banner-container">
+      <div class="banner">
+        <img src="../../assets/img/activity/activity-banner.jpg" alt="" />
       </div>
     </div>
-    <div class="calendar">
-      <DatePicker
-        v-model="dateRange"
-        range
-        :min-date="minDate"
-        :format="format"
-        :enable-time-picker="false"
+    <div class="background">
+      <img
+        class="bg-decorate2"
+        src="../../assets/img/bg-decorate2.png"
+        alt=""
+      />
+      <img
+        class="bg-decorate3"
+        src="../../assets/img/bg-decorate3.png"
+        alt=""
       />
     </div>
-    <div class="button-go">
-      <Button isFull theme="primary" size="sm">GO</Button>
+    <div class="search-bar-container">
+      <div class="search-bar">
+        <input v-model="SearchText" type="text" />
+        <div class="search-icon">
+          <SearchIcon></SearchIcon>
+        </div>
+      </div>
+      <div @click.prevent="" class="calendar">
+        <DatePicker
+          v-model="dateRange"
+          range
+          :partial-range="false"
+          :min-date="minDate"
+          :format="customFormat"
+          :enable-time-picker="false"
+          placeholder="請選擇起訖日期"
+        >
+          <!-- 自訂確認與取消按鈕 -->
+          <template #action="{ selectDate, closePicker }">
+            <button
+              class="dp__action_cancel"
+              type="button"
+              @click="closePicker"
+            >
+              取消
+            </button>
+            <button
+              class="dp__action_select"
+              type="button"
+              :disabled="!isRangeComplete"
+              @click="selectDate"
+            >
+              確認
+            </button>
+          </template>
+        </DatePicker>
+      </div>
+      <div class="button-go">
+        <Button isFull theme="primary" size="sm" :onClick="handleSearch"
+          >GO!!!</Button
+        >
+      </div>
     </div>
-  </div>
 
-  <div class="category-list">
-    <CategoryTag
-      v-for="cat in categories"
-      :key="cat.id"
-      :label="cat.name"
-      class="category-tag"
-      :isActive="activeCategory === cat.id"
-      @click="selectCategory(cat.id)"
-    ></CategoryTag>
-  </div>
-  <div class="bg-decorate2">
-    <img src="@/assets/img/bg-decorate2.png" alt="" />
-  </div>
-  <div class="activity-list">
-    <RouterLink
-      v-for="item in paginatedActivities"
-      :key="item.activity_no"
-      :to="`/activity/${item.activity_no}`"
-      class="activity-link"
-    >
-      <ActivityCard :item="item"></ActivityCard>
-    </RouterLink>
-  </div>
-  <div class="pagination">
-    <button class="pre-arrow" @click="prePage" :disabled="currentPage === 1">
-      <PreArrow></PreArrow>
-    </button>
+    <div class="category-list">
+      <CategoryTag
+        v-for="cat in categories"
+        :key="cat.id"
+        :label="cat.name"
+        class="category-tag"
+        :isActive="activeCategory === cat.id"
+        @click="selectCategory(cat.id)"
+      ></CategoryTag>
+    </div>
 
-    <button
-      class="pages"
-      v-for="page in totalPages"
-      :key="page"
-      @click="changePage(page)"
-      :class="{ active: currentPage === page }"
+    <div class="activity-list">
+      <!-- 有資料才顯示卡片 -->
+      <template v-if="paginatedActivities.length > 0">
+        <RouterLink
+          v-for="item in paginatedActivities"
+          :key="item.activity_no"
+          :to="`/activity/${item.activity_no}`"
+          class="activity-link"
+        >
+          <ActivityCard :item="item"></ActivityCard>
+        </RouterLink>
+      </template>
+
+      <!-- 沒資料顯示提示 -->
+      <p v-else class="no-data">查無資料</p>
+    </div>
+
+    <div
+      class="pagination"
+      v-if="totalPages > 1 && paginatedActivities.length > 0"
     >
-      {{ page }}
-    </button>
-    <button
-      class="next-arrow"
-      @click="nextPage"
-      :disabled="currentPage === totalPages"
-    >
-      <NextArrow></NextArrow>
-    </button>
+      <button class="pre-arrow" @click="prePage" :disabled="currentPage === 1">
+        <PreArrow></PreArrow>
+      </button>
+
+      <button
+        class="pages"
+        v-for="page in paginationPages"
+        :key="page"
+        @click="typeof page === 'number' && changePage(page)"
+        :class="{ active: currentPage === page }"
+        :disabled="page === '...'"
+      >
+        {{ page }}
+      </button>
+      <button
+        class="next-arrow"
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+      >
+        <NextArrow></NextArrow>
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-main {
+.activity-wrap {
   position: relative;
-}
-.container {
-  margin: 0 auto;
-  width: 100%;
+  min-height: 100vh;
 }
 .banner {
-  display: flex;
-  background-position: center;
-  border: 1px solid $black;
-  width: 100vw;
-
-  background-image: url(../../assets/img/activity/activity-banner.jpg);
-  background-size: contain;
-  background-repeat: no-repeat;
-  @include mobile() {
-    min-height: 212px;
-    background-position: left;
-    background-size: cover;
-  }
+  margin: 0 auto;
+  height: 212px;
+  overflow: hidden;
+  padding-bottom: 41px;
 
   @include tablet() {
+    height: 414px;
   }
 
   @include desktop() {
+    width: 100%;
+    height: 414px;
+  }
+}
+.banner img {
+  display: block;
+  border: 1px solid $black;
+  width: 100%;
+  object-fit: cover;
+  object-position: left;
+  height: 100%;
+
+  @include tablet() {
+    height: 414px;
+    object-position: center;
+  }
+
+  @include desktop() {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; // 填滿並裁切
+    object-position: center; // 中心顯示
   }
 }
 .activity-list {
   z-index: 10;
-  width: 100%;
+  max-width: 100%;
   display: grid;
   gap: 25px;
   padding: 10px;
   justify-items: center;
-
-  @include mobile() {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-  }
+  grid-template-columns: repeat(1, 1fr);
 
   @include tablet() {
-    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
   }
   @include desktop() {
-    max-width: 1200px;
+    min-width: 1200px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
 
@@ -223,10 +390,20 @@ main {
   }
 }
 .search-bar-container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   padding: 15px 21px;
   gap: 13px;
+
+  @include tablet() {
+    grid-template-columns: 2fr 1fr 2fr;
+    width: auto;
+  }
+  @include desktop() {
+    grid-template-columns: 2fr 1fr 2fr;
+    max-width: 1200px;
+    justify-self: center;
+  }
 }
 .search-bar {
   display: flex;
@@ -235,11 +412,10 @@ main {
   border-radius: 3px;
   background-color: $white;
   min-height: 34px;
+  width: 100%;
 }
 .search-bar input {
   width: 100%;
-  @include mobile() {
-  }
 
   @include tablet() {
   }
@@ -256,6 +432,12 @@ main {
   min-height: 34px;
   border: 1px solid $black;
   border-radius: 3px;
+  width: 100%;
+  @include tablet() {
+  }
+
+  @include desktop() {
+  }
 }
 :deep(.dp__input_icon) {
   color: $black;
@@ -263,9 +445,29 @@ main {
 :deep(.dp__action_cancel) {
   background-color: $white;
   border: 1px solid $blue;
+  color: $blue;
+  &:hover {
+    background-color: $light-blue;
+    color: $color-primary;
+    border: 1px solid $color-primary;
+  }
+  &:active {
+    background-color: $light-blue;
+    color: $blue;
+    border: 1px solid $blue;
+  }
 }
 :deep(.dp__action_select) {
-  color: $color-highlight;
+  background-color: $color-highlight;
+  color: $black;
+  &:hover {
+    background-color: $yellow;
+    color: $black;
+  }
+  &:active {
+    background-color: $orange;
+    color: $white;
+  }
 }
 
 .dp__range_start,
@@ -273,22 +475,32 @@ main {
   background-color: $yellow;
 }
 
-.dp__range_between {
+.button-go {
+  width: 100%;
 }
 
-.button {
-  height: 34px;
-}
 .category-list {
-  @include flex-center;
+  display: flex;
   flex-wrap: wrap;
-  padding: 21px;
-  gap: 10px;
+  justify-content: left;
+  padding: 20px 15px 50px 20px;
+  gap: 5px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @include tablet() {
+    max-width: 1200px;
+  }
+
+  @include desktop() {
+    width: 1200px;
+  }
 }
 .pagination {
-  padding: 10px;
+  gap: 10px;
   display: flex;
   justify-content: center;
+  margin-bottom: 5vh;
 }
 
 .pre-arrow,
@@ -296,8 +508,9 @@ main {
   padding: 3px 5px 0 5px;
   cursor: pointer;
   &:hover {
-    background-color: $gray-disabled;
     opacity: 0.5;
+    transition: transform 0.5s ease;
+    transform: translate(5px);
   }
   &:disabled {
     color: $gray-disabled;
@@ -306,36 +519,72 @@ main {
     pointer-events: none;
   }
 }
+.pre-arrow {
+  &:hover {
+    transform: translate(-5px);
+  }
+}
 .pages {
+  @include flex-center;
+  font-size: $font-size-p;
   cursor: pointer;
-  width: 20px;
-  padding: 0 5px;
+  padding: 5px 10px;
+  border: 2px solid $blue;
+  border-radius: 3px;
+  background-color: $white;
+  color: $blue;
+  @include tablet() {
+    border-radius: 6px;
+  }
+
+  @include desktop() {
+    border-radius: 6px;
+  }
 
   &:not(.active):hover {
     background-color: $gray-disabled;
     opacity: 0.5;
   }
   &.active {
-    border: 1px solid $blue;
-    color: $blue;
+    background-color: $color-primary;
     pointer-events: none;
-  }
-}
-
-.pages.active {
-  border: 1px solid $blue;
-  color: $blue;
-  &:hover {
-    background-color: none;
+    color: $black;
   }
 }
 
 .bg-decorate2 {
   position: absolute;
   z-index: -1;
-  transform: translateY(-45%);
+  top: 500px;
+  left: 0;
+  width: auto;
+  width: 50%;
+  @include tablet() {
+    top: 600px;
+    width: 20%;
+  }
+
+  @include desktop() {
+    top: 400px;
+    width: 15%;
+  }
 }
-.bg-decorate2 img {
-  width: 40%;
+
+.bg-decorate3 {
+  position: absolute;
+  z-index: -1;
+  bottom: 310px;
+  right: 0;
+  width: auto;
+  width: 45%;
+  @include tablet() {
+    bottom: 300px;
+    width: 25%;
+  }
+
+  @include desktop() {
+    bottom: 250px;
+    width: 15%;
+  }
 }
 </style>

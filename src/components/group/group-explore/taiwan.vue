@@ -204,7 +204,7 @@ onBeforeUnmount(() => {
 // 比例
 const baseMobileRatio = 0.18;
 const baseTabletRatio = 0.45;
-const baseDesktopRatio = 0.65;
+const baseDesktopRatio = 0.6;
 
 // 北西東南 初始寬高
 const northOriginal = { width: 700, height: 447 };
