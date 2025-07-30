@@ -100,7 +100,17 @@ function updateMarquee() {
 </template>
 
 <style lang="scss" scoped>
+@font-face {
+    font-family: 'Baloo 2';
+    src: url('@/assets/fonts/Baloo2-Regular.woff2') format('woff2');
+    font-weight: 400;
+}
 
+@font-face {
+    font-family: 'Baloo 2';
+    src: url('@/assets/fonts/Baloo2-Bold.woff2') format('woff2');
+    font-weight: 700;
+}
 .marquee-wrapper {
     margin-top: 80px;
     margin-bottom: 50px;
@@ -131,9 +141,9 @@ function updateMarquee() {
     color: var(--color);         
     font-weight: bold;
     font-size: 3rem;
-    margin-right: 0.15em;        
+    // margin-right: 0.15em;        
     transform: skewX(-25deg);
-    font-family: 'Baloo 2', cursive; 
+    font-family: 'Baloo 2'; 
     text-shadow:-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
