@@ -27,6 +27,8 @@ import {
 const isMobile = ref(true);
 const isTablet = ref(false);
 
+// console.log(FakeActivity);
+
 // DOM：'.taiwan-content'
 const taiwanContent = ref(null);
 // 確認區塊被點擊狀態
@@ -460,6 +462,8 @@ const formatDate = (dateStr) => {
 };
 
 function getRegionByCity(cityName) {
+  console.log(cityName);
+
   const regionMap = {
     北部: ["基隆市", "台北市", "新北市", "桃園市", "新竹縣", "新竹市"],
     東部: ["宜蘭縣", "花蓮縣", "台東縣"],
@@ -478,10 +482,46 @@ function getRegionByCity(cityName) {
 FakeActivity.forEach((item) => {
   // title
   console.log(item.activity_name);
+
+  // 判斷區域
+  const targetRegion = getRegionByCity(item.location.slice(0, 3));
+
   // image
   console.log(item.activity_img);
+
   // date
-  console.log(item.activity_start_date);
+  const targetDate = formatDate(item.activity_start_date);
+
+  switch (targetRegion) {
+    case "北部":
+      northData.push({
+        title: item.activity_name,
+        image: item.activity_img,
+        date: targetDate,
+      });
+      break;
+    case "西部":
+      westData.push({
+        title: item.activity_name,
+        image: item.activity_img,
+        date: targetDate,
+      });
+      break;
+    case "南部":
+      southData.push({
+        title: item.activity_name,
+        image: item.activity_img,
+        date: targetDate,
+      });
+      break;
+    case "東部":
+      eastData.push({
+        title: item.activity_name,
+        image: item.activity_img,
+        date: targetDate,
+      });
+      break;
+  }
 });
 </script>
 
@@ -596,89 +636,123 @@ FakeActivity.forEach((item) => {
       <!-- 若要單純遮罩，則內容放這（決定在這） -->
       <h4 class="title">{{ currentRegion }}</h4>
       <!-- 北部區塊 -->
-      <Swiper
-        v-show="currentRegion === '北部'"
-        :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
-        :space-between="isMobile ? 10 : isTablet ? 20 : 30"
-        class="my-swiper"
+      <div v-show="northData.length && currentRegion === '北部'">
+        <Swiper
+          v-show="currentRegion === '北部'"
+          :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
+          :space-between="isMobile ? 10 : isTablet ? 20 : 30"
+          class="my-swiper"
+        >
+          <SwiperSlide v-for="(item, index) in northData" :key="index">
+            <div class="item-card">
+              <div class="item-image" v-if="item.image">
+                <img class="img" :src="item.image" :alt="item.title" />
+              </div>
+              <div class="item-image" v-else>
+                <PlaceholderImageBg class="img" />
+              </div>
+              <span class="item-date_and_title"
+                >{{ item.date }}&nbsp;{{ item.title }}</span
+              >
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+      <div
+        v-show="!northData.length && currentRegion === '北部'"
+        class="no-data"
       >
-        <SwiperSlide v-for="(item, index) in northData" :key="index">
-          <div class="item-card">
-            <div class="item-image" v-if="item.image">
-              <img class="img" :src="item.image" :alt="item.title" />
-            </div>
-            <div class="item-image" v-else>
-              <PlaceholderImageBg class="img" />
-            </div>
-            <span class="item-date_and_title"
-              >{{ item.date }}&nbsp;{{ item.title }}</span
-            >
-          </div>
-        </SwiperSlide>
-      </Swiper>
+        尚無活動資訊
+      </div>
       <!-- 西部區塊 -->
-      <Swiper
-        v-show="currentRegion === '西部'"
-        :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
-        :space-between="isMobile ? 10 : isTablet ? 20 : 30"
-        class="my-swiper"
+      <div v-show="westData.length && currentRegion === '西部'">
+        <Swiper
+          v-show="currentRegion === '西部'"
+          :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
+          :space-between="isMobile ? 10 : isTablet ? 20 : 30"
+          class="my-swiper"
+        >
+          <SwiperSlide v-for="(item, index) in westData" :key="index">
+            <div class="item-card">
+              <div class="item-image" v-if="item.image">
+                <img class="img" :src="item.image" :alt="item.title" />
+              </div>
+              <div class="item-image" v-else>
+                <PlaceholderImageBg class="img" />
+              </div>
+              <span class="item-date_and_title"
+                >{{ item.date }}&nbsp;{{ item.title }}</span
+              >
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+      <div
+        v-show="!westData.length && currentRegion === '西部'"
+        class="no-data"
       >
-        <SwiperSlide v-for="(item, index) in westData" :key="index">
-          <div class="item-card">
-            <div class="item-image" v-if="item.image">
-              <img class="img" :src="item.image" :alt="item.title" />
-            </div>
-            <div class="item-image" v-else>
-              <PlaceholderImageBg class="img" />
-            </div>
-            <span class="item-date_and_title"
-              >{{ item.date }}&nbsp;{{ item.title }}</span
-            >
-          </div>
-        </SwiperSlide>
-      </Swiper>
+        尚無活動資訊
+      </div>
+
       <!-- 東部區塊 -->
-      <Swiper
-        v-show="currentRegion === '東部'"
-        :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
-        :space-between="isMobile ? 10 : isTablet ? 20 : 30"
-        class="my-swiper"
+      <div v-show="eastData.length && currentRegion === '東部'">
+        <Swiper
+          v-show="currentRegion === '東部'"
+          :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
+          :space-between="isMobile ? 10 : isTablet ? 20 : 30"
+          class="my-swiper"
+        >
+          <SwiperSlide v-for="(item, index) in eastData" :key="index">
+            <div class="item-card">
+              <div class="item-image" v-if="item.image">
+                <img class="img" :src="item.image" :alt="item.title" />
+              </div>
+              <div class="item-image" v-else>
+                <PlaceholderImageBg class="img" />
+              </div>
+              <span class="item-date_and_title"
+                >{{ item.date }}&nbsp;{{ item.title }}</span
+              >
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+      <div
+        v-show="!eastData.length && currentRegion === '東部'"
+        class="no-data"
       >
-        <SwiperSlide v-for="(item, index) in eastData" :key="index">
-          <div class="item-card">
-            <div class="item-image" v-if="item.image">
-              <img class="img" :src="item.image" :alt="item.title" />
-            </div>
-            <div class="item-image" v-else>
-              <PlaceholderImageBg class="img" />
-            </div>
-            <span class="item-date_and_title"
-              >{{ item.date }}&nbsp;{{ item.title }}</span
-            >
-          </div>
-        </SwiperSlide>
-      </Swiper>
+        尚無活動資訊
+      </div>
       <!-- 南部區塊 -->
-      <Swiper
-        v-show="currentRegion === '南部'"
-        :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
-        :space-between="isMobile ? 10 : isTablet ? 20 : 30"
-        class="my-swiper"
+      <div v-show="southData.length && currentRegion === '南部'">
+        <Swiper
+          v-show="currentRegion === '南部'"
+          :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
+          :space-between="isMobile ? 10 : isTablet ? 20 : 30"
+          class="my-swiper"
+        >
+          <SwiperSlide v-for="(item, index) in southData" :key="index">
+            <div class="item-card">
+              <div class="item-image" v-if="item.image">
+                <img class="img" :src="item.image" :alt="item.title" />
+              </div>
+              <div class="item-image" v-else>
+                <PlaceholderImageBg class="img" />
+              </div>
+              <span class="item-date_and_title"
+                >{{ item.date }}&nbsp;{{ item.title }}</span
+              >
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+      <div
+        v-show="!southData.length && currentRegion === '南部'"
+        class="no-data"
       >
-        <SwiperSlide v-for="(item, index) in southData" :key="index">
-          <div class="item-card">
-            <div class="item-image" v-if="item.image">
-              <img class="img" :src="item.image" :alt="item.title" />
-            </div>
-            <div class="item-image" v-else>
-              <PlaceholderImageBg class="img" />
-            </div>
-            <span class="item-date_and_title"
-              >{{ item.date }}&nbsp;{{ item.title }}</span
-            >
-          </div>
-        </SwiperSlide>
-      </Swiper>
+        尚無活動資訊
+      </div>
+
       <div class="region-mask">
         <!-- 若要有東西往下推的感覺，則內容放這 -->
         <!-- <div class="r"></div>
@@ -719,7 +793,7 @@ FakeActivity.forEach((item) => {
     }
   }
   @include desktop() {
-    padding: 7.8% 0;
+    padding: 7show% 0;
   }
 }
 .taiwan-area-news {
@@ -869,6 +943,17 @@ FakeActivity.forEach((item) => {
   // .region-mask {
   //   transform: translateY(-100%);
   // }
+}
+.no-data {
+  @include flex-center();
+  font-size: 18px;
+  color: #afafaf;
+  @include tablet() {
+    font-size: 20px;
+  }
+  @include desktop() {
+    font-size: 24px;
+  }
 }
 // .taiwan-area {
 //   position: absolute;
