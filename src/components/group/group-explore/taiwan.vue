@@ -10,6 +10,8 @@ import East from "@/assets/img/group/group-explore/group-explore-taiwan/east.svg
 import South from "@/assets/img/group/group-explore/group-explore-taiwan/south.svg";
 import BigTaiwan from "@/assets/img/group/group-explore/group-explore-taiwan/taiwan.svg";
 
+import { FakeActivity } from "@/assets/data/fake-activity";
+
 import PlaceholderImageBg from "@/components/placeholder-image-bg.vue";
 
 import {
@@ -290,155 +292,181 @@ const taiwanAreaSize = reactive({
 const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 
 // 北部測試資料，並拔掉幾張圖片網址模擬開團時沒有放縮圖
-const northData = [
-  {
-    title: "陽明山一日遊經典行程",
-    image: "https://picsum.photos/seed/n1/300/200",
-    date: "7/15",
-  },
-  {
-    title: "九份老街探索",
-    image: "",
-    date: "8/03",
-  },
-  {
-    title: "北投溫泉散策",
-    image: "",
-    date: "9/10",
-  },
-  {
-    title: "士林夜市美食團",
-    image: "https://picsum.photos/seed/n4/300/200",
-    date: "8/28",
-  },
-  {
-    title: "淡水夕陽之旅",
-    image: "https://picsum.photos/seed/n5/300/200",
-    date: "7/30",
-  },
-  {
-    title: "大稻埕文化散步",
-    image: "https://picsum.photos/seed/n6/300/200",
-    date: "9/05",
-  },
-  {
-    title: "故宮博物院導覽",
-    image: "https://picsum.photos/seed/n7/300/200",
-    date: "8/20",
-  },
-];
+// const northData = [
+//   {
+//     title: "陽明山一日遊經典行程",
+//     image: "https://picsum.photos/seed/n1/300/200",
+//     date: "7/15",
+//   },
+//   {
+//     title: "九份老街探索",
+//     image: "",
+//     date: "8/03",
+//   },
+//   {
+//     title: "北投溫泉散策",
+//     image: "",
+//     date: "9/10",
+//   },
+//   {
+//     title: "士林夜市美食團",
+//     image: "https://picsum.photos/seed/n4/300/200",
+//     date: "8/28",
+//   },
+//   {
+//     title: "淡水夕陽之旅",
+//     image: "https://picsum.photos/seed/n5/300/200",
+//     date: "7/30",
+//   },
+//   {
+//     title: "大稻埕文化散步",
+//     image: "https://picsum.photos/seed/n6/300/200",
+//     date: "9/05",
+//   },
+//   {
+//     title: "故宮博物院導覽",
+//     image: "https://picsum.photos/seed/n7/300/200",
+//     date: "8/20",
+//   },
+// ];
 
-// 西部測試資料
-const westData = [
-  {
-    title: "鹿港古鎮散策",
-    image: "https://picsum.photos/seed/w1/300/200",
-    date: "7/17",
-  },
-  {
-    title: "台中一日輕旅行",
-    image: "https://picsum.photos/seed/w2/300/200",
-    date: "8/05",
-  },
-  {
-    title: "阿里山小火車體驗",
-    image: "https://picsum.photos/seed/w3/300/200",
-    date: "9/12",
-  },
-  {
-    title: "台南美食巡禮",
-    image: "https://picsum.photos/seed/w4/300/200",
-    date: "8/25",
-  },
-  {
-    title: "嘉義文青之旅",
-    image: "https://picsum.photos/seed/w5/300/200",
-    date: "9/03",
-  },
-  {
-    title: "南投清境農場",
-    image: "https://picsum.photos/seed/w6/300/200",
-    date: "7/29",
-  },
-  {
-    title: "彰化扇形車庫探訪",
-    image: "https://picsum.photos/seed/w7/300/200",
-    date: "8/17",
-  },
-];
+// // 西部測試資料
+// const westData = [
+//   {
+//     title: "鹿港古鎮散策",
+//     image: "https://picsum.photos/seed/w1/300/200",
+//     date: "7/17",
+//   },
+//   {
+//     title: "台中一日輕旅行",
+//     image: "https://picsum.photos/seed/w2/300/200",
+//     date: "8/05",
+//   },
+//   {
+//     title: "阿里山小火車體驗",
+//     image: "https://picsum.photos/seed/w3/300/200",
+//     date: "9/12",
+//   },
+//   {
+//     title: "台南美食巡禮",
+//     image: "https://picsum.photos/seed/w4/300/200",
+//     date: "8/25",
+//   },
+//   {
+//     title: "嘉義文青之旅",
+//     image: "https://picsum.photos/seed/w5/300/200",
+//     date: "9/03",
+//   },
+//   {
+//     title: "南投清境農場",
+//     image: "https://picsum.photos/seed/w6/300/200",
+//     date: "7/29",
+//   },
+//   {
+//     title: "彰化扇形車庫探訪",
+//     image: "https://picsum.photos/seed/w7/300/200",
+//     date: "8/17",
+//   },
+// ];
 
-// 南部測試資料
-const southData = [
-  {
-    title: "墾丁陽光沙灘團",
-    image: "https://picsum.photos/seed/s1/300/200",
-    date: "7/20",
-  },
-  {
-    title: "高雄駁二藝術之旅",
-    image: "https://picsum.photos/seed/s2/300/200",
-    date: "9/01",
-  },
-  {
-    title: "台東熱氣球嘉年華",
-    image: "https://picsum.photos/seed/s3/300/200",
-    date: "8/14",
-  },
-  {
-    title: "屏東海生館參訪",
-    image: "https://picsum.photos/seed/s4/300/200",
-    date: "7/31",
-  },
-  {
-    title: "旗津海港美食團",
-    image: "https://picsum.photos/seed/s5/300/200",
-    date: "8/22",
-  },
-  {
-    title: "東港黑鮪魚季",
-    image: "https://picsum.photos/seed/s6/300/200",
-    date: "9/07",
-  },
-];
+// // 南部測試資料
+// const southData = [
+//   {
+//     title: "墾丁陽光沙灘團",
+//     image: "https://picsum.photos/seed/s1/300/200",
+//     date: "7/20",
+//   },
+//   {
+//     title: "高雄駁二藝術之旅",
+//     image: "https://picsum.photos/seed/s2/300/200",
+//     date: "9/01",
+//   },
+//   {
+//     title: "台東熱氣球嘉年華",
+//     image: "https://picsum.photos/seed/s3/300/200",
+//     date: "8/14",
+//   },
+//   {
+//     title: "屏東海生館參訪",
+//     image: "https://picsum.photos/seed/s4/300/200",
+//     date: "7/31",
+//   },
+//   {
+//     title: "旗津海港美食團",
+//     image: "https://picsum.photos/seed/s5/300/200",
+//     date: "8/22",
+//   },
+//   {
+//     title: "東港黑鮪魚季",
+//     image: "https://picsum.photos/seed/s6/300/200",
+//     date: "9/07",
+//   },
+// ];
 
-// 東部測試資料
-const eastData = [
-  {
-    title: "花蓮七星潭之旅",
-    image: "https://picsum.photos/seed/e1/300/200",
-    date: "7/22",
-  },
-  {
-    title: "太魯閣國家公園健行",
-    image: "https://picsum.photos/seed/e2/300/200",
-    date: "8/01",
-  },
-  {
-    title: "台東池上稻田散策",
-    image: "https://picsum.photos/seed/e3/300/200",
-    date: "9/08",
-  },
-  {
-    title: "鹿野高台風景之旅",
-    image: "https://picsum.photos/seed/e4/300/200",
-    date: "8/27",
-  },
-  {
-    title: "宜蘭幾米公園拍照團",
-    image: "https://picsum.photos/seed/e5/300/200",
-    date: "9/14",
-  },
-  {
-    title: "蘇澳冷泉泡湯團",
-    image: "https://picsum.photos/seed/e6/300/200",
-    date: "7/28",
-  },
-  {
-    title: "三仙台日出之旅",
-    image: "https://picsum.photos/seed/e7/300/200",
-    date: "8/10",
-  },
-];
+// // 東部測試資料
+// const eastData = [
+//   {
+//     title: "花蓮七星潭之旅",
+//     image: "https://picsum.photos/seed/e1/300/200",
+//     date: "7/22",
+//   },
+//   {
+//     title: "太魯閣國家公園健行",
+//     image: "https://picsum.photos/seed/e2/300/200",
+//     date: "8/01",
+//   },
+//   {
+//     title: "台東池上稻田散策",
+//     image: "https://picsum.photos/seed/e3/300/200",
+//     date: "9/08",
+//   },
+//   {
+//     title: "鹿野高台風景之旅",
+//     image: "https://picsum.photos/seed/e4/300/200",
+//     date: "8/27",
+//   },
+//   {
+//     title: "宜蘭幾米公園拍照團",
+//     image: "https://picsum.photos/seed/e5/300/200",
+//     date: "9/14",
+//   },
+//   {
+//     title: "蘇澳冷泉泡湯團",
+//     image: "https://picsum.photos/seed/e6/300/200",
+//     date: "7/28",
+//   },
+//   {
+//     title: "三仙台日出之旅",
+//     image: "https://picsum.photos/seed/e7/300/200",
+//     date: "8/10",
+//   },
+// ];
+
+const northData = [];
+const westData = [];
+const southData = [];
+const eastData = [];
+//   {
+//     title: "花蓮七星潭之旅",
+//     image: "https://picsum.photos/seed/e1/300/200",
+//     date: "7/22",
+//   },
+
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${month}/${day}`;
+};
+
+FakeActivity.forEach((item) => {
+  // title
+  console.log(item.activity_name);
+  // image
+  console.log(item.activity_img);
+  // date
+  console.log(item.activity_start_date);
+});
 </script>
 
 <template>
