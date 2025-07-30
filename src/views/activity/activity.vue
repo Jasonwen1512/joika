@@ -1,14 +1,31 @@
 <script setup>
+import { useRoute } from "vue-router";
 import ActivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Button from "@/components/Button.vue";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import DatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import SearchIcon from "@/assets/img/icon/search1.svg";
 import CategoryTag from "@/components/activity/category-tag.vue";
 import PreArrow from "@/assets/img/icon/pre-arrow.svg";
 import NextArrow from "@/assets/img/icon/next-arrow.svg";
+const route = useRoute();
+onMounted(() => {
+  const categoryFromQuery = route.query.category;
+  if (categoryFromQuery) {
+    activeCategory.value = categoryFromQuery;
+    searchTrigger.value++;
+  }
+});
+
+watch(
+  () => route.query.category,
+  (newVal) => {
+    activeCategory.value = newVal || null;
+    searchTrigger.value++;
+  }
+);
 const SearchText = ref("");
 const confirmedSearch = ref({
   keyword: "",
@@ -350,8 +367,8 @@ const paginationPages = computed(() => {
   @include desktop() {
     width: 100%;
     height: 100%;
-    object-fit: cover; // 填滿並裁切
-    object-position: center; // 中心顯示
+    object-fit: cover;
+    object-position: center;
   }
 }
 .activity-list {
@@ -365,13 +382,12 @@ const paginationPages = computed(() => {
 
   @include tablet() {
     grid-template-columns: repeat(2, 1fr);
-    gap: 25px;
   }
   @include desktop() {
     min-width: 1200px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-
+    gap: 25px;
     justify-self: center;
   }
 }
@@ -490,10 +506,12 @@ const paginationPages = computed(() => {
 
   @include tablet() {
     max-width: 1200px;
+    gap: 10px;
   }
 
   @include desktop() {
     width: 1200px;
+    gap: 10px;
   }
 }
 .pagination {
