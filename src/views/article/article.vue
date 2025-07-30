@@ -195,10 +195,10 @@ const ula = () => {
 
 <template>
 <!-- 背景色塊 -->
-<background>
+<div>
   <img class="bg-img2" src="/src/assets/img/bg-decorate2.png" alt="背景圖藍">
   <img class="bg-img3" src="/src/assets/img/bg-decorate3.png" alt="背景圖黃">
-</background>
+</div>
   <!-- 熱門文章頁 -->
   <div>這是熱門文章頁</div>
   <!-- banner的跑馬燈 -->
@@ -212,7 +212,7 @@ const ula = () => {
           :style="{ backgroundColor: item.color }"
 
         >
-                <h3 class="banner-text">{{ item.label }}</h3>
+                <!-- <h3 class="banner-text">{{ item.label }}</h3> -->
 
           <img :src="item.img" :alt="item.label" />
         </div>
@@ -236,9 +236,12 @@ const ula = () => {
           {{ cat }}
         </div>
       </div>
+      <router-link to="/article/article-create" class="article-link">
+
 <div class="post-btn">
-      <Button :onClick="ula" theme="primary" size="md">我要發文</Button>
+      <Button  theme="primary" size="md">我要發文</Button>
     </div>
+    </router-link>
     </section>
     <hr/>
     <!-- 文章列表 -->
@@ -363,10 +366,9 @@ body{
     flex-shrink: 0;
     width: 300px;
     height: 300px;
-    margin-right: 10px;
+    margin-right: 25px;
     color: #000000;
-    display: flex
-;
+    display: flex;
     justify-content: space-evenly;
     text-align: center;
     border-radius: 6px;
@@ -375,10 +377,10 @@ body{
 }
 
 .pic img {
-    width: 100%;
+    width: 120%;
     height: auto;
     object-fit: cover;
-    overflow: inherit;
+    overflow: visible;
     transform: scale(0.8);
     transition: transform 0.5s ease, width 0.5s ease;
 }
@@ -532,6 +534,7 @@ section.article-list {
 .read-more{
   display: grid;
 justify-content: end;
+margin-top: 10px;
 }
 a.article-text-link {
     flex: 2;

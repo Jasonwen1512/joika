@@ -24,6 +24,9 @@ export default defineConfig(({ mode }) => {
         },
       }),
       vueDevTools(),
+    //   viteStaticCopy({
+      
+    // }),
     ],
     //base: env.VITE_BASE || '/',
     base: "/cjd101/g2/front/",

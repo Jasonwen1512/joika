@@ -44,6 +44,13 @@ const article = articleList.find(item => item.postid === postid)
     <p>找不到這篇文章。</p>
   </div>
 </section>
+<section class="Comment">
+  <!-- 這邊也要串 先寫死 -->
+<div class="comment-header">
+
+</div>
+
+</section>
   </main>
 </template>
 
