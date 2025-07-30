@@ -459,6 +459,22 @@ const formatDate = (dateStr) => {
   return `${month}/${day}`;
 };
 
+function getRegionByCity(cityName) {
+  const regionMap = {
+    北部: ["基隆市", "台北市", "新北市", "桃園市", "新竹縣", "新竹市"],
+    東部: ["宜蘭縣", "花蓮縣", "台東縣"],
+    西部: ["苗栗縣", "台中市", "彰化縣", "雲林縣", "南投縣"],
+    南部: ["嘉義市", "嘉義縣", "台南市", "高雄市", "屏東縣"],
+  };
+
+  for (const region in regionMap) {
+    if (regionMap[region].includes(cityName)) {
+      return region;
+    }
+  }
+  return "未知區域";
+}
+
 FakeActivity.forEach((item) => {
   // title
   console.log(item.activity_name);

@@ -6,7 +6,9 @@ import { useRoute } from "vue-router";
 import { computed } from "vue";
 
 const route = useRoute();
-const hideLayout = computed(() => route.meta.hideLayout);
+const hideLayout = computed(() => {
+  return route.path === "/" || route.meta?.hideLayout === true;
+});
 </script>
 
 <template>

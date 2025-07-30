@@ -48,9 +48,6 @@ const routes = [
     path: "/activity/:activity_id",
     component: () => import("@/views/activity/activity-detail.vue"),
   },
-
-
-  
 ];
 
 const router = createRouter({
