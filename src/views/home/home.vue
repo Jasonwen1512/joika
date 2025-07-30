@@ -146,13 +146,13 @@ const items = [
     />
     <Swiper
       :slides-per-view="1"
-      :space-between="5"
+      :space-between="0"
       :free-mode="true"
       :pagination="{ clickable: true }"
       :breakpoints="{
-        1024: { slidesPerView: 6, spaceBetween: 40 },
-        768: { slidesPerView: 3, spaceBetween: 30 },
-        480: { slidesPerView: 1, spaceBetween: 5 },
+        1024: { slidesPerView: 6, spaceBetween: 30 },
+        768: { slidesPerView: 3, spaceBetween: 20 },
+        480: { slidesPerView: 1, spaceBetween: 0 },
       }"
       :modules="modules"
       class="recommendations-swiper"
@@ -291,11 +291,9 @@ const items = [
 
 .bg-img6 {
   position: absolute;
-  /* top: 430vh; */
   top: -15%;
   right: 0;
   width: 20%;
-  /* height: 50%; */
   z-index: 0;
 }
 
@@ -359,7 +357,6 @@ const items = [
   position: relative;
   z-index: 2;
 }
-
 .recommendations-swiper {
   padding: 20px 0;
   .swiper-slide {
