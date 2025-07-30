@@ -259,7 +259,7 @@ v-for="(article, index) in PaginatedArticles"
           <div class="article-date">
           <span
   class="event-label"
-  :style="{ backgroundColor: GetEventColor(article.event) }"
+  :style="{ borderColor: GetEventColor(article.event), }"
 >
   {{ article.event }}
 </span> <p>{{ article.date }}</p>
@@ -272,7 +272,9 @@ v-for="(article, index) in PaginatedArticles"
 <p v-html="article.content"></p>
 
         </div> 
-       
+          <div class="read-more">      
+              <Button :onClick="readarticle" theme="info" size="sm">閱讀更多</Button>
+          </div>
       </div>
      
       </router-link>
@@ -472,9 +474,7 @@ hr {
     flex-wrap: nowrap;
     margin: 5vh auto;
 }
-.article-item:hover{
-  color:#4f8da8;
-}
+
 section.article-list {
     margin: 5vh;
 }
@@ -486,14 +486,13 @@ section.article-list {
     flex-direction: column;
     /* gap: 20px; */
     justify-content: space-around;
+    gap:5px;
 }
 .event-label {
     text-align: center;
     padding: 5px;
     margin: 5px;
-    background-color: #FADA7A;
-    color: #000;
-    border: #000 solid 1px;
+    border: solid 3px;
     border-radius: 6px;
     width: 80px;
 }
@@ -523,11 +522,16 @@ section.article-list {
  
 }
 .article-title {
-    padding-block: 10px;
+    padding-block: 5px;
 }
 .article-img{
   margin: 10px;
   flex:1;
+}
+
+.read-more{
+  display: grid;
+justify-content: end;
 }
 a.article-text-link {
     flex: 2;
