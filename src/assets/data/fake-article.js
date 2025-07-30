@@ -4,7 +4,7 @@ export const articleList=[
 
     {
     postid:"PST-000001",
-    userid:	"M001",
+    userid:	"M0001",
     date: '2025/3/15 PM11:48 ',
     title: '第一次夜衝合歡山！星星多到爆炸',
     event:'登山',
