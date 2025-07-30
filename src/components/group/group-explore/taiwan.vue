@@ -462,7 +462,7 @@ const formatDate = (dateStr) => {
 };
 
 function getRegionByCity(cityName) {
-  console.log(cityName);
+  // console.log(cityName);
 
   const regionMap = {
     北部: ["基隆市", "台北市", "新北市", "桃園市", "新竹縣", "新竹市"],
@@ -478,16 +478,17 @@ function getRegionByCity(cityName) {
   }
   return "未知區域";
 }
+console.log(FakeActivity);
 
 FakeActivity.forEach((item) => {
   // title
-  console.log(item.activity_name);
+  // console.log(item.activity_name);
 
   // 判斷區域
   const targetRegion = getRegionByCity(item.location.slice(0, 3));
 
   // image
-  console.log(item.activity_img);
+  // console.log(item.activity_img);
 
   // date
   const targetDate = formatDate(item.activity_start_date);
@@ -495,6 +496,7 @@ FakeActivity.forEach((item) => {
   switch (targetRegion) {
     case "北部":
       northData.push({
+        no: item.activity_no,
         title: item.activity_name,
         image: item.activity_img,
         date: targetDate,
@@ -502,6 +504,7 @@ FakeActivity.forEach((item) => {
       break;
     case "西部":
       westData.push({
+        no: item.activity_no,
         title: item.activity_name,
         image: item.activity_img,
         date: targetDate,
@@ -509,6 +512,7 @@ FakeActivity.forEach((item) => {
       break;
     case "南部":
       southData.push({
+        no: item.activity_no,
         title: item.activity_name,
         image: item.activity_img,
         date: targetDate,
@@ -516,6 +520,7 @@ FakeActivity.forEach((item) => {
       break;
     case "東部":
       eastData.push({
+        no: item.activity_no,
         title: item.activity_name,
         image: item.activity_img,
         date: targetDate,
@@ -644,17 +649,19 @@ FakeActivity.forEach((item) => {
           class="my-swiper"
         >
           <SwiperSlide v-for="(item, index) in northData" :key="index">
-            <div class="item-card">
-              <div class="item-image" v-if="item.image">
-                <img class="img" :src="item.image" :alt="item.title" />
+            <router-link :to="`/activity/${item.no}`"
+              ><div class="item-card">
+                <div class="item-image" v-if="item.image">
+                  <img class="img" :src="item.image" :alt="item.title" />
+                </div>
+                <div class="item-image" v-else>
+                  <PlaceholderImageBg class="img" />
+                </div>
+                <span class="item-date_and_title"
+                  >{{ item.date }}&nbsp;{{ item.title }}</span
+                >
               </div>
-              <div class="item-image" v-else>
-                <PlaceholderImageBg class="img" />
-              </div>
-              <span class="item-date_and_title"
-                >{{ item.date }}&nbsp;{{ item.title }}</span
-              >
-            </div>
+            </router-link>
           </SwiperSlide>
         </Swiper>
       </div>
@@ -673,17 +680,19 @@ FakeActivity.forEach((item) => {
           class="my-swiper"
         >
           <SwiperSlide v-for="(item, index) in westData" :key="index">
-            <div class="item-card">
-              <div class="item-image" v-if="item.image">
-                <img class="img" :src="item.image" :alt="item.title" />
+            <router-link :to="`/activity/${item.no}`"
+              ><div class="item-card">
+                <div class="item-image" v-if="item.image">
+                  <img class="img" :src="item.image" :alt="item.title" />
+                </div>
+                <div class="item-image" v-else>
+                  <PlaceholderImageBg class="img" />
+                </div>
+                <span class="item-date_and_title"
+                  >{{ item.date }}&nbsp;{{ item.title }}</span
+                >
               </div>
-              <div class="item-image" v-else>
-                <PlaceholderImageBg class="img" />
-              </div>
-              <span class="item-date_and_title"
-                >{{ item.date }}&nbsp;{{ item.title }}</span
-              >
-            </div>
+            </router-link>
           </SwiperSlide>
         </Swiper>
       </div>
@@ -703,17 +712,19 @@ FakeActivity.forEach((item) => {
           class="my-swiper"
         >
           <SwiperSlide v-for="(item, index) in eastData" :key="index">
-            <div class="item-card">
-              <div class="item-image" v-if="item.image">
-                <img class="img" :src="item.image" :alt="item.title" />
+            <router-link :to="`/activity/${item.no}`"
+              ><div class="item-card">
+                <div class="item-image" v-if="item.image">
+                  <img class="img" :src="item.image" :alt="item.title" />
+                </div>
+                <div class="item-image" v-else>
+                  <PlaceholderImageBg class="img" />
+                </div>
+                <span class="item-date_and_title"
+                  >{{ item.date }}&nbsp;{{ item.title }}</span
+                >
               </div>
-              <div class="item-image" v-else>
-                <PlaceholderImageBg class="img" />
-              </div>
-              <span class="item-date_and_title"
-                >{{ item.date }}&nbsp;{{ item.title }}</span
-              >
-            </div>
+            </router-link>
           </SwiperSlide>
         </Swiper>
       </div>
@@ -732,17 +743,19 @@ FakeActivity.forEach((item) => {
           class="my-swiper"
         >
           <SwiperSlide v-for="(item, index) in southData" :key="index">
-            <div class="item-card">
-              <div class="item-image" v-if="item.image">
-                <img class="img" :src="item.image" :alt="item.title" />
+            <router-link :to="`/activity/${item.no}`"
+              ><div class="item-card">
+                <div class="item-image" v-if="item.image">
+                  <img class="img" :src="item.image" :alt="item.title" />
+                </div>
+                <div class="item-image" v-else>
+                  <PlaceholderImageBg class="img" />
+                </div>
+                <span class="item-date_and_title"
+                  >{{ item.date }}&nbsp;{{ item.title }}</span
+                >
               </div>
-              <div class="item-image" v-else>
-                <PlaceholderImageBg class="img" />
-              </div>
-              <span class="item-date_and_title"
-                >{{ item.date }}&nbsp;{{ item.title }}</span
-              >
-            </div>
+            </router-link>
           </SwiperSlide>
         </Swiper>
       </div>
@@ -928,6 +941,7 @@ FakeActivity.forEach((item) => {
     font-size: $font-size-p;
     padding: 0 5px 0 5px;
     white-space: nowrap;
+    color: #000;
     overflow: hidden; /* 超出隱藏 */
     text-overflow: ellipsis; /* 超出用 ... 代替 */
     @include desktop() {
