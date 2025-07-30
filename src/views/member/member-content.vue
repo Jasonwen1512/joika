@@ -173,7 +173,7 @@ const currentTab = ref('group')
     background-color: $color-secondary;
     border-radius: 3px 3px 0 0;
     border: 2px solid $black;
-    padding: 10px 15px;
+    padding: 10px;
     width: 80px;
     cursor: pointer;
     &.active {
