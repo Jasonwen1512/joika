@@ -2,6 +2,37 @@
 import { ref, onMounted } from "vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import logoSvg from "@/assets/img/welcome/logo.svg?url";
+import pointDown from "@/assets/img/welcome/point-down.svg?url"; // 使用?url強制將svg轉換為url字串
+
+// 背景色塊
+const backgroundDecoration = ref({
+  featureBackground: new URL("@/assets/img/welcome/feature-background.svg", import.meta.url).href,
+  bgSkyblue1: new URL("@/assets/img/welcome/bg-decorate-skyblue1.svg", import.meta.url).href,
+  bgSkyblue2: new URL("@/assets/img/welcome/bg-decorate-skyblue2.svg", import.meta.url).href,
+  bgGreen: new URL("@/assets/img/welcome/bg-decorate-green.svg", import.meta.url).href,
+  bgYellow1: new URL("@/assets/img/welcome/bg-decorate-yellow1.svg", import.meta.url).href,
+  bgYellow2: new URL("@/assets/img/welcome/bg-decorate-yellow2.svg", import.meta.url).href,
+});
+
+// 平台特色卡片資料
+const featureCardInfo = ref([
+  {
+    image: new URL("@/assets/img/welcome/membership-icon.svg", import.meta.url).href,
+    title: "嚴選會員機制",
+    subtitle: "會員資料實名認證",
+  },
+  {
+    image: new URL("@/assets/img/welcome/review-icon.svg", import.meta.url).href,
+    title: "活動內容審核",
+    subtitle: "官方審核每一場揪團",
+  },
+  {
+    image: new URL("@/assets/img/welcome/first-choice-icon.svg", import.meta.url).href,
+    title: "揪團平台首選",
+    subtitle: "輕鬆找到志同道合的夥伴",
+  },
+]);
 
 // 社群回覆卡片資料
 const communityCardInfo = ref([
@@ -93,105 +124,83 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Start ****** 這裡預留空間，測試下半部的動畫，暫時先這樣寫，後續再做修改 ****** Start -->
-  <!-- ===文字漂浮區域=== -->
-  <section class="floating-text-wrapper">
-    <p class="floating-text" id="floating-text-1">朋友們都好難揪</p>
-    <p class="floating-text" id="floating-text-2">一個人好無聊</p>
-    <p class="floating-text" id="floating-text-3">好想出去走走</p>
-    <p class="floating-text" id="floating-text-4">沒人一起露營</p>
-    <p class="floating-text" id="floating-text-5">說走就走怎麼那麼難</p>
-    <p class="floating-text" id="floating-text-6">永遠差一咖</p>
-    <p class="floating-text" id="floating-text-7">如果有人剛好也想玩就好了</p>
-    <h1 class="entrance-slogan">揪一咖 就出發</h1>
-  </section>
+  <div class="welcome-page-wrapper">
+    <!-- === 文字漂浮區域 === -->
+    <section class="floating-text-wrapper">
+      <h3 class="floating-text" id="floating-text-1">朋友們都好難揪</h3>
+      <h3 class="floating-text" id="floating-text-2">一個人好無聊</h3>
+      <h3 class="floating-text" id="floating-text-3">好想出去走走</h3>
+      <h3 class="floating-text" id="floating-text-4">沒人一起露營</h3>
+      <h3 class="floating-text" id="floating-text-5">說走就走怎麼那麼難</h3>
+      <h3 class="floating-text" id="floating-text-6">永遠差一咖</h3>
+      <h3 class="floating-text" id="floating-text-7">如果有人剛好也想玩就好了</h3>
+      <h1 class="entrance-slogan">揪一咖 就出發</h1>
+      <img id="bg-skyblue1" :src="backgroundDecoration.bgSkyblue1" alt="背景色塊 skyblue" />
+      <img id="bg-green" :src="backgroundDecoration.bgGreen" alt="背景色塊 green" />
+      <img id="bg-yellow1" :src="backgroundDecoration.bgYellow1" alt="背景色塊 yellow" />
+    </section>
 
-  <!-- ===卡片滑動效果區域=== -->
-  <section class="sliding-cards-wrapper">
-    <div class="sliding-slogan-group">
-      <!-- font-size: 60px -->
-      <p class="sliding-slogan">每一種玩樂</p>
-      <p class="sliding-slogan">都值得被揪</p>
-    </div>
-    <div class="activity-card">卡片1</div>
-    <div class="activity-card">卡片2</div>
-    <div class="activity-card">卡片3</div>
-    <div class="activity-card">卡片4</div>
-    <div class="activity-card">卡片5</div>
-  </section>
+    <!-- === 卡片滑動效果區域 === -->
+    <section class="sliding-cards-wrapper">
+      <div class="sliding-slogan-group">
+        <!-- font-size: 60px -->
+        <p class="sliding-slogan">每一種玩樂</p>
+        <p class="sliding-slogan">都值得被揪</p>
+      </div>
+      <div class="activity-card">卡片1</div>
+      <div class="activity-card">卡片2</div>
+      <div class="activity-card">卡片3</div>
+      <div class="activity-card">卡片4</div>
+      <div class="activity-card">卡片5</div>
+    </section>
 
-  <!-- ===平台特色卡片區域=== -->
-  <section class="feature-cards-wrapper">
-    <h2 class="entrance-slogan">安心揪 放心玩</h2>
-    <div class="feature-card">
-      <img src="" alt="" class="feature-icon" />
-      <h3 class="feature-title"></h3>
-      <p class="feature-text"></p>
-    </div>
-    <div class="feature-card">
-      <img src="" alt="" class="feature-icon" />
-      <h3 class="feature-title"></h3>
-      <p class="feature-text"></p>
-    </div>
-    <div class="feature-card">
-      <img src="" alt="" class="feature-icon" />
-      <h3 class="feature-title"></h3>
-      <p class="feature-text"></p>
-    </div>
-  </section>
-  <!-- End ****** 這裡預留空間，測試下半部的動畫，暫時先這樣寫，後續再做修改 ****** End -->
-
-  <!-- ===社群回覆卡片區域=== -->
-  <section class="community-cards-wrapper" ref="cardWrapperRef">
-    <div class="community-cards-list">
-      <h2 class="entrance-slogan">一咖都不能少的理由</h2>
-
-      <!-- 從 communityCardInfo 引入資料 -->
-      <div class="community-card" v-for="(card, index) in communityCardInfo" :key="card.id">
-        <div class="content-wrapper">
-          <img src="" alt="" class="profile-photo" />
-          <h2 class="member-nickname">{{ card.nickname }}</h2>
-          <h2 class="comment-title">{{ card.title }}</h2>
-          <p class="comment-content">{{ card.content }}</p>
+    <!-- === 平台特色卡片區域 === -->
+    <section class="feature-cards-wrapper">
+      <h2 class="entrance-slogan">安心揪 放心玩</h2>
+      <div class="community-cards-list">
+        <div class="feature-card" v-for="(card, index) in featureCardInfo" :key="index">
+          <img class="feature-icon" :src="card.image" alt="" />
+          <h2 class="feature-title">{{ card.title }}</h2>
+          <p class="feature-text">{{ card.subtitle }}</p>
         </div>
       </div>
-    </div>
-  </section>
+      <div>
+        <img class="feature-bg" :src="backgroundDecoration.featureBackground" alt="背景圖" />
+      </div>
+    </section>
 
-  <!-- ===骰子區域=== -->
-  <section class="dice-wrapper">
-    <h2 class="entrance-slogan">不知道揪什麼？</h2>
-  </section>
+    <!-- === 社群回覆卡片區域 === -->
+    <section class="community-cards-wrapper" ref="cardWrapperRef">
+      <div class="community-cards-list">
+        <h2 class="entrance-slogan">一咖都不能少的理由</h2>
 
-  <!-- ===頁面跳轉緩衝區=== -->
-  <section class="learn-more">
-    <h2 class="entrance-slogan">
-      還等什麼？裡面更好玩
-      <svg id="point-down" width="60" height="64" viewBox="0 0 60 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g filter="url(#filter0_d_1178_735)">
-          <mask id="mask0_1178_735" style="mask-type: luminance" maskUnits="userSpaceOnUse" x="4" y="0" width="52" height="60">
-            <path d="M5.9917 10.1665H37.1584V1.6665H5.9917V10.1665Z" fill="#555555" stroke="white" stroke-width="3" stroke-linejoin="round" />
-            <path d="M37.1584 10.1665C46.395 20.2569 51.6943 26.1049 53.0562 27.7105C55.1004 30.1188 54.2419 32.8388 49.1249 32.8388C44.0079 32.8388 41.057 25.3518 37.1584 25.3518C37.1357 25.348 37.1343 34.9232 37.1541 54.0775C37.155 54.636 37.0459 55.1892 36.8329 55.7054C36.6199 56.2217 36.3073 56.6909 35.9128 57.0863C35.5184 57.4816 35.0499 57.7954 34.5341 58.0096C34.0184 58.2238 33.4654 58.3342 32.9069 58.3346H32.9027C32.3437 58.3346 31.7902 58.2245 31.2738 58.0105C30.7574 57.7966 30.2882 57.483 29.893 57.0876C29.4978 56.6923 29.1844 56.223 28.9706 55.7065C28.7568 55.19 28.6468 54.6365 28.647 54.0775V42.73C17.3515 41.0187 11.2107 40.0742 10.2247 39.8967C8.7457 39.6318 5.9917 38.2193 5.9917 34.1549V10.1665H37.1584Z" stroke="white" stroke-width="3" stroke-linejoin="round" />
-          </mask>
-          <g mask="url(#mask0_1178_735)">
-            <path d="M-4 -4H64V64H-4V-4Z" fill="black" />
-          </g>
-        </g>
-        <defs>
-          <filter id="filter0_d_1178_735" x="0.491699" y="0.166504" width="59.0962" height="67.668" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-            <feFlood flood-opacity="0" result="BackgroundImageFix" />
-            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-            <feOffset dy="4" />
-            <feGaussianBlur stdDeviation="2" />
-            <feComposite in2="hardAlpha" operator="out" />
-            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1178_735" />
-            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1178_735" result="shape" />
-          </filter>
-        </defs>
-      </svg>
-    </h2>
-  </section>
+        <!-- 從 communityCardInfo 引入資料 -->
+        <div class="community-card" v-for="(card, index) in communityCardInfo" :key="card.id">
+          <div class="content-wrapper">
+            <img class="profile-photo" src="" alt="" />
+            <h2 class="member-nickname">{{ card.nickname }}</h2>
+            <h2 class="comment-title">{{ card.title }}</h2>
+            <p class="comment-content">{{ card.content }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- === 骰子區域 === -->
+    <section class="dice-wrapper">
+      <h2 class="entrance-slogan">不知道揪什麼？</h2>
+      <img id="bg-skyblue2" :src="backgroundDecoration.bgSkyblue2" alt="背景色塊 skyblue" />
+      <img id="bg-yellow2" :src="backgroundDecoration.bgYellow2" alt="背景色塊 yellow" />
+    </section>
+
+    <!-- === 頁面跳轉緩衝區 === -->
+    <section class="learn-more">
+      <h2 class="entrance-slogan">
+        還等什麼？裡面更好玩
+        <img id="point-down" :src="pointDown" alt="" />
+      </h2>
+    </section>
+  </div>
 </template>
 
 <style scoped lang="scss">
@@ -207,56 +216,137 @@ onMounted(() => {
 }
 // End ****** 暫時這樣寫，預留空間測試下半部的動畫 ******
 
+// === 通用設定 ===
+.entrance-slogan {
+  margin: auto;
+  font-size: $font-size-h1;
+  text-align: center;
+  margin-bottom: 100px;
+}
+
+// === 文字漂浮區域 ===
 .floating-text-wrapper {
+  position: relative;
+  line-height: 1; // line-height設定為1，方便設定絕對定位
+
   #floating-text-1 {
     color: #1fb92c;
-    font-size: 50px;
+    font-size: clamp(12px, 2.604vw, 50px);
+    position: absolute;
+    top: 7.24vw;
+    right: 3.125vw;
   }
-
   #floating-text-2 {
     color: $color-primary;
-    font-size: 45px;
+    font-size: clamp(10px, 2.344vw, 45px);
+    position: absolute;
+    top: 12.135vw;
+    left: 13.75vw;
   }
-
   #floating-text-3 {
     color: #fb400c;
-    font-size: 30px;
+    font-size: clamp(6px, 1.563vw, 30px);
+    position: absolute;
+    top: 14.479vw;
+    right: 30vw;
   }
-
   #floating-text-4 {
     color: #e038af;
-    font-size: 50px;
+    font-size: clamp(12px, 2.604vw, 50px);
+    position: absolute;
+    top: 23.021vw;
+    left: 30vw;
   }
-
   #floating-text-5 {
     color: $white;
-    font-size: 30px;
+    font-size: clamp(6px, 1.563vw, 30px);
+    position: absolute;
+    top: 25.938vw;
+    left: 7.031vw;
   }
-
   #floating-text-6 {
     color: $color-highlight;
-    font-size: 50px;
+    font-size: clamp(14px, 2.604vw, 50px);
+    position: absolute;
+    top: 24.896vw;
+    right: 4.427vw;
   }
-
   #floating-text-7 {
-    // color: #4f8da8;
     color: $blue;
-    font-size: 60px;
+    font-size: clamp(12px, 3.125vw, 60px);
+    line-height: 1.7; // 無須絕對定位，line-height改回1.7
+    margin: 43.75vw auto;
+    text-align: center;
   }
-
   .entrance-slogan {
     color: $blue;
-    font-size: 48px;
+    font-size: clamp(14px, 3.333vw, 64px);
     font-weight: normal;
-    // font-weight: $font-weight-regular; // scss中尚未賦值
+    position: absolute;
+    top: 63.021vw;
+    left: 50%;
+    transform: translateX(-50%); // 文字移回元素整體寬度的一半位置，達到水平置中效果
+  }
+  #bg-skyblue1 {
+    width: 29.323vw;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: -1;
+  }
+  #bg-green {
+    width: 23.177vw;
+    position: absolute;
+    top: 18.75vw;
+    left: 0;
+    z-index: -1;
+  }
+  #bg-yellow1 {
+    width: 32.188vw;
+    position: absolute;
+    top: 84vw;
+    left: 5vw;
+    z-index: -1;
   }
 }
 
-.entrance-slogan {
-  margin: auto;
-  font-size: $font-size-h2;
-  text-align: center;
-  margin-bottom: 100px; //
+// === 卡片滑動效果區域 ===
+
+// === 平台特色卡片區域 ===
+.feature-cards-wrapper {
+  min-width: 1200px;
+  padding-top: 210px;
+  position: relative;
+
+  .community-cards-list {
+    @include flex-center;
+    // flex-wrap: wrap;
+    gap: 20px;
+
+    .feature-card {
+      width: 385px;
+      height: 350px;
+      background-color: $white;
+      border: 2px solid $black;
+      text-align: center;
+
+      .feature-icon {
+        margin: 50px auto;
+      }
+      .feature-text {
+        margin-top: 30px;
+      }
+    }
+  }
+  .feature-bg {
+    width: 100%;
+    min-height: 898px;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+  }
 }
 
 // === 社群回覆卡片 ===
@@ -284,6 +374,7 @@ onMounted(() => {
       .content-wrapper {
         display: grid;
         gap: 20px 50px;
+        // grid-template-rows: 1fr 1fr 2fr;
         grid-template-columns: 1fr 4fr;
         padding: 50px;
 
@@ -295,18 +386,14 @@ onMounted(() => {
           border-radius: 50%;
         }
         .member-nickname {
-          line-height: 1.6; // 待SCSS更新後移除
-          // line-height: $line-height-base; // scss中尚未賦值
-          font-weight: 700; // 待SCSS更新後移除
-          // font-weight: $font-weight-bold; // scss中尚未賦值
+          line-height: 1.7;
+          font-weight: 700;
         }
         .comment-title {
-          line-height: 1.6; // 待SCSS更新後移除
-          // line-height: $line-height-base; // scss中尚未賦值
+          line-height: 1.7;
         }
         .comment-content {
-          line-height: 2; // 待SCSS更新後移除
-          // line-height: $line-height-base; // scss中尚未賦值
+          line-height: 2;
           grid-column: 1 / span 2;
         }
       }
@@ -314,12 +401,13 @@ onMounted(() => {
   }
 }
 
+// === 骰子區域 ===
 // === 頁面跳轉緩衝區 ===
 .learn-more {
   #point-down {
     vertical-align: middle;
-    height: $font-size-h2;
-    aspect-ratio: 1/1;
+    height: $font-size-h1;
+    aspect-ratio: 1 / 1;
   }
 }
 </style>
