@@ -535,6 +535,17 @@ section.article-list {
 .article-img{
   margin: 10px;
   flex:1;
+  max-width: 285px;
+  max-height: 190px;
+  width: 100%;
+  height: auto;
+      overflow: hidden;
+
+
+}
+.article-img img{
+  width: 100%;
+
 }
 
 .read-more{
