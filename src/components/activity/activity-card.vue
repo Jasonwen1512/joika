@@ -1,9 +1,10 @@
 <script setup>
+import { RouterLink } from "vue-router";
 import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
-defineProps({
+const props = defineProps({
   item: Object,
 });
 
@@ -15,21 +16,52 @@ const toggleLike = (id) => {
 const aloha = () => {
   alert("我要跟團！");
 };
+const formDate = (dateStr) => {
+  const date = new Date(dateStr);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${month.toString().padStart(2, "0")}/${day
+    .toString()
+    .padStart(2, "0")}`;
+};
+
+const titleDate = computed(() => {
+  if (!props.item) return "";
+  const start = formDate(props.item.activity_start_date);
+  const end = formDate(props.item.activity_end_date);
+  if (props.item.activity_start_date === props.item.activity_end_date) {
+    return `${start} ${props.item.activity_name}`;
+  } else {
+    return `${start}-${end} ${props.item.activity_name}`;
+  }
+});
 </script>
 
 <template>
-  <div class="activity-card" v-if="item">
-    <div class="activity-img">
-      <img :src="item.activity_img" :alt="item.activity_name" />
-    </div>
-    <h4 class="activity-name">{{ item.activity_name }}</h4>
-    <p class="activity-description">{{ item.activity_description }}</p>
+  <div class="activity-card" v-if="props.item">
+    <RouterLink
+      :to="`/activity/${props.item.activity_no}`"
+      class="activity-img"
+    >
+      <img :src="props.item.activity_img" :alt="props.item.activity_name" />
+    </RouterLink>
+    <RouterLink :to="`/activity/${props.item.activity_no}`"
+      ><h4 class="activity-name">
+        {{ titleDate }}
+      </h4></RouterLink
+    >
+    <RouterLink :to="`/activity/${props.item.activity_no}`"
+      ><p class="activity-description">
+        {{ props.item.activity_description }}
+      </p></RouterLink
+    >
+
     <div class="button-group" @click.stop.prevent>
       <Button @click.stop.prevent="aloha" theme="primary" size="md"
         >我要跟團!</Button
       >
       <LikeButton
-        :isActive="likeMap[item.activity_no]"
+        :isActive="likeMap[props.item.activity_no]"
         @click.stop.prevent="toggleLike(item.activity_no)"
       ></LikeButton>
     </div>
@@ -69,6 +101,7 @@ const aloha = () => {
 }
 
 .activity-name {
+  color: $black;
   display: block;
   max-width: 264px;
   font-size: $font-size-h4;
@@ -81,6 +114,7 @@ const aloha = () => {
   letter-spacing: 0.5px;
 }
 .activity-description {
+  color: $black;
   font-size: $font-size-p;
   padding: 10px 0 0;
   line-height: 1.7;

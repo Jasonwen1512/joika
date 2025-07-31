@@ -1,17 +1,20 @@
 <script setup></script>
 
 <template>
-  <!-- 這是發起揪團頁 -->
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
-  <div>這是發起揪團頁</div>
+  <div class="group-create-wrap">
+    <div class="banner-background">
+      <h2>發起揪團</h2>
+    </div>
+  </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.banner-background {
+  background-image: url(../../assets/img/group/group-create/group-create-banner-background.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+h2 {
+  display: none;
+}
+</style>

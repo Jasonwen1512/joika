@@ -8,7 +8,8 @@ import konanImage from '@/assets/img/article/movie_konan.jpg';
 import ArticleDetail from "./article-detail.vue";
 import PreIcon from '@/assets/img/icon/pre-arrow.svg?url';
 import NextIcon from '@/assets/img/icon/next-arrow.svg?url';
-
+import articleimg from'@/assets/img/article/article-img.png?url';
+import Illustration from '@/components/article/Illustration.vue';
 //banner的跑馬燈
 
 
@@ -195,10 +196,10 @@ const ula = () => {
 
 <template>
 <!-- 背景色塊 -->
-<background>
+<div>
   <img class="bg-img2" src="/src/assets/img/bg-decorate2.png" alt="背景圖藍">
   <img class="bg-img3" src="/src/assets/img/bg-decorate3.png" alt="背景圖黃">
-</background>
+</div>
   <!-- 熱門文章頁 -->
   <div>這是熱門文章頁</div>
   <!-- banner的跑馬燈 -->
@@ -212,7 +213,7 @@ const ula = () => {
           :style="{ backgroundColor: item.color }"
 
         >
-                <h3 class="banner-text">{{ item.label }}</h3>
+                <!-- <h3 class="banner-text">{{ item.label }}</h3> -->
 
           <img :src="item.img" :alt="item.label" />
         </div>
@@ -236,9 +237,12 @@ const ula = () => {
           {{ cat }}
         </div>
       </div>
+      <router-link to="/article/article-create" class="article-link">
+
 <div class="post-btn">
-      <Button :onClick="ula" theme="primary" size="md">我要發文</Button>
+      <Button  theme="primary" size="md">我要發文</Button>
     </div>
+    </router-link>
     </section>
     <hr/>
     <!-- 文章列表 -->
@@ -259,7 +263,7 @@ v-for="(article, index) in PaginatedArticles"
           <div class="article-date">
           <span
   class="event-label"
-  :style="{ backgroundColor: GetEventColor(article.event) }"
+  :style="{ borderColor: GetEventColor(article.event), }"
 >
   {{ article.event }}
 </span> <p>{{ article.date }}</p>
@@ -272,7 +276,9 @@ v-for="(article, index) in PaginatedArticles"
 <p v-html="article.content"></p>
 
         </div> 
-       
+          <div class="read-more">      
+              <Button :onClick="readarticle" theme="info" size="sm">閱讀更多</Button>
+          </div>
       </div>
      
       </router-link>
@@ -319,8 +325,13 @@ v-for="(article, index) in PaginatedArticles"
   <button class="next" @click="GoToNextPage" :disabled="IsLastPage">
     <img :src="NextIcon" alt="下一張箭頭" />
   </button>
-</div>
+</div> 
+<div class="decoration">
+    <Illustration />
+
+ </div>
 </main>
+
 </template>
 
 <style scoped lang="scss">
@@ -361,10 +372,9 @@ body{
     flex-shrink: 0;
     width: 300px;
     height: 300px;
-    margin-right: 10px;
+    margin-right: 25px;
     color: #000000;
-    display: flex
-;
+    display: flex;
     justify-content: space-evenly;
     text-align: center;
     border-radius: 6px;
@@ -373,10 +383,10 @@ body{
 }
 
 .pic img {
-    width: 100%;
+    width: 120%;
     height: auto;
     object-fit: cover;
-    overflow: inherit;
+    overflow: visible;
     transform: scale(0.8);
     transition: transform 0.5s ease, width 0.5s ease;
 }
@@ -472,9 +482,7 @@ hr {
     flex-wrap: nowrap;
     margin: 5vh auto;
 }
-.article-item:hover{
-  color:#4f8da8;
-}
+
 section.article-list {
     margin: 5vh;
 }
@@ -486,14 +494,13 @@ section.article-list {
     flex-direction: column;
     /* gap: 20px; */
     justify-content: space-around;
+    gap:5px;
 }
 .event-label {
     text-align: center;
     padding: 5px;
     margin: 5px;
-    background-color: #FADA7A;
-    color: #000;
-    border: #000 solid 1px;
+    border: solid 3px;
     border-radius: 6px;
     width: 80px;
 }
@@ -523,11 +530,28 @@ section.article-list {
  
 }
 .article-title {
-    padding-block: 10px;
+    padding-block: 5px;
 }
 .article-img{
   margin: 10px;
   flex:1;
+  max-width: 285px;
+  max-height: 190px;
+  width: 100%;
+  height: auto;
+      overflow: hidden;
+
+
+}
+.article-img img{
+  width: 100%;
+
+}
+
+.read-more{
+  display: grid;
+justify-content: end;
+margin-top: 10px;
 }
 a.article-text-link {
     flex: 2;
@@ -616,5 +640,10 @@ text-align: center;
 }
 
 }
-
+.decoration {
+    position: absolute;
+    bottom: 0px;
+    z-index: -999;
+    display: none;
+}
 </style>

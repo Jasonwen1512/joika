@@ -1,14 +1,33 @@
 <script setup>
+import { useRoute } from "vue-router";
+import { ActivityCategories } from "@/assets/data/fake-activity-category";
 import ActivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Button from "@/components/Button.vue";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import DatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import SearchIcon from "@/assets/img/icon/search1.svg";
 import CategoryTag from "@/components/activity/category-tag.vue";
 import PreArrow from "@/assets/img/icon/pre-arrow.svg";
 import NextArrow from "@/assets/img/icon/next-arrow.svg";
+
+const route = useRoute();
+onMounted(() => {
+  const categoryFromQuery = route.query.category;
+  if (categoryFromQuery) {
+    activeCategory.value = categoryFromQuery;
+    searchTrigger.value++;
+  }
+});
+
+watch(
+  () => route.query.category,
+  (newVal) => {
+    activeCategory.value = newVal || null;
+    searchTrigger.value++;
+  }
+);
 const SearchText = ref("");
 const confirmedSearch = ref({
   keyword: "",
@@ -52,22 +71,7 @@ const activities = ref(
       new Date(b.activity_start_date).getTime()
   )
 );
-const categories = [
-  { id: null, name: "全部" },
-  { id: "CA001", name: "登山" },
-  { id: "CA002", name: "桌遊" },
-  { id: "CA003", name: "運動" },
-  { id: "CA004", name: "露營" },
-  { id: "CA005", name: "唱歌" },
-  { id: "CA006", name: "展覽" },
-  { id: "CA007", name: "水上活動" },
-  { id: "CA008", name: "聚餐" },
-  { id: "CA009", name: "電影" },
-  { id: "CA010", name: "手作" },
-  { id: "CA011", name: "文化體驗" },
-  { id: "CA012", name: "演出表演" },
-  { id: "CA013", name: "其他" },
-];
+const categories = ActivityCategories;
 const activeCategory = ref(null);
 
 const selectCategory = (id) => {
@@ -271,14 +275,13 @@ const paginationPages = computed(() => {
     <div class="activity-list">
       <!-- 有資料才顯示卡片 -->
       <template v-if="paginatedActivities.length > 0">
-        <RouterLink
+        <ActivityCard
+          :item="item"
           v-for="item in paginatedActivities"
           :key="item.activity_no"
-          :to="`/activity/${item.activity_no}`"
-          class="activity-link"
         >
-          <ActivityCard :item="item"></ActivityCard>
-        </RouterLink>
+          ></ActivityCard
+        >
       </template>
 
       <!-- 沒資料顯示提示 -->
@@ -350,8 +353,8 @@ const paginationPages = computed(() => {
   @include desktop() {
     width: 100%;
     height: 100%;
-    object-fit: cover; // 填滿並裁切
-    object-position: center; // 中心顯示
+    object-fit: cover;
+    object-position: center;
   }
 }
 .activity-list {
@@ -360,27 +363,31 @@ const paginationPages = computed(() => {
   display: grid;
   gap: 25px;
   padding: 10px;
-  justify-items: center;
+  justify-self: center;
   grid-template-columns: repeat(1, 1fr);
 
   @include tablet() {
     grid-template-columns: repeat(2, 1fr);
-    gap: 25px;
   }
+
   @include desktop() {
     min-width: 1200px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-
+    gap: 25px;
     justify-self: center;
+  }
+  @media screen and (min-width: 1023px) and (max-width: 1199px) {
+    grid-template-columns: repeat(3, 1fr);
+    min-width: 1024px;
+    gap: 25px;
+    justify-items: center;
   }
 }
 
 .hint {
   line-height: 27px;
   margin: 29px auto 11px 18px;
-  @include mobile() {
-  }
 
   @include tablet() {
   }
@@ -416,12 +423,6 @@ const paginationPages = computed(() => {
 }
 .search-bar input {
   width: 100%;
-
-  @include tablet() {
-  }
-
-  @include desktop() {
-  }
 }
 .search-icon {
   padding: 3px 12px 0 12px;
@@ -433,11 +434,6 @@ const paginationPages = computed(() => {
   border: 1px solid $black;
   border-radius: 3px;
   width: 100%;
-  @include tablet() {
-  }
-
-  @include desktop() {
-  }
 }
 :deep(.dp__input_icon) {
   color: $black;
@@ -490,10 +486,16 @@ const paginationPages = computed(() => {
 
   @include tablet() {
     max-width: 1200px;
+    gap: 10px;
   }
 
   @include desktop() {
     width: 1200px;
+    gap: 10px;
+    justify-content: space-between;
+  }
+  @media screen and (min-width: 1023px) and (max-width: 1199px) {
+    width: 1024px;
   }
 }
 .pagination {
@@ -573,10 +575,11 @@ const paginationPages = computed(() => {
 .bg-decorate3 {
   position: absolute;
   z-index: -1;
-  bottom: 310px;
+  top: 1350px;
   right: 0;
   width: auto;
   width: 45%;
+  overflow: hidden;
   @include tablet() {
     bottom: 300px;
     width: 25%;
