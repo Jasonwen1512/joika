@@ -150,9 +150,10 @@ const items = [
       :free-mode="true"
       :pagination="{ clickable: true }"
       :breakpoints="{
-        1024: { slidesPerView: 6, spaceBetween: 30 },
-        768: { slidesPerView: 3, spaceBetween: 20 },
-        480: { slidesPerView: 1, spaceBetween: 0 },
+        1024: { slidesPerView: 6 },
+        768: { slidesPerView: 3 },
+        320: { slidesPerView: 2 },
+        0: { slidesPerView: 1 },
       }"
       :modules="modules"
       class="recommendations-swiper"
