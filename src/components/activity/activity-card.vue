@@ -1,4 +1,5 @@
 <script setup>
+import { RouterLink } from "vue-router";
 import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
 import { ref, computed } from "vue";
@@ -38,13 +39,23 @@ const titleDate = computed(() => {
 
 <template>
   <div class="activity-card" v-if="props.item">
-    <div class="activity-img">
-      <img :src="item.activity_img" :alt="props.item.activity_name" />
-    </div>
-    <h4 class="activity-name">
-      {{ titleDate }}
-    </h4>
-    <p class="activity-description">{{ props.item.activity_description }}</p>
+    <RouterLink
+      :to="`/activity/${props.item.activity_no}`"
+      class="activity-img"
+    >
+      <img :src="props.item.activity_img" :alt="props.item.activity_name" />
+    </RouterLink>
+    <RouterLink :to="`/activity/${props.item.activity_no}`"
+      ><h4 class="activity-name">
+        {{ titleDate }}
+      </h4></RouterLink
+    >
+    <RouterLink :to="`/activity/${props.item.activity_no}`"
+      ><p class="activity-description">
+        {{ props.item.activity_description }}
+      </p></RouterLink
+    >
+
     <div class="button-group" @click.stop.prevent>
       <Button @click.stop.prevent="aloha" theme="primary" size="md"
         >我要跟團!</Button
@@ -90,6 +101,7 @@ const titleDate = computed(() => {
 }
 
 .activity-name {
+  color: $black;
   display: block;
   max-width: 264px;
   font-size: $font-size-h4;
@@ -102,6 +114,7 @@ const titleDate = computed(() => {
   letter-spacing: 0.5px;
 }
 .activity-description {
+  color: $black;
   font-size: $font-size-p;
   padding: 10px 0 0;
   line-height: 1.7;

@@ -56,7 +56,7 @@ export const FakeActivity = [
     registration__start_date: "2025-07-28",
     registration_deadline: "2025-08-18",
     activity_start_date: "2025-08-20",
-    activity_end_date: "2025-08-21",
+    activity_end_date: "2025-08-20",
     max_participant: 20,
     current_participant: 12,
     min_participant: 8,
@@ -65,7 +65,7 @@ export const FakeActivity = [
     participant_limitation: "不需經驗，現場會詳細教學，只要喜歡桌遊就可以。",
     activity_description:
       "工作壓力太大需要紓解，打算辦一場超熱鬧的狼人殺整夜狂歡局！地點選在氣氛絕佳的大安桌遊店，我們會準備多個場次，從經典狼人殺、到各式合作解謎、派對遊戲應有盡有。無論你是新手還是資深玩家，都歡迎加入，現場會有專人解說規則，不用擔心沒人帶玩。當晚還會準備一些小點心，讓大家可以一邊享受遊戲一邊輕鬆交流。活動將一路進行到凌晨，歡迎熱愛桌遊或想拓展交友圈的朋友，一起來歡樂到天亮吧！",
-    activity_status: "待審核",
+    activity_status: "審核中",
     host_member_id: "M0044",
     created_at: "2025-07-21",
     staff_id: "ST001",
@@ -88,7 +88,7 @@ export const FakeActivity = [
     participant_limitation: "不限經驗，但需自備睡袋與個人用品。",
     activity_description:
       "想要找個輕鬆的方式放鬆一下嗎？我們將於陽明山舉辦露營活動，晚上有篝火晚會，一起數星星，聊聊天，享受大自然的寧靜。非常適合喜歡戶外活動，但又不想太劇烈運動的朋友。大家一起搭帳篷、烤肉，早晨還能一同欣賞日出美景，歡迎新手加入！",
-    activity_status: "已結束",
+    activity_status: "已完成",
     host_member_id: "M0039",
     created_at: "2025-07-08",
     staff_id: "ST001",
@@ -157,7 +157,7 @@ export const FakeActivity = [
     participant_limitation: "新手可參加，穿著輕便服裝即可。",
     activity_description:
       "我是一個長期久坐的工程師，肩頸超緊！後來開始晨間瑜伽，真的覺得差很多。這次我揪人一起到台中都會公園的草地，早上七點開始，空氣超清新，鳥叫聲取代鬧鐘。課程是基礎伸展，不用擔心做不到。教練會教呼吸法，做完一套動作後整個人醒了。課後可以去公園旁邊喝咖啡，慢慢開始一天，超適合想放鬆的人。",
-    activity_status: "待審核",
+    activity_status: "審核中",
     host_member_id: "M0014",
     created_at: "2025-07-23",
     staff_id: "ST001",
@@ -203,7 +203,7 @@ export const FakeActivity = [
     participant_limitation: "不限經驗，適合喜歡美食與散步的人。",
     activity_description:
       "宜蘭老街真的藏了很多寶藏小吃，我帶你們去吃我最愛的幾家！蔥油餅、卜肉、花生冰淇淋春捲，每攤都想吃兩份。我們會邊走邊吃，也會停下來拍一些復古建築和街景，拍照打卡超美。適合不趕行程的人，邊吃邊聊邊散步，氣氛超chill。",
-    activity_status: "待審核",
+    activity_status: "審核中",
     host_member_id: "M0009",
     created_at: "2025-07-22",
     staff_id: "ST001",
@@ -249,7 +249,7 @@ export const FakeActivity = [
     participant_limitation: "不限經驗，單純想吃宵夜就來。",
     activity_description:
       "工作完常覺得肚子餓到睡不著，乾脆揪一團深夜夜市小吃巡禮。集合點在劍潭捷運站，19:30 準時出發，沿路從大腸包小腸、蚵仔煎一路吃到花生冰淇淋春捲，中間會停下來拍照打卡。沒有固定路線，走到哪吃到哪，喜歡什麼就買什麼，不需要拘束。適合愛吃又想認識新朋友的人，聊美食比聊話題還自然，輕鬆沒有壓力。",
-    activity_status: "開團中",
+    activity_status: "已成團",
     host_member_id: "M0011",
     created_at: "2025-07-21",
     staff_id: "ST001",
@@ -272,7 +272,7 @@ export const FakeActivity = [
     participant_limitation: "需有基本登山經驗，攜帶保暖衣物。",
     activity_description:
       "夜裡的合歡山星空一生必看。凌晨2點清境集合搭車上山，抓緊短暫寧靜的時刻邊登頂邊看滿天星斗。沿途可以拍到銀河與流星，運氣好還能看到雲海。此行屬於輕裝路線，但溫度可能接近零度，保暖裝備務必備齊。喜歡攝影的人可以準備腳架，拍星空會很美。這次揪團主要是想找同樣熱愛山景與寧靜的人一起分享這段過程。",
-    activity_status: "待審核",
+    activity_status: "審核中",
     host_member_id: "M0019",
     created_at: "2025-07-16",
     staff_id: "ST001",
@@ -387,7 +387,7 @@ export const FakeActivity = [
     participant_limitation: "不限角色設定，歡迎Cosplayer與攝影師參加。",
     activity_description:
       "動漫展超適合找同好！不管是想 Cos 角色、單純拍照，還是純逛買周邊都 OK。活動沒有固定流程，大家可以自由交流、分享攝影或服裝心得，想單純亂逛也沒問題。這次主要就是想找喜歡 ACG 的人聚在一起，一起開心玩一整天。",
-    activity_status: "待審核",
+    activity_status: "審核中",
     host_member_id: "M0017",
     created_at: "2025-07-14",
     staff_id: "ST001",
@@ -410,7 +410,7 @@ export const FakeActivity = [
     participant_limitation: "喜歡現場搖滾氛圍即可參加。",
     activity_description:
       "Coldplay要在小巨蛋辦演唱會啦！想找一群喜歡現場氛圍的人一起去嗨一波。當天燈光和音樂一起炸開的瞬間真的超爽，全場跟著節奏跳、一起吶喊，完全不用在意旁邊的人怎麼想，就是盡情放開自己。這次不只是聽歌，而是一起沉浸在現場互動裡，把所有壓力都甩掉。票價大約 1500 元，位置可以一起討論想買哪區，先揪起來再一起搶票！不管你是搖滾老粉還是第一次參加，都一定會被現場燃到。想一起去的直接 +1，我們組個小團衝一波！",
-    activity_status: "待審核",
+    activity_status: "審核中",
     host_member_id: "M0018",
     created_at: "2025-07-13",
     staff_id: "ST001",
@@ -456,7 +456,7 @@ export const FakeActivity = [
     participant_limitation: "不限經驗，單純愛逛市集都可參加。",
     activity_description:
       "高雄駁二最近又有插畫市集！超多獨立創作者來擺攤，每個攤位風格都不一樣，從手作小物、插畫明信片到超可愛的周邊都有。這次想約一群人一起去逛，不用趕行程，慢慢看、慢慢挑，還可以跟創作者聊聊作品的故事，真的很療癒。市集就在駁二園區裡，周邊也有很多咖啡店跟美食，逛累了就坐下來休息聊天。很適合喜歡藝術小物、想放鬆散步的人，一起去挖寶、找靈感。",
-    activity_status: "待審核",
+    activity_status: "審核中",
     host_member_id: "M0001",
     created_at: "2025-07-19",
     staff_id: "ST001",

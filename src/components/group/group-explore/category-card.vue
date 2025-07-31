@@ -3,16 +3,15 @@ import { useRouter } from "vue-router";
 
 const props = defineProps({
   title: String, // 卡片標題
-  imageUrl: String, // 圖片 URL
+  imageUrl: String, // 圖片路徑
   categoryNo: String, // 分類編號
 });
 
 const router = useRouter();
-
 const goToCategory = () => {
   router.push({
-    path: "/activities", // 活動列表頁
-    query: { category: props.categoryNo }, // 帶分類參數
+    path: "/activity",
+    query: { category: props.categoryNo },
   });
 };
 </script>
@@ -30,9 +29,24 @@ const goToCategory = () => {
   text-align: center;
 
   img {
-    width: 100%;
-    border-radius: 8px;
+    width: 117px;
+    height: 145px;
+    border-radius: 6px;
     transition: transform 0.2s ease-in-out;
+    border: 2px solid $black;
+
+    @include tablet() {
+      //768-1023
+      width: 255px;
+      height: 315px;
+    }
+
+    @include desktop() {
+      //1024以上
+    }
+    @media screen and (min-width: 1023px) and (max-width: 1199px) {
+      //1023-1199
+    }
   }
 
   &:hover img {
@@ -41,8 +55,7 @@ const goToCategory = () => {
 
   p {
     margin-top: 8px;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: $font-size-p;
   }
 }
 </style>
