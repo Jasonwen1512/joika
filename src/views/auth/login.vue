@@ -1,13 +1,16 @@
 <script setup>
-import { reactive } from "vue";
+import { reactive,ref } from "vue";
 import Button from "@/components/Button.vue";
+import CaptchaBox from "@/components/auth/CaptchaBox.vue";
+
+const captchaRef = ref(null);
 
 // 使用 reactive 建立一個響應式的表單資料物件
 const form = reactive({
   mobile: "",
   password: "",
   verifyCode: "",
-});
+}); 
 
 // 定義表單提交的處理函式
 const handleLogin = () => {
@@ -18,14 +21,6 @@ const handleLogin = () => {
     password: form.password,
     verifyCode: form.verifyCode,
   });
-
-  // 實際應用中可能會像這樣：
-  // try {
-  //   const response = await api.login(form);
-  //   // 登入成功，導向到其他頁面
-  // } catch (error) {
-  //   // 顯示錯誤訊息
-  // }
 };
 </script>
 
@@ -49,7 +44,12 @@ const handleLogin = () => {
           <label for="verify-code">驗證碼</label>
           <div class="verification-group">
             <input type="text" id="verify-code" v-model="form.verifyCode" />
-            <div class="verification-code-box"></div>
+            <CaptchaBox ref="captchaRef" />
+            <!-- <FontAwesomeIcon
+              :icon="byPrefixAndName.fas['arrow-rotate-left']"
+              class="refresh-icon"
+              @click="captchaRef?.refreshCode()"
+            /> -->
           </div>
         </div>
 
@@ -148,16 +148,14 @@ const handleLogin = () => {
     align-items: center;
     gap: 10px;
 
-    input {
-      flex-grow: 1;
+    input#verify-code {
+      width: 150px;
     }
 
     .verification-code-box {
-      width: 120px;
-      height: 47px;
       background-color: #e0e0e0;
       border-radius: 4px;
-      flex-shrink: 0;
+      flex-shrink: 1;
     }
   }
 

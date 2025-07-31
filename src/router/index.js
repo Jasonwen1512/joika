@@ -49,14 +49,15 @@ const routes = [
     path: "/activity/:activity_id",
     component: () => import("@/views/activity/activity-detail.vue"),
   },
-
-
-  
 ];
 
 const router = createRouter({
   history: createWebHistory("/cjd101/g2/front/"),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // 總是滾動到頂部
+    return { left: 0, top: 0 };
+  },
 });
 
 export default router;
