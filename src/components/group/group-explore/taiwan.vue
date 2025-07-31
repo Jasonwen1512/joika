@@ -10,6 +10,8 @@ import East from "@/assets/img/group/group-explore/group-explore-taiwan/east.svg
 import South from "@/assets/img/group/group-explore/group-explore-taiwan/south.svg";
 import BigTaiwan from "@/assets/img/group/group-explore/group-explore-taiwan/taiwan.svg";
 
+import { FakeActivity } from "@/assets/data/fake-activity";
+
 import PlaceholderImageBg from "@/components/placeholder-image-bg.vue";
 
 import {
@@ -24,6 +26,8 @@ import {
 
 const isMobile = ref(true);
 const isTablet = ref(false);
+
+// console.log(FakeActivity);
 
 // DOM：'.taiwan-content'
 const taiwanContent = ref(null);
@@ -290,155 +294,240 @@ const taiwanAreaSize = reactive({
 const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 
 // 北部測試資料，並拔掉幾張圖片網址模擬開團時沒有放縮圖
-const northData = [
-  {
-    title: "陽明山一日遊經典行程",
-    image: "https://picsum.photos/seed/n1/300/200",
-    date: "7/15",
-  },
-  {
-    title: "九份老街探索",
-    image: "",
-    date: "8/03",
-  },
-  {
-    title: "北投溫泉散策",
-    image: "",
-    date: "9/10",
-  },
-  {
-    title: "士林夜市美食團",
-    image: "https://picsum.photos/seed/n4/300/200",
-    date: "8/28",
-  },
-  {
-    title: "淡水夕陽之旅",
-    image: "https://picsum.photos/seed/n5/300/200",
-    date: "7/30",
-  },
-  {
-    title: "大稻埕文化散步",
-    image: "https://picsum.photos/seed/n6/300/200",
-    date: "9/05",
-  },
-  {
-    title: "故宮博物院導覽",
-    image: "https://picsum.photos/seed/n7/300/200",
-    date: "8/20",
-  },
-];
+// const northData = [
+//   {
+//     title: "陽明山一日遊經典行程",
+//     image: "https://picsum.photos/seed/n1/300/200",
+//     date: "7/15",
+//   },
+//   {
+//     title: "九份老街探索",
+//     image: "",
+//     date: "8/03",
+//   },
+//   {
+//     title: "北投溫泉散策",
+//     image: "",
+//     date: "9/10",
+//   },
+//   {
+//     title: "士林夜市美食團",
+//     image: "https://picsum.photos/seed/n4/300/200",
+//     date: "8/28",
+//   },
+//   {
+//     title: "淡水夕陽之旅",
+//     image: "https://picsum.photos/seed/n5/300/200",
+//     date: "7/30",
+//   },
+//   {
+//     title: "大稻埕文化散步",
+//     image: "https://picsum.photos/seed/n6/300/200",
+//     date: "9/05",
+//   },
+//   {
+//     title: "故宮博物院導覽",
+//     image: "https://picsum.photos/seed/n7/300/200",
+//     date: "8/20",
+//   },
+// ];
 
-// 西部測試資料
-const westData = [
-  {
-    title: "鹿港古鎮散策",
-    image: "https://picsum.photos/seed/w1/300/200",
-    date: "7/17",
-  },
-  {
-    title: "台中一日輕旅行",
-    image: "https://picsum.photos/seed/w2/300/200",
-    date: "8/05",
-  },
-  {
-    title: "阿里山小火車體驗",
-    image: "https://picsum.photos/seed/w3/300/200",
-    date: "9/12",
-  },
-  {
-    title: "台南美食巡禮",
-    image: "https://picsum.photos/seed/w4/300/200",
-    date: "8/25",
-  },
-  {
-    title: "嘉義文青之旅",
-    image: "https://picsum.photos/seed/w5/300/200",
-    date: "9/03",
-  },
-  {
-    title: "南投清境農場",
-    image: "https://picsum.photos/seed/w6/300/200",
-    date: "7/29",
-  },
-  {
-    title: "彰化扇形車庫探訪",
-    image: "https://picsum.photos/seed/w7/300/200",
-    date: "8/17",
-  },
-];
+// // 西部測試資料
+// const westData = [
+//   {
+//     title: "鹿港古鎮散策",
+//     image: "https://picsum.photos/seed/w1/300/200",
+//     date: "7/17",
+//   },
+//   {
+//     title: "台中一日輕旅行",
+//     image: "https://picsum.photos/seed/w2/300/200",
+//     date: "8/05",
+//   },
+//   {
+//     title: "阿里山小火車體驗",
+//     image: "https://picsum.photos/seed/w3/300/200",
+//     date: "9/12",
+//   },
+//   {
+//     title: "台南美食巡禮",
+//     image: "https://picsum.photos/seed/w4/300/200",
+//     date: "8/25",
+//   },
+//   {
+//     title: "嘉義文青之旅",
+//     image: "https://picsum.photos/seed/w5/300/200",
+//     date: "9/03",
+//   },
+//   {
+//     title: "南投清境農場",
+//     image: "https://picsum.photos/seed/w6/300/200",
+//     date: "7/29",
+//   },
+//   {
+//     title: "彰化扇形車庫探訪",
+//     image: "https://picsum.photos/seed/w7/300/200",
+//     date: "8/17",
+//   },
+// ];
 
-// 南部測試資料
-const southData = [
-  {
-    title: "墾丁陽光沙灘團",
-    image: "https://picsum.photos/seed/s1/300/200",
-    date: "7/20",
-  },
-  {
-    title: "高雄駁二藝術之旅",
-    image: "https://picsum.photos/seed/s2/300/200",
-    date: "9/01",
-  },
-  {
-    title: "台東熱氣球嘉年華",
-    image: "https://picsum.photos/seed/s3/300/200",
-    date: "8/14",
-  },
-  {
-    title: "屏東海生館參訪",
-    image: "https://picsum.photos/seed/s4/300/200",
-    date: "7/31",
-  },
-  {
-    title: "旗津海港美食團",
-    image: "https://picsum.photos/seed/s5/300/200",
-    date: "8/22",
-  },
-  {
-    title: "東港黑鮪魚季",
-    image: "https://picsum.photos/seed/s6/300/200",
-    date: "9/07",
-  },
-];
+// // 南部測試資料
+// const southData = [
+//   {
+//     title: "墾丁陽光沙灘團",
+//     image: "https://picsum.photos/seed/s1/300/200",
+//     date: "7/20",
+//   },
+//   {
+//     title: "高雄駁二藝術之旅",
+//     image: "https://picsum.photos/seed/s2/300/200",
+//     date: "9/01",
+//   },
+//   {
+//     title: "台東熱氣球嘉年華",
+//     image: "https://picsum.photos/seed/s3/300/200",
+//     date: "8/14",
+//   },
+//   {
+//     title: "屏東海生館參訪",
+//     image: "https://picsum.photos/seed/s4/300/200",
+//     date: "7/31",
+//   },
+//   {
+//     title: "旗津海港美食團",
+//     image: "https://picsum.photos/seed/s5/300/200",
+//     date: "8/22",
+//   },
+//   {
+//     title: "東港黑鮪魚季",
+//     image: "https://picsum.photos/seed/s6/300/200",
+//     date: "9/07",
+//   },
+// ];
 
-// 東部測試資料
-const eastData = [
-  {
-    title: "花蓮七星潭之旅",
-    image: "https://picsum.photos/seed/e1/300/200",
-    date: "7/22",
-  },
-  {
-    title: "太魯閣國家公園健行",
-    image: "https://picsum.photos/seed/e2/300/200",
-    date: "8/01",
-  },
-  {
-    title: "台東池上稻田散策",
-    image: "https://picsum.photos/seed/e3/300/200",
-    date: "9/08",
-  },
-  {
-    title: "鹿野高台風景之旅",
-    image: "https://picsum.photos/seed/e4/300/200",
-    date: "8/27",
-  },
-  {
-    title: "宜蘭幾米公園拍照團",
-    image: "https://picsum.photos/seed/e5/300/200",
-    date: "9/14",
-  },
-  {
-    title: "蘇澳冷泉泡湯團",
-    image: "https://picsum.photos/seed/e6/300/200",
-    date: "7/28",
-  },
-  {
-    title: "三仙台日出之旅",
-    image: "https://picsum.photos/seed/e7/300/200",
-    date: "8/10",
-  },
-];
+// // 東部測試資料
+// const eastData = [
+//   {
+//     title: "花蓮七星潭之旅",
+//     image: "https://picsum.photos/seed/e1/300/200",
+//     date: "7/22",
+//   },
+//   {
+//     title: "太魯閣國家公園健行",
+//     image: "https://picsum.photos/seed/e2/300/200",
+//     date: "8/01",
+//   },
+//   {
+//     title: "台東池上稻田散策",
+//     image: "https://picsum.photos/seed/e3/300/200",
+//     date: "9/08",
+//   },
+//   {
+//     title: "鹿野高台風景之旅",
+//     image: "https://picsum.photos/seed/e4/300/200",
+//     date: "8/27",
+//   },
+//   {
+//     title: "宜蘭幾米公園拍照團",
+//     image: "https://picsum.photos/seed/e5/300/200",
+//     date: "9/14",
+//   },
+//   {
+//     title: "蘇澳冷泉泡湯團",
+//     image: "https://picsum.photos/seed/e6/300/200",
+//     date: "7/28",
+//   },
+//   {
+//     title: "三仙台日出之旅",
+//     image: "https://picsum.photos/seed/e7/300/200",
+//     date: "8/10",
+//   },
+// ];
+
+const northData = [];
+const westData = [];
+const southData = [];
+const eastData = [];
+//   {
+//     title: "花蓮七星潭之旅",
+//     image: "https://picsum.photos/seed/e1/300/200",
+//     date: "7/22",
+//   },
+
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${month}/${day}`;
+};
+
+function getRegionByCity(cityName) {
+  // console.log(cityName);
+
+  const regionMap = {
+    北部: ["基隆市", "台北市", "新北市", "桃園市", "新竹縣", "新竹市"],
+    東部: ["宜蘭縣", "花蓮縣", "台東縣"],
+    西部: ["苗栗縣", "台中市", "彰化縣", "雲林縣", "南投縣"],
+    南部: ["嘉義市", "嘉義縣", "台南市", "高雄市", "屏東縣"],
+  };
+
+  for (const region in regionMap) {
+    if (regionMap[region].includes(cityName)) {
+      return region;
+    }
+  }
+  return "未知區域";
+}
+console.log(FakeActivity);
+
+FakeActivity.forEach((item) => {
+  // title
+  // console.log(item.activity_name);
+
+  // 判斷區域
+  const targetRegion = getRegionByCity(item.location.slice(0, 3));
+
+  // image
+  // console.log(item.activity_img);
+
+  // date
+  const targetDate = formatDate(item.activity_start_date);
+
+  switch (targetRegion) {
+    case "北部":
+      northData.push({
+        no: item.activity_no,
+        title: item.activity_name,
+        image: item.activity_img,
+        date: targetDate,
+      });
+      break;
+    case "西部":
+      westData.push({
+        no: item.activity_no,
+        title: item.activity_name,
+        image: item.activity_img,
+        date: targetDate,
+      });
+      break;
+    case "南部":
+      southData.push({
+        no: item.activity_no,
+        title: item.activity_name,
+        image: item.activity_img,
+        date: targetDate,
+      });
+      break;
+    case "東部":
+      eastData.push({
+        no: item.activity_no,
+        title: item.activity_name,
+        image: item.activity_img,
+        date: targetDate,
+      });
+      break;
+  }
+});
 </script>
 
 <template>
@@ -552,89 +641,131 @@ const eastData = [
       <!-- 若要單純遮罩，則內容放這（決定在這） -->
       <h4 class="title">{{ currentRegion }}</h4>
       <!-- 北部區塊 -->
-      <Swiper
-        v-show="currentRegion === '北部'"
-        :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
-        :space-between="isMobile ? 10 : isTablet ? 20 : 30"
-        class="my-swiper"
+      <div v-show="northData.length && currentRegion === '北部'">
+        <Swiper
+          v-show="currentRegion === '北部'"
+          :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
+          :space-between="isMobile ? 10 : isTablet ? 20 : 30"
+          class="my-swiper"
+        >
+          <SwiperSlide v-for="(item, index) in northData" :key="index">
+            <router-link :to="`/activity/${item.no}`"
+              ><div class="item-card">
+                <div class="item-image" v-if="item.image">
+                  <img class="img" :src="item.image" :alt="item.title" />
+                </div>
+                <div class="item-image" v-else>
+                  <PlaceholderImageBg class="img" />
+                </div>
+                <span class="item-date_and_title"
+                  >{{ item.date }}&nbsp;{{ item.title }}</span
+                >
+              </div>
+            </router-link>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+      <div
+        v-show="!northData.length && currentRegion === '北部'"
+        class="no-data"
       >
-        <SwiperSlide v-for="(item, index) in northData" :key="index">
-          <div class="item-card">
-            <div class="item-image" v-if="item.image">
-              <img class="img" :src="item.image" :alt="item.title" />
-            </div>
-            <div class="item-image" v-else>
-              <PlaceholderImageBg class="img" />
-            </div>
-            <span class="item-date_and_title"
-              >{{ item.date }}&nbsp;{{ item.title }}</span
-            >
-          </div>
-        </SwiperSlide>
-      </Swiper>
+        尚無活動資訊
+      </div>
       <!-- 西部區塊 -->
-      <Swiper
-        v-show="currentRegion === '西部'"
-        :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
-        :space-between="isMobile ? 10 : isTablet ? 20 : 30"
-        class="my-swiper"
+      <div v-show="westData.length && currentRegion === '西部'">
+        <Swiper
+          v-show="currentRegion === '西部'"
+          :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
+          :space-between="isMobile ? 10 : isTablet ? 20 : 30"
+          class="my-swiper"
+        >
+          <SwiperSlide v-for="(item, index) in westData" :key="index">
+            <router-link :to="`/activity/${item.no}`"
+              ><div class="item-card">
+                <div class="item-image" v-if="item.image">
+                  <img class="img" :src="item.image" :alt="item.title" />
+                </div>
+                <div class="item-image" v-else>
+                  <PlaceholderImageBg class="img" />
+                </div>
+                <span class="item-date_and_title"
+                  >{{ item.date }}&nbsp;{{ item.title }}</span
+                >
+              </div>
+            </router-link>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+      <div
+        v-show="!westData.length && currentRegion === '西部'"
+        class="no-data"
       >
-        <SwiperSlide v-for="(item, index) in westData" :key="index">
-          <div class="item-card">
-            <div class="item-image" v-if="item.image">
-              <img class="img" :src="item.image" :alt="item.title" />
-            </div>
-            <div class="item-image" v-else>
-              <PlaceholderImageBg class="img" />
-            </div>
-            <span class="item-date_and_title"
-              >{{ item.date }}&nbsp;{{ item.title }}</span
-            >
-          </div>
-        </SwiperSlide>
-      </Swiper>
+        尚無活動資訊
+      </div>
+
       <!-- 東部區塊 -->
-      <Swiper
-        v-show="currentRegion === '東部'"
-        :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
-        :space-between="isMobile ? 10 : isTablet ? 20 : 30"
-        class="my-swiper"
+      <div v-show="eastData.length && currentRegion === '東部'">
+        <Swiper
+          v-show="currentRegion === '東部'"
+          :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
+          :space-between="isMobile ? 10 : isTablet ? 20 : 30"
+          class="my-swiper"
+        >
+          <SwiperSlide v-for="(item, index) in eastData" :key="index">
+            <router-link :to="`/activity/${item.no}`"
+              ><div class="item-card">
+                <div class="item-image" v-if="item.image">
+                  <img class="img" :src="item.image" :alt="item.title" />
+                </div>
+                <div class="item-image" v-else>
+                  <PlaceholderImageBg class="img" />
+                </div>
+                <span class="item-date_and_title"
+                  >{{ item.date }}&nbsp;{{ item.title }}</span
+                >
+              </div>
+            </router-link>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+      <div
+        v-show="!eastData.length && currentRegion === '東部'"
+        class="no-data"
       >
-        <SwiperSlide v-for="(item, index) in eastData" :key="index">
-          <div class="item-card">
-            <div class="item-image" v-if="item.image">
-              <img class="img" :src="item.image" :alt="item.title" />
-            </div>
-            <div class="item-image" v-else>
-              <PlaceholderImageBg class="img" />
-            </div>
-            <span class="item-date_and_title"
-              >{{ item.date }}&nbsp;{{ item.title }}</span
-            >
-          </div>
-        </SwiperSlide>
-      </Swiper>
+        尚無活動資訊
+      </div>
       <!-- 南部區塊 -->
-      <Swiper
-        v-show="currentRegion === '南部'"
-        :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
-        :space-between="isMobile ? 10 : isTablet ? 20 : 30"
-        class="my-swiper"
+      <div v-show="southData.length && currentRegion === '南部'">
+        <Swiper
+          v-show="currentRegion === '南部'"
+          :slides-per-view="isMobile ? 3.5 : isTablet ? 4.5 : 4.5"
+          :space-between="isMobile ? 10 : isTablet ? 20 : 30"
+          class="my-swiper"
+        >
+          <SwiperSlide v-for="(item, index) in southData" :key="index">
+            <router-link :to="`/activity/${item.no}`"
+              ><div class="item-card">
+                <div class="item-image" v-if="item.image">
+                  <img class="img" :src="item.image" :alt="item.title" />
+                </div>
+                <div class="item-image" v-else>
+                  <PlaceholderImageBg class="img" />
+                </div>
+                <span class="item-date_and_title"
+                  >{{ item.date }}&nbsp;{{ item.title }}</span
+                >
+              </div>
+            </router-link>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+      <div
+        v-show="!southData.length && currentRegion === '南部'"
+        class="no-data"
       >
-        <SwiperSlide v-for="(item, index) in southData" :key="index">
-          <div class="item-card">
-            <div class="item-image" v-if="item.image">
-              <img class="img" :src="item.image" :alt="item.title" />
-            </div>
-            <div class="item-image" v-else>
-              <PlaceholderImageBg class="img" />
-            </div>
-            <span class="item-date_and_title"
-              >{{ item.date }}&nbsp;{{ item.title }}</span
-            >
-          </div>
-        </SwiperSlide>
-      </Swiper>
+        尚無活動資訊
+      </div>
+
       <div class="region-mask">
         <!-- 若要有東西往下推的感覺，則內容放這 -->
         <!-- <div class="r"></div>
@@ -675,7 +806,7 @@ const eastData = [
     }
   }
   @include desktop() {
-    padding: 7.8% 0;
+    padding: 7show% 0;
   }
 }
 .taiwan-area-news {
@@ -810,6 +941,7 @@ const eastData = [
     font-size: $font-size-p;
     padding: 0 5px 0 5px;
     white-space: nowrap;
+    color: #000;
     overflow: hidden; /* 超出隱藏 */
     text-overflow: ellipsis; /* 超出用 ... 代替 */
     @include desktop() {
@@ -825,6 +957,17 @@ const eastData = [
   // .region-mask {
   //   transform: translateY(-100%);
   // }
+}
+.no-data {
+  @include flex-center();
+  font-size: 18px;
+  color: #afafaf;
+  @include tablet() {
+    font-size: 20px;
+  }
+  @include desktop() {
+    font-size: 24px;
+  }
 }
 // .taiwan-area {
 //   position: absolute;

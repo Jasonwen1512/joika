@@ -1,7 +1,7 @@
 export const FakeActivity = [
   {
     activity_no: "ACT00001",
-    activity_name: "8/31 嘉明湖 一次攻兩座百岳！",
+    activity_name: "嘉明湖 一次攻兩座百岳！",
     category_name: "登山",
     location: "台東縣海端鄉 嘉明湖",
     activity_img: "https://picsum.photos/seed/ACT0001/600/400",
@@ -25,7 +25,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00002",
-    activity_name: "8/15 小琉球 夜潛拍攝海龜生態",
+    activity_name: "小琉球 夜潛拍攝海龜生態",
     category_name: "水上活動",
     location: "屏東縣琉球鄉 小琉球海域",
     activity_img: "https://picsum.photos/seed/ACT0002/600/400",
@@ -49,7 +49,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00003",
-    activity_name: "8/20 大安桌遊店 狼人殺整夜狂歡局",
+    activity_name: "大安桌遊店 狼人殺整夜狂歡局",
     category_name: "桌遊",
     location: "台北市大安區 桌遊店",
     activity_img: "https://picsum.photos/seed/ACT0003/600/400",
@@ -72,7 +72,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00004",
-    activity_name: "8/10 陽明山 星空下的露營體驗",
+    activity_name: "陽明山 星空下的露營體驗",
     category_name: "露營",
     location: "台北市北投區 陽明山",
     activity_img: "https://picsum.photos/seed/ACT0004/600/400",
@@ -95,7 +95,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00005",
-    activity_name: "8/22 信義威秀 鐵達尼號重映之夜",
+    activity_name: "信義威秀 鐵達尼號重映之夜",
     category_name: "電影",
     location: "台北市信義區 信義威秀影城",
     activity_img: "https://picsum.photos/seed/ACT005/600/401",
@@ -118,7 +118,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00006",
-    activity_name: "8/12 華山文創園區 手作陶藝下午班",
+    activity_name: "華山文創園區 手作陶藝下午班",
     category_name: "手作",
     location: "台北市中正區 華山文創園區",
     activity_img: "https://picsum.photos/seed/ACT0006/600/401",
@@ -141,7 +141,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00007",
-    activity_name: "8/19 台中都會公園 晨間瑜伽舒展課",
+    activity_name: "台中都會公園 晨間瑜伽舒展課",
     category_name: "運動",
     location: "台中市北屯區 都會公園",
     activity_img: "https://picsum.photos/seed/ACT0007/600/401",
@@ -164,7 +164,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00008",
-    activity_name: "8/25 澎湖 北海岸SUP立槳初體驗",
+    activity_name: "澎湖 北海岸SUP立槳初體驗",
     category_name: "水上活動",
     location: "澎湖縣白沙鄉 北海岸",
     activity_img: "https://picsum.photos/seed/ACT0008/600/401",
@@ -187,7 +187,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00009",
-    activity_name: "8/28 宜蘭老街 在地美食散步聚餐",
+    activity_name: "宜蘭老街 在地美食散步聚餐",
     category_name: "聚餐",
     location: "宜蘭縣宜蘭市 宜蘭老街",
     activity_img: "https://picsum.photos/seed/ACT0009/600/402",
@@ -210,7 +210,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00010",
-    activity_name: "8/14 南投溪頭 森林浴文化體驗",
+    activity_name: "南投溪頭 森林浴文化體驗",
     category_name: "文化體驗",
     location: "南投縣鹿谷鄉 溪頭自然教育園區",
     activity_img: "https://picsum.photos/seed/ACT0010/600/402",
@@ -233,7 +233,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00011",
-    activity_name: "8/18 士林夜市 深夜小吃快閃團",
+    activity_name: "士林夜市 深夜小吃快閃團",
     category_name: "聚餐",
     location: "台北市士林區 士林夜市",
     activity_img: "https://picsum.photos/seed/ACT0011/600/402",
@@ -256,7 +256,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00012",
-    activity_name: "8/30 合歡山 夜衝觀星登山行",
+    activity_name: "合歡山 夜衝觀星登山行",
     category_name: "登山",
     location: "南投縣仁愛鄉 合歡山",
     activity_img: "https://picsum.photos/seed/ACT0012/600/402",
@@ -279,7 +279,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00013",
-    activity_name: "8/27 信義區 露天音樂表演之夜",
+    activity_name: "信義區 露天音樂表演之夜",
     category_name: "演出表演",
     location: "台北市信義區 四四南村廣場",
     activity_img: "https://picsum.photos/seed/ACT0013/600/403",
@@ -302,7 +302,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00014",
-    activity_name: "8/21 台北KTV 經典情歌大合唱",
+    activity_name: "台北KTV 經典情歌大合唱",
     category_name: "唱歌",
     location: "台北市信義區 KTV商圈",
     activity_img: "https://picsum.photos/seed/ACT0014/600/403",
@@ -325,7 +325,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00015",
-    activity_name: "8/17 花蓮七星潭 日出攝影團",
+    activity_name: "花蓮七星潭 日出攝影團",
     category_name: "其他",
     location: "花蓮縣新城鄉 七星潭",
     activity_img: "https://picsum.photos/seed/ACT0015/600/403",
@@ -348,7 +348,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00016",
-    activity_name: "8/29 木柵 貓空纜車文化散策",
+    activity_name: "木柵 貓空纜車文化散策",
     category_name: "文化體驗",
     location: "台北市文山區 貓空纜車站",
     activity_img: "https://picsum.photos/seed/ACT0016/600/403",
@@ -371,7 +371,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00017",
-    activity_name: "8/23 台中動漫展 Cosplay自由交流日",
+    activity_name: "台中動漫展 Cosplay自由交流日",
     category_name: "展覽",
     location: "台中市西屯區 臺中國際展覽館",
     activity_img: "https://picsum.photos/seed/ACT0017/600/404",
@@ -394,7 +394,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00018",
-    activity_name: "8/16 小巨蛋 Coldplay現場表演",
+    activity_name: "小巨蛋 Coldplay現場表演",
     category_name: "演出表演",
     location: "台北市松山區 台北小巨蛋",
     activity_img: "https://picsum.photos/seed/ACT0018/600/404",
@@ -417,7 +417,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00019",
-    activity_name: "8/13 花蓮富里 金針花季健行之旅",
+    activity_name: "花蓮富里 金針花季健行之旅",
     category_name: "登山",
     location: "花蓮縣富里鄉 六十石山",
     activity_img: "https://picsum.photos/seed/ACT0019/600/404",
@@ -440,7 +440,7 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00020",
-    activity_name: "8/22 高雄駁二 插畫市集週末逛展",
+    activity_name: "高雄駁二 插畫市集週末逛展",
     category_name: "展覽",
     location: "高雄市鹽埕區 駁二藝術特區",
     activity_img: "https://picsum.photos/seed/ACT0020/600/404",
