@@ -8,7 +8,8 @@ import konanImage from '@/assets/img/article/movie_konan.jpg';
 import ArticleDetail from "./article-detail.vue";
 import PreIcon from '@/assets/img/icon/pre-arrow.svg?url';
 import NextIcon from '@/assets/img/icon/next-arrow.svg?url';
-
+import articleimg from'@/assets/img/article/article-img.png?url';
+import Illustration from '@/components/article/Illustration.vue';
 //banner的跑馬燈
 
 
@@ -324,8 +325,13 @@ v-for="(article, index) in PaginatedArticles"
   <button class="next" @click="GoToNextPage" :disabled="IsLastPage">
     <img :src="NextIcon" alt="下一張箭頭" />
   </button>
-</div>
+</div> 
+<div class="decoration">
+    <Illustration />
+
+ </div>
 </main>
+
 </template>
 
 <style scoped lang="scss">
@@ -623,5 +629,10 @@ text-align: center;
 }
 
 }
-
+.decoration {
+    position: absolute;
+    bottom: 0px;
+    z-index: -999;
+    display: none;
+}
 </style>
