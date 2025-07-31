@@ -4,6 +4,7 @@
   import EditIcon from "@/assets/img/icon/edit.svg";
   import NotifyIcon from "@/assets/img/icon/notification.svg";
   import { ref } from 'vue'
+  import FullCalendar from "@/components/member/member-content/FullCalendar.vue";
 
   const activities = ['水上活動', '露營', '登山'];
 
@@ -82,7 +83,12 @@ const currentTab = ref('group')
           我是揪團頁
         </div>
         <div v-else-if="currentTab === 'calendar'">
-          我是行事曆頁
+          <div class="groups">
+            <p>下一個揪團</p>
+          </div>
+          <div class="calerdar">
+            <FullCalendar />
+          </div>
         </div>
         <div v-else-if="currentTab === 'post'">
           我是文章
@@ -187,13 +193,13 @@ const currentTab = ref('group')
 .tab-content{
   border: 2px solid $black;
   border-radius: 3px;
-  height: 500px;
-  padding: 20px;
+  padding: 15px;
 }
 
 @media (min-width: 768px) {
   .member-header{
-    width: 1200px;
+    width: 100%;
+    max-width: 1200px;
     border-radius: 6px;
     margin: 0 auto 100px;
     flex-direction: row;
@@ -211,6 +217,7 @@ const currentTab = ref('group')
       flex-direction: column;
       gap: 15px;
       align-items: flex-end;
+      background-color: $white;
     }
   }
 
@@ -226,8 +233,10 @@ const currentTab = ref('group')
   }
 
   .tab-content{
-    width: 1200px;
+    width: 100%;
+    max-width: 1200px;
     margin: auto;
+    padding: 50px;
   }
 
 

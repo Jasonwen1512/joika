@@ -69,4 +69,10 @@ h4 {
   font-size: $font-size-h4;
   font-weight: 400;
 }
+
+p{
+  font-family: "MyFont", sans-serif;
+  font-size: $font-size-p;
+  font-weight: 400;
+}
 </style>
