@@ -170,7 +170,7 @@ const categories = ["登山", "水上活動", "運動", "露營", "唱歌", "展
     </div>
     <div class="text-editor">
       <editor v-model="editorValue" :init="init" @onInit="handleEditorInit"></editor>
-      <P class="notice">請遵守社群規定，不得發表違規言論或進行違反法律之相關情事，如有違規需自負法律責任</P>
+      <p class="notice">請遵守社群規定，不得發表違規言論或進行違反法律之相關情事，如有違規需自負法律責任</p>
     
     </div>
 
