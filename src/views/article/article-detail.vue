@@ -37,21 +37,21 @@ const GetEventColor = (eventName) => {
 
 const comments = ref([
   {
-    id: 1,
+    userid: 'M0001',
     author: 'SunnyDive',
     avatar: 'https://i.pravatar.cc/150?u=sunnydive', // 假頭像，每次刷新會變
     timestamp: '2025/07/07 18:45',
     content: '我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！'
   },
   {
-    id: 2,
+    userid: 'M0002',
     author: 'kelly_travel',
     avatar: 'https://i.pravatar.cc/150?u=kellytravel',
     timestamp: '2025/07/07 20:13',
     content: '哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！'
   },
   {
-    id: 3,
+    userid: 'M0003',
     author: 'ocean_rookie',
     avatar: 'https://i.pravatar.cc/150?u=oceanrookie',
     timestamp: '2025/07/08 09:07',

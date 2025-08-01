@@ -201,7 +201,6 @@ const ula = () => {
   <img class="bg-img3" src="/src/assets/img/bg-decorate3.png" alt="背景圖黃">
 </div>
   <!-- 熱門文章頁 -->
-  <div>這是熱門文章頁</div>
   <!-- banner的跑馬燈 -->
     <section id="marquee">
     <div class="view">
