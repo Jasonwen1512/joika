@@ -232,10 +232,12 @@ const isLastCommentPage = computed(() => currentCommentPage.value === totalComme
       </button>
 
       <button class="next" @click="goToNextCommentPage" :disabled="isLastCommentPage">
-        >
+        
       </button>
     </div>
-
+<div class="inputbox">
+    <input class="my-comment" type="text" placeholder="留言" />
+</div>
 </section>
   </main>
 </template>
@@ -364,5 +366,17 @@ display: flex;
       color: #000;
     }
  
+}
+.my-comment {
+  background-color: #fff;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+main{
+  margin-block: 5vh;
 }
 </style>
