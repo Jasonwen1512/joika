@@ -7,6 +7,20 @@ const showOptions = ref(false)
 function toggleOptions() {
   showOptions.value = !showOptions.value
 }
+
+function copyMessage(e){
+  const messageText = e.target.closest('.chat-message').querySelector('.bubble')?.innerText;
+
+  if(messageText){
+    navigator.clipboard.writeText(messageText)
+    .then(() => {
+    console.log("複製成功");
+    })
+    .catch(err => {
+    console.error("複製失敗", err);
+    });
+  }
+}
 </script>
 
 <template>
@@ -39,7 +53,7 @@ function toggleOptions() {
             </button>
 
             <ul class="options-menu" :class="{ on: showOptions }">
-              <li><button>複製</button></li>
+              <li><button @click="copyMessage">複製</button></li>
               <li><button>檢舉</button></li>
             </ul>
           </div>  
@@ -385,6 +399,11 @@ function toggleOptions() {
     border-radius: 3px;
     order: 2;
     
+  }
+  .chat-box{
+    width: 80%;     
+    padding: 8px 12px;
+    font-size: 16px;
   }
   .chat-now-btns {             
   display: flex;
