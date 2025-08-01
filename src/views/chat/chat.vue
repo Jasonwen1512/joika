@@ -1,6 +1,12 @@
 <script setup>
+import { ref } from 'vue'
 import Button from "@/components/Button.vue";
 
+const showOptions = ref(false)
+
+function toggleOptions() {
+  showOptions.value = !showOptions.value
+}
 </script>
 
 <template>
@@ -24,7 +30,7 @@ import Button from "@/components/Button.vue";
             <p class="bubble">傻眼...昨天被阿瑄的團放鳥!!我一定要檢舉他</p>
           </div>
           <div class="more-options">
-            <button class="more-btn">
+            <button class="more-btn" @click="toggleOptions">
               <svg width="29" height="7" viewBox="0 0 29 7" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="25.5" cy="3.5" r="3" fill="#FADA7A" stroke="black"/>
               <circle cx="14.5" cy="3.5" r="3" fill="#FADA7A" stroke="black"/>
@@ -32,7 +38,7 @@ import Button from "@/components/Button.vue";
               </svg>
             </button>
 
-            <ul class="options-menu on">
+            <ul class="options-menu" :class="{ on: showOptions }">
               <li><button>複製</button></li>
               <li><button>檢舉</button></li>
             </ul>
@@ -267,9 +273,13 @@ import Button from "@/components/Button.vue";
   .chat-content{
     border: 2px solid black;
     background-color: #fff;
-    padding: 5px;
+    padding: 10px;
     border-radius: 3px;
     word-wrap: break-word;
+  }
+  .more-options{
+  display: flex;
+  align-items: end;
   }
   .options-menu{
     display: none;
@@ -279,62 +289,60 @@ import Button from "@/components/Button.vue";
   padding: 6px;
   margin: 0;
   position: absolute;
-  top: 80%;
-  right: -70px;
+  top: 90%;
+  right: -85px;
   border-radius: 6px;
   display: flex;
   flex-direction: column;
   gap: 6px;           
   min-width: 100px;
-  z-index: 10;
+  z-index: 3;
 }
-
 .options-menu li {
   display: block;
 }
-
 .options-menu li button {
   display: block;
   width: 100%;
-  padding: 8px 12px;
+  padding: 5px 10px;
   background: #fff;
   border: 2px solid black;   
   border-radius: 4px;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
   cursor: pointer;
 }
 
-  .chat-recommend-card{
-    position: relative;
-    border: 2px solid black;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-    justify-content: center;
-    background-image: url('/src/assets/img/chat/chat-card-bg.png');
-    border-radius: 3px;
-    width: 120%;
-    img{
-      width: 80px;
-      position: absolute;
-      top: -20px;
-      right: -20px;
-    }
+.chat-recommend-card{
+  position: relative;
+  border: 2px solid black;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center;
+  background-image: url('/src/assets/img/chat/chat-card-bg.png');
+  border-radius: 3px;
+  width: 120%;
+  img{
+    width: 80px;
+    position: absolute;
+    top: -20px;
+    right: -20px;
   }
-  .chat-card{
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin-bottom: 10px; 
-    gap: 5px;
-  }
-  .chat-card-content{
-    display: inline-block;
-    width: 15ch; 
-    word-break: break-all;
-  }
+}
+.chat-card{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 10px; 
+  gap: 5px;
+}
+.chat-card-content{
+  display: inline-block;
+  width: 15ch; 
+  word-break: break-all;
+}
 
 //chat-other-end
 
@@ -417,8 +425,8 @@ import Button from "@/components/Button.vue";
     }
     .lines {
       width: 40px;
-      left: 22vh;
-      bottom: 34vh;
+      left: 19vh;
+      bottom: 31vh;
     }
     .chat-recommend-card{
       width: 120%;
