@@ -110,8 +110,10 @@ function copyMessage(e){
     </div>
 
     <div class="megaphone-box">
-      <img src="/src/assets/img/chat/megaphone-man.png" alt="擴音器人物圖" class="person">
-      <img src="/src/assets/img/chat/megaphone-line.png" alt="擴音器線條圖" class="lines">
+      <div class="megaphone-wrap">
+        <img src="/src/assets/img/chat/megaphone-man.png" alt="擴音器人物圖" class="person">
+        <img src="/src/assets/img/chat/megaphone-line.png" alt="擴音器線條圖" class="lines">
+      </div>
     </div>
 
   <!-- 輸入框 -->
@@ -212,31 +214,30 @@ function copyMessage(e){
     }
   }
 
-  .megaphone-box {
-    position: absolute; 
-    bottom: 0;
-    left: 0;
-    z-index: 0;
-    }
+.megaphone-box {
+  position: relative;
+}
 
-  .person {
-    width: 150px; 
-    display: block;
-    position: absolute;
-    bottom: 12vh;
-    left: -3vh;
-    z-index: 0;
-  }
+.megaphone-wrap {
+  position: absolute;
+  bottom: 5px;
+  left: -10px;
+  width: fit-content;
+}
 
-  .lines {
-    position: absolute;
-    left: 14vh;
-    bottom: 28vh;
-    z-index: 0;
-    width: 30px;    
-    animation: blink 1s infinite;
-    transform-origin: left center; 
-  }
+.person {
+  width: 130px;
+  display: block;
+}
+
+.lines {
+  position: absolute;
+  top: 4px;  
+  left: 130px; 
+  width: 25px;
+  animation: blink 1s infinite;
+  z-index: 1;  
+}
 
   @keyframes blink {
     0%, 100% { opacity: 0; transform: scale(0.5); }
@@ -357,7 +358,6 @@ function copyMessage(e){
   width: 15ch; 
   word-break: break-all;
 }
-
 //chat-other-end
 
 //chat-me-start
@@ -440,12 +440,11 @@ function copyMessage(e){
     }
     .person{
       width: 180px;
-      bottom: 10vh;
     }
     .lines {
       width: 40px;
-      left: 19vh;
-      bottom: 31vh;
+      left: 175px;
+      top: 0;
     }
     .chat-recommend-card{
       width: 120%;
