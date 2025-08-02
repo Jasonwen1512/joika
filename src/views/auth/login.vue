@@ -2,8 +2,17 @@
 import { reactive,ref } from "vue";
 import Button from "@/components/Button.vue";
 import CaptchaBox from "@/components/auth/CaptchaBox.vue";
+import { useRouter } from 'vue-router'
+import { watch } from 'vue'
 
+const realCaptcha = ref('') // 接住 emit 的驗證碼
+const router = useRouter()
 const captchaRef = ref(null);
+const error = reactive({
+  mobile: "",
+  password: "",
+  verifyCode: ""
+})
 
 // 使用 reactive 建立一個響應式的表單資料物件
 const form = reactive({
@@ -12,16 +21,70 @@ const form = reactive({
   verifyCode: "",
 }); 
 
-// 定義表單提交的處理函式
+// 假資料帳號密碼
+const mockUser = {
+  mobile: '0912345678',
+  password: '1234',
+}
+
+// 即時輸入清除錯誤
+watch(() => form.mobile, val => {
+  if (error.mobile && val) error.mobile = ''
+})
+watch(() => form.password, val => {
+  if (error.password && val) error.password = ''
+})
+watch(() => form.verifyCode, val => {
+  if (error.verifyCode && val) error.verifyCode = ''
+})
+
 const handleLogin = () => {
-  // 在這裡處理登入邏輯，例如發送 API 請求
-  // 目前先在控制台印出表單資料
-  console.log("表單已提交:", {
-    mobile: form.mobile,
-    password: form.password,
-    verifyCode: form.verifyCode,
-  });
-};
+  // 清空錯誤
+  error.mobile = ''
+  error.password = ''
+  error.verifyCode = ''
+
+  let hasError = false
+
+  if (!form.mobile) {
+    error.mobile = '請輸入手機號碼'
+    hasError = true
+  }
+
+  if (!form.password) {
+    error.password = '請輸入密碼'
+    hasError = true
+  }
+
+  if (!form.verifyCode) {
+    error.verifyCode = '請輸入驗證碼'
+    hasError = true
+  }
+
+  // 提早返回，防止空值比對
+  if (hasError) return
+
+  // 驗證帳密與驗證碼
+  if (form.mobile !== mockUser.mobile) {
+    error.mobile = '手機號碼錯誤'
+    hasError = true
+  }
+
+  if (form.password !== mockUser.password) {
+    error.password = '密碼錯誤'
+    hasError = true
+  }
+
+  if (form.verifyCode.toLowerCase() !== realCaptcha.value.toLowerCase()) {
+  error.verifyCode = '驗證碼錯誤'
+  hasError = true
+}
+
+  if (hasError) return
+
+  // 通過所有驗證 → 導頁
+  router.push('/member/member-content')
+}
 </script>
 
 <template>
@@ -32,32 +95,39 @@ const handleLogin = () => {
 
         <div class="form-group">
           <label for="mobile">手機</label>
-          <input type="tel" id="mobile" v-model="form.mobile" />
+          <input type="tel" id="mobile" @blur="validateMobile" v-model="form.mobile" />
+          <p class="error-msg" v-if="error.mobile">{{error.mobile}}</p>
+
         </div>
 
         <div class="form-group">
           <label for="password">密碼</label>
           <input type="password" id="password" v-model="form.password" />
+          <p class="error-msg" v-if="error.password">{{error.password}}</p>
         </div>
 
         <div class="form-group">
           <label for="verify-code">驗證碼</label>
-          <div class="verification-group">
-            <input type="text" id="verify-code" v-model="form.verifyCode" />
-            <CaptchaBox ref="captchaRef" />
-            <!-- <FontAwesomeIcon
-              :icon="byPrefixAndName.fas['arrow-rotate-left']"
-              class="refresh-icon"
-              @click="captchaRef?.refreshCode()"
-            /> -->
+          <div class="captcha-input-wrapper">
+            <input type="text" id="verify-code" v-model="form.verifyCode"/>
+            <div class="captcha-overlay">
+              <CaptchaBox @updateIdentifyCode="val => realCaptcha = val" ref="captchaRef" />
+            </div>
+            <div class="captcha-icon-wrapper">
+              <font-awesome-icon
+                :icon="['fas', 'arrow-rotate-right']"
+                class="captcha-refresh"
+                @click="captchaRef?.refreshCode()" />
+            </div>
           </div>
+          <p class="error-msg" v-if="error.verifyCode">{{error.verifyCode}}</p>
         </div>
 
         <a href="#" class="forgot-password">忘記密碼</a>
 
         <div class="button-group">
-          <Button size="md" theme="info">註冊</Button>
-          <Button size="md" theme="primary">登入</Button>
+          <Button size="md" theme="info" type="button">註冊</Button>
+          <Button size="md" theme="primary" type="submit">登入</Button>
         </div>
       </form>
     </div>
@@ -79,26 +149,26 @@ const handleLogin = () => {
 .login-page::before {
   content: "";
   position: absolute;
-  background-image: url("/src/assets/img/bg-decorate5.png");
+  background-image: url("@/assets/img/bg-decorate5.png");
   background-size: contain;
   background-repeat: no-repeat;
-  width: 200px;
-  height: 200px;
+  width: 150px;
+  aspect-ratio: 334 / 591;
   top: -20px;
-  left: -50px;
+  left: 0px;
   z-index: -1;
 }
 
 .login-page::after {
   content: "";
   position: absolute;
-  background-image: url("/src/assets/img/bg-decorate7.png");
+  background-image: url("@/assets/img/bg-decorate7.png");
   background-size: contain;
   background-repeat: no-repeat;
-  width: 200px;
-  height: 200px;
-  bottom: -100px;
-  right: -50px;
+  aspect-ratio: 406 / 518;
+  width: 150px;
+  bottom: -50px;
+  right:0;
   z-index: -1;
 }
 
@@ -143,20 +213,34 @@ const handleLogin = () => {
     }
   }
 
-  .verification-group {
+  .captcha-input-wrapper {
     display: flex;
     align-items: center;
     gap: 10px;
 
     input#verify-code {
-      width: 150px;
+      flex: 1;
     }
 
-    .verification-code-box {
-      background-color: #e0e0e0;
-      border-radius: 4px;
-      flex-shrink: 1;
+    .captcha-overlay {
+      flex: 0 0 auto;
+      height: 100%;
+
+      canvas {
+        height: 100%;
+        width: 100px;
+        object-fit: cover;
+        display: block;
+      }
     }
+  }
+
+  .captcha-icon-wrapper{
+    display: flex;
+    justify-content: flex-end;
+  }
+  .captcha-refresh{
+    color: #81bfda;
   }
 
   .forgot-password {
@@ -175,6 +259,11 @@ const handleLogin = () => {
     display: flex;
     justify-content: space-between;
     gap: 15px;
+
+    button {
+      flex: 1 1 120px;
+      max-width: 100%;
+    }
   }
 }
 
@@ -190,25 +279,19 @@ const handleLogin = () => {
       margin-bottom: 30px;
     }
 
-    // .button-group {
-    //   display: flex;
-    //   justify-content:center;
-    //   gap: 100px;
-    // }
+    .button-group {
+      display: flex;
+      justify-content:center;
+      gap: 100px;
+    }
   }
 
   .login-page::before {
-    top: 0px;
-    left: -300px;
-    width: 700px;
-    height: 400px;
+    width: 200px;
   }
 
   .login-page::after {
-    bottom: 0px;
-    right: 0px;
-    width: 700px;
-    height: 400px;
+    width: 200px;
   }
 }
 </style>

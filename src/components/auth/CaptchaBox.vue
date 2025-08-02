@@ -141,11 +141,19 @@ import { ref, onMounted, watch } from "vue"
 </template>
 
 <style scoped>
-    .s-canvas {
-    width: fit-content;
+.s-canvas {
+    width: 100%;
+    height: 100%;
     cursor: pointer;
     border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-    }
+    display: flex;
+}
+
+canvas {
+    width: 100% ;
+    height: 100% ;
+    display: block;
+}
 </style>
