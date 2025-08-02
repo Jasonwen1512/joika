@@ -224,14 +224,16 @@ const setSizes = () => {
   isMobile.value = currentScreenWidth < 768;
 
   if (isMobile.value) {
+    // 顯示張數
     slidesToShow.value = 1;
     slideGap.value = viewportWidth * 0.05;
     centerOffset.value = 0;
     itemWidth.value = viewportWidth * 0.75;
   } else {
-    slidesToShow.value = 6;
+    // 電腦版顯示五張
+    slidesToShow.value = 5;
     slideGap.value = isMobile.value ? viewportWidth * 0.02 : 0; // ← 減少 gap
-    centerOffset.value = Math.floor(slidesToShow.value / 2) - 1;
+    centerOffset.value = Math.floor(slidesToShow.value / 2);
     itemWidth.value =
       (viewportWidth - (slidesToShow.value - 1) * slideGap.value) /
       slidesToShow.value;
@@ -264,7 +266,7 @@ const setSizes = () => {
     gsap.set(item, {
       width: itemWidth.value,
       // 自訂卡片高度
-      height: isMobile.value ? 380 : 560,
+      height: isMobile.value ? 380 : 550,
       marginRight: slideGap.value,
     })
   );
@@ -282,6 +284,16 @@ const setSizes = () => {
 
   // ✅ === 步驟 2：在所有尺寸和位置都設定好後，重新啟動無限循環 ===
   delayedLoop = gsap.delayedCall(2, playInfiniteLoop);
+
+  const initialIndex = 1; // ← 從第 2 張開始
+  currentIndex.value = initialIndex;
+
+  const initialOffset = totalMoveWidth.value * initialIndex;
+  wrapperX.value = isMobile.value
+    ? (swiperContainer.value.offsetWidth - itemWidth.value) / 2 - initialOffset
+    : -initialOffset;
+
+  gsap.set(wrapper.value, { x: wrapperX.value });
 };
 
 const playInfiniteLoop = () => {
@@ -297,9 +309,9 @@ const playInfiniteLoop = () => {
     onComplete: () => {
       currentIndex.value++;
       if (currentIndex.value >= slideData.value.length) {
+        currentIndex.value = 0;
         wrapperX.value += slideData.value.length * totalMoveWidth.value;
         gsap.set(wrapper.value, { x: wrapperX.value });
-        currentIndex.value = 0;
       }
 
       const animationTargetIndex = currentIndex.value + centerOffset.value;
@@ -503,7 +515,7 @@ $breakpoint-tablet: 768px;
 
 .card-content-wrapper {
   width: 90%;
-  height: 90%;
+  height: 100%;
   border-radius: 12px;
   position: relative;
   transform-origin: center center;

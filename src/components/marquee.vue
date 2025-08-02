@@ -200,4 +200,10 @@ onBeforeUnmount(() => {
   display: inline-block;
   width: 2rem;
 }
+@media screen and (max-width: 767px) {
+  .marquee-wrapper {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+}
 </style>

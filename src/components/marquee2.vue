@@ -120,7 +120,7 @@ onBeforeUnmount(() => {
   font-weight: 700;
 }
 .marquee-wrapper {
-  margin-top: 100px;
+  margin-top: 50px;
   margin-bottom: 70px;
   overflow: hidden;
   white-space: nowrap;
@@ -167,5 +167,11 @@ onBeforeUnmount(() => {
 .tag-spacer {
   display: inline-block;
   width: 2rem;
+}
+@media screen and (max-width: 767px) {
+  .marquee-wrapper {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
 }
 </style>

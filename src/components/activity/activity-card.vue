@@ -74,7 +74,7 @@ const titleDate = computed(() => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  margin: 45px 5px;
+  margin: 25px 5px;
   min-height: 390px;
   padding: 0 15px;
   color: black;
@@ -97,7 +97,7 @@ const titleDate = computed(() => {
   }
 
   @include tablet() {
-    margin: 45px 0;
+    margin: 45px 5px;
   }
   @include desktop() {
   }

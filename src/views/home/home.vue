@@ -411,7 +411,7 @@ h1 {
   position: relative;
   z-index: 2;
   text-align: center;
-  margin-top: 55px;
+  margin-top: 140px;
 }
 .index-section-start {
   display: flex;
@@ -436,8 +436,10 @@ h1 {
 }
 .home-Carousel {
   position: relative;
-  height: 700px;
+  height: 600px;
   z-index: 2;
+  overflow: visible;
+  margin-top: 40px;
 }
 
 .first-section {
@@ -555,10 +557,18 @@ h1 {
   z-index: 2;
 }
 .recommendations-swiper {
+  height: 320px;
   padding: 20px 0;
   .swiper-slide {
+    width: 200px !important;
     display: flex;
     justify-content: center;
+    @include tablet() {
+      width: 300px !important;
+    }
+  }
+  @include desktop() {
+    height: 350px;
   }
 }
 
@@ -603,8 +613,12 @@ h1 {
 
 @media screen and (max-width: 767px) {
   h1 {
-    margin-top: 50px;
+    margin-top: 0px;
     font-size: $font-size-h2;
+  }
+  .index-section-start {
+    margin-top: 10px;
+    margin-bottom: 25px;
   }
   .card-grid {
     display: grid;
@@ -621,6 +635,7 @@ h1 {
   }
 
   .bg-img2 {
+    top: -140%;
     width: 50%;
   }
 

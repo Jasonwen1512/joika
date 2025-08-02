@@ -45,11 +45,15 @@ select {
     padding-top: $header-h-d;
   }
 }
+html {
+  overflow-x: hidden;
+}
 body {
   background-image: url("@/assets/img/bgc.jpg");
   background-repeat: repeat;
   background-size: auto;
   background-position: top left;
+  overflow-x: hidden;
 }
 h1 {
   font-family: "MyFont", sans-serif;
