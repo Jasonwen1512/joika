@@ -26,7 +26,19 @@ const generalNotifications = ref([
     title: '有人回覆你的留言',
     content:'這次的爬山活動真的很不錯，天氣也很剛好.....',
     expanded: false
-  }
+  },
+  {
+    id: 4,
+    title: '有人回覆你的留言',
+    content:'這次的桌遊活動真的很好玩，認識很多新朋友.....',
+    expanded: false
+  },
+  {
+    id: 5,
+    title: '你的文章有新留言',
+    content:'7/6 墾丁初學潛水團',
+    expanded: false
+  },
 ])
 
 // 展開/收合
@@ -156,8 +168,28 @@ function toggleAccordion(list, item) {
 }
 
 .notify-detail{
-  padding: 8px;
+  padding: 8px 12px 8px 8px;
 }
+
+//捲軸
+.tab-content {
+  max-height: 300px;
+  overflow-y: overlay;
+  scrollbar-width:thin;
+  scrollbar-color: $color-secondary #E0F3F8;
+}
+.tab-content::-webkit-scrollbar {
+  width: 8px;
+}
+.tab-content::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+}
+.tab-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #81BFDA, #4F8DA8);
+  border-radius: 8px;
+}
+//桌機版
 @include desktop{
   .notify-tabs{
     width: 70%;
