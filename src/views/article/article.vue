@@ -356,7 +356,11 @@ body{
 
 
 #marquee .view {
-  overflow: hidden;
+ overflow-x: hidden;     
+  overflow-y: visible;    
+  padding-bottom: 60px;  
+  
+  width: 100%;
   width: 100%;
 }
 
@@ -366,36 +370,66 @@ body{
   animation: marquee 60s linear infinite;
 }
 
+.article-link{
+  flex: 1;
+  display: flex;
+    justify-content: center;
+}
+
 .pic {
-  padding: 20px;
-    flex-shrink: 0;
-    width: 300px;
-    height: 300px;
-    margin-right: 25px;
-    color: #000000;
-    display: flex;
-    justify-content: space-evenly;
-    text-align: center;
-    border-radius: 6px;
-    align-items: center;
-    flex-direction: column;
+  margin-top: 8vh;
+  padding: 20px 20px 0 20px; /* 移除 bottom padding，上方和左右留白照舊 */
+  flex-shrink: 0;
+  width: 250px;
+  height: 250px;
+  margin-right: 25px;
+  color: #000000;
+  display: flex;
+  justify-content: center; /* 水平置中圖片 */
+  align-items: flex-end;   /* 將圖片對齊底部 */
+  text-align: center;
+  border-radius: 6px;
+ 
+  /* 加上這兩個屬性，確保效果能正常顯示 */
+  position: relative; /* 為了更好地控制子元素的位置 */
+  overflow: visible;  /* 明確設定 overflow，雖然這是預設值 */
 }
 
 .pic img {
     width: 120%;
     height: auto;
-    object-fit: cover;
-    overflow: visible;
-    transform: scale(0.8);
-    transition: transform 0.5s ease, width 0.5s ease;
+    object-fit: contain; 
+      margin-bottom: 10px;
+
+    transform: scale(0.9); 
+    transition: all 0.5s ease;
+    z-index: 3;
 }
+
 .pic img:hover {
-  width: 100%;
-  height: auto;
-  transform: scale(1);
-
+  margin-bottom: 20px;
+  transform: scale(1.3);
 }
+.pic::after {
+  content: ''; /* 偽元素必需的屬性 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 
+ background: radial-gradient(
+    ellipse at 50% 100%,
+    rgb(223, 251, 255) 0%,  
+    transparent 60%               
+  );
+ 
+clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
+  /* 預設透明，並設定過渡效果 */
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  pointer-events: none;
+}
 @keyframes marquee {
   0% {
     transform: translateX(0);
@@ -404,7 +438,9 @@ body{
     transform: translateX(-33.3333%);
   }
 }
-
+.pic:hover::after {
+  opacity: 1; /* 滑鼠移入時，讓聚光燈的透明度變為 1 (完全可見) */
+}
 /*.banner {
   width: 100%;
 }
@@ -442,6 +478,8 @@ body{
 .category-list {
   display: flex;
   gap: 10px;
+  flex: 3;
+      flex-wrap: wrap;
  
 }
 .title {
@@ -457,9 +495,13 @@ section.article-category {
 }
 
 main.artic {
-  max-width: 1200px;
-  align-content: center;
-  margin: auto;
+ max-width: 1200px;
+    align-content: center;
+    margin: 0 auto 6vh;
+    background: white;
+    padding: 20px;
+    border: 3px solid;
+    border-radius: 6px;
 }
 hr {
   margin-block: 5vh;
