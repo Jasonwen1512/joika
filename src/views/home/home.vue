@@ -28,8 +28,7 @@ const slideData = ref([
   { cardBase: new URL('@/assets/img/index-img/carousel/night-showtime.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/starlight-night.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/lee.png', import.meta.url).href },
   { cardBase: new URL('@/assets/img/index-img/carousel/ktv-night.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/ktv-room.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/sam.png', import.meta.url).href },
 ]);
-
-
+//推薦揪團分類輪播
 const items = [
   {
     name: "水上活動",
@@ -99,8 +98,8 @@ const items = [
 </script>
 
 <template>
-  <Carousel :slides="slideData" />
-
+  <Carousel :slides="slideData" class="home-Carousel"/>
+  <h1>JOIKA 一起玩吧</h1>
   <Marquee2 />
   <!-- 限時揪團區塊 -->
   <img class="bg-img" src="/src/assets/img/bg-decorate1.png" alt="背景圖黃" />
@@ -226,6 +225,9 @@ const items = [
           ——因為我們都在找，願意一起行動的那一咖。
           <br /><br />
         </p>
+        <div class="floating">
+          <img src="/src/assets/img/index-img/float.png" alt="浮動圖" />
+        </div>
       </div>
     </div>
     <img
@@ -239,12 +241,16 @@ const items = [
       alt="背景圖深藍"
     />
   </div>
-  <div class="floating">
-    <img src="/src/assets/img/index-img/float.png" alt="浮動圖" />
-  </div>
+  
 </template>
 
 <style scoped lang="scss">
+h1{
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-top: 30px;
+}
 .index-section-start {
   display: flex;
   justify-content: center;
@@ -255,6 +261,10 @@ const items = [
   }
   margin-top: 50px;
   margin-bottom: 50px;
+  position: relative;
+  z-index: 2;
+}
+.home-Carousel{
   position: relative;
   z-index: 2;
 }
@@ -289,7 +299,7 @@ const items = [
 
 .bg-img3 {
   position: absolute;
-  top: 90%;
+  top: 35%;
   right: 0;
   width: 15%;
   z-index: 1;
@@ -342,8 +352,8 @@ const items = [
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
   width: 300px;
   position: absolute;
-  right: 30px;
-  top: 3750px;
+  right:-250px;
+  bottom: 0;
   z-index: 2;
 }
 
@@ -428,10 +438,17 @@ const items = [
 }
 
 @media screen and (max-width: 767px) {
+  h1{
+    margin-top: 50px;
+  }
   .card-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     justify-items: center;
+  }
+
+  .card-grid > *:nth-child(n+5) {
+    display: none;
   }
 
   .bg-img {
@@ -443,7 +460,7 @@ const items = [
   }
 
   .bg-img3 {
-    top: 40%;
+    top: 28%;
     width: 50%;
   }
 
@@ -462,15 +479,15 @@ const items = [
   }
 
   .floating img {
-    top:1150vh;
-    width: 50%;
+    top:750px;
+    right: 0;
+    width: 45%;
     z-index: 2;
   }
 
   .introduction {
-    max-width: 300px;
+    max-width: 400px;
     margin-bottom: 150px;
-    margin-left: 0;
   }
 
   .bg-img8 {
@@ -509,6 +526,7 @@ const items = [
   }
   .introduction {
     margin-bottom: 200px;
+    position: relative;
   }
   .bg-img5 {
     position: absolute;
@@ -521,7 +539,8 @@ const items = [
   }
 
   .floating img {
-    top: 5950px;
+    bottom: 0;
+    right: 0;
     width: 30%;
   }
 }
