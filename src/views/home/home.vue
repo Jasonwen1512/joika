@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'; // 引入 ref
 import AtivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Marquee from "@/components/marquee.vue";
@@ -8,7 +9,26 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import { FreeMode, Pagination } from "swiper/modules";
+// === 1. 引入我們做好的輪播元件 ===
+import Carousel from '@/components/carousel.vue';
 const modules = [FreeMode, Pagination];
+
+// === 2. 準備輪播元件需要的資料 (slideData) ===
+const slideData = ref([
+  { cardBase: new URL('@/assets/img/index-img/carousel/diving-with-fish.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/undersea-stroll.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/diving.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/happy-movie-day.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/ticket-booth.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/movie.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/basketball-girl.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/sunny-court.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/sports.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/mountain-buddies.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/morning-mountains.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/hiking-buddy.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/camping-moments.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/mountain-tent.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/camping.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/board-game-time.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/game-corner.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/board-game-champ.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/strolling-the-gallery.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/immersed-in-art.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/exhibition-visitor.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/dinner-with-friends.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/food-time-friends.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/jack.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/happy-art-class.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/creative-craft-corner.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/art-sharing-moment.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/romantic-wish.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/wishful-night.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/annie.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/night-showtime.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/starlight-night.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/lee.png', import.meta.url).href },
+  { cardBase: new URL('@/assets/img/index-img/carousel/ktv-night.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/ktv-room.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/sam.png', import.meta.url).href },
+]);
+
 
 const items = [
   {
@@ -79,6 +99,8 @@ const items = [
 </script>
 
 <template>
+  <Carousel :slides="slideData" />
+
   <Marquee2 />
   <!-- 限時揪團區塊 -->
   <img class="bg-img" src="/src/assets/img/bg-decorate1.png" alt="背景圖黃" />
@@ -440,7 +462,7 @@ const items = [
   }
 
   .floating img {
-    top:1430vh;
+    top:1150vh;
     width: 50%;
     z-index: 2;
   }

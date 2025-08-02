@@ -5,6 +5,7 @@ import { FakeActivity } from '@/assets/data/fake-activity';
 import Button from '@/components/Button.vue';
 import LikeButton from '@/components/activity/like-button.vue';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { ref } from "vue";
 
 const route = useRoute();
 const activityNo = route.params.activity_id;
@@ -12,6 +13,12 @@ const activityNo = route.params.activity_id;
 const activity = computed(() =>
   FakeActivity.find((item) => String(item.activity_no) === String(activityNo))
 );
+
+const likeMap = ref({});
+
+const toggleLike = (id) => {
+  likeMap.value[id] = !likeMap.value[id];
+};
 
 const aloha = () => {
   alert('我要跟團！');
@@ -38,7 +45,10 @@ const aloha = () => {
       <Button @click.stop.prevent="aloha" theme="primary" size="md">
         我要跟團!
       </Button>
-      <LikeButton />
+      <LikeButton
+      :isActive="likeMap[activity?.activity_no]"
+      @click.stop.prevent="toggleLike(activity?.activity_no)"
+      ></LikeButton>
     </div>
 
     <!-- 裝飾圖 -->
@@ -49,7 +59,6 @@ const aloha = () => {
     <!-- 🆕 改版後的資訊排版 -->
       
     <section class="activity-info">
-      <div class="info-divider"></div>
       <div class="info-grid">
         <!-- 左欄 -->
         <div class="info-col">
@@ -83,9 +92,6 @@ const aloha = () => {
           </div>
         </div>
       </div>
-
-      <!-- 底部橫線裝飾 -->
-      <div class="info-divider"></div>
     </section>
   </div>
 </template>
@@ -96,12 +102,15 @@ const aloha = () => {
 }
 
 .activity-hero-bg {
-  background: url("@/assets/img/activity/activity-detail/bg-blue-triangle.svg") no-repeat center / cover;
-  width: 100%;
-  height: 400px;
+  background-image: url("@/assets/img/activity/activity-detail/bg-blue-triangle.svg");
+  background-repeat: no-repeat;
+  background-size: 100% auto; 
+  background-position: center bottom; 
+  width: 100%;  
+  height: 320px;
 
   @include desktop() {
-    height: 600px;
+    height: 730px;
   }
 }
 
@@ -110,17 +119,18 @@ const aloha = () => {
   justify-content: center;
   align-items: center;
   margin-top: -240px;
+  
 
   img {
     width: 360px;
-    height: 205px;
+    height: 210px;
     object-fit: cover;
     border-radius: 8px;
 
     @include desktop() {
       width: 1030px;
       height: 660px;
-      margin-top: -200px;
+      margin-top: -240px;
     }
   }
 }
@@ -138,15 +148,26 @@ const aloha = () => {
     @include mobile() {
       font-size: 22px;
     }
+
+    @include desktop() {
+      position: absolute;
+      top: 110px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
   }
 }
 
 .activity-button-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
+  @include flex-center;
+  gap: 60px;
   margin: 24px 0;
+
+  @include mobile() {
+      gap: 25px;
+  }  
+
+
 }
 
 // ✅ 新排版樣式
@@ -160,8 +181,12 @@ const aloha = () => {
     flex-direction: column;
     gap: 24px;
     justify-content: space-between;
-
+    padding: 40px 0;
+    border: none;
+    
     @include desktop() {
+      border-top: 1px solid #000;
+      border-bottom: 1px solid #000;
       flex-direction: row;
     }
   }
@@ -187,35 +212,35 @@ const aloha = () => {
     }
 
     span {
+      padding-left: 70px;
       max-width: 70%;
       line-height: 1.5;
     }
-  }
-
-  .info-divider {
-    margin: 40px 0;
-    height: 1px;
-    background-color: #000;
   }
 }
 
 .bg-decorate2 {
   position: absolute;
-  bottom: 0;
+  top: 500px;
   left: 0;
-  z-index: -1;
-  margin-bottom: 240px;
-  transform: translateY(20%);
+  width: auto;
+  width: 50%;
+
+  @include mobile(){
+    z-index: -1;
+    margin-top: 150px;
+  }
+
+  @include tablet() {
+    top: 600px;
+    width: 20%;
+  }
 
   @include desktop() {
-    bottom: -40px;
-    left: -80px;
-    transform: none;
+    top: 400px;
+    width: 15%;
   }
 
-  @include mobile() {
-    margin-left: -40px;
-  }
 
 
   img {
@@ -228,3 +253,5 @@ const aloha = () => {
   }
 }
 </style>
+
+
