@@ -1,21 +1,177 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import gsap from 'gsap';
+import { ref, onMounted, onUnmounted } from "vue";
+import gsap from "gsap";
 
 // === Data ===
 const slideData = ref([
-  { cardBase: new URL('@/assets/img/index-img/carousel/diving-with-fish.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/undersea-stroll.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/diving.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/happy-movie-day.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/ticket-booth.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/movie.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/basketball-girl.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/sunny-court.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/sports.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/mountain-buddies.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/morning-mountains.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/hiking-buddy.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/camping-moments.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/mountain-tent.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/camping.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/board-game-time.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/game-corner.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/board-game-champ.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/strolling-the-gallery.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/immersed-in-art.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/exhibition-visitor.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/dinner-with-friends.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/food-time-friends.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/jack.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/happy-art-class.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/creative-craft-corner.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/art-sharing-moment.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/romantic-wish.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/wishful-night.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/annie.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/night-showtime.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/starlight-night.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/lee.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/ktv-night.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/ktv-room.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/sam.png', import.meta.url).href },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/diving-with-fish.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/undersea-stroll.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/diving.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/happy-movie-day.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/ticket-booth.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/movie.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/basketball-girl.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/sunny-court.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/sports.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/mountain-buddies.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/morning-mountains.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/hiking-buddy.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/camping-moments.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/mountain-tent.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/camping.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/board-game-time.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/game-corner.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/board-game-champ.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/strolling-the-gallery.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/immersed-in-art.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/exhibition-visitor.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/dinner-with-friends.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/food-time-friends.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/jack.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/happy-art-class.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/creative-craft-corner.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/art-sharing-moment.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/romantic-wish.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/wishful-night.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/annie.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/night-showtime.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/starlight-night.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/lee.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/ktv-night.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/ktv-room.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/sam.png",
+      import.meta.url
+    ).href,
+  },
 ]);
 
 // === Animation Constants ===
@@ -55,7 +211,9 @@ const setSizes = () => {
     gsap.killTweensOf(wrapper.value);
   }
   if (allItems && allItems.length > 0) {
-    const allAnimatedElements = gsap.utils.toArray('.card-content-wrapper, .card-base-image, .card-bg-patch, .card-char-floating');
+    const allAnimatedElements = gsap.utils.toArray(
+      ".card-content-wrapper, .card-base-image, .card-bg-patch, .card-char-floating"
+    );
     gsap.killTweensOf(allAnimatedElements);
   }
 
@@ -72,30 +230,44 @@ const setSizes = () => {
     itemWidth.value = viewportWidth * 0.75;
   } else {
     slidesToShow.value = 6;
-    slideGap.value = 20;
+    slideGap.value = isMobile.value ? viewportWidth * 0.02 : 0; // ← 減少 gap
     centerOffset.value = Math.floor(slidesToShow.value / 2) - 1;
-    itemWidth.value = (viewportWidth - (slidesToShow.value - 1) * slideGap.value) / slidesToShow.value;
+    itemWidth.value =
+      (viewportWidth - (slidesToShow.value - 1) * slideGap.value) /
+      slidesToShow.value;
   }
 
-  const originalSlides = wrapper.value.querySelectorAll('.swiper-slide:not(.clone)');
-  const clones = wrapper.value.querySelectorAll('.clone');
+  const originalSlides = wrapper.value.querySelectorAll(
+    ".swiper-slide:not(.clone)"
+  );
+  const clones = wrapper.value.querySelectorAll(".clone");
   clones.forEach((c) => c.remove());
 
-  const itemsToClone = Array.from(originalSlides).slice(0, slidesToShow.value * 2);
+  const itemsToClone = Array.from(originalSlides).slice(
+    0,
+    slidesToShow.value * 2
+  );
   itemsToClone.forEach((item) => {
     const clone = item.cloneNode(true);
-    clone.classList.add('clone');
+    clone.classList.add("clone");
     wrapper.value.appendChild(clone);
   });
-  allItems = gsap.utils.toArray('.swiper-slide');
+  allItems = gsap.utils.toArray(".swiper-slide");
 
   totalMoveWidth.value = itemWidth.value + slideGap.value;
 
   // 清除舊樣式，然後設定新樣式
-  gsap.set(allItems, { clearProps: 'all' });
-  gsap.set(wrapper.value, { clearProps: 'all' });
+  gsap.set(allItems, { clearProps: "all" });
+  gsap.set(wrapper.value, { clearProps: "all" });
 
-  allItems.forEach((item) => gsap.set(item, { width: itemWidth.value, marginRight: slideGap.value }));
+  allItems.forEach((item) =>
+    gsap.set(item, {
+      width: itemWidth.value,
+      // 自訂卡片高度
+      height: isMobile.value ? 380 : 560,
+      marginRight: slideGap.value,
+    })
+  );
   gsap.set(wrapper.value, { width: allItems.length * totalMoveWidth.value });
 
   if (isMobile.value) {
@@ -121,7 +293,7 @@ const playInfiniteLoop = () => {
   gsap.to(wrapper.value, {
     x: wrapperX.value,
     duration: moveDuration,
-    ease: 'power3.inOut',
+    ease: "power3.inOut",
     onComplete: () => {
       currentIndex.value++;
       if (currentIndex.value >= slideData.value.length) {
@@ -139,10 +311,10 @@ const playInfiniteLoop = () => {
         return;
       }
 
-      const cardWrapper = currentSlide.querySelector('.card-content-wrapper');
-      const baseImage = currentSlide.querySelector('.card-base-image');
-      const bgPatch = currentSlide.querySelector('.card-bg-patch');
-      const floatingChar = currentSlide.querySelector('.card-char-floating');
+      const cardWrapper = currentSlide.querySelector(".card-content-wrapper");
+      const baseImage = currentSlide.querySelector(".card-base-image");
+      const bgPatch = currentSlide.querySelector(".card-bg-patch");
+      const floatingChar = currentSlide.querySelector(".card-char-floating");
 
       if (!cardWrapper || !baseImage || !bgPatch || !floatingChar) {
         isAnimating = false;
@@ -152,33 +324,74 @@ const playInfiniteLoop = () => {
 
       const effectTl = gsap.timeline({
         onComplete: () => {
-          gsap.set([baseImage, bgPatch], { clearProps: 'opacity' });
-          gsap.set(floatingChar, { clearProps: 'transform,opacity,scale' });
+          gsap.set([baseImage, bgPatch], { clearProps: "opacity" });
+          gsap.set(floatingChar, { clearProps: "transform,opacity,scale" });
           isAnimating = false;
           playInfiniteLoop();
         },
       });
 
       effectTl
-        .addLabel('start', pauseBeforeAnimation)
-        .to(cardWrapper, { scale: 1.1, duration: scaleUpDuration, ease: 'back.out(1.4)' }, 'start')
-        .to(baseImage, { opacity: 0, duration: scaleUpDuration * 0.8, ease: 'power1.inOut' }, 'start')
-        .to(bgPatch, { opacity: 1, duration: scaleUpDuration * 0.8, ease: 'power1.inOut' }, 'start')
-        .fromTo(floatingChar, { opacity: 0, y: 0, scale: 0.6 }, {
-          opacity: 1, y: 140, scale: 0.9, duration: scaleUpDuration, ease: 'back.out(1.4)',
-        }, 'start+=0.15');
+        .addLabel("start", pauseBeforeAnimation)
+        .to(
+          cardWrapper,
+          { scale: 1.1, duration: scaleUpDuration, ease: "back.out(1.4)" },
+          "start"
+        )
+        .to(
+          baseImage,
+          { opacity: 0, duration: scaleUpDuration * 0.8, ease: "power1.inOut" },
+          "start"
+        )
+        .to(
+          bgPatch,
+          { opacity: 1, duration: scaleUpDuration * 0.8, ease: "power1.inOut" },
+          "start"
+        )
+        .fromTo(
+          floatingChar,
+          { opacity: 0, y: 0, scale: 0.6 },
+          {
+            opacity: 1,
+            y: 140,
+            scale: 0.9,
+            duration: scaleUpDuration,
+            ease: "back.out(1.4)",
+          },
+          "start+=0.15"
+        );
 
       const charMoveBack = scaleUpDuration;
       const charPause = 0.1;
       const charFade = 0.2;
 
       effectTl
-        .addLabel('end', `start+=${scaleUpDuration + pauseDuringScale}`)
-        .to(cardWrapper, { scale: 1, duration: scaleDownDuration, ease: 'power2.inOut' }, 'end')
-        .to(floatingChar, { y: 100, scale: 0.6, duration: charMoveBack, ease: 'power2.inOut' }, 'end')
-        .to(floatingChar, { opacity: 0, duration: charFade, ease: 'power1.inOut' }, `end+=${charMoveBack + charPause}`)
-        .to(bgPatch, { opacity: 0, duration: 0.3, ease: 'power1.inOut' }, `end+=${charMoveBack + charPause + charFade}`)
-        .to(baseImage, { opacity: 1, duration: 0.3, ease: 'power1.inOut' }, `end+=${charMoveBack + charPause + charFade}`);
+        .addLabel("end", `start+=${scaleUpDuration + pauseDuringScale}`)
+        .to(
+          cardWrapper,
+          { scale: 1, duration: scaleDownDuration, ease: "power2.inOut" },
+          "end"
+        )
+        .to(
+          floatingChar,
+          { y: 100, scale: 0.6, duration: charMoveBack, ease: "power2.inOut" },
+          "end"
+        )
+        .to(
+          floatingChar,
+          { opacity: 0, duration: charFade, ease: "power1.inOut" },
+          `end+=${charMoveBack + charPause}`
+        )
+        .to(
+          bgPatch,
+          { opacity: 0, duration: 0.3, ease: "power1.inOut" },
+          `end+=${charMoveBack + charPause + charFade}`
+        )
+        .to(
+          baseImage,
+          { opacity: 1, duration: 0.3, ease: "power1.inOut" },
+          `end+=${charMoveBack + charPause + charFade}`
+        );
     },
   });
 };
@@ -193,14 +406,14 @@ onMounted(() => {
 
   setTimeout(() => {
     setSizes(); // 首次初始化，會自動啟動循環
-    window.addEventListener('resize', debouncedSetSizes);
+    window.addEventListener("resize", debouncedSetSizes);
   }, 100);
 });
 
 onUnmounted(() => {
   // 移除監聽並清除所有計時器和動畫實例
   if (debouncedSetSizes) {
-    window.removeEventListener('resize', debouncedSetSizes);
+    window.removeEventListener("resize", debouncedSetSizes);
   }
   clearTimeout(resizeTimer);
 
@@ -216,13 +429,29 @@ onUnmounted(() => {
 <template>
   <div class="swiper" ref="swiperContainer">
     <div class="swiper-wrapper" ref="wrapper">
-      <div class="swiper-slide" v-for="(slide, index) in slideData" :key="index">
+      <div
+        class="swiper-slide"
+        v-for="(slide, index) in slideData"
+        :key="index"
+      >
         <div class="slide-content-holder">
           <div class="card-content-wrapper">
-            <img class="card-image card-base-image" :src="slide.cardBase" alt="卡片基礎圖">
-            <img class="card-image card-bg-patch" :src="slide.bgPatch" alt="背景補丁">
+            <img
+              class="card-image card-base-image"
+              :src="slide.cardBase"
+              alt="卡片基礎圖"
+            />
+            <img
+              class="card-image card-bg-patch"
+              :src="slide.bgPatch"
+              alt="背景補丁"
+            />
           </div>
-          <img class="card-image card-char-floating" :src="slide.charFloating" alt="浮出人物">
+          <img
+            class="card-image card-char-floating"
+            :src="slide.charFloating"
+            alt="浮出人物"
+          />
         </div>
       </div>
     </div>

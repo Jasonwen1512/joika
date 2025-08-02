@@ -1,162 +1,171 @@
 <script setup>
-import { computed } from 'vue'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const rawTags = [
-    {
-        text: '#JOIKA',
-        colors: ['#81BFDA', '#4F8DA8', '#FADA7A',  '#4F8DA8', '#FADA7A', '#4F8DA8']
-    },
-    {
-        text: '#JOIKA',
-        colors: ['#FB900C', '#4F8DA8', '#FADA7A',  '#4F8DA8', '#FADA7A', '#4F8DA8']
-    },
-    {
-        text: '#JOIKA',
-        colors:['#81BFDA', '#4F8DA8', '#FADA7A',  '#4F8DA8', '#FADA7A', '#4F8DA8']
-    },
-    {
-        text: '#JOIKA',
-        colors:  ['#FB400C', '#4F8DA8', '#FADA7A',  '#4F8DA8', '#FADA7A', '#4F8DA8']
-    },
-    {
-        text: '#JOIKA',
-        colors: ['#1FB92C', '#4F8DA8', '#FADA7A',  '#4F8DA8', '#FADA7A', '#4F8DA8']
-    },
-    {
-        text:'#JOIKA',
-        colors: ['#F315BB', '#4F8DA8', '#FADA7A',  '#4F8DA8', '#FADA7A', '#4F8DA8']
-    },
-    {   text:'#JOIKA',
-        colors: ['#FFE100', '#4F8DA8', '#FADA7A',  '#4F8DA8', '#FADA7A', '#4F8DA8']
-    },
-    {   text:'#JOIKA',
-        colors: ['#1A00FF', '#4F8DA8', '#FADA7A',  '#4F8DA8', '#FADA7A', '#4F8DA8']
-    }
-]
+  {
+    text: "#JOIKA",
+    colors: ["#81BFDA", "#4F8DA8", "#FADA7A", "#4F8DA8", "#FADA7A", "#4F8DA8"],
+  },
+  {
+    text: "#JOIKA",
+    colors: ["#FB900C", "#4F8DA8", "#FADA7A", "#4F8DA8", "#FADA7A", "#4F8DA8"],
+  },
+  {
+    text: "#JOIKA",
+    colors: ["#81BFDA", "#4F8DA8", "#FADA7A", "#4F8DA8", "#FADA7A", "#4F8DA8"],
+  },
+  {
+    text: "#JOIKA",
+    colors: ["#FB400C", "#4F8DA8", "#FADA7A", "#4F8DA8", "#FADA7A", "#4F8DA8"],
+  },
+  {
+    text: "#JOIKA",
+    colors: ["#1FB92C", "#4F8DA8", "#FADA7A", "#4F8DA8", "#FADA7A", "#4F8DA8"],
+  },
+  {
+    text: "#JOIKA",
+    colors: ["#F315BB", "#4F8DA8", "#FADA7A", "#4F8DA8", "#FADA7A", "#4F8DA8"],
+  },
+  {
+    text: "#JOIKA",
+    colors: ["#FFE100", "#4F8DA8", "#FADA7A", "#4F8DA8", "#FADA7A", "#4F8DA8"],
+  },
+  {
+    text: "#JOIKA",
+    colors: ["#1A00FF", "#4F8DA8", "#FADA7A", "#4F8DA8", "#FADA7A", "#4F8DA8"],
+  },
+];
 const colorfulLetters = computed(() => {
-    return rawTags.flatMap((tag, index) => {
-        const letterSpans = tag.text.split('').map((ch, i) => ({
-            ch,
-            color: tag.colors[i % tag.colors.length]
-        }));
-        return index < rawTags.length - 1 ? [...letterSpans, { ch: ' ', color: 'transparent' }] : letterSpans;
-    }).filter(item => item.ch !== '' || item.color === 'transparent'); 
+  return rawTags
+    .flatMap((tag, index) => {
+      const letterSpans = tag.text.split("").map((ch, i) => ({
+        ch,
+        color: tag.colors[i % tag.colors.length],
+      }));
+      return index < rawTags.length - 1
+        ? [...letterSpans, { ch: " ", color: "transparent" }]
+        : letterSpans;
+    })
+    .filter((item) => item.ch !== "" || item.color === "transparent");
 });
 
-const marqueeContent = ref(null)
+const marqueeContent = ref(null);
 
 function updateMarquee() {
-    const content = marqueeContent.value
-    const wrapperWidth = content.parentElement.offsetWidth
+  const content = marqueeContent.value;
+  const wrapperWidth = content.parentElement.offsetWidth;
 
-    while (content.children.length > 1) {
-        content.removeChild(content.lastChild)
-    }
+  while (content.children.length > 1) {
+    content.removeChild(content.lastChild);
+  }
 
-    while (content.scrollWidth < wrapperWidth * 2) {
-        const clone = content.children[0].cloneNode(true)
-        content.appendChild(clone)
-    }
-    }
+  while (content.scrollWidth < wrapperWidth * 2) {
+    const clone = content.children[0].cloneNode(true);
+    content.appendChild(clone);
+  }
+}
 
-    onMounted(() => {
-    updateMarquee()
-    window.addEventListener('resize', updateMarquee)
-    })
+onMounted(() => {
+  updateMarquee();
+  window.addEventListener("resize", updateMarquee);
+});
 
-    onBeforeUnmount(() => {
-    window.removeEventListener('resize', updateMarquee)
-})
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", updateMarquee);
+});
 </script>
 
 <template>
-    <div class="marquee-wrapper">
-        <div class="marquee-content"  ref="marqueeContent">
-            <div class="marquee-item">
-                <template v-for="(item, i) in colorfulLetters" :key="i">
-                    <span
-                        v-if="item.ch !== ' '"
-                        class="color-letter"
-                        :style="{ '--color': item.color }"
-                    >
-                        {{ item.ch }}
-                    </span>
-                    <span v-else class="tag-spacer"></span> </template>
-            </div>
-            <div class="marquee-item">
-                <template v-for="(item, i) in colorfulLetters" :key="'clone-' + i">
-                    <span
-                        v-if="item.ch !== ' '"
-                        class="color-letter"
-                        :style="{ '--color': item.color }"
-                    >
-                        {{ item.ch }}
-                    </span>
-                    <span v-else class="tag-spacer"></span> </template>
-            </div>
-        </div>
+  <div class="marquee-wrapper">
+    <div class="marquee-content" ref="marqueeContent">
+      <div class="marquee-item">
+        <template v-for="(item, i) in colorfulLetters" :key="i">
+          <span
+            v-if="item.ch !== ' '"
+            class="color-letter"
+            :style="{ '--color': item.color }"
+          >
+            {{ item.ch }}
+          </span>
+          <span v-else class="tag-spacer"></span>
+        </template>
+      </div>
+      <div class="marquee-item">
+        <template v-for="(item, i) in colorfulLetters" :key="'clone-' + i">
+          <span
+            v-if="item.ch !== ' '"
+            class="color-letter"
+            :style="{ '--color': item.color }"
+          >
+            {{ item.ch }}
+          </span>
+          <span v-else class="tag-spacer"></span>
+        </template>
+      </div>
     </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
 @font-face {
-    font-family: 'Baloo 2';
-    src: url('@/assets/fonts/Baloo2-Regular.woff2') format('woff2');
-    font-weight: 400;
+  font-family: "Baloo 2";
+  src: url("@/assets/fonts/Baloo2-Regular.woff2") format("woff2");
+  font-weight: 400;
 }
 
 @font-face {
-    font-family: 'Baloo 2';
-    src: url('@/assets/fonts/Baloo2-Bold.woff2') format('woff2');
-    font-weight: 700;
+  font-family: "Baloo 2";
+  src: url("@/assets/fonts/Baloo2-Bold.woff2") format("woff2");
+  font-weight: 700;
 }
 .marquee-wrapper {
-    margin-top: 80px;
-    margin-bottom: 50px;
-    overflow: hidden;          
-    white-space: nowrap;       
-    width: 100%;               
-    background-color: transparent; 
-    box-sizing: border-box;
-    position: relative;
-    z-index: 2;
+  margin-top: 100px;
+  margin-bottom: 70px;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  background-color: transparent;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 3;
 }
 .marquee-content {
-    display: inline-flex;           
-    animation: marquee-right 20s linear infinite; 
-    min-width: fit-content;
+  display: inline-flex;
+  animation: marquee-right 20s linear infinite;
+  min-width: fit-content;
 }
 
 .marquee-item {
-    margin: 0;
-    padding: 0;
-    flex-shrink: 0;                
-    display: flex;                
-    margin-right: 2rem; 
-    align-items: center;          
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  display: flex;
+  margin-right: 2rem;
+  align-items: center;
 }
 
 .color-letter {
-    color: var(--color);         
-    font-weight: bold;
-    font-size: 3rem;
-    // margin-right: 0.15em;        
-    transform: skewX(-25deg);
-    font-family: 'Baloo 2'; 
-    text-shadow:-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  color: var(--color);
+  font-weight: bold;
+  font-size: 3rem;
+  // margin-right: 0.15em;
+  transform: skewX(-25deg);
+  font-family: "Baloo 2";
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 @keyframes marquee-right {
-    0% {
-        transform: translateX(-50%);
-    }
-    100% {
-        transform: translateX(0%);
-    }
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
 }
 .tag-spacer {
-    display: inline-block;
-    width: 2rem; 
+  display: inline-block;
+  width: 2rem;
 }
 </style>
