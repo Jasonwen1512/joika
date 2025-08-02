@@ -15,18 +15,18 @@ const article = articleList.find(item => item.postid === postid)
 
 //分類顏色
   const EventColorMap = {
-  "登山": "#56DD61",
-  "水上活動": "#81BFDA",
-  "運動": "#567ADD",
-  "露營": "#F05ECC",
-  "唱歌": "#FADA7A",
-  "展覽": "#FF7F5B",
-  "聚餐": "#FFB65D",
-  "桌遊": "#F5F0CD",
-  "電影": "#B1F0F7",
-  "手作": "#DBF964",
-  "文化體驗": "#6AF6C5",
-  "演出表演": "#EA64FF",
+  "登山": "#6DE1D2",
+  "水上活動": "#77BEF0",
+  "運動": "#FFD63A",
+  "露營": "#FF8C86",
+  "唱歌": "#FFA955",
+  "展覽": "#6DE1D2",
+  "聚餐": "#77BEF0",
+  "桌遊": "#FFD63A",
+  "電影": "#FF8C86",
+  "手作": "#FFA955",
+  "文化體驗": "#6DE1D2",
+  "演出表演": "#77BEF0",
   "其他": "#969696"
 };
 const GetEventColor = (eventName) => {
@@ -394,8 +394,7 @@ display: flex;
 .my-comment {
   background-color: #fff;
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
+    padding: 8px 12px;
   border-radius: 3px;
   box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
@@ -405,8 +404,12 @@ display: flex;
 main{
   margin-block: 5vh;
 }
+.comment-input{
+  width: 100%;
+}
 .send-button{
-    display: block;
-  text-align: right;
+display: flex;
+    text-align: right;
+    align-items: center;
 }
 </style>

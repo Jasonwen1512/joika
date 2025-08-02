@@ -141,6 +141,16 @@ onBeforeUnmount(() => {
 
 
 const categories = ["登山", "水上活動", "運動", "露營", "唱歌", "展覽", "聚餐", "桌遊", "電影", "手作", "文化體驗", "演出表演", "其他"];
+
+
+ //標題字
+ const titleText = ref("今天想說點什麼？")
+ const isVisible = ref(false);
+
+ onMounted(() => {
+  // 元件掛載後，直接將 isVisible 設為 true
+  isVisible.value = true;
+});
 </script>
 
 <template>
@@ -150,7 +160,19 @@ const categories = ["登山", "水上活動", "運動", "露營", "唱歌", "展
 
 
   <main class="create">
-   
+   <div>
+      <h2 class="title" >
+    <span
+      v-for="(char, index) in titleText.split('')"
+      :key="index"
+      :style="`--index: ${index}`"
+      :class="{show:isVisible}"
+    >
+      {{ char }}
+    </span>
+  </h2>
+    </div>
+
     <input class="titlebox" type="text" placeholder="請輸入文章標題" />
     <div class="category-btn-list">
       <!-- 建議修正 props 寫法 -->
@@ -184,7 +206,7 @@ const categories = ["登山", "水上活動", "運動", "露營", "唱歌", "展
  </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 
 .bgimg{
   width: 100vw;
@@ -208,7 +230,7 @@ overflow: hidden;
 .decoration {
     position: absolute;
     bottom: 0px;
-    z-index: -999;
+    z-index: 1;
     display: none;
 }
 .create {
@@ -220,6 +242,7 @@ overflow: hidden;
   box-sizing: border-box;
   /* [關鍵修正] 明確定義 Grid 欄位 */
   grid-template-columns: 1fr;
+  z-index: 5;
 }
 
 .titlebox {
@@ -294,7 +317,37 @@ select {
   color: #ccc;
   padding: 10px;
     }
-@media (max-width: 768px) {
+
+
+    @keyframes showLetter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.title{
+text-align: center;
+display: flex;
+justify-content: center;
+margin-block: 3vh;
+}
+
+.title span {
+  display: inline-block;
+  opacity: 0;
+}
+
+.title span.show {
+  animation: showLetter 0.5s cubic-bezier(0.34, 2.55, 0.64, 1)
+    calc(var(--index) * 0.1s) forwards;
+}
+
+
   .create {
     gap: 15px;
   }
@@ -302,11 +355,13 @@ select {
     gap: 10px;
   }
 
-}
-@media screen and (min-width: 1024px) {
-  .decoration{
 
-  display: block;
-}}
+
+  .decoration{
+     @include desktop() {
+position: absolute;
+        bottom: 0vh;
+  display: block;}
+}
  
     </style>
