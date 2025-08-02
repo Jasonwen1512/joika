@@ -440,7 +440,7 @@ const items = [
   }
 
   .floating img {
-    top:1430vh;
+    top:1150vh;
     width: 50%;
     z-index: 2;
   }
