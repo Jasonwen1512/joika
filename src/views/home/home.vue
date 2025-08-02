@@ -12,7 +12,6 @@ import { FreeMode, Pagination } from "swiper/modules";
 // === 1. 引入我們做好的輪播元件 ===
 import Carousel from '@/components/carousel.vue';
 const modules = [FreeMode, Pagination];
-//測試
 
 // === 2. 準備輪播元件需要的資料 (slideData) ===
 const slideData = ref([
