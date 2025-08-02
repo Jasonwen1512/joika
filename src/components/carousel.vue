@@ -37,6 +37,8 @@ const wrapperX = ref(0);
 let isAnimating = false;
 let allItems = [];
 let delayedLoop = null;
+let resizeTimer = null; // For debouncing resize events
+let debouncedSetSizes = null; // To hold the debounced function for proper removal
 
 // === Template Refs ===
 const swiperContainer = ref(null);
@@ -44,9 +46,21 @@ const wrapper = ref(null);
 
 // === Logic ===
 const setSizes = () => {
+  // ✅ === 步驟 1：在重新計算前，停止所有正在運行的動畫和計時器 ===
+  isAnimating = true; // 立即鎖定，防止 playInfiniteLoop 觸發
+  if (delayedLoop) {
+    delayedLoop.kill();
+  }
+  if (wrapper.value) {
+    gsap.killTweensOf(wrapper.value);
+  }
+  if (allItems && allItems.length > 0) {
+    const allAnimatedElements = gsap.utils.toArray('.card-content-wrapper, .card-base-image, .card-bg-patch, .card-char-floating');
+    gsap.killTweensOf(allAnimatedElements);
+  }
+
   if (!swiperContainer.value) return;
 
-  isAnimating = true;
   const viewportWidth = swiperContainer.value.offsetWidth;
   const currentScreenWidth = document.documentElement.clientWidth;
   isMobile.value = currentScreenWidth < 768;
@@ -77,6 +91,10 @@ const setSizes = () => {
 
   totalMoveWidth.value = itemWidth.value + slideGap.value;
 
+  // 清除舊樣式，然後設定新樣式
+  gsap.set(allItems, { clearProps: 'all' });
+  gsap.set(wrapper.value, { clearProps: 'all' });
+
   allItems.forEach((item) => gsap.set(item, { width: itemWidth.value, marginRight: slideGap.value }));
   gsap.set(wrapper.value, { width: allItems.length * totalMoveWidth.value });
 
@@ -88,7 +106,10 @@ const setSizes = () => {
 
   gsap.set(wrapper.value, { x: wrapperX.value });
   currentIndex.value = 0;
-  isAnimating = false;
+  isAnimating = false; // 解鎖
+
+  // ✅ === 步驟 2：在所有尺寸和位置都設定好後，重新啟動無限循環 ===
+  delayedLoop = gsap.delayedCall(2, playInfiniteLoop);
 };
 
 const playInfiniteLoop = () => {
@@ -143,7 +164,6 @@ const playInfiniteLoop = () => {
         .to(cardWrapper, { scale: 1.1, duration: scaleUpDuration, ease: 'back.out(1.4)' }, 'start')
         .to(baseImage, { opacity: 0, duration: scaleUpDuration * 0.8, ease: 'power1.inOut' }, 'start')
         .to(bgPatch, { opacity: 1, duration: scaleUpDuration * 0.8, ease: 'power1.inOut' }, 'start')
-        // ✅ === 步驟 3：恢復 GSAP 動畫數值 ===
         .fromTo(floatingChar, { opacity: 0, y: 0, scale: 0.6 }, {
           opacity: 1, y: 140, scale: 0.9, duration: scaleUpDuration, ease: 'back.out(1.4)',
         }, 'start+=0.15');
@@ -155,7 +175,6 @@ const playInfiniteLoop = () => {
       effectTl
         .addLabel('end', `start+=${scaleUpDuration + pauseDuringScale}`)
         .to(cardWrapper, { scale: 1, duration: scaleDownDuration, ease: 'power2.inOut' }, 'end')
-        // ✅ === 步驟 3：恢復 GSAP 動畫數值 ===
         .to(floatingChar, { y: 100, scale: 0.6, duration: charMoveBack, ease: 'power2.inOut' }, 'end')
         .to(floatingChar, { opacity: 0, duration: charFade, ease: 'power1.inOut' }, `end+=${charMoveBack + charPause}`)
         .to(bgPatch, { opacity: 0, duration: 0.3, ease: 'power1.inOut' }, `end+=${charMoveBack + charPause + charFade}`)
@@ -166,15 +185,25 @@ const playInfiniteLoop = () => {
 
 // === Lifecycle Hooks ===
 onMounted(() => {
+  // ✅ === 步驟 3：使用 Debounce（防抖）來優化 resize 事件 ===
+  debouncedSetSizes = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => setSizes(), 250); // 停止 resize 250ms 後才執行
+  };
+
   setTimeout(() => {
-    setSizes();
-    window.addEventListener('resize', setSizes);
-    delayedLoop = gsap.delayedCall(2, playInfiniteLoop);
+    setSizes(); // 首次初始化，會自動啟動循環
+    window.addEventListener('resize', debouncedSetSizes);
   }, 100);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', setSizes);
+  // 移除監聽並清除所有計時器和動畫實例
+  if (debouncedSetSizes) {
+    window.removeEventListener('resize', debouncedSetSizes);
+  }
+  clearTimeout(resizeTimer);
+
   if (delayedLoop) {
     delayedLoop.kill();
   }
@@ -188,7 +217,6 @@ onUnmounted(() => {
   <div class="swiper" ref="swiperContainer">
     <div class="swiper-wrapper" ref="wrapper">
       <div class="swiper-slide" v-for="(slide, index) in slideData" :key="index">
-        <!-- ✅ === 新增一個中介層，用來作為絕對定位的基準 === -->
         <div class="slide-content-holder">
           <div class="card-content-wrapper">
             <img class="card-image card-base-image" :src="slide.cardBase" alt="卡片基礎圖">
@@ -236,28 +264,25 @@ $breakpoint-tablet: 768px;
 .swiper-slide {
   flex-shrink: 0;
   position: relative;
-  // ✅ 像這樣，讓它只做一個單純的容器
 }
 
-// ✅ === 新增中介層的樣式 ===
 .slide-content-holder {
   width: 100%;
   height: 100%;
-  position: relative; // 關鍵：讓它成為內部絕對定位元素的基準
+  position: relative;
 }
 
 .card-content-wrapper {
-  // 注意：現在它的寬高是相對於 .slide-content-holder
   width: 90%;
   height: 90%;
   border-radius: 12px;
   position: relative;
   transform-origin: center center;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  // ✅ 為了確保它在中介層中也置中
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  overflow: hidden; // 確保圖片不會超出圓角範圍
 }
 
 .card-image {
@@ -277,7 +302,6 @@ $breakpoint-tablet: 768px;
 }
 
 .card-char-floating {
-  // 注意：現在它的定位是相對於 .slide-content-holder
   position: absolute;
   bottom: -50%;
   left: 50%;
