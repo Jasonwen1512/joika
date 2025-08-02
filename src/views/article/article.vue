@@ -8,7 +8,8 @@ import konanImage from '@/assets/img/article/movie_konan.jpg';
 import ArticleDetail from "./article-detail.vue";
 import PreIcon from '@/assets/img/icon/pre-arrow.svg?url';
 import NextIcon from '@/assets/img/icon/next-arrow.svg?url';
-
+import articleimg from'@/assets/img/article/article-img.png?url';
+import Illustration from '@/components/article/Illustration.vue';
 //banner的跑馬燈
 
 
@@ -195,12 +196,11 @@ const ula = () => {
 
 <template>
 <!-- 背景色塊 -->
-<background>
+<div>
   <img class="bg-img2" src="/src/assets/img/bg-decorate2.png" alt="背景圖藍">
   <img class="bg-img3" src="/src/assets/img/bg-decorate3.png" alt="背景圖黃">
-</background>
+</div>
   <!-- 熱門文章頁 -->
-  <div>這是熱門文章頁</div>
   <!-- banner的跑馬燈 -->
     <section id="marquee">
     <div class="view">
@@ -212,7 +212,7 @@ const ula = () => {
           :style="{ backgroundColor: item.color }"
 
         >
-                <h3 class="banner-text">{{ item.label }}</h3>
+                <!-- <h3 class="banner-text">{{ item.label }}</h3> -->
 
           <img :src="item.img" :alt="item.label" />
         </div>
@@ -236,9 +236,12 @@ const ula = () => {
           {{ cat }}
         </div>
       </div>
+      <router-link to="/article/article-create" class="article-link">
+
 <div class="post-btn">
-      <Button :onClick="ula" theme="primary" size="md">我要發文</Button>
+      <Button  theme="primary" size="md">我要發文</Button>
     </div>
+    </router-link>
     </section>
     <hr/>
     <!-- 文章列表 -->
@@ -259,7 +262,7 @@ v-for="(article, index) in PaginatedArticles"
           <div class="article-date">
           <span
   class="event-label"
-  :style="{ backgroundColor: GetEventColor(article.event) }"
+  :style="{ borderColor: GetEventColor(article.event), }"
 >
   {{ article.event }}
 </span> <p>{{ article.date }}</p>
@@ -272,7 +275,9 @@ v-for="(article, index) in PaginatedArticles"
 <p v-html="article.content"></p>
 
         </div> 
-       
+          <div class="read-more">      
+              <Button :onClick="readarticle" theme="info" size="sm">閱讀更多</Button>
+          </div>
       </div>
      
       </router-link>
@@ -319,8 +324,13 @@ v-for="(article, index) in PaginatedArticles"
   <button class="next" @click="GoToNextPage" :disabled="IsLastPage">
     <img :src="NextIcon" alt="下一張箭頭" />
   </button>
-</div>
+</div> 
+<div class="decoration">
+    <Illustration />
+
+ </div>
 </main>
+
 </template>
 
 <style scoped lang="scss">
@@ -346,7 +356,11 @@ body{
 
 
 #marquee .view {
-  overflow: hidden;
+ overflow-x: hidden;     
+  overflow-y: visible;    
+  padding-bottom: 60px;  
+  
+  width: 100%;
   width: 100%;
 }
 
@@ -356,37 +370,66 @@ body{
   animation: marquee 60s linear infinite;
 }
 
+.article-link{
+  flex: 1;
+  display: flex;
+    justify-content: center;
+}
+
 .pic {
-  padding: 20px;
-    flex-shrink: 0;
-    width: 300px;
-    height: 300px;
-    margin-right: 10px;
-    color: #000000;
-    display: flex
-;
-    justify-content: space-evenly;
-    text-align: center;
-    border-radius: 6px;
-    align-items: center;
-    flex-direction: column;
+  margin-top: 8vh;
+  padding: 20px 20px 0 20px; /* 移除 bottom padding，上方和左右留白照舊 */
+  flex-shrink: 0;
+  width: 250px;
+  height: 250px;
+  margin-right: 25px;
+  color: #000000;
+  display: flex;
+  justify-content: center; /* 水平置中圖片 */
+  align-items: flex-end;   /* 將圖片對齊底部 */
+  text-align: center;
+  border-radius: 6px;
+ 
+  /* 加上這兩個屬性，確保效果能正常顯示 */
+  position: relative; /* 為了更好地控制子元素的位置 */
+  overflow: visible;  /* 明確設定 overflow，雖然這是預設值 */
 }
 
 .pic img {
-    width: 100%;
+    width: 120%;
     height: auto;
-    object-fit: cover;
-    overflow: inherit;
-    transform: scale(0.8);
-    transition: transform 0.5s ease, width 0.5s ease;
+    object-fit: contain; 
+      margin-bottom: 10px;
+
+    transform: scale(0.9); 
+    transition: all 0.5s ease;
+    z-index: 3;
 }
+
 .pic img:hover {
-  width: 100%;
-  height: auto;
-  transform: scale(1);
-
+  margin-bottom: 20px;
+  transform: scale(1.3);
 }
+.pic::after {
+  content: ''; /* 偽元素必需的屬性 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 
+ background: radial-gradient(
+    ellipse at 50% 100%,
+    rgb(223, 251, 255) 0%,  
+    transparent 60%               
+  );
+ 
+clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
+  /* 預設透明，並設定過渡效果 */
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  pointer-events: none;
+}
 @keyframes marquee {
   0% {
     transform: translateX(0);
@@ -395,7 +438,9 @@ body{
     transform: translateX(-33.3333%);
   }
 }
-
+.pic:hover::after {
+  opacity: 1; /* 滑鼠移入時，讓聚光燈的透明度變為 1 (完全可見) */
+}
 /*.banner {
   width: 100%;
 }
@@ -433,6 +478,8 @@ body{
 .category-list {
   display: flex;
   gap: 10px;
+  flex: 3;
+      flex-wrap: wrap;
  
 }
 .title {
@@ -448,9 +495,13 @@ section.article-category {
 }
 
 main.artic {
-  max-width: 1200px;
-  align-content: center;
-  margin: auto;
+ max-width: 1200px;
+    align-content: center;
+    margin: 0 auto 6vh;
+    background: white;
+    padding: 20px;
+    border: 3px solid;
+    border-radius: 6px;
 }
 hr {
   margin-block: 5vh;
@@ -472,9 +523,7 @@ hr {
     flex-wrap: nowrap;
     margin: 5vh auto;
 }
-.article-item:hover{
-  color:#4f8da8;
-}
+
 section.article-list {
     margin: 5vh;
 }
@@ -486,14 +535,13 @@ section.article-list {
     flex-direction: column;
     /* gap: 20px; */
     justify-content: space-around;
+    gap:5px;
 }
 .event-label {
     text-align: center;
     padding: 5px;
     margin: 5px;
-    background-color: #FADA7A;
-    color: #000;
-    border: #000 solid 1px;
+    border: solid 3px;
     border-radius: 6px;
     width: 80px;
 }
@@ -523,11 +571,28 @@ section.article-list {
  
 }
 .article-title {
-    padding-block: 10px;
+    padding-block: 5px;
 }
 .article-img{
   margin: 10px;
   flex:1;
+  max-width: 285px;
+  max-height: 190px;
+  width: 100%;
+  height: auto;
+      overflow: hidden;
+
+
+}
+.article-img img{
+  width: 100%;
+
+}
+
+.read-more{
+  display: grid;
+justify-content: end;
+margin-top: 10px;
 }
 a.article-text-link {
     flex: 2;
@@ -616,5 +681,10 @@ text-align: center;
 }
 
 }
-
+.decoration {
+    position: absolute;
+    bottom: 0px;
+    z-index: -999;
+    display: none;
+}
 </style>

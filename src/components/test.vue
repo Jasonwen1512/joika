@@ -5,7 +5,8 @@ import EditIcon from "@/assets/img/icon/edit.svg";
 import NotifyIcon from "@/assets/img/icon/notification.svg";
 import SortIcon from "@/assets/img/icon/sort.svg";
 import FilterIcon from "@/assets/img/icon/filter.svg";
-import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
+import SmEditIcon from "@/assets/img/icon/edit.svg";
+import memberActivityCard from "./member/member-activity-card.vue";
 
 const aloha = () => {
   alert("阿囉哈");
@@ -13,6 +14,8 @@ const aloha = () => {
 </script>
 
 <template>
+  <memberActivityCard />
+
   <Button isOutline :suffixIcon="DeleteIcon" theme="secondary" size="sm"
     >刪除</Button
   >
@@ -25,6 +28,7 @@ const aloha = () => {
   <Button :prefixIcon="EditIcon" theme="info" size="md">編輯檔案</Button>
   <Button :prefixIcon="NotifyIcon" theme="primary" size="md">通知訊息</Button>
   <Button :suffixIcon="SmEditIcon" theme="info" size="sm">編輯</Button>
+  <Button :suffixIcon="DeleteIcon" theme="info" size="sm">刪除</Button>
 
   <Button :suffixIcon="SortIcon" theme="info" size="sm">排序</Button>
   <Button :suffixIcon="FilterIcon" theme="info" size="sm">篩選</Button>

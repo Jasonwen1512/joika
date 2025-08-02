@@ -168,13 +168,14 @@ const items = [
     />
     <Swiper
       :slides-per-view="1"
-      :space-between="5"
+      :space-between="0"
       :free-mode="true"
       :pagination="{ clickable: true }"
       :breakpoints="{
-        1024: { slidesPerView: 6, spaceBetween: 40 },
-        768: { slidesPerView: 3, spaceBetween: 30 },
-        480: { slidesPerView: 1, spaceBetween: 5 },
+        1024: { slidesPerView: 6 },
+        768: { slidesPerView: 3 },
+        320: { slidesPerView: 2 },
+        0: { slidesPerView: 1 },
       }"
       :modules="modules"
       class="recommendations-swiper"
@@ -257,15 +258,18 @@ const items = [
   position: relative;
   z-index: 2;
 }
+
 .first-section {
   width: 100%;
   margin: auto;
   position: relative;
 }
+
 .bg-section {
   position: relative;
   width: 100%;
 }
+
 .bg-img {
   position: absolute;
   top: 20vh;
@@ -274,6 +278,7 @@ const items = [
   height: 150%;
   z-index: 0;
 }
+
 .bg-img2 {
   position: absolute;
   top: 5vh;
@@ -281,6 +286,7 @@ const items = [
   width: 15%;
   z-index: 1;
 }
+
 .bg-img3 {
   position: absolute;
   top: 90%;
@@ -288,6 +294,7 @@ const items = [
   width: 15%;
   z-index: 1;
 }
+
 .bg-img4 {
   position: absolute;
   top: 0;
@@ -296,27 +303,28 @@ const items = [
   height: 100%;
   z-index: 0;
 }
+
 .bg-img5 {
   position: absolute;
-  // top: 400vh;
   width: 100%;
   top: -46%;
   height: 170%;
   z-index: -1;
 }
+
 .bg-img6 {
   position: absolute;
-  // top: 430vh;
   top: -15%;
   right: 0;
   width: 20%;
-  // height: 50%;
   z-index: 0;
 }
+
 .bg-wrapper {
   position: relative;
   margin-bottom: 10.5vw;
 }
+
 .bg-img8 {
   display: none;
   position: absolute;
@@ -327,6 +335,7 @@ const items = [
   height: 110%;
   z-index: 0;
 }
+
 .floating img {
   display: block;
   animation: floatXY 5s ease-in-out infinite;
@@ -337,6 +346,7 @@ const items = [
   top: 3750px;
   z-index: 2;
 }
+
 @keyframes floatXY {
   0% {
     transform: translate(0, 0);
@@ -359,6 +369,7 @@ const items = [
     opacity: 1;
   }
 }
+
 .card-grid {
   max-width: 1200px;
   display: grid;
@@ -376,6 +387,7 @@ const items = [
     justify-content: center;
   }
 }
+
 .recommendations-card {
   display: flex;
   flex-direction: column;
@@ -383,6 +395,7 @@ const items = [
   gap: 20px;
   padding-bottom: 50px;
 }
+
 .recommendations-pic {
   display: flex;
   justify-content: center;
@@ -398,61 +411,68 @@ const items = [
     object-fit: contain;
   }
 }
-.intro-section {
-  margin-bottom: 150px;
-}
+
 .introduction {
   border: 2px solid #fff;
   padding: 20px;
   background-color: #addaee;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   max-width: 900px;
-  margin: auto;
+  margin:auto;
   p {
     line-height: 3;
   }
   position: relative;
   z-index: 1;
 }
+
 @media screen and (max-width: 767px) {
   .card-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     justify-items: center;
   }
+
   .bg-img {
     height: 200%;
   }
+
   .bg-img2 {
     width: 50%;
   }
+
   .bg-img3 {
     top: 40%;
     width: 50%;
   }
+
   .bg-img4 {
-    top: 8700px;
+    top: 0;
     width: 50%;
+    height: 70%;
   }
+
   .bg-img5 {
     display: none;
   }
+
   .bg-img6 {
-    top: 4500px;
-    width: 80%;
+    display: none;
   }
+
   .floating img {
-    top: 10300px;
+    top:1150vh;
     width: 50%;
     z-index: 2;
   }
+
   .introduction {
     max-width: 300px;
-    margin: 0;
+    margin-bottom: 150px;
+    margin-left: 0;
   }
+
   .bg-img8 {
     display: block;
     position: absolute;
@@ -460,6 +480,7 @@ const items = [
     z-index: 0;
   }
 }
+
 @media screen and (min-width: 768px) and (max-width: 1024px) {
   .card-grid {
     display: grid;
@@ -467,29 +488,38 @@ const items = [
     justify-items: center;
     align-items: center;
   }
+
   .bg-img {
     height: 100%;
   }
+
   .bg-img2 {
     width: 25%;
   }
+
   .bg-img3 {
     top: 50%;
     width: 25%;
   }
+
   .bg-img4 {
     top: 10%;
     width: 30%;
     height: 90%;
   }
-  .bg-img5 {
-    top: 430vh;
-    width: 100%;
-    height: 100%;
+  .introduction {
+    margin-bottom: 200px;
   }
+  .bg-img5 {
+    position: absolute;
+    width: 100%;
+    z-index: 0; 
+  }
+
   .bg-img6 {
     display: none;
   }
+
   .floating img {
     top: 5950px;
     width: 30%;

@@ -181,11 +181,11 @@ $buttonSizes: (
     font-size: $font-size-p,
     min-width: 86px,
     min-height: 38px,
-    padding-horizontal: 16px,
+    padding-horizontal: 10px,
     mobile-font-size: 14px,
     mobile-min-width: 86px,
     mobile-min-height: 38px,
-    mobile-padding-horizontal: 16px,
+    mobile-padding-horizontal: 10px,
     border-radius: 6px,
     mobile-border-radius: 3px,
   ),
@@ -278,6 +278,8 @@ $buttonSizes: (
         border: 1px solid map.get($styles, outline-border-color);
         .button-icon {
           color: map.get($styles, icon-outline-color);
+        }
+        .button-icon svg {
         }
 
         &:hover {
