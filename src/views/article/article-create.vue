@@ -155,9 +155,9 @@ const categories = ["登山", "水上活動", "運動", "露營", "唱歌", "展
     <div class="category-btn-list">
       <!-- 建議修正 props 寫法 -->
        <label>文章類型：</label>
-      <Button suffixIcon="no" theme="secondary" size="sm">揪團心得</Button>
-      <Button suffixIcon="no" theme="info" size="sm">閒聊</Button>
-      <Button suffixIcon="no" theme="info" size="sm">分享</Button>
+      <Button theme="secondary" size="sm">揪團心得</Button>
+      <Button  theme="info" size="sm">閒聊</Button>
+      <Button  theme="info" size="sm">分享</Button>
     </div>
     <div class="topic-category">
       <label for="topic-category">文章分類：</label>
@@ -175,7 +175,7 @@ const categories = ["登山", "水上活動", "運動", "露營", "唱歌", "展
     </div>
 
     <div class="btn">
-      <Button suffixIcon="no" theme="info" size="md">送出</Button>
+      <Button theme="info" size="md">送出</Button>
     </div>
   </main>
    <div class="decoration">
