@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faArrowRotateRight } from "@fortawesome/free-solid-svg-icons";
 
 /* add icons to the library */
-library.add(faArrowRotateRight)
+library.add(faArrowRotateRight);
 
 const app = createApp(App);
 app.component("font-awesome-icon", FontAwesomeIcon);
