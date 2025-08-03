@@ -1,17 +1,171 @@
-<script setup></script>
+<script setup>
+
+import Button from "@/components/Button.vue";
+import { ref, watch, onMounted } from "vue";
+import concatbg from "@/assets/img/bg-concat.svg?url";
+
+
+
+
+// 標題字
+const titleText = ref("聯絡我們");
+const isVisible = ref(false);
+
+onMounted(() => {
+  // 元件掛載後，直接將 isVisible 設為 true
+  isVisible.value = true;
+});
+
+// --- 新增部分 ---
+// 為每個輸入框建立一個 ref 來儲存其值
+const name = ref('');
+const phone = ref('');
+const email = ref('');
+const subject = ref('');
+const content = ref('');
+
+// const isModalVisible = ref(false); 
+// const submittedData = ref({});    
+
+// --- 修改後的 Submit 函式 ---
+const Submit = () => {
+  // 組合所有輸入框的資訊
+  const formData = `
+    姓名：${name.value}
+    手機：${phone.value}
+    E-mail：${email.value}
+    問題標題：${subject.value}
+    內容：${content.value}
+  `;
+  // 使用 alert 顯示資訊
+  alert(formData);
+};
+</script>
+
+
+
+
+
 
 <template>
+
   <!-- 這是聯絡表單頁 -->
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
-  <div>這是聯絡表單頁</div>
+ 
+<main class="concat">
+   <div class="bg" :style="{ backgroundImage: `url(${concatbg})` }" >
+
+    <div class="concat-form">
+    <div>
+      <h3 class="title" >
+    <span
+      v-for="(char, index) in titleText.split('')"
+      :key="index"
+      :style="`--index: ${index}`"
+      :class="{show:isVisible}"
+    >
+      {{ char }}
+    </span>
+  </h3>
+    </div>
+        <form @submit.prevent="Submit">
+
+<label>姓名</label>
+          <input class="inputbox" type="text" placeholder="請輸入姓名" v-model="name" />   
+           <label>手機</label>
+          <input class="inputbox" type="tel" placeholder="請輸入手機號碼" v-model="phone" />
+<label>E-mail</label>
+          <input class="inputbox" type="email" placeholder="請輸入 E-mail" v-model="email" />
+<label>問題標題</label>
+          <input class="inputbox" type="text" v-model="subject" />
+<label>內容</label>
+          <textarea class="inputbox-l" type="text" v-model="content" />
+
+          <Button class="submitbtn" theme="primary" size="md"> 送出</Button>
+  </form>
+</div>
+</div>
+    </main>  
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.bg{
+  
+  z-index: -1;
+  background-image: v-bind(concatbg);
+  background-repeat: no-repeat;
+  background-size: 100%;
+ background-position: top;
+
+
+  // @include tablet() {
+  //   background-image: v-bind(concatbg);
+  //   background-repeat: no-repeat;
+  //   background-size: cover;
+  //   background-position: center;
+  // }
+}
+.concat {
+
+ 
+}
+
+
+    @keyframes showLetter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.title{
+text-align: center;
+display: flex;
+justify-content: center;
+margin-block: 3vh;
+ @include desktop() {
+font-size: 48px;
+}
+}
+
+.title span {
+  display: inline-block;
+  opacity: 0;
+}
+
+.title span.show {
+  animation: showLetter 0.5s cubic-bezier(0.34, 2.55, 0.64, 1)
+    calc(var(--index) * 0.1s) forwards;
+}
+
+
+.concat-form{
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+ 
+
+}
+form{
+  display: grid;
+  gap: 20px;
+}
+.inputbox,.inputbox-l{
+    background-color: #fff;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+.inputbox-l{
+  height: 200px;
+}
+.submitbtn{
+  margin: auto;
+}
+</style>

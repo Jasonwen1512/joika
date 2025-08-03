@@ -129,7 +129,6 @@ const init = reactive({
 // --- 其他 Vue 生命週期與邏輯 (保持不變) ---
 const { modelValue } = toRefs(props);
 const editorValue = ref(modelValue.value);
-// ... (其他 watch, ref, onMounted 等邏輯請保留)
 const editorInstance = ref(null);
 const handleEditorInit = (evt, editor) => { editorInstance.value = editor; };
 const handleResize = () => { if (editorInstance.value) editorInstance.value.execCommand('mceRepaint'); };
@@ -264,11 +263,7 @@ select {
   box-sizing: border-box;
 }
 
-.category-btn-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
+
 .topic-category{
   display: flex;
   align-items: center;
@@ -296,6 +291,7 @@ select {
 }
  .category-btn-list{
 
+  gap: 15px;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -306,12 +302,7 @@ select {
 .text-editor{
   width: 100%;
 }
-.button-wrapper {
-    height: fit-content;
-    width: auto;
-    display: flex
-;
-    justify-content: center;}
+
 
 .notice{
   color: #ccc;
@@ -351,10 +342,7 @@ margin-block: 3vh;
   .create {
     gap: 15px;
   }
-  .category-btn-list {
-    gap: 10px;
-  }
-
+ 
 
 
   .decoration{
