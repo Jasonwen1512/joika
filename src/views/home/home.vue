@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue"; // 引入 ref
+import { ref, onMounted } from "vue";
 import AtivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Marquee from "@/components/marquee.vue";
@@ -251,11 +251,38 @@ const items = [
     color: "#2AA9FF",
   },
 ];
+
+import { gsap } from "gsap";
+import SplitText from "gsap/SplitText";
+// 註冊插件
+gsap.registerPlugin(SplitText);
+
+let split;
+let animation;
+
+// title文字動畫
+onMounted(() => {
+  // 初始化 SplitText
+  split = new SplitText(".title", {
+    type: "words,chars,lines",
+  });
+
+  // 執行動畫（你原本的 gsap.from 設定）
+  animation = gsap.from(split.words, {
+    y: -100,
+    opacity: 0,
+    rotation: "random(-80, 80)",
+    duration: 0.8,
+    ease: "back",
+    stagger: 0.15,
+    delay: 0.45,
+  });
+});
 </script>
 
 <template>
   <Carousel :slides="slideData" class="home-Carousel" />
-  <h1>JOIKA 一起玩吧</h1>
+  <h1 class="title">JOIKA 一起玩吧</h1>
   <Marquee2 />
   <!-- 限時揪團區塊 -->
   <img class="bg-img" src="/src/assets/img/bg-decorate1.png" alt="背景圖黃" />
@@ -564,7 +591,10 @@ h1 {
     display: flex;
     justify-content: center;
     @include tablet() {
-      width: 300px !important;
+      width: 30% !important;
+    }
+    @include desktop() {
+      width: 18% !important;
     }
   }
   @include desktop() {

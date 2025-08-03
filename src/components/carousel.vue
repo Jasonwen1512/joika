@@ -416,10 +416,15 @@ onMounted(() => {
     resizeTimer = setTimeout(() => setSizes(), 250); // 停止 resize 250ms 後才執行
   };
 
-  setTimeout(() => {
-    setSizes(); // 首次初始化，會自動啟動循環
-    window.addEventListener("resize", debouncedSetSizes);
-  }, 100);
+  // 拔掉延遲
+  // setTimeout(() => {
+  //   setSizes(); // 首次初始化，會自動啟動循環
+  //   window.addEventListener("resize", debouncedSetSizes);
+  // }, 100);
+
+  // 改為立即執行
+  setSizes();
+  window.addEventListener("resize", debouncedSetSizes);
 });
 
 onUnmounted(() => {

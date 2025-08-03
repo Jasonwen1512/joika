@@ -1,5 +1,7 @@
 <script setup>
 import { gsap } from "gsap";
+import SplitText from "gsap/SplitText";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/css";
@@ -22,6 +24,7 @@ import {
   watchEffect,
   watch,
   computed,
+  nextTick,
 } from "vue";
 
 const isMobile = ref(true);
@@ -293,157 +296,6 @@ const taiwanAreaSize = reactive({
 // 物件解構賦值
 const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 
-// 北部測試資料，並拔掉幾張圖片網址模擬開團時沒有放縮圖
-// const northData = [
-//   {
-//     title: "陽明山一日遊經典行程",
-//     image: "https://picsum.photos/seed/n1/300/200",
-//     date: "7/15",
-//   },
-//   {
-//     title: "九份老街探索",
-//     image: "",
-//     date: "8/03",
-//   },
-//   {
-//     title: "北投溫泉散策",
-//     image: "",
-//     date: "9/10",
-//   },
-//   {
-//     title: "士林夜市美食團",
-//     image: "https://picsum.photos/seed/n4/300/200",
-//     date: "8/28",
-//   },
-//   {
-//     title: "淡水夕陽之旅",
-//     image: "https://picsum.photos/seed/n5/300/200",
-//     date: "7/30",
-//   },
-//   {
-//     title: "大稻埕文化散步",
-//     image: "https://picsum.photos/seed/n6/300/200",
-//     date: "9/05",
-//   },
-//   {
-//     title: "故宮博物院導覽",
-//     image: "https://picsum.photos/seed/n7/300/200",
-//     date: "8/20",
-//   },
-// ];
-
-// // 西部測試資料
-// const westData = [
-//   {
-//     title: "鹿港古鎮散策",
-//     image: "https://picsum.photos/seed/w1/300/200",
-//     date: "7/17",
-//   },
-//   {
-//     title: "台中一日輕旅行",
-//     image: "https://picsum.photos/seed/w2/300/200",
-//     date: "8/05",
-//   },
-//   {
-//     title: "阿里山小火車體驗",
-//     image: "https://picsum.photos/seed/w3/300/200",
-//     date: "9/12",
-//   },
-//   {
-//     title: "台南美食巡禮",
-//     image: "https://picsum.photos/seed/w4/300/200",
-//     date: "8/25",
-//   },
-//   {
-//     title: "嘉義文青之旅",
-//     image: "https://picsum.photos/seed/w5/300/200",
-//     date: "9/03",
-//   },
-//   {
-//     title: "南投清境農場",
-//     image: "https://picsum.photos/seed/w6/300/200",
-//     date: "7/29",
-//   },
-//   {
-//     title: "彰化扇形車庫探訪",
-//     image: "https://picsum.photos/seed/w7/300/200",
-//     date: "8/17",
-//   },
-// ];
-
-// // 南部測試資料
-// const southData = [
-//   {
-//     title: "墾丁陽光沙灘團",
-//     image: "https://picsum.photos/seed/s1/300/200",
-//     date: "7/20",
-//   },
-//   {
-//     title: "高雄駁二藝術之旅",
-//     image: "https://picsum.photos/seed/s2/300/200",
-//     date: "9/01",
-//   },
-//   {
-//     title: "台東熱氣球嘉年華",
-//     image: "https://picsum.photos/seed/s3/300/200",
-//     date: "8/14",
-//   },
-//   {
-//     title: "屏東海生館參訪",
-//     image: "https://picsum.photos/seed/s4/300/200",
-//     date: "7/31",
-//   },
-//   {
-//     title: "旗津海港美食團",
-//     image: "https://picsum.photos/seed/s5/300/200",
-//     date: "8/22",
-//   },
-//   {
-//     title: "東港黑鮪魚季",
-//     image: "https://picsum.photos/seed/s6/300/200",
-//     date: "9/07",
-//   },
-// ];
-
-// // 東部測試資料
-// const eastData = [
-//   {
-//     title: "花蓮七星潭之旅",
-//     image: "https://picsum.photos/seed/e1/300/200",
-//     date: "7/22",
-//   },
-//   {
-//     title: "太魯閣國家公園健行",
-//     image: "https://picsum.photos/seed/e2/300/200",
-//     date: "8/01",
-//   },
-//   {
-//     title: "台東池上稻田散策",
-//     image: "https://picsum.photos/seed/e3/300/200",
-//     date: "9/08",
-//   },
-//   {
-//     title: "鹿野高台風景之旅",
-//     image: "https://picsum.photos/seed/e4/300/200",
-//     date: "8/27",
-//   },
-//   {
-//     title: "宜蘭幾米公園拍照團",
-//     image: "https://picsum.photos/seed/e5/300/200",
-//     date: "9/14",
-//   },
-//   {
-//     title: "蘇澳冷泉泡湯團",
-//     image: "https://picsum.photos/seed/e6/300/200",
-//     date: "7/28",
-//   },
-//   {
-//     title: "三仙台日出之旅",
-//     image: "https://picsum.photos/seed/e7/300/200",
-//     date: "8/10",
-//   },
-// ];
-
 const northData = [];
 const westData = [];
 const southData = [];
@@ -528,11 +380,40 @@ FakeActivity.forEach((item) => {
       break;
   }
 });
+
+// taiwan-title 文字動畫
+gsap.registerPlugin(SplitText, ScrollTrigger);
+
+let split;
+let animation;
+
+onMounted(() => {
+  nextTick(() => {
+    split = new SplitText(".taiwan-title", {
+      type: "chars",
+      includeWhiteSpaces: true,
+    });
+
+    gsap.from(split.chars, {
+      scrollTrigger: {
+        trigger: ".taiwan-title",
+        start: "top 80%", // 當 .taiwan-title 的 top 滑到視窗 80% 處
+        toggleActions: "play none none none", // 滾到就播
+      },
+      // 動畫本身
+      x: 150,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power4",
+      stagger: 0.1,
+    });
+  });
+});
 </script>
 
 <template>
   <div class="taiwan">
-    <h1 class="taiwan-title">JOIKA 揪遍全台灣</h1>
+    <h1 class="taiwan-title">JOIKA 揪遍全台灣！</h1>
     <div class="taiwan-content" ref="taiwanContent">
       <div class="taiwan-area-news">
         <!-- 北部 原尺寸：349*245 -->
@@ -777,7 +658,7 @@ FakeActivity.forEach((item) => {
 
 <style scoped lang="scss">
 .taiwan {
-  padding-top: 5vw;
+  padding-top: 4vw;
 }
 .taiwan-title {
   font-weight: 400;

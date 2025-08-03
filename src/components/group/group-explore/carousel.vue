@@ -26,15 +26,6 @@ const updateCardPositions = () => {
   });
 };
 
-// const imgList = Array.from({ length: 12 }, (_, i) => {
-//   return new URL(
-//     `/src/assets/img/group/group-explore/group-explore-banner-img/img${
-//       i + 1
-//     }.jpg`,
-//     import.meta.url
-//   ).href;
-// });
-
 let rotateTween = ref(null);
 
 const hoverIn = (e) => {
@@ -58,15 +49,6 @@ onMounted(() => {
     duration: 1.2,
     ease: "power2.out",
   });
-  // gsap.fromTo(
-  //   ".scene",
-  //   { perspective: 500 },
-  //   {
-  //     perspective: 800,
-  //     duration: 2,
-  //     ease: "power3.out",
-  //   }
-  // );
 
   // gsap區域
   updateCardPositions();
