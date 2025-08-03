@@ -44,7 +44,7 @@ const handleLogin = () => {
   error.password = ''
   error.verifyCode = ''
 
-  let hasError = false
+  const hasError = false
 
   if (!form.mobile) {
     error.mobile = '請輸入手機號碼'
@@ -81,10 +81,13 @@ const handleLogin = () => {
 }
 
   if (hasError) return
-
-  // 通過所有驗證 → 導頁
   router.push('/member/member-content')
 }
+
+const goToRegister = () => {
+  router.push('/auth/signup')
+} 
+
 </script>
 
 <template>
@@ -126,12 +129,13 @@ const handleLogin = () => {
         <a href="#" class="forgot-password">忘記密碼</a>
 
         <div class="button-group">
-          <Button size="md" theme="info" type="button">註冊</Button>
+          <Button size="md" theme="info" type="button" @click="goToRegister">註冊</Button>
           <Button size="md" theme="primary" type="submit">登入</Button>
         </div>
       </form>
     </div>
   </div>
+
 </template>
 
 <style scoped lang="scss">
@@ -144,32 +148,32 @@ const handleLogin = () => {
   margin: 50px 0;
   padding: 20px;
   position: relative;
-}
 
-.login-page::before {
-  content: "";
-  position: absolute;
-  background-image: url("@/assets/img/bg-decorate5.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  width: 150px;
-  aspect-ratio: 334 / 591;
-  top: -20px;
-  left: 0px;
-  z-index: -1;
-}
+  &::before {
+    content: "";
+    position: absolute;
+    background-image: url("@/assets/img/bg-decorate5.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 150px;
+    aspect-ratio: 334 / 591;
+    top: -20px;
+    left: 0px;
+    z-index: -1;
+  }
 
-.login-page::after {
-  content: "";
-  position: absolute;
-  background-image: url("@/assets/img/bg-decorate7.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  aspect-ratio: 406 / 518;
-  width: 150px;
-  bottom: -50px;
-  right:0;
-  z-index: -1;
+  &::after {
+    content: "";
+    position: absolute;
+    background-image: url("@/assets/img/bg-decorate7.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    aspect-ratio: 406 / 518;
+    width: 150px;
+    bottom: -50px;
+    right:0;
+    z-index: -1;
+  }
 }
 
 .login-container {
@@ -193,7 +197,6 @@ const handleLogin = () => {
   label {
     display: block;
     margin-bottom: 8px;
-    font-size: $font-size-p;
   }
 
   input[type="text"],
@@ -211,6 +214,11 @@ const handleLogin = () => {
       border-color: $color-primary;
       box-shadow: 0 0 0 2px rgba($color-primary, 0.3);
     }
+  }
+
+  .error-msg{
+    color: $red;
+    margin-top: 2px;
   }
 
   .captcha-input-wrapper {
@@ -255,7 +263,7 @@ const handleLogin = () => {
     }
   }
 
-  .button-group {
+  .button-group { 
     display: flex;
     justify-content: space-between;
     gap: 15px;
@@ -271,7 +279,6 @@ const handleLogin = () => {
   .login-container {
     border-radius: 6px;
     padding: 50px 100px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 
     h1 {
       font-size: $font-size-h2;
