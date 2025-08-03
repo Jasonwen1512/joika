@@ -27,6 +27,21 @@ onBeforeUnmount(() => {
   window.removeEventListener("resize", checkIsMobile);
   // window.removeEventListener("scroll", handleScroll);
 });
+
+const isScrolledDown = ref(false);
+
+const onScroll = () => {
+  // 滾動超過1px表示往下滑了
+  isScrolledDown.value = window.scrollY > 1;
+};
+
+onMounted(() => {
+  window.addEventListener("scroll", onScroll);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", onScroll);
+});
 </script>
 <template>
   <header>
@@ -71,7 +86,7 @@ onBeforeUnmount(() => {
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                :stroke="isMobile ? '#000' : '#4f8da8'"
+                :stroke="isMobile ? '#000' : 'rgba(0, 0, 0, 0.9)'"
               />
             </svg>
           </router-link>
@@ -92,6 +107,7 @@ onBeforeUnmount(() => {
             </svg>
           </label>
         </nav>
+        <div class="header-bg" :class="{ isScroll: isScrolledDown }"></div>
       </div>
     </div>
     <label class="overlay" for="switch-hamburger"></label>
@@ -107,9 +123,16 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   position: fixed;
   z-index: 5;
-  background-color: $header-bgc;
+  // 新bgc：f5f0cd
+  background-color: $tp;
   padding: $header-pd-tb $header-pd-lr;
   transform-style: preserve-3d; // 加上這行才不會閃爍，重要
+  // &::after {
+  //   content: "";
+  //   background-color: #f5f0cd;
+  //   height: 40px;
+  //   position: absolute;
+  // }
   @include desktop() {
     height: $header-h-d;
     padding: 0 4% 0 2.6%;
@@ -133,6 +156,32 @@ onBeforeUnmount(() => {
 .menu_and_nav {
   @include flex-center();
   transition: 0.3s;
+  position: relative;
+  .header-bg {
+    width: 0;
+    height: 40px;
+    background-color: #f5f0cd;
+    position: absolute;
+    z-index: -1;
+    right: -17px;
+    border-radius: 9999px 0 0 9999px;
+    border: 2px solid rgba(0, 0, 0, 0.6);
+    border-right: 0;
+    transition: 0.3s;
+    @include desktop() {
+      $height: 60px;
+      height: 60px;
+      transition: 0.5s;
+      right: calc(-2.6vw - 40px);
+      // border: 2px solid rgba(0, 0, 0, 0.6);
+    }
+    &.isScroll {
+      width: calc(55px + 15px * 2 + 15px);
+      @include desktop() {
+        width: calc(100% + 40px + 120px);
+      }
+    }
+  }
 }
 nav {
   display: flex;
@@ -161,7 +210,7 @@ nav {
 }
 .menu {
   position: fixed;
-  top: $header-h-m;
+  top: 45px;
   right: 0;
   transform: translateX(100%);
   transition: 0.3s;
@@ -174,8 +223,12 @@ nav {
   padding: 18px 8px 18px 15px;
   gap: 25px;
   font-size: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.9);
+  border-top: 0;
+  border-right: 0;
+  border-radius: 0 0 0 25px;
   a {
-    color: $header-text-color;
+    color: rgba(0, 0, 0, 0.9);
   }
   @include desktop() {
     position: relative;
@@ -214,6 +267,12 @@ nav {
   &:checked ~ .menu {
     transform: translateX(0);
   }
+  &:checked ~ .header-bg {
+    width: 165px;
+    @include desktop() {
+      width: calc(100% + 40px + 120px);
+    }
+  }
   &:checked ~ nav .hamburger {
     .line1 {
       transform: rotate(45deg) translate(6px, -7px);
@@ -231,5 +290,13 @@ nav {
 header:has(#switch-hamburger:checked) .overlay {
   opacity: 1;
   pointer-events: auto;
+}
+</style>
+<style lang="scss">
+html:has(#switch-hamburger:checked) {
+  overflow: hidden;
+  @include desktop() {
+    overflow: auto;
+  }
 }
 </style>

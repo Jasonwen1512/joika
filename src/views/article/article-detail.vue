@@ -7,7 +7,9 @@ import Button from "@/components/Button.vue";
 import DeleteIcon from "@/assets/img/icon/delete.svg";
 import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from '@/assets/img/article/movie_konan.jpg';
-
+import reprot from '@/assets/img/icon/errorred.svg?url';
+import like from '@/assets/img/icon/likeicon.svg?url';
+import commenticon from '@/assets/img/icon/commenticon.svg?url';
 const route = useRoute()
 const postid = route.params.postid
 const article = articleList.find(item => item.postid === postid)
@@ -15,18 +17,18 @@ const article = articleList.find(item => item.postid === postid)
 
 //分類顏色
   const EventColorMap = {
-  "登山": "#56DD61",
-  "水上活動": "#81BFDA",
-  "運動": "#567ADD",
-  "露營": "#F05ECC",
-  "唱歌": "#FADA7A",
-  "展覽": "#FF7F5B",
-  "聚餐": "#FFB65D",
-  "桌遊": "#F5F0CD",
-  "電影": "#B1F0F7",
-  "手作": "#DBF964",
-  "文化體驗": "#6AF6C5",
-  "演出表演": "#EA64FF",
+  "登山": "#6DE1D2",
+  "水上活動": "#77BEF0",
+  "運動": "#FFD63A",
+  "露營": "#FF8C86",
+  "唱歌": "#FFA955",
+  "展覽": "#6DE1D2",
+  "聚餐": "#77BEF0",
+  "桌遊": "#FFD63A",
+  "電影": "#FF8C86",
+  "手作": "#FFA955",
+  "文化體驗": "#6DE1D2",
+  "演出表演": "#77BEF0",
   "其他": "#969696"
 };
 const GetEventColor = (eventName) => {
@@ -41,28 +43,33 @@ const comments = ref([
     author: 'SunnyDive',
     avatar: 'https://i.pravatar.cc/150?u=sunnydive', // 假頭像，每次刷新會變
     timestamp: '2025/07/07 18:45',
-    content: '我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！'
+    content: '我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！',
+    likenum: 0,
+
   },
   {
     userid: 'M0002',
     author: 'kelly_travel',
     avatar: 'https://i.pravatar.cc/150?u=kellytravel',
     timestamp: '2025/07/07 20:13',
-    content: '哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！'
+    content: '哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！',
+    likenum: 0,
   },
   {
     userid: 'M0003',
     author: 'ocean_rookie',
     avatar: 'https://i.pravatar.cc/150?u=oceanrookie',
     timestamp: '2025/07/08 09:07',
-    content: '我是這團的其中一員！很開心認識大家～謝謝你分享這段回憶❤️'
+    content: '我是這團的其中一員！很開心認識大家～謝謝你分享這段回憶❤️',
+    likenum: 0,
   },
     {
     id: 4,
     author: 'sandy_test',
     avatar: 'https://i.pravatar.cc/150?u=sandy_test',
     timestamp: '2025/07/07 09:30',
-    content: '有誰也有跟過嗎?好奇其他人的想法?'
+    content: '有誰也有跟過嗎?好奇其他人的想法?',
+    likenum: 0,
   }
 
 ]);
@@ -144,6 +151,32 @@ const isLastCommentPage = computed(() => currentCommentPage.value === totalComme
 const DeleteCheck = () =>{
   alert("文章刪除後無法復原，確定要刪除嗎?  (之後會做一個小彈窗 先用這樣)")
 }
+const likeIt = (index) => {
+  const comment = comments.value[index]
+  comment.likenum++
+
+  // 觸發動畫
+  comment.animateLike = true
+
+  // 動畫播放完後移除 class（確保下次還會動）
+  setTimeout(() => {
+    comment.animateLike = false
+  }, 300) // 和 CSS 動畫時間一致
+}
+
+const GoToComment = () =>{
+      alert("回覆")
+
+}
+
+const ReportIt = () =>{
+      alert("跳檢舉彈窗")
+
+  
+}
+
+
+
 </script>
 
 <template>
@@ -186,7 +219,8 @@ const DeleteCheck = () =>{
    <!-- 留言列表區塊 -->
     <div class="comments-list">
       <!-- 使用 v-for 遍歷所有留言 -->
-      <div v-for="comment in comments" :key="comment.id" class="comment-item">
+               <div v-for="(comment, index) in comments" :key="comment.id" class="comment">
+
         <div class="comment-content">
        
           <!-- 頭像 -->
@@ -203,11 +237,16 @@ const DeleteCheck = () =>{
         </div>
         
         <!-- 留言互動按鈕 (讚、回覆、檢舉) -->
-        <div class="comment-actions">
-          <div class="action-icon">👍</div> <!-- TODO: 替換成您的按讚 icon -->
-          <div class="action-icon">💬</div> <!-- TODO: 替換成您的回覆 icon -->
-          <div class="action-icon">⚠️</div> <!-- TODO: 替換成您的檢舉 icon -->
-        </div>
+          <p>{{ comment.text }}</p>
+          <div class="comment-actions">
+            <div class="action-icon like":class="{ animate: comment.animateLike }" @click="likeIt(index)">
+              <img :src="like" />
+              <p v-if="comment.likenum > 0">{{ comment.likenum }}</p>
+            </div>
+       
+            <div class="action-icon" @click="GoToComment"><img :src="commenticon"></img></div> <!-- TODO: 替換成您的回覆 icon -->
+            <div class="action-icon" @click="ReportIt"><img :src="reprot"></img></div> <!-- TODO: 替換成您的檢舉 icon -->
+          </div>
 
         <hr class="separator">
       </div>
@@ -288,7 +327,7 @@ body{
 }
 main{
   max-width: 1200px;
-  margin:auto;
+  margin:10px auto;
   padding: 20px;
 }
 
@@ -324,7 +363,8 @@ gap: 10px;
 
 .article{
 max-width: 1200px;
-margin: 10px auto;
+margin: 10px auto ;
+
 display: flex;
   flex-direction: column; 
   gap: 10px;
@@ -349,6 +389,10 @@ display: flex;
   display: block;
   border-radius: 8px;
 }
+
+.Content{
+    margin-bottom: 15vh;
+  }
 .comment-content{
   display: grid;
   gap:20px;
@@ -369,6 +413,7 @@ display: flex;
   display: flex;
     justify-content: flex-end;
     flex-wrap: nowrap;
+    gap:10px;
 }
 
 .pagination {
@@ -394,8 +439,7 @@ display: flex;
 .my-comment {
   background-color: #fff;
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
+    padding: 8px 12px;
   border-radius: 3px;
   box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
@@ -405,8 +449,35 @@ display: flex;
 main{
   margin-block: 5vh;
 }
-.send-button{
-    display: block;
-  text-align: right;
+.comment-input{
+  width: 100%;
 }
+.send-button{
+display: flex;
+    text-align: right;
+    align-items: center;
+}
+.action-icon img{
+  width: 100%;
+}
+.like{
+  color:#FF8C86;
+  display: flex
+;
+    align-items: center;
+    gap: 5px;
+}
+.action-icon.animate img {
+  animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); 
+    animation: draw-line-1 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+  100% { transform: scale(1); }
+}
+
 </style>

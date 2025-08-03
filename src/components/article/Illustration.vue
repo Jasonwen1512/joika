@@ -2,53 +2,52 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 // 1. 導入您的主要插圖
-//    請務必將路徑替換成您專案中正確的圖片路徑
-import articleimg from '@/assets/img/article/article-img.png?url'; // <--- 請修改此路徑
+import articleimg from '@/assets/img/article/article-img.png?url';
 
-// 2. 定義動畫所需的狀態
-//    這裡我們先用 emoji 當作素材庫，這也是您提到的方法之一
+// 2. 定義動畫所需的狀態 (已簡化)
 const iconOptions = ['🎨', '⛰️', '🎬', '🍽️', '🎶', '✍️','⛺','🏖️','🔥','🌅'];
 const lightbulbIcon = '💡';
 
 // 當前在雲朵中顯示的圖示
 const currentCloudIcon = ref(iconOptions[0]);
-// 是否被點擊，觸發了燈泡模式
+// [關鍵] 現在只用這一個狀態來控制所有點擊效果
 const isIdeaActive = ref(false);
 
-// 用於存放 setInterval 的 ID，方便之後清除
+// 用於存放 setInterval 的 ID
 let iconChangeInterval = null;
 
 // 3. 核心動畫邏輯
 function startIconCycling() {
-  // 設定一個計時器，每 2 秒執行一次
+  // 確保不會重複啟動計時器
+  if (iconChangeInterval) clearInterval(iconChangeInterval);
+
   iconChangeInterval = setInterval(() => {
-    // 如果已經點擊顯示燈泡了，就停止更換
-    if (isIdeaActive.value) {
-      clearInterval(iconChangeInterval);
-      return;
-    }
-
-    // 計算下一個要顯示的圖示
     const currentIndex = iconOptions.indexOf(currentCloudIcon.value);
-    const nextIndex = (currentIndex + 1) % iconOptions.length; // 使用 % 實現循環
+    const nextIndex = (currentIndex + 1) % iconOptions.length;
     currentCloudIcon.value = iconOptions[nextIndex];
-
-  }, 2000); // 2000 毫秒 = 2 秒
+  }, 2000);
 }
 
-// 4. 點擊事件處理
+// 4. [已簡化] 點擊事件處理
 function handleIllustrationClick() {
-  isIdeaActive.value = true;
+  // 直接切換「靈光一閃」的狀態
+  isIdeaActive.value = !isIdeaActive.value;
+
+  if (isIdeaActive.value) {
+    // 如果是啟用狀態，就清除圖示輪播
+    clearInterval(iconChangeInterval);
+  } else {
+    // 如果是關閉狀態，就重新開始輪播
+    startIconCycling();
+  }
 }
 
-// 5. 生命週期管理
+// 5. 生命週期管理 (不變)
 onMounted(() => {
-  // 當元件被掛載到畫面上時，啟動圖示循環動畫
   startIconCycling();
 });
 
 onBeforeUnmount(() => {
-  // 當元件要被銷毀時，務必清除計時器，避免記憶體洩漏
   if (iconChangeInterval) {
     clearInterval(iconChangeInterval);
   }
@@ -57,20 +56,14 @@ onBeforeUnmount(() => {
 
 <template>
   <!-- 
-    主容器，設定為 relative 定位，
-    這樣內部的 absolute 元素就會相對於它來定位。
-    我們也在這裡加上點擊事件。
+    主容器，現在只綁定點擊事件
   -->
   <div class="illustration-container" @click="handleIllustrationClick">
     
     <!-- 您的主要插圖 -->
     <img class="main-illustration" :src="articleimg" alt="插圖">
 
-    <!-- 
-      雲朵中的小圖示。
-      它會根據 isIdeaActive 的狀態，顯示燈泡或循環的圖示。
-      key 的作用是讓 Vue 在切換時能重新觸發 CSS 動畫。
-    -->
+    <!-- 雲朵中的圖示 -->
     <div v-if="isIdeaActive" :key="'idea'" class="cloud-icon">
       {{ lightbulbIcon }}
     </div>
@@ -78,51 +71,92 @@ onBeforeUnmount(() => {
       {{ currentCloudIcon }}
     </div>
 
+    <!-- 
+      [全新] 紅色線條的容器
+      只有在 isIdeaActive 為 true 時才會顯示
+    -->
+    <div v-if="isIdeaActive" class="idea-lines-container">
+      <div class="idea-line line-1"></div>
+      <div class="idea-line line-2"></div>
+      <div class="idea-line line-3"></div>
+    </div>
+
   </div>
 </template>
 
 <style scoped>
-/* 主容器 */
+/* 主容器 (不變) */
 .illustration-container {
-  position: absolute; /* 這是您原本的設定 */
-  bottom: -100px;   /* 這是您原本的設定 */
-  z-index: -999;    /* 這是您原本的設定 */
-
-  /* [新增] 讓容器本身也變成 relative，才能定位裡面的小圖示 */
+  position: absolute;
+  bottom: -100px;
+  z-index: -999;
   position: relative;
-  width: 400px; /* 請給定一個寬高，讓內部定位有依據 */
+  width: 400px;
   height: 400px;
-  cursor: pointer; /* 讓滑鼠變成手形，提示可以點擊 */
+  cursor: pointer;
 }
 
-/* 您的主要插圖 */
+/* 您的主要插圖 (不變) */
 .main-illustration {
   width: 100%;
   height: 100%;
 }
 
-/* 雲朵中的小圖示 */
+/* 雲朵中的小圖示 (不變) */
 .cloud-icon {
   position: absolute;
-
-  /* 
-    [關鍵] 定位！
-    這兩個值(top, left)需要您根據插圖的實際樣貌來微調，
-    目標是讓圖示剛好出現在對話雲朵的中間。
-  */
   top: 18%; 
-  left: 32%;
-
-  font-size: 45px; /* Emoji 的大小 */
-  
-  /* 使用 transform 讓圖示的中心點對準 top/left 的位置 */
+  left: 30%;
+  font-size: 45px;
   transform: translate(-50%, -50%);
-
-  /* 加入一個可愛的彈出動畫 */
   animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* 定義彈出動畫 */
+/* [修改] 紅色線條的容器，微調了位置以適應旋轉 */
+.idea-lines-container {
+  position: absolute;
+  top: 15%; /* 稍微向上移動一點 */
+  left: 65%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+      transform: rotate(-45deg); 
+
+}
+
+/* [修改] 單條紅線的通用樣式，移除了 animation 屬性，改為在下方單獨定義 */
+.idea-line {
+  height: 12px;
+  background-color: #ffe23d;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  transform-origin: left; /* 確保從左邊開始旋轉和縮放 */
+
+}
+
+/* [修改] 為每條線設定不同的寬度、旋轉角度和對應的動畫 */
+.idea-line.line-1 {
+  width: 60px;
+  /* 向上旋轉 15 度 */
+  transform: rotate(-15deg); 
+  animation: draw-line-1 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.idea-line.line-2 {
+  width: 100px;
+  /* 稍微向下旋轉 5 度 */
+  transform: rotate(5deg);
+  animation: draw-line-2 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.1s forwards;
+}
+
+.idea-line.line-3 {
+  width: 75px;
+  /* 向下旋轉 20 度 */
+  transform: rotate(20deg);
+  animation: draw-line-3 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.2s forwards;
+}
+
+/* 定義彈出動畫 (不變) */
 @keyframes pop-in {
   from {
     transform: translate(-50%, -50%) scale(0);
@@ -130,6 +164,41 @@ onBeforeUnmount(() => {
   }
   to {
     transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* [全新] 為三條線分別定義帶有旋轉的動畫 */
+@keyframes draw-line-1 {
+  from {
+    /* 在保持旋轉角度的同時，將寬度從 0 放大到 1 */
+    transform: rotate(-15deg) scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(-15deg) scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes draw-line-2 {
+  from {
+    transform: rotate(5deg) scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(5deg) scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes draw-line-3 {
+  from {
+    transform: rotate(20deg) scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(20deg) scaleX(1);
     opacity: 1;
   }
 }

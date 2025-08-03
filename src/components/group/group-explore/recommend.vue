@@ -110,7 +110,8 @@ const insideCategoriesDouble = [...insideCategories, ...insideCategories];
     //768-1023
     background-image: url("@/assets/img/group/group-recommend/background-decoration.svg"),
       url("@/assets/img/group/group-recommend/background-color-big.svg");
-    margin: 150px 0;
+    margin: 120px 0;
+    padding: 150px 0;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;

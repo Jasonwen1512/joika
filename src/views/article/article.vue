@@ -3,7 +3,7 @@
 import { articleList } from "@/assets/data/fake-article";
 
 import Button from "@/components/Button.vue";
-import { ref, computed ,watch} from "vue";
+import { ref, computed ,watch,onMounted} from "vue";
 import konanImage from '@/assets/img/article/movie_konan.jpg';
 import ArticleDetail from "./article-detail.vue";
 import PreIcon from '@/assets/img/icon/pre-arrow.svg?url';
@@ -23,18 +23,18 @@ function getImageUrl(name) {
 }
 
   const BaseActivities = [
-  { label: "登山", color: "#56DD61", img: getImageUrl("banner_climbing.png") },
-  { label: "水上活動", color: "#81BFDA", img: getImageUrl("banner_diving.png") },
-  { label: "運動", color: "#567ADD", img: getImageUrl("banner_sports.png") },
-  { label: "露營", color: "#F05ECC", img: getImageUrl("banner_camping.png") },
-  { label: "唱歌", color: "#FADA7A", img: getImageUrl("banner_sing.png") },
-  { label: "展覽", color: "#FF7F5B", img: getImageUrl("banner_exhibition.png") },
-  { label: "聚餐", color: "#FFB65D", img: getImageUrl("banner_Dinner.png") },
-  { label: "桌遊", color: "#F5F0CD", img: getImageUrl("banner_board_games.png") },
-  { label: "電影", color: "#B1F0F7", img: getImageUrl("banner_movie.png") },
-  { label: "手作", color: "#DBF964", img: getImageUrl("banner_Handmade.png") },
-  { label: "文化體驗", color: "#6AF6C5", img: getImageUrl("banner_culturalHxperience.png") },
-  { label: "演出表演", color: "#EA64FF", img: getImageUrl("banner_live.png") },
+  { label: "登山", color: "#6DE1D2", img: getImageUrl("banner_climbing.png") },
+  { label: "水上活動", color:"#77BEF0", img: getImageUrl("banner_diving.png") },
+  { label: "運動", color:  "#FFD63A", img: getImageUrl("banner_sports.png") },
+  { label: "露營", color: "#FF8C86", img: getImageUrl("banner_camping.png") },
+  { label: "唱歌", color:  "#FFA955", img: getImageUrl("banner_sing.png") },
+  { label: "展覽", color: "#6DE1D2", img: getImageUrl("banner_exhibition.png") },
+  { label: "聚餐", color: "#77BEF0", img: getImageUrl("banner_Dinner.png") },
+  { label: "桌遊", color: "#FFD63A", img: getImageUrl("banner_board_games.png") },
+  { label: "電影", color: "#FF8C86", img: getImageUrl("banner_movie.png") },
+  { label: "手作", color: "#FFA955", img: getImageUrl("banner_Handmade.png") },
+  { label: "文化體驗", color: "#6DE1D2", img: getImageUrl("banner_culturalHxperience.png") },
+  { label: "演出表演", color: "#77BEF0", img: getImageUrl("banner_live.png") },
   { label: "其他", color: "#969696", img: getImageUrl("cpboy.svg") }
 ];
 const activities = [...BaseActivities, ...BaseActivities, ...BaseActivities];
@@ -60,18 +60,18 @@ const categories = [
 
 //分類顏色
   const EventColorMap = {
-  "登山": "#56DD61",
-  "水上活動": "#81BFDA",
-  "運動": "#567ADD",
-  "露營": "#F05ECC",
-  "唱歌": "#FADA7A",
-  "展覽": "#FF7F5B",
-  "聚餐": "#FFB65D",
-  "桌遊": "#F5F0CD",
-  "電影": "#B1F0F7",
-  "手作": "#DBF964",
-  "文化體驗": "#6AF6C5",
-  "演出表演": "#EA64FF",
+  "登山": "#6DE1D2",
+  "水上活動": "#77BEF0",
+  "運動": "#FFD63A",
+  "露營": "#FF8C86",
+  "唱歌": "#FFA955",
+  "展覽": "#6DE1D2",
+  "聚餐": "#77BEF0",
+  "桌遊": "#FFD63A",
+  "電影": "#FF8C86",
+  "手作": "#FFA955",
+  "文化體驗": "#6DE1D2",
+  "演出表演": "#77BEF0",
   "其他": "#969696"
 };
 
@@ -185,12 +185,21 @@ const PaginationList = computed(() => {
 
   return pages
 })
+
 //我要發文按鈕
 const ula = () => {
   alert('我要發文');
   // 在這裡可以加入跳轉到發文頁面的邏輯，例如使用 Vue Router
   // router.push('/create-post');
   }
+  //標題字
+ const titleText = ref("JOIKA團友筆記")
+ const isVisible = ref(false);
+
+ onMounted(() => {
+  // 元件掛載後，直接將 isVisible 設為 true
+  isVisible.value = true;
+});
 
 </script>
 
@@ -219,11 +228,20 @@ const ula = () => {
       </div>
     </div>
   </section>
-
-  <main class="artic">
-    <div class="title">
-      <h2>文章列表</h2>
+   <div>
+      <h2 class="title" >
+    <span
+      v-for="(char, index) in titleText.split('')"
+      :key="index"
+      :style="`--index: ${index}`"
+      :class="{show:isVisible}"
+    >
+      {{ char }}
+    </span>
+  </h2>
     </div>
+  <main class="artic">
+ 
 <!-- 文章類別 -->
     <section class="article-category">
       <div class="category-list">
@@ -239,7 +257,7 @@ const ula = () => {
       <router-link to="/article/article-create" class="article-link">
 
 <div class="post-btn">
-      <Button  theme="primary" size="md">我要發文</Button>
+      <Button :theme="primary" size="md">我要發文</Button>
     </div>
     </router-link>
     </section>
@@ -275,7 +293,7 @@ v-for="(article, index) in PaginatedArticles"
 <p v-html="article.content"></p>
 
         </div> 
-          <div class="read-more">      
+          <div class="read-more"  >      
               <Button :onClick="readarticle" theme="info" size="sm">閱讀更多</Button>
           </div>
       </div>
@@ -325,10 +343,7 @@ v-for="(article, index) in PaginatedArticles"
     <img :src="NextIcon" alt="下一張箭頭" />
   </button>
 </div> 
-<div class="decoration">
-    <Illustration />
 
- </div>
 </main>
 
 </template>
@@ -388,11 +403,12 @@ body{
   justify-content: center; /* 水平置中圖片 */
   align-items: flex-end;   /* 將圖片對齊底部 */
   text-align: center;
-  border-radius: 6px;
+      border-radius: 6px;
+    position: relative;
+    overflow: visible;
+    border: 3px solid;
  
-  /* 加上這兩個屬性，確保效果能正常顯示 */
-  position: relative; /* 為了更好地控制子元素的位置 */
-  overflow: visible;  /* 明確設定 overflow，雖然這是預設值 */
+
 }
 
 .pic img {
@@ -420,7 +436,7 @@ body{
 
  background: radial-gradient(
     ellipse at 50% 100%,
-    rgb(223, 251, 255) 0%,  
+    rgb(254, 255, 206) 0%,  
     transparent 60%               
   );
  
@@ -480,31 +496,59 @@ clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
   gap: 10px;
   flex: 3;
       flex-wrap: wrap;
- 
+      justify-content: space-around;
+
+ @keyframes showLetter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.title {
-  margin-block: 3vh;
+}
+.title{
+text-align: center;
+display: flex;
+justify-content: center;
+margin-block: 3vh;
 }
 
+.title span {
+  display: inline-block;
+  opacity: 0;
+}
+
+.title span.show {
+  animation: showLetter 0.5s cubic-bezier(0.34, 2.55, 0.64, 1)
+    calc(var(--index) * 0.1s) forwards;
+}
+
+
 section.article-category {
-  display: flex;
-  justify-content: space-between;
-  max-width: 1200px;
-  width: 100%;
-  align-items: center;
+    gap: 30px;
+    padding: 4vh 2.5vw;
+    display: flex
+;
+    justify-content: space-between;
+    max-width: 1200px;
+    width: 100%;
+    flex-direction: column
 }
 
 main.artic {
  max-width: 1200px;
     align-content: center;
-    margin: 0 auto 6vh;
-    background: white;
-    padding: 20px;
-    border: 3px solid;
-    border-radius: 6px;
+    margin: 0 auto 20vh;
+    // background: white;
+
+    // border: 3px solid;
+    // border-radius: 6px;
 }
 hr {
-  margin-block: 5vh;
+  margin-block: 2vh;
 }
 .article-body p {
   overflow: hidden;
@@ -522,6 +566,7 @@ hr {
     flex-direction: row;
     flex-wrap: nowrap;
     margin: 5vh auto;
+    gap:3vw;
 }
 
 section.article-list {
@@ -531,11 +576,20 @@ section.article-list {
 
 .article-text {
   flex: 2;
-    display: flex;
-    flex-direction: column;
-    /* gap: 20px; */
-    justify-content: space-around;
-    gap:5px;
+  display: flex;
+  flex-direction: column;
+  /* gap: 20px; */
+  justify-content: space-around;
+  gap: 5px;
+  &:hover{
+    .button {
+      ::v-deep &[data-theme="info"][data-size="sm"] {
+        color: #000 !important;
+        background-color: #fff39c !important;
+        border-color: #000 !important;
+      }
+    }
+  }
 }
 .event-label {
     text-align: center;
@@ -574,9 +628,8 @@ section.article-list {
     padding-block: 5px;
 }
 .article-img{
-  margin: 10px;
   flex:1;
-  max-width: 285px;
+  // max-width: 285px;
   max-height: 190px;
   width: 100%;
   height: auto;
@@ -586,13 +639,13 @@ section.article-list {
 }
 .article-img img{
   width: 100%;
+  margin: auto;
 
 }
 
 .read-more{
   display: grid;
 justify-content: end;
-margin-top: 10px;
 }
 a.article-text-link {
     flex: 2;
@@ -612,10 +665,17 @@ transform:translateX(5px)
   transform:translateX(-5px)
 
 }
+.btn_here {
+  color: #000 !important;
+  background-color: #f5f0cd !important;
+  border-color: #000 !important;
+}
+
 
 @media (max-width: 1024px) {
   .title{
       margin-inline: 20px;
+    font-size: $font-size-h3;
 
   }
 .category-list{
@@ -640,32 +700,36 @@ justify-content: center;
     width: 50%!important;
   }
 .pic{
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
 }
 .banner-text{
   font-size: 1.25rem;
 }
 .category-list {
-
+    justify-content: space-around;
  gap: 10px;
         flex-direction: row;
         justify-content: left;
         flex-wrap: wrap;
         padding: 20px;
 }
-.button-wrapper {
-    margin: 3vh auto;
-}
+// .button-wrapper {
+//     // margin: 3vh auto;
+// }
 section.article-category {
 
     flex-direction: column;
 }
 .title {
 text-align: center;
+display: flex;
+justify-content: center;
+
 }
 .article-item{
     flex-direction: column;
+    
 }
 .article-title h3{
   font-family: 'Noto Sans';
@@ -681,10 +745,6 @@ text-align: center;
 }
 
 }
-.decoration {
-    position: absolute;
-    bottom: 0px;
-    z-index: -999;
-    display: none;
-}
+
+
 </style>

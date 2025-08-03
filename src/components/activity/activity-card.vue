@@ -74,31 +74,38 @@ const titleDate = computed(() => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  margin: 45px 5px;
+  margin: 25px 5px;
   min-height: 390px;
+  padding: 0 15px;
   color: black;
+  &:hover {
+    .activity-img {
+      transform: rotate(-5deg);
+    }
+  }
+  .activity-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: ease 0.4s;
+    img {
+      width: 100%;
+      height: 100%;
+      vertical-align: middle;
+      border: black solid 1px;
+    }
+  }
 
   @include tablet() {
-    margin: 45px 0;
+    margin: 45px 5px;
   }
   @include desktop() {
   }
 }
-.activity-img img {
-  width: 100%;
-  height: 100%;
-  border: black solid 1px;
-}
-.activity-img {
-  max-width: 264px;
-  height: 200px;
-  object-fit: cover;
-}
 
-.activity-img:hover {
-  transition: ease 0.5s;
-  transform: rotate(-5deg); //
-}
+// .activity-img:hover {
+//   transform: rotate(-5deg);
+// }
 
 .activity-name {
   color: $black;
