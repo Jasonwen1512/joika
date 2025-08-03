@@ -6,9 +6,12 @@ import { ActivityCategories } from "@/assets/data/fake-activity-category";
 import { taiwanDistricts } from "@/assets/data/taiwan-city-district";
 import Button from "@/components/Button.vue";
 import { GoogleMap, Marker } from "vue3-google-map";
+import Popup from "@/components/group/group-create-popup.vue";
+import Test from "@/components/member/member-interest-tag.vue";
+import MemberInterest from "@/components/member/member-interest-tag.vue";
 
 // console.log(taiwanDistricts.map((item) => item.city));
-
+const currentMemberId = "M0001";
 const customRangeFormat = (dates) => {
   if (!dates || dates.length < 2) return "";
   const [start, end] = dates;

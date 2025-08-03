@@ -7,6 +7,7 @@ import SortIcon from "@/assets/img/icon/sort.svg";
 import FilterIcon from "@/assets/img/icon/filter.svg";
 import SmEditIcon from "@/assets/img/icon/edit.svg";
 import memberActivityCard from "./member/member-activity-card.vue";
+import MemberInterest from "@/components/member/member-interest-tag.vue";
 
 const aloha = () => {
   alert("阿囉哈");
@@ -15,7 +16,7 @@ const aloha = () => {
 
 <template>
   <memberActivityCard />
-
+  <MemberInterest></MemberInterest>
   <Button isOutline :suffixIcon="DeleteIcon" theme="secondary" size="sm"
     >刪除</Button
   >

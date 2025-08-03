@@ -8,6 +8,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img1.jpg",
       import.meta.url
     ).href,
+    color: "#6DE1D2",
   },
   {
     id: "CA002",
@@ -17,6 +18,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img2.jpg",
       import.meta.url
     ).href,
+    color: "#FFD63A",
   },
   {
     id: "CA003",
@@ -26,6 +28,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img4.jpg",
       import.meta.url
     ).href,
+    color: "#FFD63A",
   },
   {
     id: "CA004",
@@ -35,6 +38,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img5.jpg",
       import.meta.url
     ).href,
+    color: "#FF8C86",
   },
   {
     id: "CA005",
@@ -44,6 +48,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img6.jpg",
       import.meta.url
     ).href,
+    color: "#FFA955",
   },
   {
     id: "CA006",
@@ -53,6 +58,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img7.jpg",
       import.meta.url
     ).href,
+    color: "#6DE1D2",
   },
   {
     id: "CA007",
@@ -62,6 +68,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img12.jpg",
       import.meta.url
     ).href,
+    color: "#77BEF0",
   },
   {
     id: "CA008",
@@ -71,6 +78,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img9.jpg",
       import.meta.url
     ).href,
+    color: "#77BEF0",
   },
   {
     id: "CA009",
@@ -80,6 +88,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img10.jpg",
       import.meta.url
     ).href,
+    color: "#FF8C86",
   },
   {
     id: "CA010",
@@ -89,6 +98,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img11.jpg",
       import.meta.url
     ).href,
+    color: "#FFA955",
   },
   {
     id: "CA011",
@@ -98,6 +108,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img3.jpg",
       import.meta.url
     ).href,
+    color: "#6DE1D2",
   },
   {
     id: "CA012",
@@ -107,6 +118,7 @@ export const ActivityCategories = [
       "../img/group/group-explore/group-explore-banner-img/img8.jpg",
       import.meta.url
     ).href,
+    color: "#77BEF0",
   },
-  { id: "CA013", name: "其他" },
+  { id: "CA013", name: "其他", color: "#969696" },
 ];
