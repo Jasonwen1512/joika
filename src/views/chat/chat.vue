@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import Button from "@/components/Button.vue";
+import Swal from 'sweetalert2'
+import { h, render } from 'vue'
+import ReportForm from '@/components/ReportForm.vue'
 
 const showOptions = ref(false)
 
@@ -21,10 +24,30 @@ function copyMessage(e){
     });
   }
 }
+function openReportModal() {
+  const container = document.createElement('div')
+  render(h(ReportForm, {
+    onSubmit: (data) => {
+      console.log('檢舉資料：', data)
+      Swal.close()
+      Swal.fire('已送出', '感謝您的檢舉，我們會盡快處理', 'success')
+    }
+  }), container)
+
+  Swal.fire({
+    title: '檢舉留言',
+    html: container,
+    showCancelButton: false,
+    showConfirmButton: false,
+    willClose: () => render(null, container),
+    zIndex: 20000,
+  })
+}
+
 </script>
 
 <template>
-  <section class="chat">
+  <section class="chat" >
     <div class="floating">
       <img src="/src/assets/img/index-img/float.png" alt="浮動圖" />
     </div>
@@ -54,7 +77,7 @@ function copyMessage(e){
 
             <ul class="options-menu" :class="{ on: showOptions }">
               <li><button @click="copyMessage">複製</button></li>
-              <li><button>檢舉</button></li>
+              <li><button @click="openReportModal">檢舉</button></li>
             </ul>
           </div>  
         </div>
@@ -108,10 +131,12 @@ function copyMessage(e){
       </div>
 
     </div>
-
+  <!-- 擴音人物 -->
     <div class="megaphone-box">
-      <img src="/src/assets/img/chat/megaphone-man.png" alt="擴音器人物圖" class="person">
-      <img src="/src/assets/img/chat/megaphone-line.png" alt="擴音器線條圖" class="lines">
+      <div class="megaphone-wrap">
+        <img src="/src/assets/img/chat/megaphone-man.png" alt="擴音器人物圖" class="person">
+        <img src="/src/assets/img/chat/megaphone-line.png" alt="擴音器線條圖" class="lines">
+      </div>
     </div>
 
   <!-- 輸入框 -->
@@ -141,7 +166,7 @@ function copyMessage(e){
           <path d="M25.1291 23.1562C24.5586 24.1443 23.738 24.9648 22.75 25.5352C21.7619 26.1057 20.641 26.406 19.5001 26.406C18.3592 26.406 17.2383 26.1057 16.2502 25.5352C15.2621 24.9648 14.4416 24.1443 13.8711 23.1562" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button>
+        <button class="report-btn">
           <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M21.6512 13.7085L15.4291 19.8087C14.8376 20.3937 14.5126 21.1932 14.5256 22.0333C14.5433 22.8832 14.8933 23.6923 15.5006 24.2872C16.1099 24.8901 16.9306 25.2362 17.7804 25.2508C18.1965 25.2596 18.6101 25.185 18.9969 25.0315C19.3837 24.878 19.7358 24.6487 20.0327 24.3571L26.2532 18.2568C26.84 17.6763 27.3028 16.9825 27.6134 16.2177C27.9241 15.4529 28.0761 14.6329 28.0602 13.8076C28.026 12.1077 27.3271 10.4889 26.1134 9.29821C24.8964 8.09385 23.2624 7.40428 21.5504 7.37258C20.7192 7.35599 19.8931 7.50524 19.1202 7.81159C18.3473 8.11795 17.6433 8.57527 17.0492 9.15683L10.8238 15.2587C9.94421 16.13 9.25059 17.1707 8.78496 18.3179C8.31934 19.465 8.09139 20.6947 8.11494 21.9326C8.16726 24.4818 9.21611 26.9091 11.0367 28.6942C12.8613 30.5003 15.3111 31.5349 17.8779 31.5835C19.1252 31.6094 20.3652 31.3863 21.5251 30.927C22.685 30.4677 23.7417 29.7815 24.6331 28.9087L30.8552 22.8052" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -213,29 +238,28 @@ function copyMessage(e){
   }
 
   .megaphone-box {
-    position: absolute; 
-    bottom: 0;
-    left: 0;
-    z-index: 0;
-    }
+    position: relative;
+  }
+
+  .megaphone-wrap {
+    position: absolute;
+    bottom: 5px;
+    left: -10px;
+    width: fit-content;
+  }
 
   .person {
-    width: 150px; 
+    width: 130px;
     display: block;
-    position: absolute;
-    bottom: 12vh;
-    left: -3vh;
-    z-index: 0;
   }
 
   .lines {
     position: absolute;
-    left: 14vh;
-    bottom: 28vh;
-    z-index: 0;
-    width: 30px;    
+    top: 4px;  
+    left: 130px; 
+    width: 25px;
     animation: blink 1s infinite;
-    transform-origin: left center; 
+    z-index: 1;  
   }
 
   @keyframes blink {
@@ -259,12 +283,13 @@ function copyMessage(e){
     box-sizing: border-box;
     padding: 10px;
     position: relative;
-    z-index: 2;
+
   }
   .avatar-section{
     display: flex;
     align-items: center;
     gap: 20px;
+    width: fit-content;
   }
   .avatar{
     width: 50px;
@@ -291,53 +316,61 @@ function copyMessage(e){
     border-radius: 3px;
     word-wrap: break-word;
   }
+//chat-other-end
+
+//複製/檢舉按鈕設定
   .more-options{
-  display: flex;
-  align-items: end;
+    display: flex;
+    align-items: end;
+    position: relative; 
+    z-index: 4;
+    cursor: pointer;
   }
   .options-menu{
     display: none;
   }
   .options-menu.on{
-  list-style: none;
-  padding: 6px;
-  margin: 0;
-  position: absolute;
-  top: 90%;
-  right: -85px;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;           
-  min-width: 100px;
-  z-index: 3;
+    list-style: none;
+    padding: 6px;
+    margin: 0;
+    position: absolute;
+    top: 90%;
+    right: -85px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;           
+    min-width: 100px;
+    z-index: 3;
 }
-.options-menu li {
-  display: block;
+  .options-menu li {
+    display: block;
+  }
+  .options-menu li button {
+    display: block;
+    width: 100%;
+    padding: 5px 10px;
+    background: #fff;
+    border: 2px solid black;   
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap;
+    cursor: pointer;
 }
-.options-menu li button {
-  display: block;
-  width: 100%;
-  padding: 5px 10px;
-  background: #fff;
-  border: 2px solid black;   
-  border-radius: 4px;
-  text-align: center;
-  white-space: nowrap;
-  cursor: pointer;
-}
+//複製/檢舉按鈕設定-end
 
+//chat-card-start
 .chat-recommend-card{
-  position: relative;
-  border: 2px solid black;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; 
-  justify-content: center;
-  background-image: url('/src/assets/img/chat/chat-card-bg.png');
-  border-radius: 3px;
-  width: 120%;
+    position: relative;
+    border: 2px solid black;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center;
+    background-image: url('@/assets/img/chat/chat-card-bg.png');
+    border-radius: 3px;
+    width: 120%;
   img{
     width: 80px;
     position: absolute;
@@ -357,8 +390,7 @@ function copyMessage(e){
   width: 15ch; 
   word-break: break-all;
 }
-
-//chat-other-end
+//chat-card-end
 
 //chat-me-start
   .chat-message.me {
@@ -377,16 +409,16 @@ function copyMessage(e){
     padding: 10px;
     border-radius: 3px;
   }
-  //chat-me-end
-  //chat-key-in-start
+//chat-me-end
+
+//chat-key-in-start
   .chat-key-in-section{
     position: relative;
     z-index: 1;
     margin: 20px;
     display: flex;
     flex-direction: column;
-    order: 1;
-    
+    order: 1;   
   }
   .chat-now{
     display: flex;
@@ -397,8 +429,7 @@ function copyMessage(e){
     padding: 10px;
     margin: auto;
     border-radius: 3px;
-    order: 2;
-    
+    order: 2;  
   }
   .chat-box{
     width: 80%;     
@@ -406,9 +437,9 @@ function copyMessage(e){
     font-size: 16px;
   }
   .chat-now-btns {             
-  display: flex;
-  justify-content: flex-start;
-  gap: 10px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
   }
   .chat-now-btns button{
     cursor: pointer;
@@ -419,6 +450,9 @@ function copyMessage(e){
   .send-btn-mobile{
     display: block;
   }
+//chat-key-in-end
+
+//平板設定
   @include tablet{
     .person{
       bottom: 13vh;
@@ -427,6 +461,8 @@ function copyMessage(e){
       margin-bottom: 30px;
     }
   }
+
+//桌機版設定
   @include desktop {
     .chat-section {
       display: flex;
@@ -440,12 +476,11 @@ function copyMessage(e){
     }
     .person{
       width: 180px;
-      bottom: 10vh;
     }
     .lines {
       width: 40px;
-      left: 19vh;
-      bottom: 31vh;
+      left: 175px;
+      top: 0;
     }
     .chat-recommend-card{
       width: 120%;
@@ -475,5 +510,4 @@ function copyMessage(e){
       display: inline-block;
     }
   }
-
 </style>
