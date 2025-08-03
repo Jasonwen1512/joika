@@ -1,6 +1,10 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { ActivityCategories } from "@/assets/data/fake-activity-category";
 import gsap from "gsap";
+
+const list = [...ActivityCategories].splice(1, 12);
+// console.log(list);
 
 const updateCardPositions = () => {
   const cards = document.querySelectorAll(".scene .content .card");
@@ -22,14 +26,14 @@ const updateCardPositions = () => {
   });
 };
 
-const imgList = Array.from({ length: 12 }, (_, i) => {
-  return new URL(
-    `/src/assets/img/group/group-explore/group-explore-banner-img/img${
-      i + 1
-    }.jpg`,
-    import.meta.url
-  ).href;
-});
+// const imgList = Array.from({ length: 12 }, (_, i) => {
+//   return new URL(
+//     `/src/assets/img/group/group-explore/group-explore-banner-img/img${
+//       i + 1
+//     }.jpg`,
+//     import.meta.url
+//   ).href;
+// });
 
 let rotateTween = ref(null);
 
@@ -111,15 +115,15 @@ onMounted(() => {
     <div class="content">
       <div
         class="card"
-        v-for="(img, index) in imgList"
+        v-for="(item, index) in list"
         :key="index"
         :style="`--i: ${index}`"
         @mouseenter="hoverIn"
         @mouseleave="hoverOut"
       >
         <!-- 先暫時都回到首頁，之後再改 -->
-        <router-link to="/home">
-          <img :src="img" :alt="`img-${index + 1}`" />
+        <router-link :to="`/activity?category=${item.id}`">
+          <img :src="item.img" :alt="`img-${index + 1}`" />
         </router-link>
       </div>
       <!-- <img

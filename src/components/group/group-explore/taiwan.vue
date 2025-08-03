@@ -478,7 +478,7 @@ function getRegionByCity(cityName) {
   }
   return "未知區域";
 }
-console.log(FakeActivity);
+// console.log(FakeActivity);
 
 FakeActivity.forEach((item) => {
   // title
