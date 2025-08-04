@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'; // 引入 ref
+import { ref, onMounted } from "vue";
 import AtivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Marquee from "@/components/marquee.vue";
@@ -10,26 +10,181 @@ import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import { FreeMode, Pagination } from "swiper/modules";
 // === 1. 引入我們做好的輪播元件 ===
-import Carousel from '@/components/carousel.vue';
+import Carousel from "@/components/carousel.vue";
 const modules = [FreeMode, Pagination];
 
 // === 2. 準備輪播元件需要的資料 (slideData) ===
 const slideData = ref([
-  { cardBase: new URL('@/assets/img/index-img/carousel/diving-with-fish.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/undersea-stroll.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/diving.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/happy-movie-day.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/ticket-booth.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/movie.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/basketball-girl.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/sunny-court.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/sports.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/mountain-buddies.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/morning-mountains.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/hiking-buddy.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/camping-moments.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/mountain-tent.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/camping.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/board-game-time.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/game-corner.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/board-game-champ.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/strolling-the-gallery.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/immersed-in-art.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/exhibition-visitor.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/dinner-with-friends.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/food-time-friends.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/jack.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/happy-art-class.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/creative-craft-corner.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/art-sharing-moment.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/romantic-wish.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/wishful-night.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/annie.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/night-showtime.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/starlight-night.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/lee.png', import.meta.url).href },
-  { cardBase: new URL('@/assets/img/index-img/carousel/ktv-night.jpg', import.meta.url).href, bgPatch: new URL('@/assets/img/index-img/carousel/ktv-room.jpg', import.meta.url).href, charFloating: new URL('@/assets/img/index-img/carousel/sam.png', import.meta.url).href },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/diving-with-fish.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/undersea-stroll.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/diving.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/happy-movie-day.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/ticket-booth.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/movie.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/basketball-girl.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/sunny-court.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/sports.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/mountain-buddies.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/morning-mountains.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/hiking-buddy.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/camping-moments.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/mountain-tent.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/camping.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/board-game-time.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/game-corner.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/board-game-champ.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/strolling-the-gallery.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/immersed-in-art.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/exhibition-visitor.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/dinner-with-friends.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/food-time-friends.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/jack.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/happy-art-class.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/creative-craft-corner.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/art-sharing-moment.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/romantic-wish.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/wishful-night.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/annie.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/night-showtime.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/starlight-night.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/lee.png",
+      import.meta.url
+    ).href,
+  },
+  {
+    cardBase: new URL(
+      "@/assets/img/index-img/carousel/ktv-night.jpg",
+      import.meta.url
+    ).href,
+    bgPatch: new URL(
+      "@/assets/img/index-img/carousel/ktv-room.jpg",
+      import.meta.url
+    ).href,
+    charFloating: new URL(
+      "@/assets/img/index-img/carousel/sam.png",
+      import.meta.url
+    ).href,
+  },
 ]);
-
-
+//推薦揪團分類輪播
 const items = [
   {
     name: "水上活動",
@@ -96,22 +251,55 @@ const items = [
     color: "#2AA9FF",
   },
 ];
+
+import { gsap } from "gsap";
+import SplitText from "gsap/SplitText";
+// 註冊插件
+gsap.registerPlugin(SplitText);
+
+let split;
+let animation;
+
+// title文字動畫
+onMounted(() => {
+  // 初始化 SplitText
+  split = new SplitText(".title", {
+    type: "words,chars,lines",
+  });
+
+  // 執行動畫（你原本的 gsap.from 設定）
+  animation = gsap.from(split.words, {
+    y: -100,
+    opacity: 0,
+    rotation: "random(-80, 80)",
+    duration: 0.8,
+    ease: "back",
+    stagger: 0.15,
+    delay: 0.45,
+  });
+});
 </script>
 
 <template>
-  <Carousel :slides="slideData" />
-
+  <Carousel :slides="slideData" class="home-Carousel" />
+  <h1 class="title">JOIKA 一起玩吧</h1>
   <Marquee2 />
   <!-- 限時揪團區塊 -->
   <img class="bg-img" src="/src/assets/img/bg-decorate1.png" alt="背景圖黃" />
-  <img class="bg-img2" src="/src/assets/img/bg-decorate2.png" alt="背景圖藍" />
+
   <div class="bg-section">
     <div class="index-section-start">
       <img
+        class="cardJ1"
         src=" @/assets/img/index-img/first-section-img.png"
         alt="限時揪團標題圖"
       />
       <h2>限時揪團<br />差你一咖</h2>
+      <img
+        class="bg-img2"
+        src="/src/assets/img/bg-decorate2.png"
+        alt="背景圖藍"
+      />
     </div>
 
     <div class="first-section">
@@ -122,13 +310,12 @@ const items = [
           :item="item"
         />
       </div>
+      <img
+        class="bg-img3"
+        src="/src/assets/img/bg-decorate3.png"
+        alt="背景圖深黃"
+      />
     </div>
-
-    <img
-      class="bg-img3"
-      src="/src/assets/img/bg-decorate3.png"
-      alt="背景圖深黃"
-    />
   </div>
 
   <Marquee />
@@ -136,6 +323,7 @@ const items = [
   <!-- 最新揪團卡片區塊 -->
   <div class="index-section-start">
     <img
+      class="cardJ1"
       src=" @/assets/img/index-img/second-section-img.png"
       alt="最新揪團標題圖"
     />
@@ -156,6 +344,7 @@ const items = [
   <div class="bg-section">
     <div class="index-section-start">
       <img
+        class="cardJ1"
         src="@/assets/img/index-img/third-section-img.png"
         alt="最新揪團標題圖"
       />
@@ -226,6 +415,9 @@ const items = [
           ——因為我們都在找，願意一起行動的那一咖。
           <br /><br />
         </p>
+        <div class="floating">
+          <img src="/src/assets/img/index-img/float.png" alt="浮動圖" />
+        </div>
       </div>
     </div>
     <img
@@ -239,24 +431,42 @@ const items = [
       alt="背景圖深藍"
     />
   </div>
-  <div class="floating">
-    <img src="/src/assets/img/index-img/float.png" alt="浮動圖" />
-  </div>
 </template>
 
 <style scoped lang="scss">
+h1 {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-top: 140px;
+}
 .index-section-start {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  img {
-    width: 80px;
+  .cardJ1 {
+    width: 100px;
   }
   margin-top: 50px;
   margin-bottom: 50px;
   position: relative;
   z-index: 2;
+}
+.bg-img2 {
+  width: 15%;
+  position: absolute;
+  // top: 5vh;
+  left: 0;
+  top: -200%;
+  z-index: -1;
+}
+.home-Carousel {
+  position: relative;
+  height: 600px;
+  z-index: 2;
+  overflow: visible;
+  margin-top: 40px;
 }
 
 .first-section {
@@ -272,24 +482,17 @@ const items = [
 
 .bg-img {
   position: absolute;
-  top: 20vh;
+  // top: 20vh;
   left: 0;
   width: 100%;
   height: 150%;
   z-index: 0;
 }
 
-.bg-img2 {
-  position: absolute;
-  top: 5vh;
-  left: 0;
-  width: 15%;
-  z-index: 1;
-}
-
 .bg-img3 {
   position: absolute;
-  top: 90%;
+  // top: 35%;
+  bottom: -17%;
   right: 0;
   width: 15%;
   z-index: 1;
@@ -342,8 +545,8 @@ const items = [
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
   width: 300px;
   position: absolute;
-  right: 30px;
-  top: 3750px;
+  right: -250px;
+  bottom: 0;
   z-index: 2;
 }
 
@@ -381,10 +584,21 @@ const items = [
   z-index: 2;
 }
 .recommendations-swiper {
+  height: 320px;
   padding: 20px 0;
   .swiper-slide {
+    width: 200px !important;
     display: flex;
     justify-content: center;
+    @include tablet() {
+      width: 30% !important;
+    }
+    @include desktop() {
+      width: 18% !important;
+    }
+  }
+  @include desktop() {
+    height: 350px;
   }
 }
 
@@ -419,7 +633,7 @@ const items = [
   display: flex;
   flex-direction: column;
   max-width: 900px;
-  margin:auto;
+  margin: auto;
   p {
     line-height: 3;
   }
@@ -428,10 +642,22 @@ const items = [
 }
 
 @media screen and (max-width: 767px) {
+  h1 {
+    margin-top: 0px;
+    font-size: $font-size-h2;
+  }
+  .index-section-start {
+    margin-top: 10px;
+    margin-bottom: 25px;
+  }
   .card-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     justify-items: center;
+  }
+
+  .card-grid > *:nth-child(n + 5) {
+    display: none;
   }
 
   .bg-img {
@@ -439,11 +665,12 @@ const items = [
   }
 
   .bg-img2 {
+    top: -140%;
     width: 50%;
   }
 
   .bg-img3 {
-    top: 40%;
+    top: 28%;
     width: 50%;
   }
 
@@ -462,15 +689,15 @@ const items = [
   }
 
   .floating img {
-    top:1150vh;
-    width: 50%;
+    top: 750px;
+    right: 0;
+    width: 45%;
     z-index: 2;
   }
 
   .introduction {
-    max-width: 300px;
+    max-width: 400px;
     margin-bottom: 150px;
-    margin-left: 0;
   }
 
   .bg-img8 {
@@ -509,11 +736,12 @@ const items = [
   }
   .introduction {
     margin-bottom: 200px;
+    position: relative;
   }
   .bg-img5 {
     position: absolute;
     width: 100%;
-    z-index: 0; 
+    z-index: 0;
   }
 
   .bg-img6 {
@@ -521,7 +749,8 @@ const items = [
   }
 
   .floating img {
-    top: 5950px;
+    bottom: 0;
+    right: 0;
     width: 30%;
   }
 }
