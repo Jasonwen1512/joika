@@ -1,10 +1,10 @@
 <script setup>
-import { useRoute } from 'vue-router';
-import { computed } from 'vue';
-import { FakeActivity } from '@/assets/data/fake-activity';
-import Button from '@/components/Button.vue';
-import LikeButton from '@/components/activity/like-button.vue';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import { useRoute, useRouter } from "vue-router";
+import { computed } from "vue";
+import { FakeActivity } from "@/assets/data/fake-activity";
+import Button from "@/components/Button.vue";
+import LikeButton from "@/components/activity/like-button.vue";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import { ref } from "vue";
 
 const route = useRoute();
@@ -21,7 +21,12 @@ const toggleLike = (id) => {
 };
 
 const aloha = () => {
-  alert('我要跟團！');
+  alert("我要跟團！");
+};
+
+const router = useRouter();
+const gotoSignup = (id) => {
+  router.push(`/group/group-signup/${id}`);
 };
 </script>
 
@@ -42,12 +47,16 @@ const aloha = () => {
 
     <!-- 按鈕 -->
     <div class="activity-button-wrap">
-      <Button @click.stop.prevent="aloha" theme="primary" size="md">
+      <Button
+        @click.stop.prevent="gotoSignup(activity?.activity_no)"
+        theme="primary"
+        size="md"
+      >
         我要跟團!
       </Button>
       <LikeButton
-      :isActive="likeMap[activity?.activity_no]"
-      @click.stop.prevent="toggleLike(activity?.activity_no)"
+        :isActive="likeMap[activity?.activity_no]"
+        @click.stop.prevent="toggleLike(activity?.activity_no)"
       ></LikeButton>
     </div>
 
@@ -57,14 +66,18 @@ const aloha = () => {
     </div>
 
     <!-- 🆕 改版後的資訊排版 -->
-      
+
     <section class="activity-info">
       <div class="info-grid">
         <!-- 左欄 -->
         <div class="info-col">
           <div class="info-row">
             <strong>日期與時間</strong>
-            <span>{{ activity?.activity_start_date }} ~ <br>{{ activity?.activity_end_date }}</span>
+            <span
+              >{{ activity?.activity_start_date }} ~ <br />{{
+                activity?.activity_end_date
+              }}</span
+            >
           </div>
           <div class="info-row">
             <strong>地點</strong>
@@ -72,7 +85,11 @@ const aloha = () => {
           </div>
           <div class="info-row">
             <strong>揪團人數</strong>
-            <span>{{ activity?.current_participant }}/{{ activity?.max_participant }}人</span>
+            <span
+              >{{ activity?.current_participant }}/{{
+                activity?.max_participant
+              }}人</span
+            >
           </div>
         </div>
 
@@ -104,9 +121,9 @@ const aloha = () => {
 .activity-hero-bg {
   background-image: url("@/assets/img/activity/activity-detail/bg-blue-triangle.svg");
   background-repeat: no-repeat;
-  background-size: 100% auto; 
-  background-position: center bottom; 
-  width: 100%;  
+  background-size: 100% auto;
+  background-position: center bottom;
+  width: 100%;
   height: 320px;
 
   @include desktop() {
@@ -119,7 +136,6 @@ const aloha = () => {
   justify-content: center;
   align-items: center;
   margin-top: -240px;
-  
 
   img {
     width: 360px;
@@ -164,10 +180,8 @@ const aloha = () => {
   margin: 24px 0;
 
   @include mobile() {
-      gap: 25px;
-  }  
-
-
+    gap: 25px;
+  }
 }
 
 // ✅ 新排版樣式
@@ -183,7 +197,7 @@ const aloha = () => {
     justify-content: space-between;
     padding: 40px 0;
     border: none;
-    
+
     @include desktop() {
       border-top: 1px solid #000;
       border-bottom: 1px solid #000;
@@ -226,7 +240,7 @@ const aloha = () => {
   width: auto;
   width: 50%;
 
-  @include mobile(){
+  @include mobile() {
     z-index: -1;
     margin-top: 150px;
   }
@@ -241,8 +255,6 @@ const aloha = () => {
     width: 15%;
   }
 
-
-
   img {
     width: 180px;
     height: auto;
@@ -253,5 +265,3 @@ const aloha = () => {
   }
 }
 </style>
-
-
