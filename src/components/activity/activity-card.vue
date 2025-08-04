@@ -88,6 +88,7 @@ const titleDate = computed(() => {
     height: 200px;
     object-fit: cover;
     transition: ease 0.4s;
+    object-fit: cover;
     img {
       width: 100%;
       height: 100%;
