@@ -2,13 +2,6 @@
 import { reactive, ref, watch, toRefs, onMounted, onBeforeUnmount } from "vue";
 import tinymce from "tinymce/tinymce.js";
 import Button from "@/components/Button.vue";
-import bgImgUrl from "@/assets/img/support/bg.svg?url";
-import articleimg from "@/assets/img/article/article-img.png?url";
-import Illustration from "@/components/article/Illustration.vue";
-//測試元件有沒有出來
-import InteractiveSun from "@/components/InteractiveSun.vue";
-
-// ... (外觀、Icon、其他外掛的 import 省略，請保留您原有的) ...
 import "tinymce/skins/ui/oxide/skin.css";
 import "tinymce/themes/silver";
 import "tinymce/icons/default";
@@ -154,6 +147,7 @@ onBeforeUnmount(() => {
     window.removeEventListener("resize", handleResize);
     if (editorInstance.value) tinymce.remove(editorInstance.value);
 });
+const selectedCategory = ref("");
 
 const categories = [
     "登山",
@@ -170,40 +164,9 @@ const categories = [
     "演出表演",
     "其他",
 ];
-
-//標題字
-const titleText = ref("今天想說點什麼？");
-const isVisible = ref(false);
-
-onMounted(() => {
-    // 元件掛載後，直接將 isVisible 設為 true
-    isVisible.value = true;
-});
 </script>
-
 <template>
-    <div class="background">
-        <img
-            class="bgimg"
-            :src="bgImgUrl"
-            alt="背景圖三角"
-        />
-    </div>
-
-    <main class="create">
-        <div>
-            <h2 class="title">
-                <span
-                    v-for="(char, index) in titleText.split('')"
-                    :key="index"
-                    :style="`--index: ${index}`"
-                    :class="{ show: isVisible }"
-                >
-                    {{ char }}
-                </span>
-            </h2>
-        </div>
-
+    <form>
         <input
             class="titlebox"
             type="text"
@@ -212,24 +175,21 @@ onMounted(() => {
         <div class="category-btn-list">
             <!-- 建議修正 props 寫法 -->
             <label>文章類型：</label>
-            <button
+            <Button
                 theme="secondary"
                 size="sm"
+                >揪團心得</Button
             >
-                揪團心得
-            </button>
-            <button
+            <Button
                 theme="info"
                 size="sm"
+                >閒聊</Button
             >
-                閒聊
-            </button>
-            <button
+            <Button
                 theme="info"
                 size="sm"
+                >分享</Button
             >
-                分享
-            </button>
         </div>
         <div class="topic-category">
             <label for="topic-category">文章分類：</label>
@@ -266,56 +226,15 @@ onMounted(() => {
 
         <div class="btn">
             <Button
-                theme="primary"
+                theme="info"
                 size="md"
+                >送出</Button
             >
-                送出
-            </Button>
         </div>
-    </main>
-    <div class="decoration">
-        <Illustration />
-    </div>
+    </form>
 </template>
 
 <style scoped lang="scss">
-.bgimg {
-    width: 100vw;
-    height: auto;
-    max-height: 100vh;
-    margin-inline: auto;
-    z-index: -999;
-    position: absolute;
-    top: 0;
-    overflow: hidden;
-}
-/* .articleimg{
-  width: 100%;
-  height: auto;
-  z-index: -999;
-   position: absolute;
-  bottom:-112px;
-  left: 0; 
-
-}*/
-.decoration {
-    position: absolute;
-    bottom: 0px;
-    z-index: 1;
-    display: none;
-}
-.create {
-    display: grid;
-    margin: 10vh auto;
-    max-width: 1200px;
-    gap: 25px;
-    padding: 0 15px;
-    box-sizing: border-box;
-    /* [關鍵修正] 明確定義 Grid 欄位 */
-    grid-template-columns: 1fr;
-    z-index: 5;
-}
-
 .titlebox {
     background-color: #fff;
     width: 100%;
@@ -375,45 +294,5 @@ select {
 .notice {
     color: #ccc;
     padding: 10px;
-}
-
-@keyframes showLetter {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.title {
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    margin-block: 3vh;
-}
-
-.title span {
-    display: inline-block;
-    opacity: 0;
-}
-
-.title span.show {
-    animation: showLetter 0.5s cubic-bezier(0.34, 2.55, 0.64, 1)
-        calc(var(--index) * 0.1s) forwards;
-}
-
-.create {
-    gap: 15px;
-}
-
-.decoration {
-    @include desktop() {
-        position: absolute;
-        bottom: 0vh;
-        display: block;
-    }
 }
 </style>
