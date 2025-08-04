@@ -122,6 +122,7 @@ const handleFileChange = (e) => {
 </script>
 
 <template>
+  <Popup></Popup>
   <div class="group-create-wrap">
     <div class="banner-background">
       <h2>發起揪團</h2>
