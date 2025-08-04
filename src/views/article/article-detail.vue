@@ -1,7 +1,7 @@
 <script setup>
-import { ref , computed } from "vue";
+import { ref , computed, h, render  } from "vue";
 
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { articleList } from "@/assets/data/fake-article";
 import Button from "@/components/Button.vue";
 import DeleteIcon from "@/assets/img/icon/delete.svg";
@@ -10,7 +10,11 @@ import konanImage from '@/assets/img/article/movie_konan.jpg';
 import reprot from '@/assets/img/icon/errorred.svg?url';
 import like from '@/assets/img/icon/likeicon.svg?url';
 import commenticon from '@/assets/img/icon/commenticon.svg?url';
+import Swal from 'sweetalert2'
+import ReportForm from '@/components/ReportForm.vue'
+
 const route = useRoute()
+const router = useRouter()
 const postid = route.params.postid
 const article = articleList.find(item => item.postid === postid)
 
@@ -87,20 +91,16 @@ function postComment() {
 }
 
 //留言分頁
-// --- [新增] 留言區分頁的專用邏輯 ---
 
 // 定義每頁顯示幾則留言
 const COMMENTS_PER_PAGE = 3;
 
-// [新增] 留言區的當前頁碼狀態
 const currentCommentPage = ref(1);
 
-// [改造] 計算留言的總頁數
 const totalCommentPages = computed(() => {
   return Math.ceil(comments.value.length / COMMENTS_PER_PAGE);
 });
 
-// [新增/核心] 計算出「當前頁面應該顯示的留言」
 // 這會根據 currentCommentPage 的變化，自動從完整的 comments 陣列中「切」出對應的部分
 const paginatedComments = computed(() => {
   const startIndex = (currentCommentPage.value - 1) * COMMENTS_PER_PAGE;
@@ -108,7 +108,6 @@ const paginatedComments = computed(() => {
   return comments.value.slice(startIndex, endIndex);
 });
 
-// [改造] 產生留言區的分頁數字列表 (沿用您之前的聰明邏輯)
 const commentPaginationList = computed(() => {
   const pages = [];
   const total = totalCommentPages.value;
@@ -143,14 +142,11 @@ function goToNextCommentPage() {
   goToCommentPage(currentCommentPage.value + 1);
 }
 
-// [改造] 判斷是否為第一頁或最後一頁
 const isFirstCommentPage = computed(() => currentCommentPage.value === 1);
 const isLastCommentPage = computed(() => currentCommentPage.value === totalCommentPages.value)
 //發留言
 
-const DeleteCheck = () =>{
-  alert("文章刪除後無法復原，確定要刪除嗎?  (之後會做一個小彈窗 先用這樣)")
-}
+ReportIt
 const likeIt = (index) => {
   const comment = comments.value[index]
   comment.likenum++
@@ -169,11 +165,83 @@ const GoToComment = () =>{
 
 }
 
-const ReportIt = () =>{
-      alert("跳檢舉彈窗")
+//檢舉
+function ReportIt() {
+  const container = document.createElement('div')
+  render(h(ReportForm, {
+    onSubmit: (data) => {
+      console.log('檢舉資料：', data)
+      Swal.close()
+      Swal.fire('已送出', '感謝您的檢舉，我們會盡快處理', 'success')
+    }
+  }), container)
 
-  
+  Swal.fire({
+    title: '檢舉留言',
+    html: container,
+    showCancelButton: false,
+    showConfirmButton: false,
+    willClose: () => render(null, container),
+    zIndex: 20000,
+  })
 }
+//刪除
+function DeleteCheck() {
+  Swal.fire({
+    title: '確定要刪除嗎？',
+    text: '文章刪除後將無法復原！',
+    icon: 'warning',
+    showCancelButton: true, 
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    cancelButtonText: '取消'   ,
+    confirmButtonText: '是的，刪除它！',
+    reverseButtons: true,
+
+    buttonsStyling: false,
+
+    customClass: {
+      confirmButton: 'my-swal-confirm-button', 
+      cancelButton: 'my-swal-cancel-button'   
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire(
+        
+      {title:'已刪除！', 
+      text:'您的文章已經被刪除。',
+      icon:'success',
+    buttonsStyling: false,
+    customClass: 
+    {
+      confirmButton: 'my-swal-check-button',
+    } 
+  // 在此處串接後端刪除 API
+      // 以下為使用 fetch API 的範例
+      /*
+      fetch('YOUR_API_ENDPOINT/posts/YOUR_POST_ID', { // 將 YOUR_API_ENDPOINT/posts/YOUR_POST_ID 替換為你的 API 端點和文章 ID
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          // 如果需要，可以在這裡加入授權 token
+          // 'Authorization': 'Bearer YOUR_TOKEN'
+        }
+      })*/}   
+    ).then((result)=>{
+      if (result.isConfirmed) {
+          router.push('/article/article'); 
+          }
+       
+    })
+    } else if (result.isDismissed) {
+      // 如果使用者點擊了「取消」、按了 Esc 鍵或點擊視窗外部
+      console.log('使用者取消了刪除操作。');
+    }
+  })
+}
+
+
+
 
 
 
@@ -244,8 +312,8 @@ const ReportIt = () =>{
               <p v-if="comment.likenum > 0">{{ comment.likenum }}</p>
             </div>
        
-            <div class="action-icon" @click="GoToComment"><img :src="commenticon"></img></div> <!-- TODO: 替換成您的回覆 icon -->
-            <div class="action-icon" @click="ReportIt"><img :src="reprot"></img></div> <!-- TODO: 替換成您的檢舉 icon -->
+            <div class="action-icon" @click="GoToComment"><img :src="commenticon"></img></div> 
+            <div class="action-icon" @click="ReportIt"><img :src="reprot"></img></div> 
           </div>
 
         <hr class="separator">
@@ -478,6 +546,75 @@ display: flex;
 }
 
   100% { transform: scale(1); }
+}
+</style>
+<style lang="scss">
+//刪除燈箱的按鈕
+//取消
+.my-swal-cancel-button {
+  margin-inline: 10px;
+  font-size: 16px;
+  min-width: 86px;
+  min-height: 38px;
+  padding: 0 10px; 
+  border-radius: 6px;
+color: #4f8da8; /* outline-color */
+background-color: #ffffff; /* outline-background-color */
+border: 1px solid #4f8da8; /* outline-border-color */
+
+/* === Hover 狀態 === */
+&:hover {
+  color: #81bfda; /* outline-hover-color */
+  background-color: #edf8ff; /* outline-hover-background-color */
+  border-color: #81bfda; /* outline-hover-border-color */
+}
+
+/* === Active 狀態 === */
+&:active {
+  color: #4f8da8; /* outline-active-color */
+  background-color: #edf8ff; /* outline-active-background-color */
+  border-color: #4f8da8; /* outline-active-border-color */
+}
+
+/* === Disabled 狀態 === */
+&:disabled {
+  color: #d0d0d0; /* outline-disabled-color */
+  background-color: #ffffff; /* outline-disabled-background-color */
+  border-color: #d0d0d0; /* outline-disabled-border-color */
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+  }
+//確認
+.my-swal-confirm-button,.my-swal-check-button {
+    margin-inline: 10px;
+
+    font-size: 16px;
+  min-width: 86px;
+  min-height: 38px;
+  padding: 0 10px; 
+  border-radius: 6px;
+  color: #000;
+  background-color: #fada7a;
+  border: 1px solid #000;
+
+  &:hover {
+    color: #000;
+    background-color: #f9ff4d;
+  }
+
+  &:active {
+    color: #fff;
+    background-color: #fdc520;
+  }
+
+  &:disabled {
+    color: #fff;
+    background-color: #d0d0d0;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
 }
 
 </style>

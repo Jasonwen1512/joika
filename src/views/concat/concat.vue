@@ -104,9 +104,10 @@ const Submit = () => {
   //   background-position: center;
   // }
 }
-.concat {
-
- 
+ form{
+max-width: 756px;
+margin-inline:auto  ;
+margin-bottom: 15vh;
 }
 
 
@@ -127,7 +128,7 @@ display: flex;
 justify-content: center;
 margin-block: 3vh;
  @include desktop() {
-font-size: 48px;
+font-size: 32px;
 }
 }
 
