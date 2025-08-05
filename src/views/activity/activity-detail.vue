@@ -139,8 +139,8 @@ const swiperModules = [Pagination];
       <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
       <template v-else>
         <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
-        <Button @click="openCancelModal" theme="secondary-hollow" size="md">取消</Button>
-        <Button @click="openRatingModal" theme="primary" size="md">評價</Button>
+        <Button @click="openCancelModal" theme="cancel" :is-outline="true" size="md">取消</Button>
+        <Button @click="openRatingModal" theme="primary"size="md">評價</Button>
       </template>
     </div>
 
