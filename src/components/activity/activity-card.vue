@@ -14,9 +14,6 @@ const likeMap = ref({});
 const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
-const aloha = () => {
-  alert("我要跟團！");
-};
 
 const router = useRouter();
 const gotoSignup = (id) => {
