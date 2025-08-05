@@ -458,11 +458,7 @@ const visibleActivities = computed(() => {
     }
   }
 }
-.member-activity-card-section {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
-}
+
 //揪團卡片頁籤-end
 
 //行事曆
@@ -603,6 +599,12 @@ const visibleActivities = computed(() => {
     justify-items: start;
     flex-direction: row;
     align-items: center;
+  }
+
+  .member-activity-card-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
   }
 }
 </style>
