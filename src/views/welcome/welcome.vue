@@ -183,6 +183,15 @@ onMounted(() => {
             gsap.to(el, { opacity: 0, duration: 0.3 });
             fadedLetters.add(index);
           }
+
+          // 處理捲動速度過快，文字未被擦除的問題 (當 scroll 進度達 30% 時，直接將整句透明度設為 0)
+          if (self.progress > 0.4) {
+            gsap.to(el, { opacity: 0, duration: 0.3 });
+          }
+
+          if (self.progress < 0.4 && self.direction < 0) {
+            console.log("scroll up");
+          }
         });
       },
     },
@@ -191,7 +200,7 @@ onMounted(() => {
   tl.to(".floating-text-wrapper", { opacity: 0 }, 0);
   tl.fromTo("#joika-logo", { x: "-65vw" }, { x: "12vw" }, 0.4);
   tl.to("#joika-logo", { x: 0 }, 0.9);
-  tl.fromTo("#main-slogan", { x: "5vw", opacity: 0 }, { x: 0, opacity: 1 });
+  tl.fromTo("#main-slogan", { x: "8vw", opacity: 0 }, { x: 0, opacity: 1 });
 
   // === 卡片滑動效果區域 ===
   const slidingCardsScrollWrapper = document.querySelector(".sliding-cards-scroll-wrapper");
@@ -775,17 +784,17 @@ onUnmounted(() => {
   .community-cards-list {
     position: sticky;
     top: 50px;
-    width: 800px;
-    height: 500px;
+    width: 600px;
+    height: 375px;
     margin-bottom: 300px; // 避免卡片疊在骰子區域上
 
     .community-card {
       position: absolute;
-      width: 800px;
-      height: 500px;
+      width: 600px;
+      height: 375px;
       font-size: $font-size-h2;
       background-color: $white;
-      border: 4px solid $blue;
+      border: 3px solid $blue;
       border-radius: 60px;
 
       .content-wrapper {
@@ -798,30 +807,65 @@ onUnmounted(() => {
 
         .photo-wrapper {
           grid-row: 1 / span 2;
-          width: 140px;
-          height: 140px;
-          background-color: pink; //測試用，之後換成圖片
+          width: 105px;
+          height: 105px;
           border-radius: 50%;
-          border: 1px solid red;
+          overflow: hidden;
 
           .profile-photo {
             width: 100%;
-            overflow: hidden;
           }
         }
         .member-nickname {
-          font-size: 48px;
+          font-size: 36px;
           font-family: "Inter", sans-serif;
           font-weight: 700;
         }
         .comment-title {
-          font-size: 36px;
+          font-size: 27px;
           font-family: "Inter", sans-serif;
         }
         .comment-content {
           grid-column: 1 / span 2;
-          font-size: 36px;
+          font-size: 27px;
           font-family: "Inter", sans-serif;
+        }
+      }
+    }
+  }
+}
+
+@include tablet() {
+  .community-cards-wrapper {
+    .community-cards-list {
+      width: 720px;
+      height: 450px;
+
+      .community-card {
+        width: 720px;
+        height: 450px;
+        font-size: $font-size-h2;
+        background-color: $white;
+        border: 4px solid $blue;
+        border-radius: 45px;
+
+        .content-wrapper {
+          padding: 33.75px;
+
+          .photo-wrapper {
+            width: 140px;
+            height: 140px;
+          }
+
+          .member-nickname {
+            font-size: 42px;
+          }
+          .comment-title {
+            font-size: 32px;
+          }
+          .comment-content {
+            font-size: 32px;
+          }
         }
       }
     }
