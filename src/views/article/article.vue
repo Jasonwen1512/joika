@@ -545,8 +545,12 @@ body {
     background-color: #81bfda;
     border: 1px black solid;
     border-radius: 6px;
-}
 
+    // 正確的寫法是 &:hover
+    &:hover {
+        cursor: pointer;
+    }
+}
 .active {
     background-color: #4f8da8;
     color: #fff;
