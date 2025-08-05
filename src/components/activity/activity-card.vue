@@ -3,6 +3,7 @@ import { RouterLink } from "vue-router";
 import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
 import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   item: Object,
@@ -16,6 +17,12 @@ const toggleLike = (id) => {
 const aloha = () => {
   alert("我要跟團！");
 };
+
+const router = useRouter();
+const gotoSignup = (id) => {
+  router.push(`/group/group-signup/${id}`);
+};
+
 const formDate = (dateStr) => {
   const date = new Date(dateStr);
   const month = date.getMonth() + 1;
@@ -57,7 +64,10 @@ const titleDate = computed(() => {
     >
 
     <div class="button-group" @click.stop.prevent>
-      <Button @click.stop.prevent="aloha" theme="primary" size="md"
+      <Button
+        @click.stop.prevent="gotoSignup(item.activity_no)"
+        theme="primary"
+        size="md"
         >我要跟團!</Button
       >
       <LikeButton
@@ -88,6 +98,7 @@ const titleDate = computed(() => {
     height: 200px;
     object-fit: cover;
     transition: ease 0.4s;
+    object-fit: cover;
     img {
       width: 100%;
       height: 100%;

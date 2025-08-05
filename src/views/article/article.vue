@@ -682,11 +682,11 @@ transform:translateX(5px)
   flex-wrap: wrap;
 flex:3;
 }
-section.article-category{
-  margin-inline: 20px;
+// section.article-category{
+//   margin-inline: 20px;
 
-// flex-direction: column;
-}
+// // flex-direction: column;
+// }
 .post-btn{
 display: flex;
 flex:1;
@@ -696,6 +696,10 @@ justify-content: center;
 }
 
 @media (max-width: 768px) {
+h2{
+  font-size: 24px;
+}
+
   .bg-img2,.bg-img3{
     width: 50%!important;
   }

@@ -24,6 +24,11 @@ const routes = [
     path: "/group/group-create",
     component: () => import("@/views/group/group-create.vue"),
   },
+  {
+    path: "/group/group-signup/:id",
+    component: () => import("@/views/group/group-signup.vue"),
+    props: true,
+  },
   { path: "/concat", component: () => import("@/views/concat/concat.vue") },
   { path: "/chat", component: () => import("@/views/chat/chat.vue") },
   { path: "/auth/login", component: () => import("@/views/auth/login.vue") },

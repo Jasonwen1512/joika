@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import logoSvg from "@/assets/img/welcome/logo.svg?url";
@@ -69,49 +69,63 @@ const communityCardInfo = ref([
     nickname: "Yoyo",
     title: "第一次夜衝合歡山！星星多到爆炸✨",
     content: "昨天晚上跟幾個大學同學衝上合歡山看星星，本來還擔心會不會太冷、太累，結果完全值得！！✨✨",
-    id: 1,
   },
   {
     photo: "",
     nickname: "杯子裡的雲",
     title: "陌生人也能變朋友！第一次桌遊揪團超出預期",
     content: "身為業務員，平常接觸超多人，但很多時候反而更想認識一些**「無壓力的新朋友」**。",
-    id: 2,
   },
   {
     photo: "",
     nickname: "pika揪",
     title: "陽明山七星山日出團大推👍",
     content: "第二次參加Kevin的登山團了！上次爬大屯山就覺得他很專業，這次七星山也沒讓人失望。",
-    id: 3,
   },
   {
     photo: "",
     nickname: "Jojo",
     title: "奇萊南華百岳初體驗心得",
     content: "人生第一座百岳GET！雖然兩天一夜的行程很累，但成就感滿滿。",
-    id: 4,
   },
   {
     photo: "",
     nickname: "Larry",
     title: "大型桌遊聯誼成功脫單！",
     content: "原本抱著認識朋友的心情參加，沒想到真的遇到心儀的對象！",
-    id: 5,
   },
 ]);
 
+// 骰子轉動狀態
+const isRolling = ref(false);
+
+// 骰子投擲結果文字區域
+const currentResultText = ref("？");
+const resultTextClass = computed(() => {
+  const textLength = currentResultText.value.length;
+  return textLength <= 2 ? "result-text-two-words" : "result-text-four-words";
+});
+
+// 控制 "頁面跳轉緩衝區域" 顯示及倒數
+const showLearnMore = ref(false);
+const countdownText = ref("");
+let countdownTimer = null;
+
 gsap.registerPlugin(ScrollTrigger);
 
+// 綁定 DOM 元素
 const cardWrapperRef = ref(null);
+const logo = ref(null);
+const wordsGroup = ref(null);
+let letterEls = [];
 
 onMounted(() => {
+  // 解除 overflow 限制，避免 positoin: sticky 失效
+  document.documentElement.style.overflowX = "visible";
+  document.body.style.overflowX = "visible";
+
   // === 文字漂浮區域 ===
   const floatingTexts = gsap.utils.toArray(".floating-text");
-  const floatingTextWrapper = document.querySelector(".floating-text-wrapper");
-  const slidingCardWrapper = document.querySelector(".sliding-cards-wrapper");
-  const joikaLogo = document.querySelector("#joika-logo");
-  const mainSlogan = document.querySelector("#main-slogan");
 
   // 初始化，隱藏所有文字
   floatingTexts.forEach((el) => {
@@ -126,7 +140,7 @@ onMounted(() => {
 
   // floating-text-1 ~ floating-text-7 依序淡入效果
   ScrollTrigger.create({
-    trigger: floatingTextWrapper,
+    trigger: ".floating-text-wrapper",
     start: "0% top",
     end: "60% top",
     onUpdate: (self) => {
@@ -144,45 +158,38 @@ onMounted(() => {
     },
   });
 
+  letterEls = wordsGroup.value.querySelectorAll(".single-word");
+  console.log(letterEls);
+
+  const fadedLetters = new Set(); // 儲存被擦除的字
   const tl = gsap.timeline({
     scrollTrigger: {
-      trigger: slidingCardWrapper,
-      start: "10% top",
-      end: "90% top",
+      trigger: ".sliding-cards-wrapper",
+      start: "top top",
+      end: "300% bottom",
       scrub: true,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        self.progress > 0.5 ? gsap.set(".floating-title-container", { opacity: 0, visibility: "hidden" }) : gsap.set(".floating-title-container", { opacity: 1, visibility: "visible" });
+        const currentScroll = self.scroll(); // 目前 scroll 位置 (垂直)
+        const logoBox = logo.value.getBoundingClientRect();
+
+        letterEls.forEach((el, index) => {
+          const letterBox = el.getBoundingClientRect();
+          const isOverlap = logoBox.right > letterBox.left && logoBox.left < letterBox.right;
+
+          if (isOverlap && !fadedLetters.has(index) && logoBox.right > letterBox.right) {
+            gsap.to(el, { opacity: 0, duration: 0.3 });
+            fadedLetters.add(index);
+          }
+        });
       },
     },
   });
 
-  tl.to(floatingTextWrapper, {
-    opacity: 0,
-  })
-    .fromTo(
-      joikaLogo,
-      {
-        x: "-65vw",
-      },
-      {
-        x: "10vw",
-      }
-    )
-    .fromTo(
-      mainSlogan,
-      {
-        x: "-5vw",
-        opacity: 0,
-      },
-      {
-        x: 0,
-        opacity: 1,
-      }
-    )
-    .to(joikaLogo, {
-      x: 0,
-    });
+  tl.to(".floating-text-wrapper", { opacity: 0 }, 0);
+  tl.fromTo("#joika-logo", { x: "-65vw" }, { x: "12vw" }, 0.4);
+  tl.to("#joika-logo", { x: 0 }, 0.9);
+  tl.fromTo("#main-slogan", { x: "5vw", opacity: 0 }, { x: 0, opacity: 1 });
 
   // === 卡片滑動效果區域 ===
   const slidingCardsScrollWrapper = document.querySelector(".sliding-cards-scroll-wrapper");
@@ -242,38 +249,69 @@ onMounted(() => {
   });
 
   // === 骰子區域 ===
-  const dice = document.querySelector("#dice");
-  const rollDisplay = document.querySelector("#result-text");
+  const diceState = {
+    // 全部活動分類
+    activityCategories: {
+      1: { category: "水上活動", image: new URL("@/assets/img/index-img/diving.png", import.meta.url).href, color: "#4F8DA8" },
+      2: { category: "電影", image: new URL("@/assets/img/index-img/movie.png", import.meta.url).href, color: "#FFA68D" },
+      3: { category: "運動", image: new URL("@/assets/img/index-img/sports.png", import.meta.url).href, color: "#FADA7A" },
+      4: { category: "登山", image: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href, color: "#90DA81" },
+      5: { category: "露營", image: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href, color: "#A281DA" },
+      6: { category: "桌遊", image: new URL("@/assets/img/index-img/board-games.png", import.meta.url).href, color: "#F315BB" },
+      7: { category: "展覽", image: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href, color: "#FFFCE2" },
+      8: { category: "聚餐", image: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href, color: "#FB900C" },
+      9: { category: "手作", image: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href, color: "#81BFDA" },
+      10: { category: "文化體驗", image: new URL("@/assets/img/index-img/cultural-experience.png", import.meta.url).href, color: "#1FB92C" },
+      11: { category: "演出表演", image: new URL("@/assets/img/index-img/concert.png", import.meta.url).href, color: "#FFE100" },
+      12: { category: "唱歌", image: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href, color: "#2AA9FF" },
+    },
 
-  // Fisher-Yates 洗牌演算法
-  function getRandomUniqueItems(array, count) {
-    const copied = array.slice(); // 複製一個新的array，避免覆蓋原本的array
-    for (let i = copied.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copied[i], copied[j]] = [copied[j], copied[i]]; // 交換
-    }
-    return copied.slice(0, count);
-  }
+    // 12 類中選 6 類，以 Array 記錄被選出的 key (1 ~ 12)
+    selectedActivityKeys: new Array(),
 
-  // 活動分類 (隨機從 12 類中選 6 類放到骰子上)
-  const activityCategories = {
-    1: { category: "登山", image: "" },
-    2: { category: "水上活動", image: "" },
-    3: { category: "運動", image: "" },
-    4: { category: "露營", image: "" },
-    5: { category: "唱歌", image: "" },
-    6: { category: "展覽", image: "" },
-    7: { category: "聚餐", image: "" },
-    8: { category: "桌遊", image: "" },
-    9: { category: "電影", image: "" },
-    10: { category: "手作", image: "" },
-    11: { category: "文化體驗", image: "" },
-    12: { category: "演出表演", image: "" },
+    // 選取後的活動分類 (Object)
+    selectedActivityCategories: new Object(),
   };
 
-  const categoryKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  const selectedKeys = getRandomUniqueItems(categoryKeys, 6);
-  // const selectedCategories = ;
+  // 當頁面捲動至 "社群回覆卡片區域" 時，隨機從活動分類中選 6 類渲染到骰子上
+  ScrollTrigger.create({
+    trigger: ".community-cards-wrapper",
+    start: "top top",
+    once: true,
+    onEnter: () => {
+      const categoryKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      const diceFace = document.querySelectorAll(".dice-face");
+
+      // Fisher-Yates 洗牌演算法
+      function getRandomUniqueItems(array, count) {
+        const copied = array.slice(); // 複製一個新的array，避免覆蓋原本的array
+        for (let i = copied.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copied[i], copied[j]] = [copied[j], copied[i]]; // 交換
+        }
+        return copied.slice(0, count);
+      }
+
+      const selectedKeysArr = getRandomUniqueItems(categoryKeys, 6);
+
+      for (let i = 0; i < selectedKeysArr.length; i++) {
+        diceState.selectedActivityKeys = selectedKeysArr;
+        diceState.selectedActivityCategories[selectedKeysArr[i]] = diceState.activityCategories[selectedKeysArr[i]];
+
+        const img = document.createElement("img");
+        img.className = "dice-face-img";
+        img.src = diceState.activityCategories[selectedKeysArr[i]].image;
+        img.style.width = "100%";
+
+        // 清空並渲染圖片
+        diceFace[i].innerHTML = "";
+        diceFace[i].style.backgroundColor = diceState.activityCategories[selectedKeysArr[i]].color;
+        diceFace[i].appendChild(img);
+      }
+    },
+  });
+
+  const dice = document.querySelector(".dice");
 
   // 對應點數要讓該面朝上，所需的 rotateX/Y（單位：度）
   const faceAngles = {
@@ -288,7 +326,47 @@ onMounted(() => {
   let currentX = 0;
   let currentY = 0;
 
+  // 骰子投擲結果顯示後，自動捲動至最下方，3秒後再跳轉至JOIKA首頁
+  function triggerAutoScroll() {
+    // 顯示 "頁面跳轉緩衝區域"
+    showLearnMore.value = true;
+
+    // 延遲一段時間後捲動
+    setTimeout(() => {
+      const learnMoreSection = document.querySelector(".learn-more");
+      learnMoreSection.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+      // 倒數 3 秒
+      let countdown = 3;
+      countdownText.value = `${countdown} 秒後進入首頁`;
+
+      countdownTimer = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownText.value = `${countdown} 秒後進入首頁`;
+        } else {
+          countdownText.value = "Let's Go!!!";
+          clearInterval(countdownTimer);
+          window.location.href = "/cjd101/g2/front/home";
+        }
+      }, 1000);
+    }, 1000);
+  }
+
   function rollDice() {
+    // 骰子開始轉動時，移除放大縮小動畫效果
+    isRolling.value = true;
+
+    // 如果正在倒數，則取消倒數
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+      countdownText.value = "";
+      showLearnMore.value = false;
+    }
+
     const targetFace = Math.floor(Math.random() * 6) + 1;
     const [faceX, faceY] = faceAngles[targetFace];
 
@@ -314,34 +392,47 @@ onMounted(() => {
       dice.style.transform = `rotateX(${currentAngleX}deg) rotateY(${currentAngleY}deg)`;
 
       // 中間動畫過程顯示亂數
-      if (t < 1) {
-        rollDisplay.textContent = `${Math.floor(Math.random() * 6) + 1}`;
+      if (t < 0.8) {
+        const randomArrayIndex = Math.floor(Math.random() * 6); // 隨機取 Array 索引值 (0 ~ 5)
+        const randomActivityKey = diceState.selectedActivityKeys[randomArrayIndex]; // 取出 "selectedActivityKeys" 中的 key
+        currentResultText.value = diceState.selectedActivityCategories[randomActivityKey].category; // 使用 key 取出物件中的活動類別
+        frame++;
+        requestAnimationFrame(animate);
+      } else if (t >= 0.8 && t < 1) {
+        // 最後 20% 顯示最終結果
+        const activityKey = diceState.selectedActivityKeys[targetFace - 1];
+        currentResultText.value = diceState.selectedActivityCategories[activityKey].category;
         frame++;
         requestAnimationFrame(animate);
       } else {
         // 最終設定與顯示
+        const activityKey = diceState.selectedActivityKeys[targetFace - 1];
         currentX = faceX;
         currentY = faceY;
         dice.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
-        rollDisplay.textContent = `${targetFace}`;
+        currentResultText.value = diceState.selectedActivityCategories[activityKey].category;
+        triggerAutoScroll();
       }
     }
 
     animate();
   }
-  dice.addEventListener("click", rollDice);
 
-  // 迎賓頁面捲動至最下方，跳轉至JOIKA首頁
-  // ScrollTrigger.create({
-  //   trigger: ".learn-more", // 目標區塊
-  //   start: "top 80%",
-  //   once: true,
-  //   onEnter: () => {
-  //     setTimeout(() => {
-  //       window.location.href = "/home"; // 主頁
-  //     }, 1000); // 1秒後跳轉
-  //   },
-  // });
+  dice.addEventListener("click", rollDice);
+});
+
+onUnmounted(() => {
+  // 離開迎賓頁後，恢復 overflow 為 hidden
+  document.documentElement.style.overflowX = "hidden";
+  document.body.style.overflowX = "hidden";
+
+  // 清除倒數計時器
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+  }
+
+  // 清除 ScrollTrigger
+  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 });
 </script>
 
@@ -362,15 +453,28 @@ onMounted(() => {
 
   <!-- === 卡片滑動效果區域 === -->
   <section class="sliding-cards-wrapper">
-    <!-- 測試 -->
     <div class="joika-logo-wrapper">
       <div class="joika-logo-scroll-wrapper">
         <div class="floating-title-container">
-          <h3 class="floating-text" id="floating-text-7">如果有人剛好也想玩就好了</h3>
+          <h3 class="floating-text words-group" id="floating-text-7" ref="wordsGroup">
+            <span class="single-word">如</span>
+            <span class="single-word">果</span>
+            <span class="single-word">有</span>
+            <span class="single-word">人</span>
+            <span class="single-word">剛</span>
+            <span class="single-word">好</span>
+            <span class="single-word">也</span>
+            <span class="single-word">想</span>
+            <span class="single-word">玩</span>
+            <span class="single-word">就</span>
+            <span class="single-word">好</span>
+            <span class="single-word">了</span>
+          </h3>
+          <!-- <h3 class="floating-text" id="floating-text-7">如果有人剛好也想玩就好了</h3> -->
         </div>
         <div class="main-slogan-group">
           <h1 id="main-slogan">揪一咖 就出發</h1>
-          <img id="joika-logo" :src="logoSvg" alt="JOIKA brand logo" />
+          <img id="joika-logo" :src="logoSvg" alt="JOIKA brand logo" ref="logo" />
         </div>
       </div>
     </div>
@@ -411,7 +515,7 @@ onMounted(() => {
       <h2 class="entrance-slogan">一咖都不能少的理由</h2>
 
       <!-- 從 communityCardInfo 引入資料 -->
-      <div class="community-card" v-for="(card, index) in communityCardInfo" :key="card.id">
+      <div class="community-card" v-for="(card, index) in communityCardInfo" :key="index">
         <div class="content-wrapper">
           <img class="profile-photo" src="" alt="" />
           <p class="member-nickname">{{ card.nickname }}</p>
@@ -430,28 +534,29 @@ onMounted(() => {
     <div class="text-content-group">
       <h3 class="text-content">來揪點</h3>
       <h3 class="text-content">前往專區</h3>
-      <h3 id="result-text">？</h3>
+      <h3 :class="resultTextClass" id="result-text">{{ currentResultText }}</h3>
     </div>
 
     <!-- 3D骰子 -->
     <div class="scene">
-      <div class="cube" id="dice">
-        <div class="square point1">1</div>
-        <div class="square point2">2</div>
-        <div class="square point3">3</div>
-        <div class="square point4">4</div>
-        <div class="square point5">5</div>
-        <div class="square point6">6</div>
+      <div class="dice" :class="{ rolling: isRolling }">
+        <div class="dice-face point1"></div>
+        <div class="dice-face point2"></div>
+        <div class="dice-face point3"></div>
+        <div class="dice-face point4"></div>
+        <div class="dice-face point5"></div>
+        <div class="dice-face point6"></div>
       </div>
     </div>
   </section>
 
   <!-- === 頁面跳轉緩衝區 === -->
-  <section class="learn-more">
+  <section class="learn-more" v-show="showLearnMore">
     <h2 class="entrance-slogan">
       還等什麼？裡面更好玩
       <img id="point-down" :src="pointDown" alt="" />
     </h2>
+    <p class="countdown-text">{{ countdownText }}</p>
   </section>
 </template>
 
@@ -468,7 +573,7 @@ onMounted(() => {
 
 // === 文字漂浮區域 ===
 .floating-text-wrapper {
-  height: 300vh; // 容器捲動總長度
+  height: 197.5vh; // 容器捲動總長度 (300vh = 197.5vh) (100vh = 62.5vw with screen ratio 16:10)
 
   .floating-text-scroll-wrapper {
     height: 43.75vw; // 容器顯示長度 (70vh = 43.75vw) (100vh = 62.5vw with screen ratio 16:10)
@@ -549,6 +654,10 @@ onMounted(() => {
           color: $blue;
           font-size: clamp(24px, 3.125vw, 60px);
           text-align: center;
+
+          .single-word {
+            display: inline-block;
+          }
         }
       }
       .main-slogan-group {
@@ -723,7 +832,7 @@ onMounted(() => {
 
 // === 骰子區域 ===
 .dice-wrapper {
-  height: 50vw;
+  height: 43.75vw; // 容器顯示長度 (70vh = 43.75vw) (100vh = 62.5vw with screen ratio 16:10)
   position: relative;
 
   #bg-skyblue2 {
@@ -751,7 +860,7 @@ onMounted(() => {
       top: 26.823vw;
       right: 20.313vw;
     }
-    #result-text {
+    .result-text-two-words {
       color: $blue;
       font-size: clamp(32px, 3.333vw, 64px);
       width: 6.666vw;
@@ -760,50 +869,80 @@ onMounted(() => {
       top: 20.625vw;
       right: 16.042vw;
     }
+    .result-text-four-words {
+      color: $blue;
+      font-size: clamp(32px, 3.333vw, 64px);
+      width: 13.333vw;
+      text-align: center;
+      position: absolute;
+      top: 20.625vw;
+      right: 9.376vw;
+    }
   }
   .scene {
     perspective-origin: center;
     position: absolute;
-    top: 10.417vw;
-    left: 31.25vw;
+    top: 10vw;
+    left: 30vw;
 
-    .cube {
+    .dice {
       margin: 5vw;
-      width: 13vw;
-      height: 13vw;
+      width: 16vw;
+      height: 16vw;
       position: relative;
       transform-style: preserve-3d;
       transform: rotateX(-15deg) rotateY(-15deg); // 稍微旋轉一點角度，讓骰子的側面可以被看見
+      cursor: pointer;
 
-      .square {
-        width: 13vw;
-        height: 13vw;
-        position: absolute;
+      .dice-face {
+        width: 16vw;
+        height: 16vw;
         background-color: #fff;
         box-sizing: inset 0 0 30px #eee;
-        top: -2px;
-        left: -2px;
+        position: absolute;
+        top: 0;
+        left: 0;
         text-align: center;
-        line-height: 13vw;
+        line-height: 16vw;
         font-size: 40px;
+        overflow: hidden;
       }
       .point1 {
-        transform: rotateY(0deg) translateZ(6.5vw);
+        transform: rotateY(0deg) translateZ(8vw);
       }
       .point2 {
-        transform: rotateY(90deg) translateZ(6.5vw);
+        transform: rotateY(90deg) translateZ(8vw);
       }
       .point3 {
-        transform: rotateX(90deg) translateZ(6.5vw);
+        transform: rotateX(90deg) translateZ(8vw);
       }
       .point4 {
-        transform: rotateX(-90deg) translateZ(6.5vw);
+        transform: rotateX(-90deg) translateZ(8vw);
       }
       .point5 {
-        transform: rotateY(-90deg) translateZ(6.5vw);
+        transform: rotateY(-90deg) translateZ(8vw);
       }
       .point6 {
-        transform: rotateY(180deg) translateZ(6.5vw);
+        transform: rotateY(180deg) translateZ(8vw);
+      }
+    }
+
+    @keyframes dice-float {
+      0%,
+      100% {
+        transform: rotateX(-15deg) rotateY(-15deg) translateY(0) scale3d(1, 1, 1);
+      }
+      50% {
+        transform: rotateX(-15deg) rotateY(-15deg) translateY(-10px) scale3d(0.9, 0.9, 0.9);
+      }
+    }
+
+    .dice {
+      animation: dice-float 3s ease-in-out infinite;
+
+      // 當骰子被點擊或轉動時，可以暫停動畫
+      &.rolling {
+        animation: none;
       }
     }
   }
@@ -811,10 +950,30 @@ onMounted(() => {
 
 // === 頁面跳轉緩衝區 ===
 .learn-more {
+  height: 18.75vw; // 容器顯示長度 (30vh = 18.75vw) (100vh = 62.5vw with screen ratio 16:10)
+
   #point-down {
     vertical-align: middle;
     height: $font-size-h1;
     aspect-ratio: 1 / 1;
+  }
+  .countdown-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: clamp(32px, 2.5vw, 48px);
+    color: $blue;
+    font-weight: 700;
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 }
 </style>
