@@ -1,5 +1,5 @@
 <script setup>
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { ActivityCategories } from "@/assets/data/fake-activity-category";
 import ActivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
@@ -13,18 +13,26 @@ import PreArrow from "@/assets/img/icon/pre-arrow.svg";
 import NextArrow from "@/assets/img/icon/next-arrow.svg";
 
 const route = useRoute();
-onMounted(() => {
+const router = useRouter();
+
+const setDefaultCategory = () => {
   const categoryFromQuery = route.query.category;
   if (categoryFromQuery) {
     activeCategory.value = categoryFromQuery;
-    searchTrigger.value++;
+  } else {
+    activeCategory.value = "all";
+    router.replace({ query: { category: activeCategory.value } });
   }
+};
+
+onMounted(() => {
+  setDefaultCategory();
 });
 
 watch(
   () => route.query.category,
   (newVal) => {
-    activeCategory.value = newVal || null;
+    activeCategory.value = newVal || "all";
     searchTrigger.value++;
   }
 );
@@ -72,27 +80,18 @@ const activities = ref(
   )
 );
 const categories = ActivityCategories;
-const activeCategory = ref(null);
+const activeCategory = ref("all");
 
 const selectCategory = (id) => {
-  if (id === null) {
-    activeCategory.value = null;
-    confirmedSearch.value = {
-      keyword: "",
-      dateRange: [],
-    };
-    SearchText.value = "";
-    dateRange.value = [];
+  const current = route.query.category;
+  if (current === id) {
+    router.push({ query: { category: null } });
   } else {
-    activeCategory.value = activeCategory.value === id ? null : id;
-    confirmedSearch.value = {
-      keyword: "",
-      dateRange: [],
-    };
-    SearchText.value = "";
-    dateRange.value = [];
-    searchTrigger.value++;
+    router.push({ query: { category: id } });
   }
+  confirmedSearch.value = { keyword: "", dateRange: [] };
+  SearchText.value = "";
+  dateRange.value = [];
 };
 
 const filterActivities = computed(() => {
@@ -129,7 +128,8 @@ const filterActivities = computed(() => {
 
     // 分類搜尋
     const matchCategory =
-      !activeCategory.value || act.category_no === activeCategory.value;
+      activeCategory.value === "all" ||
+      act.category_no === activeCategory.value;
 
     return matchKeyword && matchDate && matchCategory;
   });
