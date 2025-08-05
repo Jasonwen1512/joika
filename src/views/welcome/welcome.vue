@@ -15,6 +15,9 @@ const backgroundDecoration = ref({
   bgYellow2: new URL("@/assets/img/welcome/bg-decorate-yellow2.svg", import.meta.url).href,
 });
 
+// logo 滑動擦除的文字
+const erasedWords = ref([{ word: "如" }, { word: "果" }, { word: "有" }, { word: "人" }, { word: "剛" }, { word: "好" }, { word: "也" }, { word: "想" }, { word: "玩" }, { word: "就" }, { word: "好" }, { word: "了" }]);
+
 // 滑動卡片圖片
 const slidingCardImg = ref([
   {
@@ -65,31 +68,31 @@ const featureCardInfo = ref([
 // 社群回覆卡片資料
 const communityCardInfo = ref([
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image1.jpg", import.meta.url).href,
     nickname: "Yoyo",
     title: "第一次夜衝合歡山！星星多到爆炸✨",
     content: "昨天晚上跟幾個大學同學衝上合歡山看星星，本來還擔心會不會太冷、太累，結果完全值得！！✨✨",
   },
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image2.jpg", import.meta.url).href,
     nickname: "杯子裡的雲",
     title: "陌生人也能變朋友！第一次桌遊揪團超出預期",
     content: "身為業務員，平常接觸超多人，但很多時候反而更想認識一些**「無壓力的新朋友」**。",
   },
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image3.jpg", import.meta.url).href,
     nickname: "pika揪",
     title: "陽明山七星山日出團大推👍",
     content: "第二次參加Kevin的登山團了！上次爬大屯山就覺得他很專業，這次七星山也沒讓人失望。",
   },
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image4.jpg", import.meta.url).href,
     nickname: "Jojo",
     title: "奇萊南華百岳初體驗心得",
     content: "人生第一座百岳GET！雖然兩天一夜的行程很累，但成就感滿滿。",
   },
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image5.jpg", import.meta.url).href,
     nickname: "Larry",
     title: "大型桌遊聯誼成功脫單！",
     content: "原本抱著認識朋友的心情參加，沒想到真的遇到心儀的對象！",
@@ -159,7 +162,6 @@ onMounted(() => {
   });
 
   letterEls = wordsGroup.value.querySelectorAll(".single-word");
-  console.log(letterEls);
 
   const fadedLetters = new Set(); // 儲存被擦除的字
   const tl = gsap.timeline({
@@ -181,6 +183,15 @@ onMounted(() => {
             gsap.to(el, { opacity: 0, duration: 0.3 });
             fadedLetters.add(index);
           }
+
+          // 處理捲動速度過快，文字未被擦除的問題 (當 scroll 進度達 30% 時，直接將整句透明度設為 0)
+          if (self.progress > 0.4) {
+            gsap.to(el, { opacity: 0, duration: 0.3 });
+          }
+
+          if (self.progress < 0.4 && self.direction < 0) {
+            console.log("scroll up");
+          }
         });
       },
     },
@@ -189,7 +200,7 @@ onMounted(() => {
   tl.to(".floating-text-wrapper", { opacity: 0 }, 0);
   tl.fromTo("#joika-logo", { x: "-65vw" }, { x: "12vw" }, 0.4);
   tl.to("#joika-logo", { x: 0 }, 0.9);
-  tl.fromTo("#main-slogan", { x: "5vw", opacity: 0 }, { x: 0, opacity: 1 });
+  tl.fromTo("#main-slogan", { x: "8vw", opacity: 0 }, { x: 0, opacity: 1 });
 
   // === 卡片滑動效果區域 ===
   const slidingCardsScrollWrapper = document.querySelector(".sliding-cards-scroll-wrapper");
@@ -457,20 +468,8 @@ onUnmounted(() => {
       <div class="joika-logo-scroll-wrapper">
         <div class="floating-title-container">
           <h3 class="floating-text words-group" id="floating-text-7" ref="wordsGroup">
-            <span class="single-word">如</span>
-            <span class="single-word">果</span>
-            <span class="single-word">有</span>
-            <span class="single-word">人</span>
-            <span class="single-word">剛</span>
-            <span class="single-word">好</span>
-            <span class="single-word">也</span>
-            <span class="single-word">想</span>
-            <span class="single-word">玩</span>
-            <span class="single-word">就</span>
-            <span class="single-word">好</span>
-            <span class="single-word">了</span>
+            <span class="single-word" v-for="(wordsList, index) in erasedWords" :key="index">{{ wordsList.word }}</span>
           </h3>
-          <!-- <h3 class="floating-text" id="floating-text-7">如果有人剛好也想玩就好了</h3> -->
         </div>
         <div class="main-slogan-group">
           <h1 id="main-slogan">揪一咖 就出發</h1>
@@ -499,7 +498,7 @@ onUnmounted(() => {
     <h2 class="entrance-slogan">安心揪 放心玩</h2>
     <div class="community-cards-list">
       <div class="feature-card" v-for="(card, index) in featureCardInfo" :key="index">
-        <img class="feature-icon" :src="card.image" alt="" />
+        <img class="feature-icon" :src="card.image" :alt="card.title" />
         <h2 class="feature-title">{{ card.title }}</h2>
         <p class="feature-text">{{ card.subtitle }}</p>
       </div>
@@ -517,7 +516,9 @@ onUnmounted(() => {
       <!-- 從 communityCardInfo 引入資料 -->
       <div class="community-card" v-for="(card, index) in communityCardInfo" :key="index">
         <div class="content-wrapper">
-          <img class="profile-photo" src="" alt="" />
+          <div class="photo-wrapper">
+            <img class="profile-photo" :src="card.photo" alt="會員頭像" />
+          </div>
           <p class="member-nickname">{{ card.nickname }}</p>
           <h2 class="comment-title">{{ card.title }}</h2>
           <p class="comment-content">{{ card.content }}</p>
@@ -554,7 +555,7 @@ onUnmounted(() => {
   <section class="learn-more" v-show="showLearnMore">
     <h2 class="entrance-slogan">
       還等什麼？裡面更好玩
-      <img id="point-down" :src="pointDown" alt="" />
+      <img id="point-down" :src="pointDown" alt="了解更多" />
     </h2>
     <p class="countdown-text">{{ countdownText }}</p>
   </section>
@@ -783,17 +784,17 @@ onUnmounted(() => {
   .community-cards-list {
     position: sticky;
     top: 50px;
-    width: 800px;
-    height: 500px;
+    width: 600px;
+    height: 375px;
     margin-bottom: 300px; // 避免卡片疊在骰子區域上
 
     .community-card {
       position: absolute;
-      width: 800px;
-      height: 500px;
+      width: 600px;
+      height: 375px;
       font-size: $font-size-h2;
       background-color: $white;
-      border: 4px solid $blue;
+      border: 3px solid $blue;
       border-radius: 60px;
 
       .content-wrapper {
@@ -804,26 +805,67 @@ onUnmounted(() => {
         grid-template-columns: 3fr 7fr;
         padding: 50px;
 
-        .profile-photo {
+        .photo-wrapper {
           grid-row: 1 / span 2;
-          width: 140px;
-          height: 140px;
-          background-color: pink; //測試用，之後換成圖片
+          width: 105px;
+          height: 105px;
           border-radius: 50%;
+          overflow: hidden;
+
+          .profile-photo {
+            width: 100%;
+          }
         }
         .member-nickname {
-          font-size: 48px;
+          font-size: 36px;
           font-family: "Inter", sans-serif;
           font-weight: 700;
         }
         .comment-title {
-          font-size: 36px;
+          font-size: 27px;
           font-family: "Inter", sans-serif;
         }
         .comment-content {
           grid-column: 1 / span 2;
-          font-size: 36px;
+          font-size: 27px;
           font-family: "Inter", sans-serif;
+        }
+      }
+    }
+  }
+}
+
+@include tablet() {
+  .community-cards-wrapper {
+    .community-cards-list {
+      width: 720px;
+      height: 450px;
+
+      .community-card {
+        width: 720px;
+        height: 450px;
+        font-size: $font-size-h2;
+        background-color: $white;
+        border: 4px solid $blue;
+        border-radius: 45px;
+
+        .content-wrapper {
+          padding: 33.75px;
+
+          .photo-wrapper {
+            width: 140px;
+            height: 140px;
+          }
+
+          .member-nickname {
+            font-size: 42px;
+          }
+          .comment-title {
+            font-size: 32px;
+          }
+          .comment-content {
+            font-size: 32px;
+          }
         }
       }
     }

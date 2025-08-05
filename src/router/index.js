@@ -54,6 +54,13 @@ const routes = [
     path: "/activity/:activity_id",
     component: () => import("@/views/activity/activity-detail.vue"),
   },
+
+
+    {
+    path: '/:pathMatch(.*)*',
+    name: '404',
+    component: () => import('@/views/404.vue'),
+  },
 ];
 
 const router = createRouter({

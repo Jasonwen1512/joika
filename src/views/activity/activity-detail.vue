@@ -1,6 +1,6 @@
 <script setup>
 // 1. 引入我們準備好的、獨立的留言板元件
-import CommentSection from '@/components/article/comment.vue';
+import commentSection from "@/components/activity/activity-detail/comment-section.vue";
 import { useRoute, useRouter } from "vue-router";
 // === 第一步：在 import ref 的地方，加入 onMounted 和 onUnmounted ===
 import { computed, ref, onMounted, onUnmounted } from "vue";
@@ -183,15 +183,15 @@ const fakeComments = [
   "推！這是我今年參加過最棒的活動，沒有之一！",
   "照片拍得真好！可以分享原圖給我嗎？謝謝你！",
   "哈哈，我就是照片裡笑得最傻的那個！那天真的玩瘋了！🤣",
-  "可惜這次沒跟到，看你們玩得這麼開心，下次有團一定要通知我！"
+  "可惜這次沒跟到，看你們玩得這麼開心，下次有團一定要通知我！",
 ];
 
 const commentsForBoard = ref(
-  participants.value.map(p => {
+  participants.value.map((p) => {
     // === 魔法在這裡發生！===
     // 1. 從我們的「台詞本」中，隨機選一個位置 (index)
     const randomIndex = Math.floor(Math.random() * fakeComments.length);
-    
+
     // 2. 根據這個隨機位置，抽出對應的台詞
     const randomComment = fakeComments[randomIndex];
 
@@ -204,7 +204,7 @@ const commentsForBoard = ref(
       content: randomComment, // <-- 使用我們隨機抽出的台- 詞，取代掉原本固定的文字！
       timestamp: new Date().toLocaleDateString(),
       likenum: p.reviews,
-      replies: []
+      replies: [],
     };
   })
 );
@@ -217,8 +217,8 @@ function handleAddNewComment(newCommentData) {
 // 監聽員二：負責處理「新增回覆」的請求
 function handleAddNewReply({ parentId, reply }) {
   // 1. 先從我們的留言黑板上，找到那則被回覆的父留言
-  const parentComment = commentsForBoard.value.find(c => c.id === parentId);
-  
+  const parentComment = commentsForBoard.value.find((c) => c.id === parentId);
+
   // 2. 如果找到了，就把新的回覆加到它的 replies 背包裡
   if (parentComment) {
     if (!parentComment.replies) {
@@ -228,14 +228,12 @@ function handleAddNewReply({ parentId, reply }) {
   }
 }
 
-
 // 3. 準備要傳遞給留言板的「當前使用者」資料
 const currentUserForBoard = ref({
-  userid: 'M-MYSELF',
-  author: '我本人',
-  avatar: 'https://i.pravatar.cc/150?u=me'
+  userid: "M-MYSELF",
+  author: "我本人",
+  avatar: "https://i.pravatar.cc/150?u=me",
 });
-
 
 // Swiper modules
 const swiperModules = [Pagination];
@@ -278,8 +276,14 @@ const swiperModules = [Pagination];
       <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
       <template v-else>
         <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
-        <Button @click="openCancelModal" theme="cancel" :is-outline="true" size="md">取消</Button>
-        <Button @click="openRatingModal" theme="primary"size="md">評價</Button>
+        <Button
+          @click="openCancelModal"
+          theme="cancel"
+          :is-outline="true"
+          size="md"
+          >取消</Button
+        >
+        <Button @click="openRatingModal" theme="primary" size="md">評價</Button>
       </template>
     </div>
 
@@ -433,11 +437,11 @@ const swiperModules = [Pagination];
     </section>
 
     <div class="comments-container">
-      <CommentSection 
-        :comments-data="commentsForBoard"  
+      <commentSection
+        :comments-data="commentsForBoard"
         :user-data="currentUserForBoard"
-        @add-comment="handleAddNewComment"   
-        @add-reply="handleAddNewReply"       
+        @add-comment="handleAddNewComment"
+        @add-reply="handleAddNewReply"
       />
     </div>
 
@@ -920,15 +924,14 @@ const swiperModules = [Pagination];
       }
     }
   }
-
 }
 
 .comments-container {
-  max-width: 1200px; 
+  max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
   margin-block: 7.5vh;
-  padding: 0 20px; 
-  box-sizing: border-box; 
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 </style>
