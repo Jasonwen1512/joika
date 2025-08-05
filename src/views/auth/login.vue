@@ -1,93 +1,101 @@
 <script setup>
-import { reactive,ref } from "vue";
+import { reactive, ref } from "vue";
 import Button from "@/components/Button.vue";
 import CaptchaBox from "@/components/auth/CaptchaBox.vue";
-import { useRouter } from 'vue-router'
-import { watch } from 'vue'
+import { useRouter } from "vue-router";
+import { watch } from "vue";
 
-const realCaptcha = ref('') // 接住 emit 的驗證碼
-const router = useRouter()
+const realCaptcha = ref(""); // 接住 emit 的驗證碼
+const router = useRouter();
 const captchaRef = ref(null);
 const error = reactive({
   mobile: "",
   password: "",
-  verifyCode: ""
-})
+  verifyCode: "",
+});
 
 // 使用 reactive 建立一個響應式的表單資料物件
 const form = reactive({
   mobile: "",
   password: "",
   verifyCode: "",
-}); 
+});
 
 // 假資料帳號密碼
 const mockUser = {
-  mobile: '0912345678',
-  password: '1234',
-}
+  mobile: "0912345678",
+  password: "1234",
+};
 
 // 即時輸入清除錯誤
-watch(() => form.mobile, val => {
-  if (error.mobile && val) error.mobile = ''
-})
-watch(() => form.password, val => {
-  if (error.password && val) error.password = ''
-})
-watch(() => form.verifyCode, val => {
-  if (error.verifyCode && val) error.verifyCode = ''
-})
+watch(
+  () => form.mobile,
+  (val) => {
+    if (error.mobile && val) error.mobile = "";
+  }
+);
+watch(
+  () => form.password,
+  (val) => {
+    if (error.password && val) error.password = "";
+  }
+);
+watch(
+  () => form.verifyCode,
+  (val) => {
+    if (error.verifyCode && val) error.verifyCode = "";
+  }
+);
 
 const handleLogin = () => {
   // 清空錯誤
-  error.mobile = ''
-  error.password = ''
-  error.verifyCode = ''
+  error.mobile = "";
+  error.password = "";
+  error.verifyCode = "";
 
-  const hasError = false
+  const hasError = ref(false);
 
   if (!form.mobile) {
-    error.mobile = '請輸入手機號碼'
-    hasError = true
+    error.mobile = "請輸入手機號碼";
+    hasError.value = true;
   }
 
   if (!form.password) {
-    error.password = '請輸入密碼'
-    hasError = true
+    error.password = "請輸入密碼";
+    hasError.value = true;
   }
 
   if (!form.verifyCode) {
-    error.verifyCode = '請輸入驗證碼'
-    hasError = true
+    error.verifyCode = "請輸入驗證碼";
+    hasError.value = true;
   }
 
   // 提早返回，防止空值比對
-  if (hasError) return
+  if (hasError.value) return;
 
   // 驗證帳密與驗證碼
   if (form.mobile !== mockUser.mobile) {
-    error.mobile = '手機號碼錯誤'
-    hasError = true
+    error.mobile = "手機號碼錯誤";
+    hasError.value = true;
   }
 
   if (form.password !== mockUser.password) {
-    error.password = '密碼錯誤'
-    hasError = true
+    error.password = "密碼錯誤";
+    hasError.value = true;
   }
 
   if (form.verifyCode.toLowerCase() !== realCaptcha.value.toLowerCase()) {
-  error.verifyCode = '驗證碼錯誤'
-  hasError = true
-}
+    error.verifyCode = "驗證碼錯誤";
+    hasError.value = true;
+  }
 
-  if (hasError) return
-  router.push('/member/member-content')
-}
+  if (hasError.value) return;
+  router.push("/member/member-content");
+};
 
 const goToRegister = () => {
-  router.push('/auth/signup')
-} 
-
+  router.push("/auth/signup");
+};
 </script>
 
 <template>
@@ -98,44 +106,55 @@ const goToRegister = () => {
 
         <div class="form-group">
           <label for="mobile">手機</label>
-          <input type="tel" id="mobile" @blur="validateMobile" v-model="form.mobile" />
-          <p class="error-msg" v-if="error.mobile">{{error.mobile}}</p>
-
+          <input
+            type="tel"
+            id="mobile"
+            @blur="validateMobile"
+            v-model="form.mobile"
+          />
+          <p class="error-msg" v-if="error.mobile">{{ error.mobile }}</p>
         </div>
 
         <div class="form-group">
           <label for="password">密碼</label>
           <input type="password" id="password" v-model="form.password" />
-          <p class="error-msg" v-if="error.password">{{error.password}}</p>
+          <p class="error-msg" v-if="error.password">{{ error.password }}</p>
         </div>
 
         <div class="form-group">
           <label for="verify-code">驗證碼</label>
           <div class="captcha-input-wrapper">
-            <input type="text" id="verify-code" v-model="form.verifyCode"/>
+            <input type="text" id="verify-code" v-model="form.verifyCode" />
             <div class="captcha-overlay">
-              <CaptchaBox @updateIdentifyCode="val => realCaptcha = val" ref="captchaRef" />
+              <CaptchaBox
+                @updateIdentifyCode="(val) => (realCaptcha = val)"
+                ref="captchaRef"
+              />
             </div>
             <div class="captcha-icon-wrapper">
               <font-awesome-icon
                 :icon="['fas', 'arrow-rotate-right']"
                 class="captcha-refresh"
-                @click="captchaRef?.refreshCode()" />
+                @click="captchaRef?.refreshCode()"
+              />
             </div>
           </div>
-          <p class="error-msg" v-if="error.verifyCode">{{error.verifyCode}}</p>
+          <p class="error-msg" v-if="error.verifyCode">
+            {{ error.verifyCode }}
+          </p>
         </div>
 
         <a href="#" class="forgot-password">忘記密碼</a>
 
         <div class="button-group">
-          <Button size="md" theme="info" type="button" @click="goToRegister">註冊</Button>
+          <Button size="md" theme="info" type="button" @click="goToRegister"
+            >註冊</Button
+          >
           <Button size="md" theme="primary" type="submit">登入</Button>
         </div>
       </form>
     </div>
   </div>
-
 </template>
 
 <style scoped lang="scss">
@@ -171,7 +190,7 @@ const goToRegister = () => {
     aspect-ratio: 406 / 518;
     width: 150px;
     bottom: -50px;
-    right:0;
+    right: 0;
     z-index: -1;
   }
 }
@@ -216,7 +235,7 @@ const goToRegister = () => {
     }
   }
 
-  .error-msg{
+  .error-msg {
     color: $red;
     margin-top: 2px;
   }
@@ -243,11 +262,11 @@ const goToRegister = () => {
     }
   }
 
-  .captcha-icon-wrapper{
+  .captcha-icon-wrapper {
     display: flex;
     justify-content: flex-end;
   }
-  .captcha-refresh{
+  .captcha-refresh {
     color: #81bfda;
   }
 
@@ -263,7 +282,7 @@ const goToRegister = () => {
     }
   }
 
-  .button-group { 
+  .button-group {
     display: flex;
     justify-content: space-between;
     gap: 15px;
@@ -288,7 +307,7 @@ const goToRegister = () => {
 
     .button-group {
       display: flex;
-      justify-content:center;
+      justify-content: center;
       gap: 100px;
     }
   }

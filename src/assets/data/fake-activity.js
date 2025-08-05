@@ -4,7 +4,10 @@ export const FakeActivity = [
     activity_name: "嘉明湖 一次攻兩座百岳！",
     category_name: "登山",
     location: "台東縣海端鄉 嘉明湖",
-    activity_img: "https://picsum.photos/seed/ACT0001/600/400",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/lake.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-25",
     registration_deadline: "2025-08-15",
     activity_start_date: "2025-08-31",
@@ -28,7 +31,10 @@ export const FakeActivity = [
     activity_name: "小琉球 夜潛拍攝海龜生態",
     category_name: "水上活動",
     location: "屏東縣琉球鄉 小琉球海域",
-    activity_img: "https://picsum.photos/seed/ACT0002/600/400",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/diving-at-night.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-25",
     registration_deadline: "2025-08-05",
     activity_start_date: "2025-08-15",
@@ -52,7 +58,10 @@ export const FakeActivity = [
     activity_name: "大安桌遊店 狼人殺整夜狂歡局",
     category_name: "桌遊",
     location: "台北市大安區 桌遊店",
-    activity_img: "https://picsum.photos/seed/ACT0003/600/400",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/board-game.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-28",
     registration_deadline: "2025-08-18",
     activity_start_date: "2025-08-20",
@@ -75,7 +84,10 @@ export const FakeActivity = [
     activity_name: "陽明山 星空下的露營體驗",
     category_name: "露營",
     location: "台北市北投區 陽明山",
-    activity_img: "https://picsum.photos/seed/ACT0004/600/400",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/camping-at-night.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-15",
     registration_deadline: "2025-08-05",
     activity_start_date: "2025-08-10",
@@ -98,7 +110,10 @@ export const FakeActivity = [
     activity_name: "信義威秀 鐵達尼號重映之夜",
     category_name: "電影",
     location: "台北市信義區 信義威秀影城",
-    activity_img: "https://picsum.photos/seed/ACT005/600/401",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/titanic.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-25",
     registration_deadline: "2025-08-18",
     activity_start_date: "2025-08-22",
@@ -121,7 +136,10 @@ export const FakeActivity = [
     activity_name: "華山文創園區 手作陶藝下午班",
     category_name: "手作",
     location: "台北市中正區 華山文創園區",
-    activity_img: "https://picsum.photos/seed/ACT0006/600/401",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/pottery.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-20",
     registration_deadline: "2025-08-10",
     activity_start_date: "2025-08-12",
@@ -144,7 +162,10 @@ export const FakeActivity = [
     activity_name: "台中都會公園 晨間瑜伽舒展課",
     category_name: "運動",
     location: "台中市北屯區 都會公園",
-    activity_img: "https://picsum.photos/seed/ACT0007/600/401",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/yoga.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-30",
     registration_deadline: "2025-08-15",
     activity_start_date: "2025-08-19",
@@ -167,7 +188,10 @@ export const FakeActivity = [
     activity_name: "澎湖 北海岸SUP立槳初體驗",
     category_name: "水上活動",
     location: "澎湖縣白沙鄉 北海岸",
-    activity_img: "https://picsum.photos/seed/ACT0008/600/401",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/sup.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-28",
     registration_deadline: "2025-08-22",
     activity_start_date: "2025-08-25",
@@ -190,7 +214,10 @@ export const FakeActivity = [
     activity_name: "宜蘭老街 在地美食散步聚餐",
     category_name: "聚餐",
     location: "宜蘭縣宜蘭市 宜蘭老街",
-    activity_img: "https://picsum.photos/seed/ACT0009/600/402",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/ilan.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-29",
     registration_deadline: "2025-08-25",
     activity_start_date: "2025-08-28",
@@ -213,7 +240,10 @@ export const FakeActivity = [
     activity_name: "南投溪頭 森林浴文化體驗",
     category_name: "文化體驗",
     location: "南投縣鹿谷鄉 溪頭自然教育園區",
-    activity_img: "https://picsum.photos/seed/ACT0010/600/402",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/xitou.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-22",
     registration_deadline: "2025-08-10",
     activity_start_date: "2025-08-14",
@@ -233,10 +263,13 @@ export const FakeActivity = [
   },
   {
     activity_no: "ACT00011",
-    activity_name: "士林夜市 深夜小吃快閃團",
+    activity_name: "饒河夜市 深夜小吃快閃團",
     category_name: "聚餐",
-    location: "台北市士林區 士林夜市",
-    activity_img: "https://picsum.photos/seed/ACT0011/600/402",
+    location: "台北市松山區 饒河夜市",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/nightmarket.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-28",
     registration_deadline: "2025-08-16",
     activity_start_date: "2025-08-18",
@@ -248,7 +281,7 @@ export const FakeActivity = [
     fee_notes: "每人約400元，現場依實際攤位消費AA。",
     participant_limitation: "不限經驗，單純想吃宵夜就來。",
     activity_description:
-      "工作完常覺得肚子餓到睡不著，乾脆揪一團深夜夜市小吃巡禮。集合點在劍潭捷運站，19:30 準時出發，沿路從大腸包小腸、蚵仔煎一路吃到花生冰淇淋春捲，中間會停下來拍照打卡。沒有固定路線，走到哪吃到哪，喜歡什麼就買什麼，不需要拘束。適合愛吃又想認識新朋友的人，聊美食比聊話題還自然，輕鬆沒有壓力。",
+      "工作完常覺得肚子餓到睡不著，乾脆揪一團深夜夜市小吃巡禮。集合點在松山捷運站，19:30 準時出發，沿路從大腸包小腸、蚵仔煎一路吃到花生冰淇淋春捲，中間會停下來拍照打卡。沒有固定路線，走到哪吃到哪，喜歡什麼就買什麼，不需要拘束。適合愛吃又想認識新朋友的人，聊美食比聊話題還自然，輕鬆沒有壓力。",
     activity_status: "已成團",
     host_member_id: "M0011",
     created_at: "2025-07-21",
@@ -259,7 +292,10 @@ export const FakeActivity = [
     activity_name: "合歡山 夜衝觀星登山行",
     category_name: "登山",
     location: "南投縣仁愛鄉 合歡山",
-    activity_img: "https://picsum.photos/seed/ACT0012/600/402",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/starry-sky.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-23",
     registration_deadline: "2025-08-20",
     activity_start_date: "2025-08-30",
@@ -282,7 +318,10 @@ export const FakeActivity = [
     activity_name: "信義區 露天音樂表演之夜",
     category_name: "演出表演",
     location: "台北市信義區 四四南村廣場",
-    activity_img: "https://picsum.photos/seed/ACT0013/600/403",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/concert.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-25",
     registration_deadline: "2025-08-24",
     activity_start_date: "2025-08-27",
@@ -305,7 +344,10 @@ export const FakeActivity = [
     activity_name: "台北KTV 經典情歌大合唱",
     category_name: "唱歌",
     location: "台北市信義區 KTV商圈",
-    activity_img: "https://picsum.photos/seed/ACT0014/600/403",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/ktv.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-22",
     registration_deadline: "2025-08-19",
     activity_start_date: "2025-08-21",
@@ -328,7 +370,10 @@ export const FakeActivity = [
     activity_name: "花蓮七星潭 日出攝影團",
     category_name: "其他",
     location: "花蓮縣新城鄉 七星潭",
-    activity_img: "https://picsum.photos/seed/ACT0015/600/403",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/sunrise.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-19",
     registration_deadline: "2025-08-14",
     activity_start_date: "2025-08-17",
@@ -351,7 +396,10 @@ export const FakeActivity = [
     activity_name: "木柵 貓空纜車文化散策",
     category_name: "文化體驗",
     location: "台北市文山區 貓空纜車站",
-    activity_img: "https://picsum.photos/seed/ACT0016/600/403",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/cable-car.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-27",
     registration_deadline: "2025-08-26",
     activity_start_date: "2025-08-29",
@@ -374,7 +422,10 @@ export const FakeActivity = [
     activity_name: "台中動漫展 Cosplay自由交流日",
     category_name: "展覽",
     location: "台中市西屯區 臺中國際展覽館",
-    activity_img: "https://picsum.photos/seed/ACT0017/600/404",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/cosplay.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-21",
     registration_deadline: "2025-08-20",
     activity_start_date: "2025-08-23",
@@ -397,7 +448,10 @@ export const FakeActivity = [
     activity_name: "小巨蛋 Coldplay現場表演",
     category_name: "演出表演",
     location: "台北市松山區 台北小巨蛋",
-    activity_img: "https://picsum.photos/seed/ACT0018/600/404",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/coldplay.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-20",
     registration_deadline: "2025-08-13",
     activity_start_date: "2025-08-16",
@@ -420,7 +474,10 @@ export const FakeActivity = [
     activity_name: "花蓮富里 金針花季健行之旅",
     category_name: "登山",
     location: "花蓮縣富里鄉 六十石山",
-    activity_img: "https://picsum.photos/seed/ACT0019/600/404",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/daylily.png",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-18",
     registration_deadline: "2025-08-09",
     activity_start_date: "2025-08-13",
@@ -443,7 +500,10 @@ export const FakeActivity = [
     activity_name: "高雄駁二 插畫市集週末逛展",
     category_name: "展覽",
     location: "高雄市鹽埕區 駁二藝術特區",
-    activity_img: "https://picsum.photos/seed/ACT0020/600/404",
+    activity_img: new URL(
+      "../img/activity/avtivity-img/market.jpg",
+      import.meta.url
+    ).href,
     registration__start_date: "2025-07-26",
     registration_deadline: "2025-08-19",
     activity_start_date: "2025-08-22",

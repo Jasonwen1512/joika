@@ -3,10 +3,12 @@
   import Button from '@/components/Button.vue';
   import EditIcon from "@/assets/img/icon/edit.svg";
   import NotifyIcon from "@/assets/img/icon/notification.svg";
-  import { ref,computed } from 'vue'
+  import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
   import { useRoute } from 'vue-router';
   import FullCalendar from "@/components/member/member-content/FullCalendar.vue";
-import { articleList } from "@/assets/data/fake-article";//引入文章假資料
+  import { articleList } from "@/assets/data/fake-article";//引入文章假資料
+  import MemberActivityCard from '@/components/member/member-activity-card.vue';
+  import { FakeActivity } from "@/assets/data/fake-activity";
 
 //靜態資料 活動類別與標籤顏色
   const activities = ['水上活動', '露營', '登山'];
@@ -28,7 +30,6 @@ import { articleList } from "@/assets/data/fake-article";//引入文章假資料
   "演出表演": "#77BEF0",
   "其他": "#969696"
 };
- 
 
 //靜態資料 留言 之後要串
 const comments = ref([
@@ -93,6 +94,29 @@ const FilteredArticles = computed(() => {
   });
 });
 
+const visibleCount = ref(2); // 預設電腦是 2 張
+
+const handleResize = () => {
+  visibleCount.value = window.innerWidth < 768 ? 1 : 2;
+};
+
+onMounted(() => {
+  handleResize(); // 初次判斷
+  window.addEventListener('resize', handleResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+}); 
+
+const openActivities = computed(() => {
+  return FakeActivity.filter(a => a.activity_status === '開團中');
+});
+
+const visibleActivities = computed(() => {
+  return openActivities.value.slice(0, visibleCount.value);
+});
+
 
 </script>
 
@@ -147,8 +171,15 @@ const FilteredArticles = computed(() => {
           我是揪團頁
         </div>
         <div v-else-if="currentTab === 'calendar'">
-          <div class="groups">
-            <p>下一個揪團</p>
+          <div class="activity-card-groups">
+            <p class="section-title">下一個揪團</p>
+            <div class="activity-card-list">
+              <MemberActivityCard 
+                v-for="activity in visibleActivities"
+                :key="activity.id"
+                :item="activity"
+              />
+            </div>
           </div>
           <div class="calerdar">
             <FullCalendar />
@@ -325,6 +356,16 @@ const FilteredArticles = computed(() => {
   border-radius: 3px;
   padding: 15px;
 }
+
+//行事曆
+.activity-card-groups{
+  
+  .section-title{
+    font-size: $font-size-h3;
+  }
+
+}
+
 //這邊開始是文章樣式
 .article-item{
     display: flex;
@@ -431,6 +472,17 @@ const FilteredArticles = computed(() => {
     padding: 50px;
   }
 
+  .activity-card-groups{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    .activity-card-list{
+      display: flex;
+
+    }
+  }
+
 .article-img{
       display: flex;
     width: 100%;
@@ -449,8 +501,5 @@ const FilteredArticles = computed(() => {
     align-items: center;
 }
 }
-
-
-
 
 </style>

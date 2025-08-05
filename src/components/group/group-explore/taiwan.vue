@@ -687,7 +687,7 @@ onMounted(() => {
     }
   }
   @include desktop() {
-    padding: 7show% 0;
+    padding: 7% 0;
   }
 }
 .taiwan-area-news {
