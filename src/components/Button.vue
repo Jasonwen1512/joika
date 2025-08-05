@@ -137,6 +137,38 @@ $buttonThemes: (
     icon-outline-active-color: $blue,
   ),
 
+  cancel: (
+    // 字體顏色
+    color: $black,
+    hover-color: $black,
+    active-color: $white,
+    // 背景顏色
+    background-color: $color-primary,
+    hover-background-color: $color-secondary,
+    active-background-color: $blue,
+    // disabled設定
+    disabled-background-color: $gray-disabled,
+    disabled-font-color: $white,
+    // 邊框色
+    border-color: $black,
+    // outline
+    outline-border-color: $color-primary,     
+    outline-background-color: $white,        
+    outline-color: $color-primary,            
+    outline-hover-color: $white,           
+    outline-hover-border-color: $color-primary, 
+    outline-hover-background-color: $color-primary,
+    outline-disabled-color: $gray-disabled,
+    // icon顏色
+    icon-color: $black,
+    icon-hover-color: $black,
+    icon-active-color: $white,
+    icon-disabled-color: $white,
+    icon-outline-color: $blue,
+    icon-outline-hover-color: $color-primary,
+    icon-outline-active-color: $blue,
+  ),
+
   info: (
     // 字體顏色
     color: $black,
