@@ -1,5 +1,6 @@
 <script setup>
-import InteractiveSun from "./InteractiveSun.vue";
+import InteractiveSun from "@/components/InteractiveSun.vue";
+import Logo from "@/components/logo.vue";
 </script>
 
 <template>
@@ -34,11 +35,12 @@ import InteractiveSun from "./InteractiveSun.vue";
                             回到首頁，看看其他內容吧
                         </p>
                         <!-- 您的 Logo -->
-                        <img
-                            src="/path/to/your-logo.png"
-                            class="logo"
-                            alt="logo"
-                        />
+                        <router-link
+                            :to="`/home`"
+                            class="article-text-link"
+                        >
+                            <Logo />
+                        </router-link>
                     </div>
                 </div>
                 <div class="sun">
@@ -94,16 +96,18 @@ import InteractiveSun from "./InteractiveSun.vue";
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 40vw;
+    font-size: 25vw;
     font-weight: bold;
     width: 100%;
     color: rgba(250, 235, 215, 0.5);
     z-index: -1;
     pointer-events: none;
+    font-weight: bold;
 }
 
 main {
-    margin: auto;
+    margin-block: 10px;
+    margin-inline: auto;
     width: 90%;
     max-width: 1200px;
     display: flex;
@@ -119,8 +123,9 @@ main {
 }
 
 .text p {
-    font-size: clamp(60px, 12vw, 147px); /* RWD 字體大小，最小60px，最大147px */
+    font-size: clamp(60px, 12vw, 120px); /* RWD 字體大小，最小60px，最大147px */
     font-weight: bold;
+    line-height: 1;
 }
 
 .text p:nth-child(1) {
@@ -144,7 +149,7 @@ main {
 
 .box {
     position: relative;
-    width: 350px; /* 給予一個參考寬度 */
+    /*width: 350px;  給予一個參考寬度 */
     padding: 30px;
     text-align: center;
 }
@@ -167,7 +172,9 @@ main {
     margin-bottom: 80px;
     position: relative;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    white-space: nowrap; /* 避免文字換行 */
+    display: grid;
+    gap: 30px;
+    justify-items: center;
 }
 
 .speech-bubble:after {
@@ -185,6 +192,7 @@ main {
 }
 
 .speech-bubble p {
+    width: 100%;
     font-size: 1rem;
     line-height: 1.5;
     color: #4f8da8;
@@ -194,9 +202,26 @@ main {
 .logo {
     width: 100px; /* 範例大小 */
     height: auto;
+    margin-block: 5px;
 }
 
 .sun {
     margin-top: -20px; /* 讓太陽和對話框稍微重疊 */
+}
+@media (max-width: 768px) {
+    main {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-block: 0px;
+    }
+    .box {
+        position: relative;
+        /* width: 350px; */
+        padding: 30px;
+        text-align: center;
+    }
+    .sun {
+        display: none;
+    }
 }
 </style>
