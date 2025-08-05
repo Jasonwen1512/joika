@@ -27,7 +27,7 @@ import interactionPlugin from '@fullcalendar/interaction'
     onMounted(() => {
         // 4. onMounted 中只負責載入事件資料
         calendarOptions.value.events = [
-            { title: '登山', start: '2025-07-30', classNames: ['event-green'] },
+            { title: '登山', start: '2025-08-15', classNames: ['event-green'] },
             { title: '淺水', start: '2025-08-15', classNames: ['event-blue'] }
         ]
     })
@@ -81,22 +81,34 @@ import interactionPlugin from '@fullcalendar/interaction'
     :deep(.fc-daygrid-day-events) {
         width: 100%;
         margin-top: 4px;
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 4px;
+        display: block;
     }
 
-    /* 這些全域樣式會為事件區塊上色 */
+    :deep(.fc-daygrid-day-events) {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch !important; // ✅ 拉滿整個寬度
+        gap: 4px;
+        margin-top: 4px;
+    }
+
+    :deep(.fc-daygrid-event) {
+        display: block;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box; // ✅ 加這行是關鍵！
+        padding: 2px 0;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 3px;
+        color: white;
+    }
+
     :deep(.event-blue) {
-        
         background-color: #93c5fd;
-        border-radius: 6px;
     }
     :deep(.event-green) {
-        width: 100%;
         background-color: #90DA81;
-        border-radius: 6px;
     }
 
     @media (min-width: 768px) {

@@ -92,7 +92,6 @@ const FilteredArticles = computed(() => {
     return ReformatDate(b.date) - ReformatDate(a.date);
   });
 });
-
 const visibleCount = ref(2); // 預設電腦是 2 張
 
 const handleResize = () => {
@@ -225,7 +224,11 @@ const visibleActivities = computed(() => {
               </li>
             </ul>
             <div class="member-activity-card-section">
-              <MemberActivityCard />
+              <MemberActivityCard
+                v-for="activity in FakeActivity.slice(0,6)"
+                :key="activity.id"
+                :item="activity"
+              />
             </div>
           </div>
         </div>
