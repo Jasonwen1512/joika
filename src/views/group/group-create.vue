@@ -268,15 +268,15 @@ const handleFileChange = (e) => {
 }
 .banner-background {
   background-image: url(../../assets/img/group/group-create/group-create-banner-background.png);
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
-  min-height: 115px;
+  min-height: 150px;
 
   @include tablet() {
     //768-1023
     min-width: 768px;
-    min-height: 250px;
-    background-size: contain;
+
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: top;
   }
