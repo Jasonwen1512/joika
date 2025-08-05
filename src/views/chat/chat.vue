@@ -347,11 +347,9 @@ function openReportModal() {
     opacity: 1;
   }
 }
-
 .megaphone-box {
-  position: relative;
+    position: relative;
 }
-
 .megaphone-wrap {
   position: absolute;
   bottom: 5px;
