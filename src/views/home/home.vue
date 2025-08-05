@@ -191,56 +191,56 @@ const items = [
     name: "水上活動",
     img: new URL("@/assets/img/index-img/diving.png", import.meta.url).href,
     color: "#4F8DA8",
-    category:"CA007",
+    category: "CA007",
   },
   {
     name: "電影",
     img: new URL("@/assets/img/index-img/movie.png", import.meta.url).href,
     color: "#FFA68D",
-    category:"CA009",
+    category: "CA009",
   },
   {
     name: "運動",
     img: new URL("@/assets/img/index-img/sports.png", import.meta.url).href,
     color: "#FADA7A",
-    category:"CA003",
+    category: "CA003",
   },
   {
     name: "登山",
     img: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href,
     color: "#90DA81",
-    category:"CA001",
+    category: "CA001",
   },
   {
     name: "露營",
     img: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href,
     color: "#A281DA",
-    category:"CA004",
+    category: "CA004",
   },
   {
     name: "桌遊",
     img: new URL("@/assets/img/index-img/board-games.png", import.meta.url)
       .href,
     color: "#F315BB",
-    category:"CA002",
+    category: "CA002",
   },
   {
     name: "展覽",
     img: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href,
     color: "#FFFCE2",
-    category:"CA006",
+    category: "CA006",
   },
   {
     name: "聚餐",
     img: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href,
     color: "#FB900C",
-    category:"CA008",
+    category: "CA008",
   },
   {
     name: "手作",
     img: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href,
     color: "#81BFDA",
-    category:"CA010",
+    category: "CA010",
   },
   {
     name: "文化體驗",
@@ -249,19 +249,19 @@ const items = [
       import.meta.url
     ).href,
     color: "#1FB92C",
-    category:"CA011",
+    category: "CA011",
   },
   {
     name: "演出表演",
     img: new URL("@/assets/img/index-img/concert.png", import.meta.url).href,
     color: "#FFE100",
-    category:"CA012",
+    category: "CA012",
   },
   {
     name: "唱歌",
     img: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href,
     color: "#2AA9FF",
-    category:"CA005",
+    category: "CA005",
   },
 ];
 
@@ -453,7 +453,7 @@ h1 {
   position: relative;
   z-index: 2;
   text-align: center;
-  margin-top: 140px;
+  margin-top: 165px;
 }
 .index-section-start {
   display: flex;
@@ -623,7 +623,7 @@ h1 {
   align-items: center;
   gap: 20px;
   padding-bottom: 50px;
-  h3{
+  h3 {
     color: black;
   }
 }
@@ -723,6 +723,12 @@ h1 {
     position: absolute;
     top: 0;
     z-index: 0;
+  }
+}
+
+@media screen and (min-width: 1025px) and (max-width: 1440px) {
+  .title {
+    margin-top: 0px;
   }
 }
 

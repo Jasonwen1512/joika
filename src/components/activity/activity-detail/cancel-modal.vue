@@ -340,7 +340,7 @@ watch(() => props.show, (newVal) => {
   }
 
   .warning-text {
-    font-size: 16px;
+    font-size: 24px;
   }
 }
 </style>
