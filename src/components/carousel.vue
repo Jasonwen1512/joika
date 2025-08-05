@@ -266,7 +266,7 @@ const setSizes = () => {
     gsap.set(item, {
       width: itemWidth.value,
       // 自訂卡片高度
-      height: isMobile.value ? 380 : 550,
+      height: isMobile.value ? 380 : "55vh",
       marginRight: slideGap.value,
     })
   );
