@@ -15,14 +15,18 @@ const memberTags = computed(() => {
   const member = memberInterest.find((m) => m.memberId === props.memberId);
   if (!member) return [];
 
-  return member.interests.map((interestId) => {
-    const category = ActivityCategories.find((cat) => cat.id === interestId);
-    return {
-      id: interestId,
-      name: category?.name || "",
-      color: category?.color || "#FFF",
-    };
-  });
+  return member.interests
+    .map((interestId) => {
+      const category = ActivityCategories.find(
+        (cat) => cat.id === interestId && cat.id !== null
+      );
+      if (!category) return null;
+      return {
+        id: interestId,
+        name: category.name,
+        color: category.color,
+      };
+    })
 });
 </script>
 <template>

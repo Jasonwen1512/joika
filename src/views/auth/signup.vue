@@ -2,9 +2,12 @@
 import { ref, watch } from "vue";
 import Button from "@/components/Button.vue";
 import InputField from '@/components/auth/Inputfield.vue'
+import InterestSelector from '@/components/auth/Interestselector.vue'
 
 const currentStep = ref(1);
 const avatarUrl = ref('');
+const genderOptions = ['男性', '女性']
+const occupationOptions = ['學生', '工程師', '設計師', '自由業', '其他']
 
 const form = ref({
   email: '',
@@ -223,7 +226,8 @@ setupAutoClearError(form, errors)
     <InputField
       id="gender"
       label="性別"
-      type="text"
+      type="select"
+      :options="genderOptions"
       v-model="form.gender"
       :error="errors.gender"
     />
@@ -232,7 +236,6 @@ setupAutoClearError(form, errors)
       id="birthdate"
       label="生日"
       type="text"
-      placeholder="例如: 1990/01/01"
       v-model="form.birthdate"
       :error="errors.birthdate"
     />
@@ -248,17 +251,16 @@ setupAutoClearError(form, errors)
     <InputField
       id="occupation"
       label="職業"
-      type="text"
+      type="select"
+      :options="occupationOptions"
       v-model="form.occupation"
       :error="errors.occupation"
     />
 
-    <InputField
-      id="interests"
-      label="興趣"
-      type="text"
+    <InterestSelector
       v-model="form.interests"
       :error="errors.interests"
+      :max="3" 
     />
 
     <div class="button-group">
@@ -468,6 +470,17 @@ setupAutoClearError(form, errors)
 
 
 @media (min-width: 768px) {
+  .signup-page {
+    &::before {
+      width: 200px;
+    }
+
+    &::after {
+      width: 200px;
+    }
+}
+
+
   .signup-container {
     border-radius: 6px;
     padding: 50px 100px;
@@ -481,6 +494,10 @@ setupAutoClearError(form, errors)
   }
 
   .registration-header {
+    .progress-bar {
+      margin-bottom: 70px;
+    }
+
     .progress-step {
       .step-circle {
         &::after {
@@ -501,4 +518,12 @@ setupAutoClearError(form, errors)
       margin-bottom: 50px;
     }
   }
+
+.avatar-upload {
+  .avatar-circle{
+    width: 200px;
+    height: 200px;
+  }
+}
+
 </style>

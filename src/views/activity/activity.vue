@@ -25,10 +25,6 @@ const setDefaultCategory = () => {
   }
 };
 
-onMounted(() => {
-  setDefaultCategory();
-});
-
 watch(
   () => route.query.category,
   (newVal) => {
@@ -135,16 +131,22 @@ const filterActivities = computed(() => {
   });
 });
 
-const itemsPerPage = 12;
+const itemsPerPage = ref(12);
 const currentPage = ref(1);
-
+const updateItemPerPage = () => {
+  if (window.innerWidth < 769) {
+    itemsPerPage.value = 6;
+  } else {
+    itemsPerPage.value = 12;
+  }
+};
 const totalPages = computed(() => {
-  return Math.ceil(filterActivities.value.length / itemsPerPage);
+  return Math.ceil(filterActivities.value.length / itemsPerPage.value);
 });
 
 const paginatedActivities = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
   return filterActivities.value.slice(start, end);
 });
 watch(activeCategory, () => {
@@ -194,6 +196,11 @@ const paginationPages = computed(() => {
   }
 
   return pages;
+});
+onMounted(() => {
+  setDefaultCategory();
+  updateItemPerPage();
+  window.addEventListener("resize", updateItemPerPage);
 });
 </script>
 
@@ -339,7 +346,8 @@ const paginationPages = computed(() => {
 }
 .banner img {
   display: block;
-  border: 1px solid $black;
+  border-top: 1px solid $black;
+  border-bottom: 1px solid $black;
   width: 100%;
   object-fit: cover;
   object-position: left;

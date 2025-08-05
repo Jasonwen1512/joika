@@ -175,16 +175,18 @@ onMounted(() => {
   border: 1px solid $black;
   border-radius: 3px;
   padding-top: 10px;
-  max-height: 1350px;
+  max-height: 1150px;
+  overflow: hidden;
 
   @include desktop() {
     //1024以上
-    width: 1200px;
+    width: 900px;
+    max-height: 1200px;
   }
   @media screen and (min-width: 1023px) and (max-width: 1199px) {
     //1023-1199
-    width: 900px;
-    max-height: 1400px;
+    width: 800px;
+    max-height: 1200px;
   }
 
   .group-form-close-btn {
@@ -195,10 +197,10 @@ onMounted(() => {
   }
 }
 .group-form-create-popup {
-  margin: 30px 15px 20px 15px;
+  margin: 20px 15px 20px 15px;
   padding: 20px 15px 30px 15px;
   text-align: left;
-
+  overflow: hidden;
   border-radius: 3px;
 
   h4 {
@@ -240,46 +242,24 @@ onMounted(() => {
   display: flex;
   flex-direction: row-reverse;
   background-color: $color-highlight;
-  justify-content: space-around;
+  min-height: 650px;
   clip-path: polygon(0 0, 100% 0, 100% 66%, 0% 100%);
-
-  @include tablet() {
-    //768-1023
-  }
-
-  @include desktop() {
-    //1024以上
-  }
-  @media screen and (min-width: 1023px) and (max-width: 1199px) {
-    //1023-1199
-  }
 }
 .negative-behavior-border {
   position: relative;
   clip-path: polygon(0 34%, 100% 0, 100% 100%, 0% 100%);
   background: #000;
   transform: translateY(-200px);
-  padding: 2px;
+  padding: 1px;
 }
 .negative-behavior {
   display: flex;
-
+  min-height: 650px;
   clip-path: polygon(0 34%, 100% 0, 100% 100%, 0% 100%);
   background-color: $blue;
-  @include tablet() {
-    //768-1023
-  }
-
-  @include desktop() {
-    //1024以上
-    background-color: $blue;
-  }
-  @media screen and (min-width: 1023px) and (max-width: 1199px) {
-    //1023-1199
-  }
 }
 .positive-content {
-  padding: 50px 20px 10px 20px;
+  padding: 30px 10px 10px 20px;
 
   h4 {
     font-size: $font-size-h2;
@@ -289,9 +269,9 @@ onMounted(() => {
   }
 }
 .positive-img {
-  max-width: 450px;
+  max-width: 250px;
   padding: 10px 10px 50px 10px;
-  transform: translateY(-55px);
+  transform: translateY(80px);
 
   img {
     width: 100%;
@@ -299,16 +279,16 @@ onMounted(() => {
   }
 }
 .negative-img {
-  max-width: 450px;
+  max-width: 250px;
   padding: 50px 10px 10px 10px;
-  transform: translateY(150px);
+  transform: translateY(280px);
   img {
     width: 100%;
   }
 }
 
 .negative-content {
-  padding: 180px 20px 10px 20px;
+  padding: 180px 10px 10px 20px;
   color: $white;
   h4 {
     padding-bottom: 20px;

@@ -66,7 +66,7 @@ import Logo from "@/components/logo.vue";
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 80vh;
   width: 100vw; /* 確保容器佔滿整個視窗 */
   position: relative;
   overflow: hidden; /* 避免巨大文字造成滾動條 */
@@ -89,7 +89,7 @@ import Logo from "@/components/logo.vue";
 .bgtxt {
   position: absolute;
   text-align: center;
-  top: 50%;
+  top: 20%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 25vw;
