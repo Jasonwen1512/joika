@@ -1,4 +1,6 @@
 <script setup>
+// 1. 引入我們準備好的、獨立的留言板元件
+import CommentSection from '@/components/article/comment.vue';
 import { useRoute, useRouter } from "vue-router";
 // === 第一步：在 import ref 的地方，加入 onMounted 和 onUnmounted ===
 import { computed, ref, onMounted, onUnmounted } from "vue";
@@ -167,6 +169,73 @@ const participants = ref([
     role: "軟體開發",
   },
 ]);
+
+// 2. 準備要傳遞給留言板的「留言列表」資料
+//    (我們先借用您頁面上現有的團員資料來展示，並用 map 整理成留言板要的格式)
+
+const fakeComments = [
+  "這活動真的太棒了，完全超出我的預期！下次還要再來！👍",
+  "主揪人超好，把所有事情都安排得妥妥當當，給個大大的讚！",
+  "哇，原來這裡這麼美！感謝分享，不然我都不知道這個好地方。",
+  "我是第一次參加，本來有點緊張，但大家都好親切，很開心認識大家！😊",
+  "有人知道主揪用的那款藍色背包是什麼牌子的嗎？好好看！",
+  "雖然那天有點小下雨，但完全不影響興致，反而有種特別的氛圍。",
+  "推！這是我今年參加過最棒的活動，沒有之一！",
+  "照片拍得真好！可以分享原圖給我嗎？謝謝你！",
+  "哈哈，我就是照片裡笑得最傻的那個！那天真的玩瘋了！🤣",
+  "可惜這次沒跟到，看你們玩得這麼開心，下次有團一定要通知我！"
+];
+
+const commentsForBoard = ref(
+  participants.value.map(p => {
+    // === 魔法在這裡發生！===
+    // 1. 從我們的「台詞本」中，隨機選一個位置 (index)
+    const randomIndex = Math.floor(Math.random() * fakeComments.length);
+    
+    // 2. 根據這個隨機位置，抽出對應的台詞
+    const randomComment = fakeComments[randomIndex];
+
+    // 3. 回傳組合好的、擁有獨一無二留言的資料
+    //    (注意：只有 content 欄位被修改了)
+    return {
+      id: p.id,
+      author: p.name,
+      avatar: p.avatar,
+      content: randomComment, // <-- 使用我們隨機抽出的台- 詞，取代掉原本固定的文字！
+      timestamp: new Date().toLocaleDateString(),
+      likenum: p.reviews,
+      replies: []
+    };
+  })
+);
+
+// 監聽員一：負責處理「新增主留言」的請求
+function handleAddNewComment(newCommentData) {
+  commentsForBoard.value.push(newCommentData);
+}
+
+// 監聽員二：負責處理「新增回覆」的請求
+function handleAddNewReply({ parentId, reply }) {
+  // 1. 先從我們的留言黑板上，找到那則被回覆的父留言
+  const parentComment = commentsForBoard.value.find(c => c.id === parentId);
+  
+  // 2. 如果找到了，就把新的回覆加到它的 replies 背包裡
+  if (parentComment) {
+    if (!parentComment.replies) {
+      parentComment.replies = [];
+    }
+    parentComment.replies.push(reply);
+  }
+}
+
+
+// 3. 準備要傳遞給留言板的「當前使用者」資料
+const currentUserForBoard = ref({
+  userid: 'M-MYSELF',
+  author: '我本人',
+  avatar: 'https://i.pravatar.cc/150?u=me'
+});
+
 
 // Swiper modules
 const swiperModules = [Pagination];
@@ -362,6 +431,15 @@ const swiperModules = [Pagination];
         </swiper>
       </div>
     </section>
+
+    <div class="comments-container">
+      <CommentSection 
+        :comments-data="commentsForBoard"  
+        :user-data="currentUserForBoard"
+        @add-comment="handleAddNewComment"   
+        @add-reply="handleAddNewReply"       
+      />
+    </div>
 
     <!-- === 第五步：在 template 的最下方，加入這段「彈窗元件」 === -->
     <RatingModal
@@ -842,5 +920,15 @@ const swiperModules = [Pagination];
       }
     }
   }
+
+}
+
+.comments-container {
+  max-width: 1200px; 
+  margin-left: auto;
+  margin-right: auto;
+  margin-block: 7.5vh;
+  padding: 0 20px; 
+  box-sizing: border-box; 
 }
 </style>
