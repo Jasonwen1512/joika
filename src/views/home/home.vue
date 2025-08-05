@@ -453,7 +453,7 @@ h1 {
   position: relative;
   z-index: 2;
   text-align: center;
-  margin-top: 140px;
+  margin-top: 165px;
 }
 .index-section-start {
   display: flex;
