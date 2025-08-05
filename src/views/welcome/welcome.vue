@@ -15,6 +15,9 @@ const backgroundDecoration = ref({
   bgYellow2: new URL("@/assets/img/welcome/bg-decorate-yellow2.svg", import.meta.url).href,
 });
 
+// logo 滑動擦除的文字
+const erasedWords = ref([{ word: "如" }, { word: "果" }, { word: "有" }, { word: "人" }, { word: "剛" }, { word: "好" }, { word: "也" }, { word: "想" }, { word: "玩" }, { word: "就" }, { word: "好" }, { word: "了" }]);
+
 // 滑動卡片圖片
 const slidingCardImg = ref([
   {
@@ -65,31 +68,31 @@ const featureCardInfo = ref([
 // 社群回覆卡片資料
 const communityCardInfo = ref([
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image1.jpg", import.meta.url).href,
     nickname: "Yoyo",
     title: "第一次夜衝合歡山！星星多到爆炸✨",
     content: "昨天晚上跟幾個大學同學衝上合歡山看星星，本來還擔心會不會太冷、太累，結果完全值得！！✨✨",
   },
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image2.jpg", import.meta.url).href,
     nickname: "杯子裡的雲",
     title: "陌生人也能變朋友！第一次桌遊揪團超出預期",
     content: "身為業務員，平常接觸超多人，但很多時候反而更想認識一些**「無壓力的新朋友」**。",
   },
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image3.jpg", import.meta.url).href,
     nickname: "pika揪",
     title: "陽明山七星山日出團大推👍",
     content: "第二次參加Kevin的登山團了！上次爬大屯山就覺得他很專業，這次七星山也沒讓人失望。",
   },
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image4.jpg", import.meta.url).href,
     nickname: "Jojo",
     title: "奇萊南華百岳初體驗心得",
     content: "人生第一座百岳GET！雖然兩天一夜的行程很累，但成就感滿滿。",
   },
   {
-    photo: "",
+    photo: new URL("@/assets/img/welcome/community-cards/user-image5.jpg", import.meta.url).href,
     nickname: "Larry",
     title: "大型桌遊聯誼成功脫單！",
     content: "原本抱著認識朋友的心情參加，沒想到真的遇到心儀的對象！",
@@ -159,7 +162,6 @@ onMounted(() => {
   });
 
   letterEls = wordsGroup.value.querySelectorAll(".single-word");
-  console.log(letterEls);
 
   const fadedLetters = new Set(); // 儲存被擦除的字
   const tl = gsap.timeline({
@@ -457,20 +459,8 @@ onUnmounted(() => {
       <div class="joika-logo-scroll-wrapper">
         <div class="floating-title-container">
           <h3 class="floating-text words-group" id="floating-text-7" ref="wordsGroup">
-            <span class="single-word">如</span>
-            <span class="single-word">果</span>
-            <span class="single-word">有</span>
-            <span class="single-word">人</span>
-            <span class="single-word">剛</span>
-            <span class="single-word">好</span>
-            <span class="single-word">也</span>
-            <span class="single-word">想</span>
-            <span class="single-word">玩</span>
-            <span class="single-word">就</span>
-            <span class="single-word">好</span>
-            <span class="single-word">了</span>
+            <span class="single-word" v-for="(wordsList, index) in erasedWords" :key="index">{{ wordsList.word }}</span>
           </h3>
-          <!-- <h3 class="floating-text" id="floating-text-7">如果有人剛好也想玩就好了</h3> -->
         </div>
         <div class="main-slogan-group">
           <h1 id="main-slogan">揪一咖 就出發</h1>
@@ -499,7 +489,7 @@ onUnmounted(() => {
     <h2 class="entrance-slogan">安心揪 放心玩</h2>
     <div class="community-cards-list">
       <div class="feature-card" v-for="(card, index) in featureCardInfo" :key="index">
-        <img class="feature-icon" :src="card.image" alt="" />
+        <img class="feature-icon" :src="card.image" :alt="card.title" />
         <h2 class="feature-title">{{ card.title }}</h2>
         <p class="feature-text">{{ card.subtitle }}</p>
       </div>
@@ -517,7 +507,9 @@ onUnmounted(() => {
       <!-- 從 communityCardInfo 引入資料 -->
       <div class="community-card" v-for="(card, index) in communityCardInfo" :key="index">
         <div class="content-wrapper">
-          <img class="profile-photo" src="" alt="" />
+          <div class="photo-wrapper">
+            <img class="profile-photo" :src="card.photo" alt="會員頭像" />
+          </div>
           <p class="member-nickname">{{ card.nickname }}</p>
           <h2 class="comment-title">{{ card.title }}</h2>
           <p class="comment-content">{{ card.content }}</p>
@@ -554,7 +546,7 @@ onUnmounted(() => {
   <section class="learn-more" v-show="showLearnMore">
     <h2 class="entrance-slogan">
       還等什麼？裡面更好玩
-      <img id="point-down" :src="pointDown" alt="" />
+      <img id="point-down" :src="pointDown" alt="了解更多" />
     </h2>
     <p class="countdown-text">{{ countdownText }}</p>
   </section>
@@ -804,12 +796,18 @@ onUnmounted(() => {
         grid-template-columns: 3fr 7fr;
         padding: 50px;
 
-        .profile-photo {
+        .photo-wrapper {
           grid-row: 1 / span 2;
           width: 140px;
           height: 140px;
           background-color: pink; //測試用，之後換成圖片
           border-radius: 50%;
+          border: 1px solid red;
+
+          .profile-photo {
+            width: 100%;
+            overflow: hidden;
+          }
         }
         .member-nickname {
           font-size: 48px;
