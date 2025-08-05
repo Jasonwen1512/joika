@@ -9,6 +9,8 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 // === 第二步：在這裡只引入您確定已存在的「彈窗元件」 ===
 import RatingModal from '@/components/activity/activity-detail/rating-modal.vue';
+// === 新增：為未來的「取消彈窗」預留 import 位置 ===
+import CancelModal from '@/components/activity/activity-detail/cancel-modal.vue';
 
 // --- Swiper  ---
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -54,15 +56,15 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
 });
 
-// --- 彈窗控制 ---
-const isRatingModalVisible = ref(false); // 彈窗的「開關」
+// --- 評價彈窗控制 ---
+const isRatingModalVisible = ref(false); // 評價彈窗的「開關」
 
 const openRatingModal = () => {
-  isRatingModalVisible.value = true; // 打開彈窗
+  isRatingModalVisible.value = true; // 打開評價彈窗
 };
 
 const closeRatingModal = () => {
-  isRatingModalVisible.value = false; // 關閉彈窗
+  isRatingModalVisible.value = false; // 關閉評價彈窗
 };
 
 const submitRatings = (ratingsData) => {
@@ -70,6 +72,26 @@ const submitRatings = (ratingsData) => {
   alert('評分已送出！感謝你的評價');
   closeRatingModal(); // 提交後關閉彈窗
 };
+
+// === 新增：取消彈窗相關邏輯 ===
+const isCancelModalVisible = ref(false); // 取消彈窗的「開關」
+
+const openCancelModal = () => {
+  isCancelModalVisible.value = true; // 打開取消彈窗
+};
+
+const closeCancelModal = () => {
+  isCancelModalVisible.value = false; // 關閉取消彈窗
+};
+
+// 這個函式將用於接收從彈窗傳來的取消原因，並在提交後切換回原來的按鈕狀態
+const handleCancelSubmit = (reason) => {
+  console.log('收到的取消原因:', reason);
+  alert('已提交取消申請。');
+  closeCancelModal(); // 關閉彈窗
+  isGroupJoined.value = false; // 將按鈕狀態切換回去
+};
+// === End 新增 ===
 
 
 // 團員假資料
@@ -116,7 +138,9 @@ const swiperModules = [Pagination];
 
       <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
       <template v-else>
-        <Button @click="openRatingModal" theme="secondary" size="md">評價</Button>
+        <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
+        <Button @click="openCancelModal" theme="secondary-hollow" size="md">取消</Button>
+        <Button @click="openRatingModal" theme="primary" size="md">評價</Button>
       </template>
     </div>
 
@@ -245,6 +269,16 @@ const swiperModules = [Pagination];
       @close="closeRatingModal"
       @submit="submitRatings"
     />
+
+    <!-- === 新增：為未來的「取消彈窗」預留的元件位置 === -->
+    
+      <CancelModal
+      :show="isCancelModalVisible"
+      :activity="activity"
+      @close="closeCancelModal"
+      @submit="handleCancelSubmit"
+    />
+    
 
   </div>
 </template>
