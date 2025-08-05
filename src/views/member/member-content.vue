@@ -7,6 +7,7 @@
   import { useRoute } from 'vue-router';
   import FullCalendar from "@/components/member/member-content/FullCalendar.vue";
 import { articleList } from "@/assets/data/fake-article";//引入文章假資料
+import MemberActivityCard from '@/components/member/member-activity-card.vue';
 
 //靜態資料 活動類別與標籤顏色
   const activities = ['水上活動', '露營', '登山'];
@@ -93,7 +94,9 @@ const FilteredArticles = computed(() => {
   });
 });
 
-
+//揪團頁籤設定-start
+const currentSubTab = ref('my-activity')
+//揪團頁籤設定-end
 </script>
 
 <template>
@@ -122,7 +125,7 @@ const FilteredArticles = computed(() => {
         </div>
       </div>
       <div class="button-group">
-        <Button :prefixIcon="NotifyIcon" size="lg" theme="primary" >通知訊息</Button>
+        <RouterLink :to="`member-notify`"><Button :prefixIcon="NotifyIcon" size="lg" theme="primary" >通知訊息</Button></RouterLink>
         <Button :prefixIcon="EditIcon" size="lg" theme="info">編輯檔案</Button>
       </div>
     </div> 
@@ -143,9 +146,21 @@ const FilteredArticles = computed(() => {
           @click="currentTab = 'comment'">評論</button>
       </div>
       <div class="tab-content">
-        <div v-if="currentTab === 'group'">
-          我是揪團頁
-        </div>
+          <div v-if="currentTab === 'group'">
+            <div  class="member-activity-section">
+              <ul class="member-activity-btns">
+                <li><button :class="{ active: currentSubTab === 'my-activity' }"
+                  @click="currentSubTab = 'my-activity'">我開的揪團</button></li>
+                <li><button :class="{ active: currentSubTab === 'my-follow-activity' }"
+                  @click="currentSubTab = 'my-follow-activity'">參與的揪團</button></li>
+                <li><button :class="{ active: currentSubTab === 'my-activity-collection' }"
+                  @click="currentSubTab = 'my-activity-collection'">我的收藏</button></li>
+              </ul>
+              <div class="member-activity-card-section">
+                <MemberActivityCard/>
+              </div>
+            </div>
+          </div>
         <div v-else-if="currentTab === 'calendar'">
           <div class="groups">
             <p>下一個揪團</p>
@@ -182,7 +197,7 @@ const FilteredArticles = computed(() => {
         </div> 
       </div>
       </router-link>
-       <hr> 
+      <hr> 
     </div>  
     <div v-if="FilteredArticles.length === 0">
   <p>這位會員目前尚未發表文章。</p>
@@ -219,7 +234,7 @@ const FilteredArticles = computed(() => {
         </div> 
       </div>
       </router-link>
-       <hr> 
+        <hr> 
     </div>  
     <div v-if="FilteredArticles.length === 0">
   <p>這位會員目前尚未發表留言。</p>
@@ -325,6 +340,35 @@ const FilteredArticles = computed(() => {
   border-radius: 3px;
   padding: 15px;
 }
+//揪團卡片頁籤-start
+.member-activity-btns {
+  display: flex;
+  gap: 30px;
+  margin-left: 20px;
+  margin-bottom: 20px;
+
+  button {
+    border: 1px solid black;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #b1f0f7;
+    color: black;
+    transition: all 0.3s;
+
+    &.active {
+      background-color: #4f8da8;
+      color: white;
+    }
+  }
+}
+.member-activity-card-section{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  
+}
+//揪團卡片頁籤-end
+
 //這邊開始是文章樣式
 .article-item{
     display: flex;

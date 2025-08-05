@@ -76,8 +76,8 @@ function openReportModal() {
             </button>
 
             <ul class="options-menu" :class="{ on: showOptions }">
-              <li><button @click="copyMessage">複製</button></li>
-              <li><button @click="openReportModal">檢舉</button></li>
+              <li><button type="button" @click="copyMessage">複製</button></li>
+              <li><button type="button" @click="openReportModal">檢舉</button></li>
             </ul>
           </div>  
         </div>
@@ -143,7 +143,7 @@ function openReportModal() {
   <div class="chat-key-in-section">
       <div class="chat-now">
         <input class="chat-box" type="text" placeholder="說點什麼吧">
-        <button class="send-btn-mobile">
+        <button type="button" class="send-btn-mobile">
           <svg width="29" height="30" viewBox="0 0 29 30" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g clip-path="url(#clip0_1566_5695)">
           <path d="M9.59021 17.4098L24 3L9.59021 17.4098ZM24 3L15.4851 26.5797C15.4276 26.7051 15.3354 26.8114 15.2193 26.8859C15.1032 26.9604 14.9681 27 14.8301 27C14.6922 27 14.5571 26.9604 14.441 26.8859C14.3249 26.8114 14.2326 26.7051 14.1751 26.5797L9.59021 17.4098L0.420335 12.8249C0.294915 12.7674 0.188634 12.6751 0.114122 12.559C0.0396097 12.4429 0 12.3078 0 12.1699C0 12.0319 0.0396097 11.8968 0.114122 11.7807C0.188634 11.6646 0.294915 11.5724 0.420335 11.5149L24 3Z" fill="#F5F0CD"/>
@@ -158,7 +158,7 @@ function openReportModal() {
         </button>
       </div>
       <div class="chat-now-btns">
-        <button>
+        <button type="button">
           <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M19.5 34.5312C27.8015 34.5312 34.5312 27.8015 34.5312 19.5C34.5312 11.1985 27.8015 4.46875 19.5 4.46875C11.1985 4.46875 4.46875 11.1985 4.46875 19.5C4.46875 27.8015 11.1985 34.5312 19.5 34.5312Z" fill="#FADA7A" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M14.625 17.4688C15.7468 17.4688 16.6562 16.5593 16.6562 15.4375C16.6562 14.3157 15.7468 13.4062 14.625 13.4062C13.5032 13.4062 12.5938 14.3157 12.5938 15.4375C12.5938 16.5593 13.5032 17.4688 14.625 17.4688Z" fill="black"/>
@@ -166,12 +166,12 @@ function openReportModal() {
           <path d="M25.1291 23.1562C24.5586 24.1443 23.738 24.9648 22.75 25.5352C21.7619 26.1057 20.641 26.406 19.5001 26.406C18.3592 26.406 17.2383 26.1057 16.2502 25.5352C15.2621 24.9648 14.4416 24.1443 13.8711 23.1562" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button class="report-btn">
+        <button type="button" class="report-btn">
           <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M21.6512 13.7085L15.4291 19.8087C14.8376 20.3937 14.5126 21.1932 14.5256 22.0333C14.5433 22.8832 14.8933 23.6923 15.5006 24.2872C16.1099 24.8901 16.9306 25.2362 17.7804 25.2508C18.1965 25.2596 18.6101 25.185 18.9969 25.0315C19.3837 24.878 19.7358 24.6487 20.0327 24.3571L26.2532 18.2568C26.84 17.6763 27.3028 16.9825 27.6134 16.2177C27.9241 15.4529 28.0761 14.6329 28.0602 13.8076C28.026 12.1077 27.3271 10.4889 26.1134 9.29821C24.8964 8.09385 23.2624 7.40428 21.5504 7.37258C20.7192 7.35599 19.8931 7.50524 19.1202 7.81159C18.3473 8.11795 17.6433 8.57527 17.0492 9.15683L10.8238 15.2587C9.94421 16.13 9.25059 17.1707 8.78496 18.3179C8.31934 19.465 8.09139 20.6947 8.11494 21.9326C8.16726 24.4818 9.21611 26.9091 11.0367 28.6942C12.8613 30.5003 15.3111 31.5349 17.8779 31.5835C19.1252 31.6094 20.3652 31.3863 21.5251 30.927C22.685 30.4677 23.7417 29.7815 24.6331 28.9087L30.8552 22.8052" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button class="send-btn-desktop">
+        <button type="button" class="send-btn-desktop">
           <svg width="29" height="30" viewBox="0 0 29 30" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g clip-path="url(#clip0_1566_5695)">
           <path d="M9.59021 17.4098L24 3L9.59021 17.4098ZM24 3L15.4851 26.5797C15.4276 26.7051 15.3354 26.8114 15.2193 26.8859C15.1032 26.9604 14.9681 27 14.8301 27C14.6922 27 14.5571 26.9604 14.441 26.8859C14.3249 26.8114 14.2326 26.7051 14.1751 26.5797L9.59021 17.4098L0.420335 12.8249C0.294915 12.7674 0.188634 12.6751 0.114122 12.559C0.0396097 12.4429 0 12.3078 0 12.1699C0 12.0319 0.0396097 11.8968 0.114122 11.7807C0.188634 11.6646 0.294915 11.5724 0.420335 11.5149L24 3Z" fill="#F5F0CD"/>
