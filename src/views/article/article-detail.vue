@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, h, render } from "vue";
+import Swal from "sweetalert2";
 
 import { useRoute, useRouter } from "vue-router";
 import { articleList } from "@/assets/data/fake-article";
@@ -36,6 +37,58 @@ const article = articleList.find((item) => item.postid === postId);
 
 function EditArticle() {
     router.push("/article/article-create");
+}
+
+//刪除
+function DeleteCheck() {
+    Swal.fire({
+        title: "確定要刪除嗎？",
+        text: "文章刪除後將無法復原！",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        cancelButtonText: "取消",
+        confirmButtonText: "是的，刪除它！",
+        reverseButtons: true,
+
+        buttonsStyling: false,
+
+        customClass: {
+            confirmButton: "my-swal-confirm-button",
+            cancelButton: "my-swal-cancel-button",
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: "已刪除！",
+                text: "您的文章已經被刪除。",
+                icon: "success",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "my-swal-check-button",
+                },
+                // 在此處串接後端刪除 API
+                // 以下為使用 fetch API 的範例
+                /*
+      fetch('YOUR_API_ENDPOINT/posts/YOUR_POST_ID', { // 將 YOUR_API_ENDPOINT/posts/YOUR_POST_ID 替換為你的 API 端點和文章 ID
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          // 如果需要，可以在這裡加入授權 token
+          // 'Authorization': 'Bearer YOUR_TOKEN'
+        }
+      })*/
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.push("/article/article");
+                }
+            });
+        } else if (result.isDismissed) {
+            // 如果使用者點擊了「取消」、按了 Esc 鍵或點擊視窗外部
+            console.log("使用者取消了刪除操作。");
+        }
+    });
 }
 </script>
 

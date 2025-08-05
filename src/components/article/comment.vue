@@ -33,6 +33,8 @@ const comments = ref([
         timestamp: "2025/07/07 18:45",
         content: "我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！",
         likenum: 0,
+        liked: false,
+
         replies: [
             // 為了展示，我們給第一則留言加上超過3則的回覆
             {
@@ -83,6 +85,8 @@ const comments = ref([
         content: "哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！",
         likenum: 0,
         replies: [],
+        liked: false,
+
         isRepliesExpanded: false,
     },
     {
@@ -94,6 +98,8 @@ const comments = ref([
         content: "我是這團的其中一員！很開心認識大家～謝謝你分享這段回憶❤️",
         likenum: 0,
         replies: [],
+        liked: false,
+
         isRepliesExpanded: false,
     },
     {
@@ -104,6 +110,8 @@ const comments = ref([
         timestamp: "2025/07/07 09:30",
         content: "有誰也有跟過嗎?好奇其他人的想法?",
         likenum: 0,
+        liked: false,
+
         replies: [],
         isRepliesExpanded: false,
     },
@@ -255,17 +263,22 @@ function toggleReplies(comment) {
 //喜歡
 const likeIt = (index) => {
     const comment = comments.value[index];
-    comment.likenum++;
+
+    if (!comment.liked) {
+        comment.likenum++;
+        comment.liked = true;
+    } else {
+        comment.likenum--;
+        comment.liked = false;
+    }
 
     // 觸發動畫
     comment.animateLike = true;
 
-    // 動畫播放完後移除 class（確保下次還會動）
     setTimeout(() => {
         comment.animateLike = false;
-    }, 300); // 和 CSS 動畫時間一致
+    }, 300);
 };
-
 //檢舉
 function ReportIt() {
     const container = document.createElement("div");
@@ -287,57 +300,6 @@ function ReportIt() {
         showConfirmButton: false,
         willClose: () => render(null, container),
         zIndex: 20000,
-    });
-}
-//刪除
-function DeleteCheck() {
-    Swal.fire({
-        title: "確定要刪除嗎？",
-        text: "文章刪除後將無法復原！",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        cancelButtonText: "取消",
-        confirmButtonText: "是的，刪除它！",
-        reverseButtons: true,
-
-        buttonsStyling: false,
-
-        customClass: {
-            confirmButton: "my-swal-confirm-button",
-            cancelButton: "my-swal-cancel-button",
-        },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: "已刪除！",
-                text: "您的文章已經被刪除。",
-                icon: "success",
-                buttonsStyling: false,
-                customClass: {
-                    confirmButton: "my-swal-check-button",
-                },
-                // 在此處串接後端刪除 API
-                // 以下為使用 fetch API 的範例
-                /*
-      fetch('YOUR_API_ENDPOINT/posts/YOUR_POST_ID', { // 將 YOUR_API_ENDPOINT/posts/YOUR_POST_ID 替換為你的 API 端點和文章 ID
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          // 如果需要，可以在這裡加入授權 token
-          // 'Authorization': 'Bearer YOUR_TOKEN'
-        }
-      })*/
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    router.push("/article/article");
-                }
-            });
-        } else if (result.isDismissed) {
-            // 如果使用者點擊了「取消」、按了 Esc 鍵或點擊視窗外部
-            console.log("使用者取消了刪除操作。");
-        }
     });
 }
 </script>
@@ -690,7 +652,9 @@ function DeleteCheck() {
     border-left: 2px solid #f0f0f0;
     margin-left: 50px;
 }
-
+.action-icon:hover {
+    cursor: pointer;
+}
 .action-icon img {
     width: 100%;
 }
