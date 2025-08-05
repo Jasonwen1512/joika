@@ -55,7 +55,7 @@ const insideCategoriesDouble = [...insideCategories, ...insideCategories];
       <h3 class="sub-title">野放時光</h3>
       <Swiper
         :modules="[Autoplay]"
-        :autoplay="{ delay: 1500, disableOnInteraction: false }"
+        :autoplay="{ delay: 1400, disableOnInteraction: false }"
         :loop="true"
         :centered-slides="true"
         slides-per-view="auto"
