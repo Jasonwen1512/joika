@@ -5,9 +5,7 @@ import Button from "@/components/Button.vue";
 import bgImgUrl from "@/assets/img/support/bg.svg?url";
 import articleimg from "@/assets/img/article/article-img.png?url";
 import Illustration from "@/components/article/Illustration.vue";
-//測試元件有沒有出來
-import InteractiveSun from "@/components/InteractiveSun.vue";
-
+import AirPlane from "@/assets/img/article/airplane.png";
 // ... (外觀、Icon、其他外掛的 import 省略，請保留您原有的) ...
 import "tinymce/skins/ui/oxide/skin.css";
 import "tinymce/themes/silver";
@@ -188,6 +186,11 @@ onMounted(() => {
             :src="bgImgUrl"
             alt="背景圖三角"
         />
+        <img
+            class="bg-airplane"
+            :src="AirPlane"
+            alt="背景插圖飛機"
+        />
     </div>
 
     <main class="create">
@@ -212,24 +215,24 @@ onMounted(() => {
         <div class="category-btn-list">
             <!-- 建議修正 props 寫法 -->
             <label>文章類型：</label>
-            <button
+            <Button
                 theme="secondary"
                 size="sm"
             >
                 揪團心得
-            </button>
-            <button
+            </Button>
+            <Button
                 theme="info"
                 size="sm"
             >
                 閒聊
-            </button>
-            <button
+            </Button>
+            <Button
                 theme="info"
                 size="sm"
             >
                 分享
-            </button>
+            </Button>
         </div>
         <div class="topic-category">
             <label for="topic-category">文章分類：</label>
@@ -289,21 +292,50 @@ onMounted(() => {
     top: 0;
     overflow: hidden;
 }
-/* .articleimg{
-  width: 100%;
-  height: auto;
-  z-index: -999;
-   position: absolute;
-  bottom:-112px;
-  left: 0; 
+.bg-airplane {
+    display: none;
+    width: 200px;
+    height: auto;
+    z-index: -1;
+    position: absolute;
+    right: 3vw;
+    top: 25vh;
+    animation: float 4s ease-in-out infinite;
+    @include desktop() {
+        display: block;
+    }
+}
 
-}*/
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3vh) translateX(3vh);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
 .decoration {
     position: absolute;
     bottom: 0px;
     z-index: 1;
     display: none;
+
+    @include desktop() {
+        display: block;
+    }
 }
+@media screen and (max-width: 1500px) {
+    .decoration {
+        display: none;
+    }
+    .bg-airplane {
+        display: none;
+    }
+}
+
 .create {
     display: grid;
     margin: 10vh auto;
@@ -322,8 +354,11 @@ onMounted(() => {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 3px;
-    box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
+    border: black 1.5px solid;
+    @include desktop() {
+        border-radius: 6px;
+    }
 }
 
 select {
@@ -333,6 +368,10 @@ select {
     border: 1px solid #ccc;
     border-radius: 3px;
     box-sizing: border-box;
+    border: 1.5px black solid;
+    @include desktop() {
+        border-radius: 6px;
+    }
 }
 
 .topic-category {
@@ -407,13 +446,5 @@ select {
 
 .create {
     gap: 15px;
-}
-
-.decoration {
-    @include desktop() {
-        position: absolute;
-        bottom: 0vh;
-        display: block;
-    }
 }
 </style>

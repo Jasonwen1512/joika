@@ -12,7 +12,8 @@ import like from "@/assets/img/icon/likeicon.svg?url";
 import commenticon from "@/assets/img/icon/commenticon.svg?url";
 import Swal from "sweetalert2";
 import ReportForm from "@/components/ReportForm.vue";
-
+import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
+import NextIcon from "@/assets/img/icon/next-arrow.svg?url";
 const route = useRoute();
 const router = useRouter();
 const postid = route.params.postid;
@@ -538,7 +539,10 @@ function EditArticle() {
                     @click="goToPreviousCommentPage"
                     :disabled="isFirstCommentPage"
                 >
-                    <
+                    <img
+                        :src="PreIcon"
+                        alt="上一張箭頭"
+                    />
                 </button>
                 <button
                     class="page"
@@ -555,7 +559,10 @@ function EditArticle() {
                     @click="goToNextCommentPage"
                     :disabled="isLastCommentPage"
                 >
-                    >
+                    <img
+                        :src="NextIcon"
+                        alt="下一張箭頭"
+                    />
                 </button>
             </div>
 
@@ -718,7 +725,7 @@ main {
     display: flex;
     gap: 10px;
     justify-content: center;
-    margin-bottom: 5vh;
+    margin-block: 5vh;
 }
 .page {
     border: #4f8da8 2px solid;
@@ -738,10 +745,13 @@ main {
     width: 100%;
     padding: 8px 12px;
     border-radius: 3px;
-    box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;
+    border: black 1.5px solid;
+    @include desktop() {
+        border-radius: 6px;
+    }
 }
 main {
     margin-block: 5vh;
