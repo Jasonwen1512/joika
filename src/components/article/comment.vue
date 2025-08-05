@@ -1,10 +1,15 @@
 <script setup>
 import { ref, computed, h, render } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { articleList } from "@/assets/data/fake-article";
+
 import reprot from "@/assets/img/icon/errorred.svg?url";
 import like from "@/assets/img/icon/likeicon.svg?url";
 import commenticon from "@/assets/img/icon/commenticon.svg?url";
 import Swal from "sweetalert2";
+import ReportForm from "@/components/ReportForm.vue";
+import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
+import NextIcon from "@/assets/img/icon/next-arrow.svg?url";
 const route = useRoute();
 const router = useRouter();
 const postid = route.params.postid;
@@ -21,17 +26,56 @@ const currentUser = {
 //假的留言們  展示用
 const comments = ref([
     {
-        commentid: 1,
+        id: 1,
         userid: "M0001",
         author: "SunnyDive",
         avatar: "https://i.pravatar.cc/150?u=sunnydive", // 假頭像，每次刷新會變
         timestamp: "2025/07/07 18:45",
         content: "我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！",
         likenum: 0,
-        replies: [],
+        replies: [
+            // 為了展示，我們給第一則留言加上超過3則的回覆
+            {
+                id: 101,
+                author: "alex",
+                avatar: "https://i.pravatar.cc/150?u=suive", // 假頭像，每次刷新會變
+                timestamp: "2025/07/07 18:45",
+                content: "真的！",
+            },
+            {
+                id: 102,
+                author: "bob",
+                avatar: "https://i.pravatar.cc/150?u=s", // 假頭像，每次刷新會變
+                timestamp: "2025/07/07 19:45",
+                content: "超幸運",
+            },
+            {
+                id: 103,
+                author: "Cclemon",
+                avatar: "https://i.pravatar.cc/150?u=sive", // 假頭像，每次刷新會變
+                timestamp: "2025/07/07 20:39",
+                content: "下次也想跟",
+            },
+            {
+                id: 104,
+                author: "丁",
+                avatar: "https://i.pravatar.cc/150?u=ve", // 假頭像，每次刷新會變
+                timestamp: "2025/07/07 20:55",
+                content: "羨慕...",
+            },
+            {
+                id: 105,
+                author: "chii",
+                avatar: "https://i.pravatar.cc/150?u=su", // 假頭像，每次刷新會變
+                timestamp: "2025/07/07 22:05",
+                content: "推！",
+            },
+        ],
+        isRepliesExpanded: false,
     },
+
     {
-        commentid: 2,
+        id: 2,
         userid: "M0002",
         author: "kelly_travel",
         avatar: "https://i.pravatar.cc/150?u=kellytravel",
@@ -39,9 +83,10 @@ const comments = ref([
         content: "哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！",
         likenum: 0,
         replies: [],
+        isRepliesExpanded: false,
     },
     {
-        commentid: 3,
+        id: 3,
         userid: "M0003",
         author: "ocean_rookie",
         avatar: "https://i.pravatar.cc/150?u=oceanrookie",
@@ -49,9 +94,10 @@ const comments = ref([
         content: "我是這團的其中一員！很開心認識大家～謝謝你分享這段回憶❤️",
         likenum: 0,
         replies: [],
+        isRepliesExpanded: false,
     },
     {
-        commentid: 4,
+        id: 4,
         userid: "M0004",
         author: "sandy_test",
         avatar: "https://i.pravatar.cc/150?u=sandy_test",
@@ -59,6 +105,7 @@ const comments = ref([
         content: "有誰也有跟過嗎?好奇其他人的想法?",
         likenum: 0,
         replies: [],
+        isRepliesExpanded: false,
     },
 ]);
 
@@ -88,6 +135,8 @@ function postComment() {
         timestamp: new Date().toLocaleString("zh-TW"),
         content: newComment.value,
         likenum: 0,
+        replies: [],
+        isRepliesExpanded: false, // <-- 2. 為新留言也加上狀態
     };
 
     comments.value.push(newCommentObject);
@@ -198,6 +247,11 @@ function postReply(parentComment) {
     // 清空回覆輸入框
     newReplyText.value = "";
 }
+// 3. 新增這個函式來切換子留言的展開/收合
+function toggleReplies(comment) {
+    comment.isRepliesExpanded = !comment.isRepliesExpanded;
+}
+
 //喜歡
 const likeIt = (index) => {
     const comment = comments.value[index];
@@ -354,9 +408,11 @@ function DeleteCheck() {
                     v-if="activeReplyId === comment.id"
                     class="reply-section"
                 >
-                    <!-- 子留言列表 -->
+                    <!-- (1) 這是用來取代舊 v-for 的新版子留言列表 -->
                     <div
-                        v-for="reply in comment.replies"
+                        v-for="reply in comment.isRepliesExpanded
+                            ? comment.replies
+                            : comment.replies.slice(0, 3)"
                         :key="reply.id"
                         class="comment reply-item"
                     >
@@ -380,6 +436,28 @@ function DeleteCheck() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- (2) 這是新加入的「顯示/收合」按鈕 -->
+                    <div
+                        v-if="comment.replies.length > 3"
+                        class="reply-controls"
+                    >
+                        <button
+                            v-if="!comment.isRepliesExpanded"
+                            @click="toggleReplies(comment)"
+                            class="toggle-reply-btn"
+                        >
+                            ── 顯示其他 {{ comment.replies.length - 3 }} 則回覆
+                            ──
+                        </button>
+                        <button
+                            v-if="comment.isRepliesExpanded"
+                            @click="toggleReplies(comment)"
+                            class="toggle-reply-btn"
+                        >
+                            ── 收合回覆 ──
+                        </button>
                     </div>
 
                     <!-- 新增回覆的輸入框 -->
@@ -515,6 +593,14 @@ function DeleteCheck() {
     </section>
 </template>
 <style scoped lang="scss">
+.avatar-img,
+.comment-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
 .Content {
     margin-bottom: 15vh;
 }
@@ -575,11 +661,36 @@ function DeleteCheck() {
 .comment-input {
     width: 100%;
 }
+.comment.reply-item {
+    margin-left: 10vh;
+}
 .send-button {
     display: flex;
     text-align: right;
     align-items: center;
 }
+
+.toggle-reply-btn {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 8px;
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+
+    &:hover {
+        color: #333;
+    }
+}
+
+.reply-section {
+    padding-left: 20px;
+    border-left: 2px solid #f0f0f0;
+    margin-left: 50px;
+}
+
 .action-icon img {
     width: 100%;
 }
