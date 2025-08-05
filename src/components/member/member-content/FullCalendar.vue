@@ -72,6 +72,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 
     :deep(.fc-daygrid-day-frame) {
         display: flex;
+        width: 100%;
         flex-direction: column;
         align-items: center; // 手機上置中
         padding: 4px 6px;
@@ -88,6 +89,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 
     /* 這些全域樣式會為事件區塊上色 */
     :deep(.event-blue) {
+        
         background-color: #93c5fd;
         border-radius: 6px;
     }
