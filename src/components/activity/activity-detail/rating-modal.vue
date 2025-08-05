@@ -109,7 +109,7 @@ watch(() => props.show, (newVal) => {
         </div>
       </main>
       <footer class="modal-footer">
-        <Button @click="submitRatings" theme="secondary" size="md">送出</Button>
+        <Button @click="submitRatings" theme="primary" size="md">送出</Button>
       </footer>
     </div>
   </div>
@@ -176,7 +176,7 @@ $z-index-modal: 1000;
 
     @include mobile() {
       font-size: 24px;
-    }  
+    }
   }
 
   .activity-meta {
@@ -210,8 +210,8 @@ $z-index-modal: 1000;
     font-size: 20px;
 
     @include desktop() {
-        padding-right:470px;
-    }    
+      padding-right: 470px;
+    }
   }
 }
 
@@ -226,6 +226,11 @@ $z-index-modal: 1000;
   flex-direction: column;
   align-items: center;
   gap: 12px;
+
+  @include mobile() {
+    margin: 10px;
+    min-width: 300px;
+  }
 }
 
 .participant-avatar {
@@ -234,9 +239,6 @@ $z-index-modal: 1000;
   border-radius: 50%;
   object-fit: cover;
 
-  @include mobile() {
-    margin-left: -240px;
-  }
 }
 
 .participant-details {
@@ -257,29 +259,22 @@ $z-index-modal: 1000;
   font-size: 20px;
   font-weight: 500;
   color: $color-text-dark;
-
-  @include mobile() {
-    margin-top: -80px;
-    margin-left: -60px;
-  }
+  // 移除了舊的 @include mobile 樣式
 }
 
 .participant-bio {
   font-size: 16px;
   color: $color-text-light;
-
-  @include mobile() {
-    padding-left: 40px;
-  }
+  // 移除了舊的 @include mobile 樣式
 }
 
 .rating-prompt {
   font-size: 16px;
   color: $color-text-dark;
   margin-bottom: 10px;
-
-  @include mobile() {
-    margin-left: -240px;
+  
+  @include mobile(){
+    margin-top: 10px;
   }
 }
 
@@ -289,9 +284,9 @@ $z-index-modal: 1000;
   font-size: 28px;
   color: $color-secondary;
   cursor: pointer;
-
-  @include mobile() {
-    margin-left: -110px;
+  
+  @include mobile(){
+    margin-top: 10px;
   }
 }
 
@@ -302,6 +297,48 @@ $z-index-modal: 1000;
   margin-top: 32px;
 }
 
+// === RWD Styles ===
+
+// === 修改開始: 手機版 Grid 排版 ===
+@include mobile() {
+  .participant-item {
+    display: grid;
+    // 定義欄寬: 1. 頭像寬度 2. 剩餘彈性空間
+    grid-template-columns: 80px 1fr;
+    // 定義列高: 1. 個人資訊 2. 評價提示 3. 星星
+    grid-template-rows: auto auto auto;
+    gap: 8px 12px; // row-gap, column-gap
+    align-items: center; // 垂直置中第一行的頭像和資訊
+  }
+
+  .participant-details {
+    // 讓 .participant-details 的子元素直接參與父層的 grid 排版
+    display: contents;
+  }
+
+  .participant-avatar {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+  }
+
+  .participant-info {
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+    align-items: flex-start; // 讓姓名和簡介靠左對齊
+  }
+
+  .rating-prompt {
+    grid-row: 2 / 3;
+    grid-column: 1 / 3; // 橫跨兩欄，使其從最左邊開始
+    margin-bottom: 0; // 由 grid-gap 控制間距
+  }
+
+  .stars {
+    grid-row: 3 / 4;
+    grid-column: 1 / 3; // 橫跨兩欄，使其從最左邊開始
+  }
+}
+// === 修改結束 ===
 
 // === Desktop Styles ===
 @include desktop() {
@@ -312,9 +349,8 @@ $z-index-modal: 1000;
     border-radius: 6px;
   }
 
-  // === 修改開始：只修改此區塊來符合新的 Mock Up ===
   .modal-body .list-title {
-    text-align: center; // 讓「團員列表」標題置中
+    text-align: center;
   }
 
   .participant-list {
@@ -338,9 +374,8 @@ $z-index-modal: 1000;
     flex-direction: row;
     align-items: center;
     padding: 16px 0;
-    justify-content: center; // 讓整個團員項目在列表中置中
+    justify-content: center;
   }
-  // === 修改結束 ===
 
   .participant-avatar {
     width: 120px;
@@ -358,8 +393,8 @@ $z-index-modal: 1000;
     align-items: flex-start;
 
     @include desktop() {
-        margin-top: -25px;
-    }    
+      margin-top: -25px;
+    }
   }
 
   .participant-bio {

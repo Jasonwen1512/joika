@@ -115,6 +115,7 @@ const openActivities = computed(() => {
 const visibleActivities = computed(() => {
   return openActivities.value.slice(0, visibleCount.value);
 });
+const currentSubTab = ref("my-activity"); 
 </script>
 
 <template>
@@ -225,7 +226,10 @@ const visibleActivities = computed(() => {
               </li>
             </ul>
             <div class="member-activity-card-section">
-              <MemberActivityCard />
+              <MemberActivityCard
+                v-for="activity in FakeActivity.slice(0,6)"
+                :key="activity.id"
+                :item="activity"/>
             </div>
           </div>
         </div>
