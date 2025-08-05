@@ -1,44 +1,52 @@
 <script setup>
-  import { ref } from "vue";
-  import Button from "@/components/Button.vue";
-  import InputField from '@/components/auth/Inputfield.vue'
+import { ref, watch } from "vue";
+import Button from "@/components/Button.vue";
+import InputField from '@/components/auth/Inputfield.vue'
 
-  const currentStep = ref(1);
-  const avatarUrl = ref('');
+const currentStep = ref(1);
+const avatarUrl = ref('');
 
-  const stepOne = ref({
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    agreed: false,
-  });
+const form = ref({
+  email: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
+  agreed: false,
+  name: '',
+  nickname: '',
+  gender: '',
+  birthdate: '',
+  location: '',
+  occupation: '',
+  interests: '',
+})
 
-  const errors = ref({
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    agreed: '',
-  });
+const errors = ref({
+  email: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
+  agreed: '',
+  name: '',
+  nickname: '',
+  gender: '',
+  birthdate: '',
+  location: '',
+  occupation: '',
+  interests: '',
+})
 
 const validateStepOne = () => {
   // 清除錯誤
-  errors.value = {
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    agreed: '',
-  };
+  Object.keys(errors.value).forEach(key => errors.value[key] = '')
 
-  const { email, phone, password, confirmPassword, agreed } = stepOne.value;
+  const { email, phone, password, confirmPassword, agreed } = form.value;
   let hasError = false;
 
   if (!email) {
     errors.value.email = '請輸入信箱';
     hasError = true;
-  }else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.value.email = '信箱格式錯誤';
     hasError = true;
   }
@@ -46,7 +54,7 @@ const validateStepOne = () => {
   if (!phone) {
     errors.value.phone = '請輸入手機';
     hasError = true;
-  }else if (!/^09\d{8}$/.test(phone)) {
+  } else if (!/^09\d{8}$/.test(phone)) {
     errors.value.phone = '手機格式錯誤';
     hasError = true;
   }
@@ -64,37 +72,51 @@ const validateStepOne = () => {
     hasError = true;
   }
 
-  // if (!agreed) {
-  //   errors.value.agreed = '請勾選會員條款';
-  //   hasError = true;
-  // }
+  if (!agreed) {
+    errors.value.agreed = '請勾選會員條款';
+    hasError = true;
+  }
 
   if (!hasError) {
     goNext();
   }
-};
+}
 
+const goNext = () => {
+  if (currentStep.value < 3) {
+    currentStep.value++
+  }
+}
 
-  const goNext = () => {
-    if (currentStep.value < 3) {
-      currentStep.value++;
-      console.log(`Current Step: ${currentStep.value}`);
-    }
-  };
+const getStepState = (step) => {
+  if (currentStep.value > step) return 'completed';
+  if (currentStep.value === step) return 'current';
+  return '';
+}
 
-  const getStepState = (step) => {
-    if (currentStep.value > step) return 'completed';
-    if (currentStep.value === step) return 'current';
-    return '';
-  };
-
-  const handleAvatarChange = (e) => {
+const handleAvatarChange = (e) => {
   const file = e.target.files[0];
   if (file) {
     avatarUrl.value = URL.createObjectURL(file);
   }
-};
+}
+
+function setupAutoClearError(dataRef, errorRef) {
+  Object.keys(dataRef.value).forEach((key) => {
+    watch(
+      () => dataRef.value[key],
+      (val) => {
+        if (errorRef.value[key] && val) {
+          errorRef.value[key] = ''
+        }
+      }
+    )
+  })
+}
+
+setupAutoClearError(form, errors)
 </script>
+
 
 <template>
   <div class="signup-page">
@@ -131,7 +153,7 @@ const validateStepOne = () => {
             id="email"
             label="信箱"
             type="email"
-            v-model="stepOne.email"
+            v-model="form.email"
             :error="errors.email"
           />
 
@@ -139,7 +161,7 @@ const validateStepOne = () => {
             id="phone"
             label="手機"
             type="tel"
-            v-model="stepOne.phone"
+            v-model="form.phone"
             :error="errors.phone"
           />
 
@@ -147,7 +169,7 @@ const validateStepOne = () => {
             id="password"
             label="密碼"
             type="password"
-            v-model="stepOne.password"
+            v-model="form.password"
             :error="errors.password"
           />
 
@@ -155,11 +177,11 @@ const validateStepOne = () => {
             id="confirm-password"
             label="確認密碼"
             type="password"
-            v-model="stepOne.confirmPassword"
+            v-model="form.confirmPassword"
             :error="errors.confirmPassword"
           />
           <div class="tos-group">
-            <input type="checkbox" id="tos" v-model="stepOne.agreed" />
+            <input type="checkbox" id="tos" v-model="form.agreed" />
             <label for="tos">我已閱讀並同意 JOIKA 會員條款</label>
           </div>
 
@@ -170,56 +192,80 @@ const validateStepOne = () => {
       </section>
 
       <!-- 步驟 2-->
-      <section v-show="currentStep === 2" class="form-step">
-        <form >
-          <div class="avatar-upload">
-            <label for="avatar-input" class="avatar-label">
-              <div class="avatar-circle">
-                <img v-if="avatarUrl" :src="avatarUrl" alt="預覽頭貼" />
-                <span v-else>頭貼上傳</span>
-              </div>
-            </label>
-            <input type="file" id="avatar-input" accept="image/*" @change="handleAvatarChange" hidden />
-          </div>
-          <div class="form-group">
-            <label for="name">姓名</label>
-            <input type="text" id="name" name="name" required />
-          </div>
-          <div class="form-group">
-            <label for="nickname">暱稱</label>
-            <input type="text" id="nickname" name="nickname" required />
-          </div>
-          <div class="form-group">
-            <label for="gender">性別</label>
-            <input type="text" id="gender" name="gender" required />
-          </div>
-          <div class="form-group">
-            <label for="birthdate">生日</label>
-            <input
-              type="text"
-              id="birthdate"
-              name="birthdate"
-              placeholder="例如: 1990/01/01"
-              required
-            />
-          </div>
-          <div class="form-group">
-            <label for="location">居住地</label>
-            <input type="text" id="location" name="location" required />
-          </div>
-          <div class="form-group">
-            <label for="occupation">職業</label>
-            <input type="text" id="occupation" name="occupation" required />
-          </div>
-          <div class="form-group">
-            <label for="interests">興趣</label>
-            <input type="text" id="interests" name="interests" required />
-          </div>
-          <div class="button-group">
-            <Button size="md" theme="primary" @click="goNext">下一步</Button>
-          </div>
-        </form>
-      </section>
+<section v-show="currentStep === 2" class="form-step">
+  <form @submit.prevent="validateStepOne">
+    <div class="avatar-upload">
+      <label for="avatar-input" class="avatar-label">
+        <div class="avatar-circle">
+          <img v-if="avatarUrl" :src="avatarUrl" alt="預覽頭貼" />
+          <span v-else>頭貼上傳</span>
+        </div>
+      </label>
+      <input type="file" id="avatar-input" accept="image/*" @change="handleAvatarChange" hidden />
+    </div>
+
+    <InputField
+      id="name"
+      label="姓名"
+      type="text"
+      v-model="form.name"
+      :error="errors.name"
+    />
+
+    <InputField
+      id="nickname"
+      label="暱稱"
+      type="text"
+      v-model="form.nickname"
+      :error="errors.nickname"
+    />
+
+    <InputField
+      id="gender"
+      label="性別"
+      type="text"
+      v-model="form.gender"
+      :error="errors.gender"
+    />
+
+    <InputField
+      id="birthdate"
+      label="生日"
+      type="text"
+      placeholder="例如: 1990/01/01"
+      v-model="form.birthdate"
+      :error="errors.birthdate"
+    />
+
+    <InputField
+      id="location"
+      label="居住地"
+      type="text"
+      v-model="form.location"
+      :error="errors.location"
+    />
+
+    <InputField
+      id="occupation"
+      label="職業"
+      type="text"
+      v-model="form.occupation"
+      :error="errors.occupation"
+    />
+
+    <InputField
+      id="interests"
+      label="興趣"
+      type="text"
+      v-model="form.interests"
+      :error="errors.interests"
+    />
+
+    <div class="button-group">
+      <Button size="md" theme="primary" @click="goNext">下一步</Button>
+    </div>
+  </form>
+</section>
 
       <!-- 步驟 3: 註冊完成 -->
       <section v-show="currentStep === 3" class="form-step">
@@ -341,7 +387,7 @@ const validateStepOne = () => {
     max-width: 420px;
     align-items: center;
     list-style: none;
-    margin: 0 auto;
+    margin: 0 auto 35px;
     padding: 0 10px;
   }
 
@@ -398,16 +444,14 @@ const validateStepOne = () => {
   }
 
   .avatar-circle {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    background-color: #ddd;
+    background-color: $lighter-yellow;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    font-size: 14px;
-    color: #666;
     transition: 0.3s;
 
     img {
