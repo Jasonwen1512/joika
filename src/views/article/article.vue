@@ -424,7 +424,7 @@ body {
     height: auto;
     z-index: -999;
 }
-.bg-img2[data-v-fd3376ce] {
+.bg-img2 {
     position: absolute;
     top: 45vh;
     left: 0;

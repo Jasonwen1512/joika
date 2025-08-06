@@ -29,7 +29,7 @@ const routes = [
     component: () => import("@/views/group/group-signup.vue"),
     props: true,
   },
-  { path: "/concat", component: () => import("@/views/concat/concat.vue") },
+  { path: "/contact", component: () => import("@/views/contact/contact.vue") },
   { path: "/chat", component: () => import("@/views/chat/chat.vue") },
   { path: "/auth/login", component: () => import("@/views/auth/login.vue") },
   { path: "/auth/signup", component: () => import("@/views/auth/signup.vue") },
@@ -55,11 +55,10 @@ const routes = [
     component: () => import("@/views/activity/activity-detail.vue"),
   },
 
-
-    {
-    path: '/:pathMatch(.*)*',
-    name: '404',
-    component: () => import('@/views/404.vue'),
+  {
+    path: "/:pathMatch(.*)*",
+    name: "404",
+    component: () => import("@/views/404.vue"),
   },
 ];
 

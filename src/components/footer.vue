@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
         <div class="company-address">公司地址：桃園市中壢區中山東路5號</div>
         <div class="company-business">營業時間：09:00~17:00</div>
         <div class="company-telephone">聯絡電話：03-425-1108</div>
-        <router-link to="/concat" class="company-information"
+        <router-link to="/contact" class="company-information"
           >聯絡我們<img src="@/assets/img/icon/email.svg?url" alt=""
         /></router-link>
       </div>

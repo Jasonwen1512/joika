@@ -482,6 +482,9 @@ h1 {
   z-index: 2;
   overflow: visible;
   margin-top: 40px;
+  @include tablet() {
+    margin-bottom: -140px;
+  }
 }
 
 .first-section {
