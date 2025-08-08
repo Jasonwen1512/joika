@@ -36,6 +36,8 @@ const isTablet = ref(false);
 const taiwanContent = ref(null);
 // 確認區塊被點擊狀態
 const isSelected = ref(false);
+// 確認使用者點擊過台灣
+const clicked = ref(false);
 
 const checkDeviceType = () => {
   isMobile.value = document.body.clientWidth < 768;
@@ -409,6 +411,61 @@ onMounted(() => {
     });
   });
 });
+
+// 剛入場，區域彈跳動畫
+const dur = 0.3;
+const gap = 0.4;
+const tl = gsap.timeline({ repeat: -1, repeatDelay: gap });
+
+onMounted(() => {
+  tl.fromTo(
+    '[data-region="north"]',
+    { y: 0 },
+    { y: -80, duration: dur, ease: "power1.out", yoyo: true, repeat: 1 }
+  )
+    .fromTo(
+      '[data-region="west"]',
+      { y: 0 },
+      { y: -80, duration: dur, ease: "power1.out", yoyo: true, repeat: 1 }
+    )
+    .fromTo(
+      '[data-region="south"]',
+      { y: 0 },
+      { y: -80, duration: dur, ease: "power1.out", yoyo: true, repeat: 1 }
+    )
+    .fromTo(
+      '[data-region="east"]',
+      { y: 0 },
+      { y: -80, duration: dur, ease: "power1.out", yoyo: true, repeat: 1 }
+    );
+});
+
+const handleClick = () => {
+  if (clicked.value) return;
+  clicked.value = true;
+
+  // 先播放所有元素歸位
+  gsap.to("[data-region]", {
+    y: 0,
+    ease: "power1.inOut",
+    onComplete: () => {
+      // 歸位後再停止 timeline
+      if (tl) {
+        tl.kill();
+        console.log("動畫已停止，並歸位");
+      }
+    },
+  });
+
+  // 使用者第一次點台灣時，滾動視窗到region區塊
+  const target = document.querySelector(".region");
+  if (target) {
+    target.scrollIntoView({
+      behavior: "smooth", // 平滑滾動
+      block: "center", // 對齊到視窗中央
+    });
+  }
+};
 </script>
 
 <template>
@@ -499,6 +556,7 @@ onMounted(() => {
       <BigTaiwan
         ref="svgRef"
         class="big-taiwan"
+        @click="handleClick"
         :width="
           isMobile
             ? bigTaiwan.mobile.width
@@ -675,6 +733,7 @@ onMounted(() => {
   background-repeat: no-repeat;
   background-size: contain; /* 或 contain，根據你想要的填滿方式 */
   background-position: center center;
+
   @include flex-center();
   .bg {
     position: absolute;
