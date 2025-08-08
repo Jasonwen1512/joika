@@ -528,8 +528,11 @@ function openReportModal() {
 
 //chat-key-in-start
 .chat-key-in-section {
-  position: relative;
-  z-index: 1;
+  position: fixed;
+  z-index: 10;
+  top: 65vh;
+  left: 3vh;
+  width: 80%;
   margin: 20px;
   display: flex;
   flex-direction: column;
@@ -584,7 +587,7 @@ function openReportModal() {
     flex-direction: column;
     gap: 15px;
     padding: 0 80px;
-    margin: 0 100px;
+    margin: 0 200px;
   }
   .floating img {
     width: 200px;
@@ -604,7 +607,9 @@ function openReportModal() {
   .chat-key-in-section {
     display: flex;
     flex-direction: row;
-    margin: auto;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
     max-width: 100vh;
     margin-bottom: 40px;
     gap: 10px;
