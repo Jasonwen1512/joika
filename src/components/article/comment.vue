@@ -623,9 +623,7 @@ function ReportIt() {
 .comment-input {
     width: 100%;
 }
-.comment.reply-item {
-    margin-left: 10vh;
-}
+
 .send-button {
     display: flex;
     text-align: right;
