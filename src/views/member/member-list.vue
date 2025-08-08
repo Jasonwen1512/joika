@@ -1,11 +1,14 @@
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Button from "@/components/Button.vue";
 // 當前頁籤，預設為 'list' (團員列表)，這樣一進頁面就會顯示團員列表
 const activeTab = ref("list");
+const activityId = "ACT00001"; // 之後會從API抓活動ID，先寫死
+const router = useRouter();
 
-// 團員假資料 之後要串
+// 團員假資料 之後要串 應該會從活動ID抓
 const memberList = ref([
     {
         userid: "M0007",
@@ -19,7 +22,7 @@ const memberList = ref([
     },
     {
         userid: "M0008",
-        name: "溫州大餛飩",
+        name: "温温",
         rating: 4,
         reviews: 32,
         location: "桃園市",
@@ -83,6 +86,14 @@ function handleReject(userId) {
     if (userIndex === -1) return;
 
     pendingList.value.splice(userIndex, 1);
+}
+//回去會員
+function backbtn() {
+    router.back();
+}
+//看活動詳細
+function gotoActivity() {
+    router.push(`/activity/${activityId}`);
 }
 </script>
 
@@ -224,11 +235,41 @@ function handleReject(userId) {
                 </div>
             </div>
         </div>
+        <div class="btn-list">
+            <Button
+                theme="info"
+                size="sm"
+                class="back"
+                @click="backbtn"
+                >回到會員頁</Button
+            >
+            <Button
+                theme="primary"
+                size="sm"
+                class="gotoActivity"
+                @click="gotoActivity"
+                >活動詳細頁</Button
+            >
+        </div>
     </div>
 </template>
 
 <!-- <style> 區塊保持原樣，不需要修改 -->
 <style scoped lang="scss">
+.btn-list {
+    display: flex;
+    margin-block: 3vh;
+    gap: 20px;
+    justify-content: center;
+    @include desktop {
+        .btn-list {
+            justify-content: flex-end;
+        }
+        Button {
+            border-radius: 6px;
+        }
+    }
+}
 .member-tabs {
     width: 100%;
     padding: 20px;
@@ -271,6 +312,8 @@ function handleReject(userId) {
     justify-content: space-between;
     flex-direction: column;
     align-items: flex-start;
+    align-items: flex-end;
+    gap: 20px;
     &:not(:last-child) {
         border-bottom: 1px solid #eee;
     }
