@@ -17,6 +17,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/diving.png",
       import.meta.url
     ).href,
+    category: "CA007",
   },
   {
     cardBase: new URL(
@@ -31,6 +32,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/movie.png",
       import.meta.url
     ).href,
+    category: "CA009",
   },
   {
     cardBase: new URL(
@@ -45,6 +47,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/sports.png",
       import.meta.url
     ).href,
+    category: "CA003",
   },
   {
     cardBase: new URL(
@@ -59,6 +62,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/hiking-buddy.png",
       import.meta.url
     ).href,
+    category: "CA001",
   },
   {
     cardBase: new URL(
@@ -73,6 +77,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/camping.png",
       import.meta.url
     ).href,
+    category: "CA004",
   },
   {
     cardBase: new URL(
@@ -87,6 +92,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/board-game-champ.png",
       import.meta.url
     ).href,
+    category: "CA002",
   },
   {
     cardBase: new URL(
@@ -101,6 +107,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/exhibition-visitor.png",
       import.meta.url
     ).href,
+    category: "CA006",
   },
   {
     cardBase: new URL(
@@ -115,6 +122,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/jack.png",
       import.meta.url
     ).href,
+    category: "CA008",
   },
   {
     cardBase: new URL(
@@ -129,6 +137,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/art-sharing-moment.png",
       import.meta.url
     ).href,
+    category: "CA010",
   },
   {
     cardBase: new URL(
@@ -143,6 +152,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/annie.png",
       import.meta.url
     ).href,
+    category: "CA011",
   },
   {
     cardBase: new URL(
@@ -157,6 +167,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/lee.png",
       import.meta.url
     ).href,
+    category: "CA012",
   },
   {
     cardBase: new URL(
@@ -171,6 +182,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/sam.png",
       import.meta.url
     ).href,
+    category: "CA005",
   },
 ]);
 
@@ -451,25 +463,26 @@ onUnmounted(() => {
         v-for="(slide, index) in slideData"
         :key="index"
       >
-        <div class="slide-content-holder">
-          <div class="card-content-wrapper">
+        <router-link :to="`/activity?category=${slide.category}`"
+          ><div class="slide-content-holder">
+            <div class="card-content-wrapper">
+              <img
+                class="card-image card-base-image"
+                :src="slide.cardBase"
+                alt="卡片基礎圖"
+              />
+              <img
+                class="card-image card-bg-patch"
+                :src="slide.bgPatch"
+                alt="背景補丁"
+              />
+            </div>
             <img
-              class="card-image card-base-image"
-              :src="slide.cardBase"
-              alt="卡片基礎圖"
-            />
-            <img
-              class="card-image card-bg-patch"
-              :src="slide.bgPatch"
-              alt="背景補丁"
-            />
-          </div>
-          <img
-            class="card-image card-char-floating"
-            :src="slide.charFloating"
-            alt="浮出人物"
-          />
-        </div>
+              class="card-image card-char-floating"
+              :src="slide.charFloating"
+              alt="浮出人物"
+            /></div
+        ></router-link>
       </div>
     </div>
   </div>
@@ -516,6 +529,11 @@ $breakpoint-tablet: 768px;
   width: 100%;
   height: 100%;
   position: relative;
+  &:hover .card-content-wrapper {
+    box-shadow: 0 0 25px rgba(79, 141, 168, 0.6),
+      0 0 50px rgba(79, 141, 168, 0.3);
+    transition: box-shadow 0.3s ease;
+  }
 }
 
 .card-content-wrapper {

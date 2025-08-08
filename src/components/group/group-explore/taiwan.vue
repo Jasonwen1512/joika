@@ -460,10 +460,12 @@ const handleClick = () => {
   // 使用者第一次點台灣時，滾動視窗到region區塊
   const target = document.querySelector(".region");
   if (target) {
-    target.scrollIntoView({
-      behavior: "smooth", // 平滑滾動
-      block: "center", // 對齊到視窗中央
-    });
+    setTimeout(() => {
+      target.scrollIntoView({
+        behavior: "smooth", // 平滑滾動
+        block: "center", // 對齊到視窗中央
+      });
+    }, 400); // delay 0.7秒
   }
 };
 </script>
