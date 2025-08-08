@@ -467,6 +467,7 @@ const swiperModules = [Pagination];
 
 <style scoped lang="scss">
 // === 您的所有既有樣式都保持不變 ===
+
 .activity-detail-page {
   position: relative;
 }
@@ -476,6 +477,8 @@ const swiperModules = [Pagination];
   background-repeat: no-repeat;
   background-size: 100% auto;
   background-position: center bottom;
+  position: relative;
+  z-index: -10;
   width: 100%;
   height: 320px;
 
@@ -506,6 +509,7 @@ const swiperModules = [Pagination];
     width: 360px;
     height: 210px;
     object-fit: cover;
+  
 
     @include desktop() {
       width: 1030px;
@@ -556,6 +560,7 @@ const swiperModules = [Pagination];
   @include desktop() {
     margin-bottom: 0;
     padding-bottom: 0;
+    
   }
 
   .info-grid {
@@ -569,6 +574,7 @@ const swiperModules = [Pagination];
     @include desktop() {
       border-top: 1px solid #000;
       flex-direction: row;
+      
     }
   }
 
@@ -586,11 +592,13 @@ const swiperModules = [Pagination];
   .info-row {
     display: flex;
     padding-bottom: 8px;
+    align-items: center; 
 
     strong {
       font-size: 24px;
       font-weight: bold;
       width: 30%;
+      font-family: "Inter", sans-serif;
 
       @include mobile() {
         font-size: 20px;
@@ -598,10 +606,11 @@ const swiperModules = [Pagination];
     }
 
     span {
-      font-size: 16px;
+      font-size: 18px;
       padding-left: 70px;
       max-width: 70%;
       line-height: 1.5;
+      font-family: "Inter", sans-serif;
     }
   }
 }
@@ -612,6 +621,7 @@ const swiperModules = [Pagination];
   left: 0;
   width: auto;
   width: 50%;
+  z-index: -5;
 
   @include mobile() {
     z-index: -1;
@@ -733,6 +743,7 @@ const swiperModules = [Pagination];
   .host-name {
     font-size: 20px;
     font-weight: 500;
+    font-family: "Inter", sans-serif;
 
     @include mobile() {
       padding-right: 155px;
@@ -749,6 +760,7 @@ const swiperModules = [Pagination];
   .host-bio {
     margin-top: 8px;
     font-size: 20px;
+    font-family: "Inter", sans-serif;
 
     @include mobile() {
       padding-left: 10px;
@@ -794,6 +806,7 @@ const swiperModules = [Pagination];
   .description-content {
     line-height: 1.8;
     white-space: pre-wrap;
+    font-size: 18px;
   }
 
   // --- 桌機版樣式 ---
@@ -818,6 +831,7 @@ const swiperModules = [Pagination];
   max-width: 1200px;
   margin: 0px auto 100px;
   padding: 0 20px;
+  // 錨點：設定為絕對定位的參考基準
   position: relative;
 
   .participants-title {
@@ -837,6 +851,7 @@ const swiperModules = [Pagination];
     flex-direction: column;
     align-items: center;
     gap: 16px;
+    // 為下方的絕對定位圓點預留足夠的空間
     padding: 0 0 80px;
   }
 
@@ -861,6 +876,7 @@ const swiperModules = [Pagination];
   .participant-name {
     font-size: 20px;
     font-weight: 500;
+    font-family: "Inter", sans-serif;
 
     @include mobile() {
       display: none;
@@ -869,9 +885,10 @@ const swiperModules = [Pagination];
 
   .participant-bio {
     font-size: 20px;
+    font-family: "Inter", sans-serif;
   }
 
-  // --- Swiper 分頁圓點樣式 ---
+  // --- Swiper 分頁圓點外觀樣式 ---
   :deep(.swiper-pagination-bullet) {
     width: 12px;
     height: 12px;
@@ -881,6 +898,18 @@ const swiperModules = [Pagination];
 
   :deep(.swiper-pagination-bullet-active) {
     background-color: #ffc700;
+  }
+
+  // --- 全域的分頁圓點置中樣式 ---
+  :deep(.swiper-pagination) {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    bottom: 30px;
+    text-align: center;
+    padding: 0;
+    // 確保圓點本身不會被意外隱藏
+    z-index: 10;
   }
 
   // --- 桌機版樣式 ---
@@ -902,6 +931,13 @@ const swiperModules = [Pagination];
     .participants-slider {
       width: 100%;
     }
+    
+    // --- 終極關鍵修正 ---
+    // Swiper.js 會在其實例 (class="swiper") 上強制加上 position: relative。
+    // 我們必須用 !important 來覆蓋它，才能打破這個定位上下文。
+    :deep(.swiper) {
+      position: static !important;
+    }
 
     .participant-card {
       flex-direction: row;
@@ -913,25 +949,15 @@ const swiperModules = [Pagination];
     .participant-details {
       align-items: flex-start;
     }
-
-    :deep(.swiper-pagination) {
-      text-align: center;
-      padding-left: 0;
-
-      @include desktop() {
-        text-align: left;
-        padding-left: 200px;
-      }
-    }
   }
 }
 
 .comments-container {
-  max-width: 1200px;
+  max-width: 1200px; 
   margin-left: auto;
   margin-right: auto;
   margin-block: 7.5vh;
-  padding: 0 20px;
-  box-sizing: border-box;
+  padding: 0 20px; 
+  box-sizing: border-box; 
 }
 </style>
