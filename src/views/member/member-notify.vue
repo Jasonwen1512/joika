@@ -9,7 +9,7 @@ const systemNotifications = ref([
     id: 1,
     title: '7/4 新手友善 陽明山登山團 報名成功通知',
     content: '此為系統通知，無需做回覆\n您在剛剛成功參與了 7/4 新手友善 陽明山登山團\n針對活動如有任何疑問可在活動頁面留言',
-    expanded: true,
+    expanded: false,
   }
 ])
 
@@ -160,7 +160,7 @@ function toggleAccordion(list, item) {
   vertical-align: middle;
 }
 .icon-wrapper .line2 {
-  transition: transform 0.3s ease;
+  transition: transform 0.5s ease;
   transform-origin: center;
 }
 .icon-wrapper.rotated .line2 {
@@ -169,6 +169,21 @@ function toggleAccordion(list, item) {
 
 .notify-detail{
   padding: 8px 12px 8px 8px;
+  border-bottom: 1px solid #ccc;
+}
+.accordion-enter-active,
+.accordion-leave-active {
+  transition: all 0.5s ease; 
+}
+.accordion-enter-from,
+.accordion-leave-to {
+  max-height: 0; 
+  opacity: 0;
+}
+.accordion-enter-to,
+.accordion-leave-from {
+  max-height: 500px; 
+  opacity: 1;
 }
 
 //捲軸
