@@ -453,7 +453,8 @@ h1 {
   position: relative;
   z-index: 2;
   text-align: center;
-  margin-top: 165px;
+  // 大標題與上面banner之間的距離
+  margin-top: 12.5vw; // 在寬度1920下，約為245px左右
 }
 .index-section-start {
   display: flex;
