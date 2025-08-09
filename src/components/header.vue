@@ -1,6 +1,9 @@
 <script setup>
 import Logo from "@/components/logo.vue";
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 
 const isMobile = ref(true);
 const shStatus = ref(false);
@@ -35,6 +38,40 @@ const onScroll = () => {
   isScrolledDown.value = window.scrollY > 1;
 };
 
+// 滑鼠暫時覆蓋的頁面名稱
+const hoverPage = ref(null);
+
+// 計算目前頁面名稱（若 hoverPage 有值則優先）
+const targetPage = computed(() => {
+  if (hoverPage.value) return hoverPage.value;
+
+  const path = route.path;
+
+  if (path === "/home") return "home";
+  if (path.startsWith("/article/")) return "article";
+  if (path === "/chat") return "chat";
+  // group-explore + activity + group-signup 都算成 group-explore
+  if (
+    path === "/group/group-explore" ||
+    path.startsWith("/activity") ||
+    path.startsWith("/group/group-signup")
+  ) {
+    return "group-explore";
+  }
+  if (path === "/support") return "support";
+  if (path === "/group/group-create") return "group-create";
+  if (path === "/auth/login" || path === "/auth/signup") return "login";
+
+  return null;
+});
+
+const onMouseEnter = (pageName) => {
+  hoverPage.value = pageName;
+};
+const onMouseLeave = () => {
+  hoverPage.value = null;
+};
+
 onMounted(() => {
   window.addEventListener("scroll", onScroll);
 });
@@ -42,37 +79,98 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", onScroll);
 });
+
+const pageIndicator = new URL(
+  "@/assets/img/page-indicator.svg",
+  import.meta.url
+).href;
 </script>
 <template>
   <header>
     <div class="header">
-      <router-link to="/home" class="header-img" @click="shStatus = false">
+      <router-link
+        to="/home"
+        class="header-img"
+        @click="shStatus = false"
+        @mouseenter="onMouseEnter('home')"
+        @mouseleave="onMouseLeave"
+      >
         <Logo class="logo" />
+        <img
+          :src="pageIndicator"
+          alt="page-indicator"
+          class="page-indicator"
+          v-show="targetPage === 'home'"
+        />
       </router-link>
       <div class="menu_and_nav">
         <input type="checkbox" id="switch-hamburger" v-model="shStatus" />
         <div class="menu">
-          <router-link to="/article/article" @click="shStatus = false"
-            >熱門文章</router-link
-          >
-          <router-link to="/chat" @click="shStatus = false"
-            >聊天大廳</router-link
-          >
-          <router-link to="/group/group-explore" @click="shStatus = false"
-            >揪團探索</router-link
-          >
-          <router-link to="/support" @click="shStatus = false"
-            >幫助中心</router-link
-          >
-          <router-link to="/group/group-create" @click="shStatus = false"
-            >我要揪團！！</router-link
-          >
+          <router-link
+            to="/article/article"
+            @click="shStatus = false"
+            @mouseenter="onMouseEnter('article')"
+            @mouseleave="onMouseLeave"
+            >熱門文章
+            <img
+              :src="pageIndicator"
+              alt="page-indicator"
+              class="page-indicator"
+              v-show="targetPage === 'article'"
+            />
+          </router-link>
+          <router-link
+            to="/chat"
+            @click="shStatus = false"
+            @mouseenter="onMouseEnter('chat')"
+            @mouseleave="onMouseLeave"
+            >聊天大廳<img
+              :src="pageIndicator"
+              alt="page-indicator"
+              class="page-indicator"
+              v-show="targetPage === 'chat'"
+          /></router-link>
+          <router-link
+            to="/group/group-explore"
+            @click="shStatus = false"
+            @mouseenter="onMouseEnter('group-explore')"
+            @mouseleave="onMouseLeave"
+            >揪團探索<img
+              :src="pageIndicator"
+              alt="page-indicator"
+              class="page-indicator"
+              v-show="targetPage === 'group-explore'"
+          /></router-link>
+          <router-link
+            to="/support"
+            @click="shStatus = false"
+            @mouseenter="onMouseEnter('support')"
+            @mouseleave="onMouseLeave"
+            >幫助中心<img
+              :src="pageIndicator"
+              alt="page-indicator"
+              class="page-indicator"
+              v-show="targetPage === 'support'"
+          /></router-link>
+          <router-link
+            to="/group/group-create"
+            @click="shStatus = false"
+            @mouseenter="onMouseEnter('group-create')"
+            @mouseleave="onMouseLeave"
+            >我要揪團！！<img
+              :src="pageIndicator"
+              alt="page-indicator"
+              class="page-indicator"
+              v-show="targetPage === 'group-create'"
+          /></router-link>
         </div>
         <nav>
           <router-link
             to="/auth/login"
             class="avatar"
             @click="shStatus = false"
+            @mouseenter="onMouseEnter('login')"
+            @mouseleave="onMouseLeave"
           >
             <svg
               viewBox="0 0 21 21"
@@ -89,6 +187,12 @@ onBeforeUnmount(() => {
                 :stroke="isMobile ? '#000' : 'rgba(0, 0, 0, 0.9)'"
               />
             </svg>
+            <img
+              :src="pageIndicator"
+              alt="page-indicator"
+              class="page-indicator"
+              v-show="targetPage === 'login'"
+            />
           </router-link>
 
           <label for="switch-hamburger" class="hamburger"
@@ -142,6 +246,12 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   transition: 0.3s;
+  position: relative;
+  .page-indicator {
+    position: absolute;
+    opacity: 0.9;
+    z-index: -1;
+  }
   .logo {
     width: 50%;
     vertical-align: middle;
@@ -187,6 +297,12 @@ nav {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  position: relative;
+  .page-indicator {
+    position: absolute;
+    opacity: 0.9;
+    z-index: -1;
+  }
   .avatar,
   .hamburger {
     cursor: pointer;
@@ -227,8 +343,19 @@ nav {
   border-top: 0;
   border-right: 0;
   border-radius: 0 0 0 25px;
+
   a {
     color: rgba(0, 0, 0, 0.9);
+    position: relative;
+    .page-indicator {
+      position: absolute;
+      opacity: 0.9;
+      z-index: -1;
+      left: 0;
+      @include desktop() {
+        left: unset;
+      }
+    }
   }
   @include desktop() {
     position: relative;
@@ -237,11 +364,12 @@ nav {
     background-color: $tp;
     flex-direction: row;
     padding: 0;
-    gap: 40px;
+    gap: 0px;
     margin-right: 40px;
     border: none;
     a {
       @include flex-center();
+      padding: 0 20px;
     }
   }
 }
