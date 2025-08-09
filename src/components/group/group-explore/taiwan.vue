@@ -1,4 +1,5 @@
 <script setup>
+// 另一台電腦push測試
 import { gsap } from "gsap";
 import SplitText from "gsap/SplitText";
 import ScrollTrigger from "gsap/ScrollTrigger";
