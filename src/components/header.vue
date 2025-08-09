@@ -96,12 +96,12 @@ const pageIndicator = new URL(
         @mouseleave="onMouseLeave"
       >
         <Logo class="logo" />
-        <img
+        <!-- <img
           :src="pageIndicator"
           alt="page-indicator"
           class="page-indicator"
           v-show="targetPage === 'home'"
-        />
+        /> -->
       </router-link>
       <div class="menu_and_nav">
         <input type="checkbox" id="switch-hamburger" v-model="shStatus" />
