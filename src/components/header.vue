@@ -251,6 +251,7 @@ const pageIndicator = new URL(
     position: absolute;
     opacity: 0.9;
     z-index: -1;
+    left: -10px;
   }
   .logo {
     width: 50%;
@@ -259,6 +260,9 @@ const pageIndicator = new URL(
   @include desktop() {
     .logo {
       width: 80%;
+    }
+    .page-indicator {
+      left: unset;
     }
   }
 }
@@ -272,7 +276,7 @@ const pageIndicator = new URL(
     height: 40px;
     background-color: #f5f0cd;
     position: absolute;
-    z-index: -1;
+    z-index: -2;
     right: -17px;
     border-radius: 9999px 0 0 9999px;
     border: 2px solid rgba(0, 0, 0, 0.6);
