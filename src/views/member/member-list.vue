@@ -312,7 +312,6 @@ function gotoActivity() {
     justify-content: space-between;
     flex-direction: column;
     align-items: flex-start;
-    align-items: flex-end;
     gap: 20px;
     &:not(:last-child) {
         border-bottom: 1px solid #eee;
@@ -339,7 +338,6 @@ function gotoActivity() {
 
 .name {
     font-size: 1.25rem;
-    font-weight: bold;
 }
 .rating-line {
     display: flex;
