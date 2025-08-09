@@ -310,17 +310,17 @@ onMounted(() => {
                 :key="index"
                 class="article-item"
             >
-                <div class="article-img">
-                    <img
-                        :src="article.image"
-                        :alt="article.title"
-                    />
-                </div>
-
                 <router-link
                     :to="`/article/${article.postid}`"
                     class="article-text-link"
                 >
+                    <div class="article-img">
+                        <img
+                            :src="article.image"
+                            :alt="article.title"
+                        />
+                    </div>
+
                     <div class="article-text">
                         <div class="articleHeader">
                             <div class="article-date">
@@ -621,7 +621,7 @@ hr {
 
     -webkit-box-orient: vertical;
 }
-.article-item {
+.article-text-link {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
