@@ -3,6 +3,9 @@ import { ref, computed, h, render } from "vue";
 import Swal from "sweetalert2";
 
 import { useRoute, useRouter } from "vue-router";
+const route = useRoute();
+const router = useRouter();
+
 import { articleList } from "@/assets/data/fake-article";
 import Button from "@/components/Button.vue";
 import DeleteIcon from "@/assets/img/icon/delete.svg";
@@ -10,6 +13,8 @@ import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from "@/assets/img/article/movie_konan.jpg";
 
 import comment from "@/components/article/comment.vue";
+
+
 //分類顏色
 const EventColorMap = {
     登山: "#6DE1D2",
@@ -29,14 +34,62 @@ const EventColorMap = {
 const GetEventColor = (eventName) => {
     return EventColorMap[eventName] || "#adb5bd";
 };
-const route = useRoute();
-const router = useRouter();
-const postId = route.params.postid;
+// ===================================================================
+// 1. 使用 defineProps 接收來自路由的「指令」和「預覽資料」
+// ===================================================================
+const props = defineProps({
+    isPreview: {
+        type: Boolean,
+        default: false,
+    },
+});
 
-const article = articleList.find((item) => item.postid === postId);
+// ===================================================================
+// 2. 使用 computed 智慧地決定要顯示哪一份文章資料
+//    這是整個修改的核心！
+// ===================================================================
+const article = computed(() => {
+    // 【判斷 A】如果是預覽模式
+    if (props.isPreview) {
+        // 從 history.state 中讀取我們傳過來的資料
+        const previewData = history.state.previewData;
+        
+        if (previewData) {
+            console.log("%c使用 history.state 中的預覽資料進行渲染。", 'color: green; font-weight: bold;', previewData);
+            // 直接回傳這個物件
+            return previewData;
+        } else {
+            console.error("錯誤：處於預覽模式，但無法從 history.state 中找到預覽資料。");
+            return null;
+        }
+    }
+    
+    // 【判斷 B】正常瀏覽模式 (保持不變)
+    const postId = route.params.postid;
+    if (!postId) return null;
+    
+    const foundArticle = articleList.find((item) => item.postid === postId);
+    if (foundArticle) {
+        return foundArticle;
+    }
+
+    return null;
+});
+
 
 function EditArticle() {
-    router.push("/article/article-create");
+    // 防禦性檢查
+    if (!article.value) {
+        console.error("文章資料未載入，無法編輯");
+        return;
+    }
+    router.push({
+        name: 'ArticleModify',
+        params: {
+            mode: 'edit',
+            postid: article.value.postid
+        }
+    });
 }
 
 //刪除
@@ -110,7 +163,7 @@ function DeleteCheck() {
                 />
                 <p>{{ article.userid }}</p>
             </div>
-            <div class="btn-list">
+            <div  v-if="!isPreview"  class="btn-list">
                 <Button
                     @click="EditArticle"
                     :suffixIcon="SmEditIcon"
@@ -158,11 +211,14 @@ function DeleteCheck() {
                 <p>找不到這篇文章。</p>
             </div>
         </section>
+            <div v-if="!isPreview" class="comments-section">
+
 
         <!-- ================================== -->
         <!--           留言系統區塊             -->
         <!-- ================================== -->
         <comment></comment>
+            </div>
     </main>
 </template>
 

@@ -1,5 +1,7 @@
 <script setup>
 import { reactive, ref, watch, toRefs, onMounted, onBeforeUnmount } from "vue";
+import { useRoute, useRouter } from 'vue-router'; // 引入 useRoute
+import { articleList } from "@/assets/data/fake-article";
 import tinymce from "tinymce/tinymce.js";
 import Button from "@/components/Button.vue";
 import bgImgUrl from "@/assets/img/support/bg.svg?url";
@@ -23,6 +25,15 @@ import Editor from "@tinymce/tinymce-vue";
 
 // --- Props (保持不變) ---
 const props = defineProps({
+    // ===== 新增的 Props，用於接收路由指令 =====
+    mode: {
+        type: String, // 'create' or 'edit'
+        required: true,
+    },
+    postid: {
+        type: String, // 在 create 模式下會是 undefined
+        default: null,
+    },
     modelValue: { type: String, default: "" },
     plugins: {
         type: [String, Array],
@@ -34,8 +45,89 @@ const props = defineProps({
             "bold italic underline strikethrough | fontsizeselect | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent blockquote | undo redo | image | removeformat | table | emoticons",
     },
 });
-
 const emit = defineEmits(["update:modelValue"]);
+const router = useRouter();
+// 【新增】建立統一的表單資料物件，用來綁定所有欄位
+
+
+const form = reactive({
+    postid: null,
+    userid: 'CJ D.', // 可換成實際登入者資料
+    title: '',
+    content: '', // 這個將與 TinyMCE 的內容保持同步
+    event: '',
+    type: '揪團心得',
+    date: new Date().toLocaleDateString('sv'), // YYYY-MM-DD
+    image: '/src/assets/img/article/article-img.png?url', // 預設圖片
+});
+
+// 3.【關鍵】當處於「編輯模式」時，載入舊資料
+onMounted(() => {
+    // 1. 監聽視窗大小變化
+    window.addEventListener("resize", handleResize);
+    
+    // 2. 觸發標題動畫
+    isVisible.value = true;
+    
+    // 3. 根據模式決定行為
+    if (props.mode === 'edit' && props.postid) {
+        // 編輯模式
+        titleText.value = "編輯你的故事";
+        const articleToEdit = articleList.find(item => item.postid === props.postid);
+        if (articleToEdit) {
+            // 將找到的舊資料填入 form 物件
+            Object.assign(form, articleToEdit);
+            // // 手動觸發 emit，確保 TinyMCE 元件接收到初始內容
+            // emit('update:modelValue', form.content); 
+        } else {
+            console.error("找不到要編輯的文章！");
+            router.push('/article/article');
+        }
+    } else {
+        // 新增模式
+        titleText.value = "今天想說點什麼？";
+    }
+});
+// 4.【函式區】處理使用者操作
+function previewArticle() {
+  // 當點擊預覽時，將整個 form 物件透過 history.state 傳遞
+  router.push({
+    name: 'ArticlePreview',
+    // 【修改】不再使用 params，改用 state
+    state: { 
+        // 我們將資料包裹在一個自訂的鍵 (例如 'previewData') 裡面
+        previewData: form 
+    }
+  });
+}
+//專門給 TinyMCE 編輯器 v-model 使用的 ref
+const editorContent = ref(props.modelValue);
+// 【監聽 1】當使用者在編輯器中輸入時，將新內容同步到 form.content
+watch(editorContent, (newValue) => {
+    form.content = newValue;
+});
+
+// 【監聽 2】當 form.content 被程式碼修改時 (例如在 onMounted 中)，將變更同步給編輯器
+watch(() => form.content, (newValue) => {
+    editorContent.value = newValue;
+});
+async function submitArticle() {
+    if (props.mode === 'edit') {
+        // --- 未來串接 API 的位置 (更新/PUT) ---
+        // await updateArticleAPI(form.postid, form);
+        console.log("正在【更新】文章:", form);
+        alert("文章更新成功！");
+    } else {
+        // --- 未來串接 API 的位置 (新增/POST) ---
+        // const newArticle = await createArticleAPI(form);
+        console.log("正在【新增】文章:", form);
+        alert("文章發表成功！");
+    }
+    // 成功後跳轉回列表頁
+    router.push('/article/article');
+}
+
+
 
 // --- 圖片上傳處理邏輯 (保持不變) ---
 const uploadImageAndGetUrl = (blobInfo) =>
@@ -145,9 +237,9 @@ const handleEditorInit = (evt, editor) => {
 const handleResize = () => {
     if (editorInstance.value) editorInstance.value.execCommand("mceRepaint");
 };
-onMounted(() => {
-    window.addEventListener("resize", handleResize);
-});
+
+
+
 onBeforeUnmount(() => {
     window.removeEventListener("resize", handleResize);
     if (editorInstance.value) tinymce.remove(editorInstance.value);
@@ -173,10 +265,14 @@ const categories = [
 const titleText = ref("今天想說點什麼？");
 const isVisible = ref(false);
 
-onMounted(() => {
-    // 元件掛載後，直接將 isVisible 設為 true
-    isVisible.value = true;
-});
+
+
+
+function selectType(typeName) {
+    form.type = typeName;
+}
+
+
 </script>
 
 <template>
@@ -205,72 +301,62 @@ onMounted(() => {
                     {{ char }}
                 </span>
             </h2>
+
+            
         </div>
 
         <input
             class="titlebox"
             type="text"
             placeholder="請輸入文章標題"
+                        v-model="form.title"
+
         />
         <div class="category-btn-list">
             <!-- 建議修正 props 寫法 -->
             <label>文章類型：</label>
-            <Button
-                theme="secondary"
+           <Button
+                @click="selectType('揪團心得')"
+                :theme="form.type === '揪團心得' ? 'secondary' : 'info'"
                 size="sm"
-            >
-                揪團心得
-            </Button>
+            >揪團心得</Button>
             <Button
-                theme="info"
+                @click="selectType('閒聊')"
+                :theme="form.type === '閒聊' ? 'secondary' : 'info'"
                 size="sm"
-            >
-                閒聊
-            </Button>
+            >閒聊</Button>
             <Button
-                theme="info"
+                @click="selectType('分享')"
+                :theme="form.type === '分享' ? 'secondary' : 'info'"
                 size="sm"
-            >
-                分享
-            </Button>
+            >分享</Button>
         </div>
         <div class="topic-category">
             <label for="topic-category">文章分類：</label>
-            <select
-                id="topic-category"
-                name="category"
-                v-model="selectedCategory"
-            >
-                <option
-                    disabled
-                    value=""
-                >
-                    活動類型
-                </option>
+            <select id="topic-category" name="category" v-model="form.event">
+                <option disabled value="">活動類型</option>
                 <option
                     v-for="(category, index) in categories"
                     :key="index"
                     :value="category"
-                >
-                    {{ category }}
-                </option>
+                >{{ category }}</option>
             </select>
         </div>
         <div class="text-editor">
-            <editor
-                v-model="editorValue"
-                :init="init"
-                @onInit="handleEditorInit"
-            ></editor>
-            <p class="notice">
+ <editor
+        v-model="editorContent"
+        :init="init"
+        @onInit="handleEditorInit"
+    />            <p class="notice">
                 請遵守社群規定，不得發表違規言論或進行違反法律之相關情事，如有違規需自負法律責任
             </p>
         </div>
 
         <div class="btn">
+                   <Button theme="info" size="md" @click="previewArticle">預覽</Button>
             <Button
                 theme="primary"
-                size="md"
+                size="md"  @click="submitArticle"
             >
                 送出
             </Button>
@@ -396,8 +482,12 @@ select {
 }
 
 .btn {
-    justify-self: center;
+
+    display: flex;
+    gap: 30px;
+    justify-content: center;
 }
+
 .category-btn-list {
     gap: 15px;
     display: flex;

@@ -3,6 +3,8 @@ import { articleList } from "@/assets/data/fake-article";
 
 import Button from "@/components/Button.vue";
 import { ref, computed, watch, onMounted } from "vue";
+import { useRouter } from 'vue-router';
+
 import konanImage from "@/assets/img/article/movie_konan.jpg";
 import ArticleDetail from "./article-detail.vue";
 import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
@@ -210,15 +212,11 @@ const PaginationList = computed(() => {
     return pages;
 });
 
-//我要發文按鈕
-const ula = () => {
-    alert("我要發文");
-    // 在這裡可以加入跳轉到發文頁面的邏輯，例如使用 Vue Router
-    // router.push('/create-post');
-};
+
 //標題字
 const titleText = ref("JOIKA團友筆記");
 const isVisible = ref(false);
+
 
 onMounted(() => {
     // 元件掛載後，直接將 isVisible 設為 true
@@ -290,11 +288,11 @@ onMounted(() => {
                 </div>
             </div>
             <router-link
-                to="/article/article-create"
-                class="article-link"
-            >
+    :to="{ name: 'ArticleModify', params: { mode: 'create' } }"
+    class="article-link"
+>
                 <div class="post-btn">
-                    <Button
+                    <Button 
                         :theme="primary"
                         size="md"
                         >我要發文</Button
