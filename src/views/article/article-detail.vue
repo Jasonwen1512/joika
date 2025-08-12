@@ -3,6 +3,9 @@ import { ref, computed, h, render } from "vue";
 import Swal from "sweetalert2";
 
 import { useRoute, useRouter } from "vue-router";
+const route = useRoute();
+const router = useRouter();
+
 import { articleList } from "@/assets/data/fake-article";
 import Button from "@/components/Button.vue";
 import DeleteIcon from "@/assets/img/icon/delete.svg";
@@ -11,42 +14,6 @@ import konanImage from "@/assets/img/article/movie_konan.jpg";
 
 import comment from "@/components/article/comment.vue";
 
-
-// ===================================================================
-// 1. 使用 defineProps 接收來自路由的「指令」和「預覽資料」
-// ===================================================================
-const props = defineProps({
-    // 是否為預覽模式，由路由設定傳入，預設為 false
-    isPreview: {
-        type: Boolean,
-        default: false,
-    },
-    // 用於接收預覽文章的資料物件，同樣由路由傳入
-    // 在非預覽模式下，這個 prop 不會被傳遞，所以設為非必需
-    articlePreviewData: {
-        type: Object,
-        required: false,
-        default: () => ({}), // 給一個空的預設物件
-    },
-});
-
-// ===================================================================
-// 2. 使用 computed 智慧地決定要顯示哪一份文章資料
-//    這是整個修改的核心！
-// ===================================================================
-const article = computed(() => {
-    // 如果 isPreview 是 true (預覽模式)
-    if (props.isPreview) {
-        // 就直接回傳從 prop 接收到的預覽資料
-        return props.articlePreviewData;
-    } 
-    // 否則 (正常瀏覽模式)
-    else {
-        // 就執行您原本的邏輯：從路由參數中找到 postid，然後去假資料中尋找
-        const postId = route.params.postid;
-        return articleList.find((item) => item.postid === postId);
-    }
-});
 
 //分類顏色
 const EventColorMap = {
@@ -67,13 +34,62 @@ const EventColorMap = {
 const GetEventColor = (eventName) => {
     return EventColorMap[eventName] || "#adb5bd";
 };
-const route = useRoute();
-const router = useRouter();
-const postId = route.params.postid;
+// ===================================================================
+// 1. 使用 defineProps 接收來自路由的「指令」和「預覽資料」
+// ===================================================================
+const props = defineProps({
+    isPreview: {
+        type: Boolean,
+        default: false,
+    },
+});
+
+// ===================================================================
+// 2. 使用 computed 智慧地決定要顯示哪一份文章資料
+//    這是整個修改的核心！
+// ===================================================================
+const article = computed(() => {
+    // 【判斷 A】如果是預覽模式
+    if (props.isPreview) {
+        // 從 history.state 中讀取我們傳過來的資料
+        const previewData = history.state.previewData;
+        
+        if (previewData) {
+            console.log("%c使用 history.state 中的預覽資料進行渲染。", 'color: green; font-weight: bold;', previewData);
+            // 直接回傳這個物件
+            return previewData;
+        } else {
+            console.error("錯誤：處於預覽模式，但無法從 history.state 中找到預覽資料。");
+            return null;
+        }
+    }
+    
+    // 【判斷 B】正常瀏覽模式 (保持不變)
+    const postId = route.params.postid;
+    if (!postId) return null;
+    
+    const foundArticle = articleList.find((item) => item.postid === postId);
+    if (foundArticle) {
+        return foundArticle;
+    }
+
+    return null;
+});
 
 
 function EditArticle() {
-    router.push("/article/article-create");
+    // 防禦性檢查
+    if (!article.value) {
+        console.error("文章資料未載入，無法編輯");
+        return;
+    }
+    router.push({
+        name: 'ArticleModify',
+        params: {
+            mode: 'edit',
+            postid: article.value.postid
+        }
+    });
 }
 
 //刪除
@@ -192,7 +208,7 @@ function DeleteCheck() {
                 ></p>
             </div>
             <div v-else>
-                <p>找不到這篇文章。</p>
+                <p>找不到這篇文章111。</p>
             </div>
         </section>
             <div v-if="!isPreview" class="comments-section">
