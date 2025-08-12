@@ -110,6 +110,21 @@ function EditArticle() {
   });
 }
 
+//預覽模式的送出
+async function submitArticle() {
+  if (props.mode === "edit") {
+    // --- 未來串接 API 的位置 (更新/PUT) ---
+    // await updateArticleAPI(form.postid, form);
+    alert("文章更新成功！");
+  } else {
+    // --- 未來串接 API 的位置 (新增/POST) ---
+    // const newArticle = await createArticleAPI(form);
+    alert("文章發表成功！");
+  }
+  // 成功後跳轉回列表頁
+  router.push("/article/article");
+}
+
 //刪除
 function DeleteCheck() {
   Swal.fire({
@@ -160,6 +175,8 @@ function DeleteCheck() {
       console.log("使用者取消了刪除操作。");
     }
   });
+
+  
 }
 </script>
 
@@ -215,6 +232,10 @@ function DeleteCheck() {
           <img :src="article.image" alt="文章圖片" />
         </div>
         <p v-html="article.content" alt="內文"></p>
+
+         <div v-if="previewStore.isPreview" class="btn">
+      <Button  theme="primary" size="md" @click="submitArticle"> 送出 </Button>
+    </div>
       </div>
       <div v-else>
         <p>找不到這篇文章111。</p>
@@ -489,5 +510,11 @@ main {
     cursor: not-allowed;
     opacity: 0.6;
   }
+}
+
+//預覽的送出
+.btn {
+  padding-block: 20px;
+    margin: auto;
 }
 </style>
