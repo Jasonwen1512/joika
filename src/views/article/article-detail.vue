@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, h, render } from "vue";
+import { ref, computed, h, render, onMounted, onUnmounted } from "vue";
 import Swal from "sweetalert2";
 
 import { useRoute, useRouter } from "vue-router";
@@ -14,116 +14,134 @@ import konanImage from "@/assets/img/article/movie_konan.jpg";
 
 import comment from "@/components/article/comment.vue";
 
+import { usePreviewStore } from "@/stores/preview";
+
+const previewStore = usePreviewStore();
+// console.log(previewData);
 
 //分類顏色
 const EventColorMap = {
-    登山: "#6DE1D2",
-    水上活動: "#77BEF0",
-    運動: "#FFD63A",
-    露營: "#FF8C86",
-    唱歌: "#FFA955",
-    展覽: "#6DE1D2",
-    聚餐: "#77BEF0",
-    桌遊: "#FFD63A",
-    電影: "#FF8C86",
-    手作: "#FFA955",
-    文化體驗: "#6DE1D2",
-    演出表演: "#77BEF0",
-    其他: "#969696",
+  登山: "#6DE1D2",
+  水上活動: "#77BEF0",
+  運動: "#FFD63A",
+  露營: "#FF8C86",
+  唱歌: "#FFA955",
+  展覽: "#6DE1D2",
+  聚餐: "#77BEF0",
+  桌遊: "#FFD63A",
+  電影: "#FF8C86",
+  手作: "#FFA955",
+  文化體驗: "#6DE1D2",
+  演出表演: "#77BEF0",
+  其他: "#969696",
 };
 const GetEventColor = (eventName) => {
-    return EventColorMap[eventName] || "#adb5bd";
+  return EventColorMap[eventName] || "#adb5bd";
 };
 // ===================================================================
 // 1. 使用 defineProps 接收來自路由的「指令」和「預覽資料」
 // ===================================================================
 const props = defineProps({
-    isPreview: {
-        type: Boolean,
-        default: false,
-    },
+  isPreview: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // ===================================================================
 // 2. 使用 computed 智慧地決定要顯示哪一份文章資料
 //    這是整個修改的核心！
 // ===================================================================
+onUnmounted(() => {
+  previewStore.isPreview = false;
+});
 const article = computed(() => {
-    // 【判斷 A】如果是預覽模式
-    if (props.isPreview) {
-        // 從 history.state 中讀取我們傳過來的資料
-        const previewData = history.state.previewData;
-        
-        if (previewData) {
-            console.log("%c使用 history.state 中的預覽資料進行渲染。", 'color: green; font-weight: bold;', previewData);
-            // 直接回傳這個物件
-            return previewData;
-        } else {
-            console.error("錯誤：處於預覽模式，但無法從 history.state 中找到預覽資料。");
-            return null;
-        }
-    }
-    
-    // 【判斷 B】正常瀏覽模式 (保持不變)
-    const postId = route.params.postid;
-    if (!postId) return null;
-    
-    const foundArticle = articleList.find((item) => item.postid === postId);
-    if (foundArticle) {
-        return foundArticle;
-    }
+  // 【判斷 A】如果是預覽模式
+  // if (props.isPreview) {
+  //   // 從 history.state 中讀取我們傳過來的資料
+  //   const previewData = history.state.previewData;
 
-    return null;
+  //   if (previewData) {
+  //     console.log(
+  //       "%c使用 history.state 中的預覽資料進行渲染。",
+  //       "color: green; font-weight: bold;",
+  //       previewData
+  //     );
+  //     // 直接回傳這個物件
+  //     return previewData;
+  //   } else {
+  //     console.error(
+  //       "錯誤：處於預覽模式，但無法從 history.state 中找到預覽資料。"
+  //     );
+  //     return null;
+  //   }
+  // }
+  if (previewStore.isPreview) {
+    // console.log("這是預覽模式");
+    // console.log(previewStore.previewData);
+
+    return previewStore.previewData;
+  }
+
+  // 【判斷 B】正常瀏覽模式 (保持不變)
+  const postId = route.params.postid;
+  if (!postId) return null;
+
+  const foundArticle = articleList.find((item) => item.postid === postId);
+  if (foundArticle) {
+    return foundArticle;
+  }
+
+  return null;
 });
 
-
 function EditArticle() {
-    // 防禦性檢查
-    if (!article.value) {
-        console.error("文章資料未載入，無法編輯");
-        return;
-    }
-    router.push({
-        name: 'ArticleModify',
-        params: {
-            mode: 'edit',
-            postid: article.value.postid
-        }
-    });
+  // 防禦性檢查
+  if (!article.value) {
+    console.error("文章資料未載入，無法編輯");
+    return;
+  }
+  router.push({
+    name: "ArticleModify",
+    params: {
+      mode: "edit",
+      postid: article.value.postid,
+    },
+  });
 }
 
 //刪除
 function DeleteCheck() {
-    Swal.fire({
-        title: "確定要刪除嗎？",
-        text: "文章刪除後將無法復原！",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        cancelButtonText: "取消",
-        confirmButtonText: "是的，刪除它！",
-        reverseButtons: true,
+  Swal.fire({
+    title: "確定要刪除嗎？",
+    text: "文章刪除後將無法復原！",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    cancelButtonText: "取消",
+    confirmButtonText: "是的，刪除它！",
+    reverseButtons: true,
 
+    buttonsStyling: false,
+
+    customClass: {
+      confirmButton: "my-swal-confirm-button",
+      cancelButton: "my-swal-cancel-button",
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: "已刪除！",
+        text: "您的文章已經被刪除。",
+        icon: "success",
         buttonsStyling: false,
-
         customClass: {
-            confirmButton: "my-swal-confirm-button",
-            cancelButton: "my-swal-cancel-button",
+          confirmButton: "my-swal-check-button",
         },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: "已刪除！",
-                text: "您的文章已經被刪除。",
-                icon: "success",
-                buttonsStyling: false,
-                customClass: {
-                    confirmButton: "my-swal-check-button",
-                },
-                // 在此處串接後端刪除 API
-                // 以下為使用 fetch API 的範例
-                /*
+        // 在此處串接後端刪除 API
+        // 以下為使用 fetch API 的範例
+        /*
       fetch('YOUR_API_ENDPOINT/posts/YOUR_POST_ID', { // 將 YOUR_API_ENDPOINT/posts/YOUR_POST_ID 替換為你的 API 端點和文章 ID
         method: 'DELETE',
         headers: {
@@ -132,338 +150,344 @@ function DeleteCheck() {
           // 'Authorization': 'Bearer YOUR_TOKEN'
         }
       })*/
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    router.push("/article/article");
-                }
-            });
-        } else if (result.isDismissed) {
-            // 如果使用者點擊了「取消」、按了 Esc 鍵或點擊視窗外部
-            console.log("使用者取消了刪除操作。");
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/article/article");
         }
-    });
+      });
+    } else if (result.isDismissed) {
+      // 如果使用者點擊了「取消」、按了 Esc 鍵或點擊視窗外部
+      console.log("使用者取消了刪除操作。");
+    }
+  });
 }
 </script>
 
 <template>
-    <div class="bg"></div>
-    <main>
-        <!-- ================================== -->
-        <!--           文章內容區塊             -->
-        <!-- ================================== -->
-        <section class="author-information">
-            <div
-                v-if="article"
-                class="avatar"
-            >
-                <img
-                    class="avatar-img"
-                    src="/src/assets/img/member/headshot.jpg"
-                    alt="Member Headshot"
-                />
-                <p>{{ article.userid }}</p>
-            </div>
-            <div  v-if="!isPreview"  class="btn-list">
-                <Button
-                    @click="EditArticle"
-                    :suffixIcon="SmEditIcon"
-                    theme="info"
-                    size="sm"
-                    >編輯</Button
-                >
-                <Button
-                    @click="DeleteCheck"
-                    isOutline
-                    :suffixIcon="DeleteIcon"
-                    theme="secondary"
-                    size="sm"
-                    >刪除</Button
-                >
-            </div>
-        </section>
+  <div class="bg"></div>
+  <main>
+    <!-- ================================== -->
+    <!--           文章內容區塊             -->
+    <!-- ================================== -->
+    <section class="author-information">
+      <div v-if="article" class="avatar">
+        <img
+          class="avatar-img"
+          src="/src/assets/img/member/headshot.jpg"
+          alt="Member Headshot"
+        />
+        <p>{{ article.userid }}</p>
+      </div>
+      <div v-if="!isPreview" class="btn-list">
+        <Button
+          @click="EditArticle"
+          :suffixIcon="SmEditIcon"
+          theme="info"
+          size="sm"
+          >編輯</Button
+        >
+        <Button
+          @click="DeleteCheck"
+          isOutline
+          :suffixIcon="DeleteIcon"
+          theme="secondary"
+          size="sm"
+          >刪除</Button
+        >
+      </div>
+    </section>
 
-        <section class="Content">
-            <div
-                class="article"
-                v-if="article"
-            >
-                <h3>{{ article.title }}</h3>
-                <div class="article-head">
-                    <span
-                        class="event-label"
-                        :style="{ borderColor: GetEventColor(article.event) }"
-                        >{{ article.event }}</span
-                    >
-                    <p>{{ article.date }}</p>
-                </div>
-                <div class="article-img">
-                    <img
-                        :src="article.image"
-                        alt="文章圖片"
-                    />
-                </div>
-                <p
-                    v-html="article.content"
-                    alt="內文"
-                ></p>
-            </div>
-            <div v-else>
-                <p>找不到這篇文章111。</p>
-            </div>
-        </section>
-            <div v-if="!isPreview" class="comments-section">
-
-
-        <!-- ================================== -->
-        <!--           留言系統區塊             -->
-        <!-- ================================== -->
-        <comment></comment>
-            </div>
-    </main>
+    <section class="Content">
+      <div class="article" v-if="article">
+        <h3>{{ article.title }}</h3>
+        <div class="article-head">
+          <span
+            class="event-label"
+            :style="{ borderColor: GetEventColor(article.event) }"
+            >{{ article.event }}</span
+          >
+          <p>{{ article.date }}</p>
+        </div>
+        <span v-if="previewStore.isPreview" class="preview"
+          >此為預覽模式！文章尚未送出！</span
+        >
+        <div class="article-img">
+          <img :src="article.image" alt="文章圖片" />
+        </div>
+        <p v-html="article.content" alt="內文"></p>
+      </div>
+      <div v-else>
+        <p>找不到這篇文章111。</p>
+      </div>
+    </section>
+    <div v-if="!isPreview" class="comments-section">
+      <!-- ================================== -->
+      <!--           留言系統區塊             -->
+      <!-- ================================== -->
+      <comment></comment>
+    </div>
+  </main>
 </template>
 
 <style scoped lang="scss">
 body {
-    position: relative;
+  position: relative;
 }
 
 .bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 1200px;
-    background-image: url("@/assets/img/support/bg.svg");
-    background-size: cover;
-    background-position: center;
-    z-index: -1;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1200px;
+  background-image: url("@/assets/img/support/bg.svg");
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+  pointer-events: none;
 }
 
 main {
-    max-width: 1200px;
-    margin: 10px auto;
-    padding: 20px;
+  max-width: 1200px;
+  margin: 10px auto;
+  padding: 20px;
 }
 
 .author-information {
-    display: flex;
-    justify-items: center;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-content: flex-end;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .avatar {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .avatar-img,
 .comment-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 .btn-list {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .article {
-    max-width: 1200px;
-    margin: 10px auto;
+  max-width: 1200px;
+  margin: 10px auto;
 
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 .article-head {
-    display: flex;
-    align-items: center;
-    padding-block: 5px;
+  display: flex;
+  align-items: center;
+  padding-block: 5px;
+  position: relative;
+}
+.preview {
+  // position: absolute;
+  background-color: $tp;
+  color: #f00;
+  right: 0;
+  font-size: $font-size-p;
+  font-family: "MyFont", sans-serif;
+  padding: 10px 14px;
+  text-align: center;
+  vertical-align: middle;
+  border: 2px dotted #f00;
+  border-radius: 3px;
+  @include tablet() {
+    border-radius: 6px;
+  }
 }
 .event-label {
-    text-align: center;
-    padding: 5px;
-    margin: 5px;
-    border: solid 3px;
-    border-radius: 6px;
-    width: 80px;
+  text-align: center;
+  padding: 5px;
+  margin: 5px;
+  border: solid 3px;
+  border-radius: 6px;
+  width: 80px;
 }
 .article-img img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 8px;
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
 }
 
 .Content {
-    margin-bottom: 15vh;
+  margin-bottom: 15vh;
 }
 .comment-content {
-    display: grid;
-    gap: 20px;
-    margin-block: 30px;
+  display: grid;
+  gap: 20px;
+  margin-block: 30px;
 }
 .comment-header {
-    gap: 10px;
-    display: flex;
-    align-items: center;
-    padding-block: 10px;
+  gap: 10px;
+  display: flex;
+  align-items: center;
+  padding-block: 10px;
 }
 .timestamp {
-    display: block;
-    text-align: right;
+  display: block;
+  text-align: right;
 }
 .comment-actions {
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: nowrap;
-    gap: 10px;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 10px;
 }
 
 .pagination {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-block: 5vh;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-block: 5vh;
 }
 .page {
-    border: #4f8da8 2px solid;
-    border-radius: 6px;
-    padding: 5px 10px;
-    background: #ffffff;
-    cursor: pointer;
-    color: #4f8da8;
+  border: #4f8da8 2px solid;
+  border-radius: 6px;
+  padding: 5px 10px;
+  background: #ffffff;
+  cursor: pointer;
+  color: #4f8da8;
 
-    &.active {
-        background: #81bfda;
-        color: #000;
-    }
+  &.active {
+    background: #81bfda;
+    color: #000;
+  }
 }
 .my-comment {
-    background-color: #fff;
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 3px;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    border: black 1.5px solid;
-    @include desktop() {
-        border-radius: 6px;
-    }
+  background-color: #fff;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 3px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  border: black 1.5px solid;
+  @include desktop() {
+    border-radius: 6px;
+  }
 }
 main {
-    margin-block: 5vh;
+  margin-block: 5vh;
 }
 .comment-input {
-    width: 100%;
+  width: 100%;
 }
 .send-button {
-    display: flex;
-    text-align: right;
-    align-items: center;
+  display: flex;
+  text-align: right;
+  align-items: center;
 }
 .action-icon img {
-    width: 100%;
+  width: 100%;
 }
 .like {
-    color: #ff8c86;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  color: #ff8c86;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 .action-icon.animate img {
-    animation: pop 0.3s ease;
+  animation: pop 0.3s ease;
 }
 .send-button.animate {
-    animation: pop 0.3s ease;
+  animation: pop 0.3s ease;
 }
 @keyframes pop {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.4);
-    }
-    100% {
-        transform: scale(1);
-    }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 </style>
 <style lang="scss">
 //刪除燈箱的按鈕
 //取消
 .my-swal-cancel-button {
-    margin-inline: 10px;
-    font-size: 16px;
-    min-width: 86px;
-    min-height: 38px;
-    padding: 0 10px;
-    border-radius: 6px;
-    color: #4f8da8; /* outline-color */
-    background-color: #ffffff; /* outline-background-color */
-    border: 1px solid #4f8da8; /* outline-border-color */
+  margin-inline: 10px;
+  font-size: 16px;
+  min-width: 86px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: #4f8da8; /* outline-color */
+  background-color: #ffffff; /* outline-background-color */
+  border: 1px solid #4f8da8; /* outline-border-color */
 
-    /* === Hover 狀態 === */
-    &:hover {
-        color: #81bfda; /* outline-hover-color */
-        background-color: #edf8ff; /* outline-hover-background-color */
-        border-color: #81bfda; /* outline-hover-border-color */
-    }
+  /* === Hover 狀態 === */
+  &:hover {
+    color: #81bfda; /* outline-hover-color */
+    background-color: #edf8ff; /* outline-hover-background-color */
+    border-color: #81bfda; /* outline-hover-border-color */
+  }
 
-    /* === Active 狀態 === */
-    &:active {
-        color: #4f8da8; /* outline-active-color */
-        background-color: #edf8ff; /* outline-active-background-color */
-        border-color: #4f8da8; /* outline-active-border-color */
-    }
+  /* === Active 狀態 === */
+  &:active {
+    color: #4f8da8; /* outline-active-color */
+    background-color: #edf8ff; /* outline-active-background-color */
+    border-color: #4f8da8; /* outline-active-border-color */
+  }
 
-    /* === Disabled 狀態 === */
-    &:disabled {
-        color: #d0d0d0; /* outline-disabled-color */
-        background-color: #ffffff; /* outline-disabled-background-color */
-        border-color: #d0d0d0; /* outline-disabled-border-color */
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
+  /* === Disabled 狀態 === */
+  &:disabled {
+    color: #d0d0d0; /* outline-disabled-color */
+    background-color: #ffffff; /* outline-disabled-background-color */
+    border-color: #d0d0d0; /* outline-disabled-border-color */
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 }
 //確認
 .my-swal-confirm-button,
 .my-swal-check-button {
-    margin-inline: 10px;
+  margin-inline: 10px;
 
-    font-size: 16px;
-    min-width: 86px;
-    min-height: 38px;
-    padding: 0 10px;
-    border-radius: 6px;
+  font-size: 16px;
+  min-width: 86px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: #000;
+  background-color: #fada7a;
+  border: 1px solid #000;
+
+  &:hover {
     color: #000;
-    background-color: #fada7a;
-    border: 1px solid #000;
+    background-color: #f9ff4d;
+  }
 
-    &:hover {
-        color: #000;
-        background-color: #f9ff4d;
-    }
+  &:active {
+    color: #fff;
+    background-color: #fdc520;
+  }
 
-    &:active {
-        color: #fff;
-        background-color: #fdc520;
-    }
-
-    &:disabled {
-        color: #fff;
-        background-color: #d0d0d0;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
+  &:disabled {
+    color: #fff;
+    background-color: #d0d0d0;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 }
 </style>
