@@ -24,6 +24,7 @@ import "tinymce-i18n/langs5/zh_TW.js";
 import Editor from "@tinymce/tinymce-vue";
 
 // --- Props (保持不變) ---
+const title = ref(null)
 const props = defineProps({
     // ===== 新增的 Props，用於接收路由指令 =====
     mode: {
@@ -304,8 +305,7 @@ function selectType(typeName) {
 
             
         </div>
-
-        <input
+        <input 
             class="titlebox"
             type="text"
             placeholder="請輸入文章標題"
