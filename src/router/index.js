@@ -59,7 +59,10 @@ const routes = [
   path: '/member/member-list',
   component: () => import('@/views/member/member-list.vue')
 },
-
+  {
+    path: "/group/form-preview",
+    component: () => import("@/views/group/group-create-preview.vue"),
+  },
   {
     path: "/:pathMatch(.*)*",
     name: "404",
