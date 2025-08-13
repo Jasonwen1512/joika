@@ -33,18 +33,34 @@ const routes = [
   { path: "/chat", component: () => import("@/views/chat/chat.vue") },
   { path: "/auth/login", component: () => import("@/views/auth/login.vue") },
   { path: "/auth/signup", component: () => import("@/views/auth/signup.vue") },
-  {
-    path: "/article/article",
-    component: () => import("@/views/article/article.vue"),
-  },
-  {
-    path: "/article/:postid",
-    component: () => import("@/views/article/article-detail.vue"),
-  },
-  {
-    path: "/article/article-create",
-    component: () => import("@/views/article/article-create.vue"),
-  },
+  
+{
+  path: "/article/article",
+  component: () => import("@/views/article/article.vue"),
+},
+
+{
+  path: "/article/preview",
+  name: 'ArticlePreview',
+  component: () => import("@/views/article/article-detail.vue"),
+    props: { isPreview: true }
+
+},
+
+{
+  path: '/article/:mode(create|edit)/:postid?',
+  name: 'ArticleModify',
+  component: () => import('@/views/article/article-create.vue'),
+  props: true,
+},
+
+{
+  path: "/article/:postid",
+  name: 'ArticleDetail', // 建議為您的路由加上 name
+  component: () => import("@/views/article/article-detail.vue"),
+},
+
+
   {
     path: "/activity",
     component: () => import("@/views/activity/activity.vue"),
@@ -59,7 +75,10 @@ const routes = [
   path: '/member/member-list',
   component: () => import('@/views/member/member-list.vue')
 },
-
+  {
+    path: "/group/form-preview",
+    component: () => import("@/views/group/group-create-preview.vue"),
+  },
   {
     path: "/:pathMatch(.*)*",
     name: "404",

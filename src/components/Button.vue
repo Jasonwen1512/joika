@@ -311,8 +311,7 @@ $buttonSizes: (
         .button-icon {
           color: map.get($styles, icon-outline-color);
         }
-        .button-icon svg {
-        }
+      
 
         &:hover {
           color: map.get($styles, outline-hover-color);
