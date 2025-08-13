@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, onBeforeUnmount } from "vue";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 
@@ -23,9 +23,7 @@ const nextArrow = ` <svg
     />
   </svg>`;
 
-onMounted(() => {
-  Swal.fire;
-});
+
 let currentPage = 1;
 const totalPage = 2;
 const mobileContent = () => {
@@ -160,7 +158,11 @@ onMounted(() => {
   showPopup();
   window.addEventListener("resize", () => {
     Swal.close();
-    showPopup();
+  });
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", () => {
+    Swal.close();
   });
 });
 </script>

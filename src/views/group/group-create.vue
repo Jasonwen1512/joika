@@ -1,108 +1,190 @@
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
-import datePicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
-import { ActivityCategories } from "@/assets/data/fake-activity-category";
+import { ref, reactive, watch, nextTick} from 'vue'
+import { ActivityCategories } from '@/assets/data/fake-activity-category'
 import { taiwanDistricts } from "@/assets/data/taiwan-city-district";
-import Button from "@/components/Button.vue";
-import { GoogleMap, Marker } from "vue3-google-map";
 import Popup from "@/components/group/group-create-popup.vue";
-import Test from "@/components/member/member-interest-tag.vue";
-import MemberInterest from "@/components/member/member-interest-tag.vue";
+import Button from '@/components/Button.vue';
+import { useGroupFormStore } from '@/stores/group-form'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const store = useGroupFormStore()
+const ruleFormRef = ref()
+const ruleForm = reactive({
+  activity_name: '',
+  category_no: '',
+  location: '',
+  registration_deadline: '',
+  activity_start_date: null,
+  activity_end_date: null,
+  max_participant: null,
+  min_participant: 1,
+  fee_notes: '',
+  activity_description: '',
+  address: '',
+  dateRange: [],
+  participant_limitation:'',
+  activity_img  : '',
+  
+})
 
-// console.log(taiwanDistricts.map((item) => item.city));
-const currentMemberId = "M0001";
-const customRangeFormat = (dates) => {
-  if (!dates || dates.length < 2) return "";
-  const [start, end] = dates;
-  return `${start.getFullYear()}/${
-    start.getMonth() + 1
-  }/${start.getDate()} - ${end.getFullYear()}/${
-    end.getMonth() + 1
-  }/${end.getDate()}`;
-};
-const cityList = taiwanDistricts.map((item) => item.city);
-// console.log(cityList);
-const fakeActivityCategories = ActivityCategories.filter(
+const rules = reactive({
+    dateRange: [
+    { required: true, message: '請選擇活動開始與結束時間', trigger: 'change' }
+  ],
+  activity_name: [
+    { required: true, message: '請輸入活動名稱', trigger: 'blur' },
+    { min: 3, max: 20, message: '活動名稱字數限制3-20字', trigger: 'blur' },
+  ],
+  category_no: [
+    {
+      required: true,
+      message: '請選擇活動類別',
+      trigger: 'change',
+    },
+  ],
+  location: [
+    {
+      required: true,
+      message: '請選擇城市',
+      trigger: 'change',
+    },
+  ],
+   address: [
+    {
+      required: true,
+      message: '請輸入活動詳細地址',
+      trigger: 'change',
+    },
+  ],
+  registration_deadline: [
+    {
+      type: 'date',
+      required: true,
+      message: '請選擇揪團截止日',
+      trigger: 'change',
+    },
+  ],
+  
+  activity_start_date: [
+    {
+      type: 'date',
+      required: true,
+      message: '請選擇活動開始日期時間',
+      trigger: 'change',
+    },
+  ],
+   activity_end_date: [
+    {
+      type: 'date',
+      required: true,
+      message: '請選擇活動結束日期時間',
+      trigger: 'change',
+    },
+  ],
+  fee_notes: [
+    {
+      required: true,
+      message: '請輸入預估費用',
+      trigger: 'change',
+    },
+  ],
+  min_participant: [
+    {
+      type: 'number',
+      required: true,
+      message: '請輸入最少人數',
+      trigger: 'change',
+    },
+  ],
+  max_participant: [
+    {
+      type: 'number',
+      required: true,
+      message: '請輸入最多人數',
+      trigger: 'change',
+    },
+  ],
+  activity_description: [
+    {
+      required: true,
+      message: '請輸入活動介紹',
+      trigger: 'change',
+      
+    },
+     { min: 10, max: 500, message: '活動名稱字數限制10-500字', trigger: 'blur' },
+  ],
+ participant_limitation: [
+    {
+      required: true,
+      message: '請輸入參團者限制',
+      trigger: 'blur',
+      
+    }],
+     activity_img: [{
+      required: true,
+      message: '請上傳活動圖片',
+      trigger: 'change',}]
+})
+
+
+const submitForm = async () => {
+  if (!ruleFormRef.value) return
+  try {
+    await ruleFormRef.value.validate()
+
+    // 存到 Pinia
+    store.setFormData({ ...ruleForm })
+
+    // 跳轉到預覽頁面
+    router.push("/group/form-preview")
+
+  } catch (fields) {
+    const firstProp = Object.keys(fields)[0]
+    ruleFormRef.value.scrollToField(firstProp)
+    nextTick(() => {
+      const el = ruleFormRef.value.$el.querySelector(
+        '.el-form-item.is-error input, .el-form-item.is-error textarea, .el-select .el-input__wrapper input'
+      )
+      el?.focus()
+    })
+  }
+}
+
+
+const activityCategories = ActivityCategories.filter(
   (item) => item.category_no !== null
 );
-const dateRange = ref([]);
-watch(dateRange, (newVal) => {
-  if (newVal && newVal.length === 2) {
-    form.value.activity_start_date = newVal[0];
-    form.value.activity_end_date = newVal[1];
-    console.log(newVal[0]);
+const dateRange = ref([])
+const cityList = taiwanDistricts.map((city) => {
+  return {
+    name: city.city,
+    value: city.city,
+  };
+});
+
+watch(ruleForm.dateRange, (val)=>{
+  if(val && val.length === 2) {
+    ruleForm.activity_start_date = val[0]
+    ruleForm.activity_end_date = val[1]
   } else {
-    form.value.activity_start_date = "";
-    form.value.activity_end_date = "";
+    ruleForm.activity_start_date = null
+    ruleForm.activity_end_date = null
   }
-});
-const form = ref({
-  activity_name: "",
-  activity_start_date: "",
-  activity_end_date: "",
-  category_no: "",
-  min_participant: "",
-  max_participant: "",
-  fee_note: "",
-  activity_description: "",
-  participant_limitation: "",
-  hasCondition: "false",
-  registration_deadline: "",
-  selectedCity: "",
-  location: "",
-  latitude: null,
-  longitude: null,
-  activity_img: "",
-});
-// 控制地圖顯示
-const showMap = ref(false);
+})
 
-// focus 時顯示
-const handleFocus = () => {
-  showMap.value = true;
-};
 
-// 點擊外部隱藏
-const handleClickOutside = (e) => {
-  const mapEl = document.getElementById("map-wrapper");
-  const inputEl = document.getElementById("location-input");
+const defaultTime2= [
+  new Date(2000, 1, 1, 12, 0, 0),
+  new Date(2000, 2, 1, 8, 0, 0),
+] // '12:00:00', '08:00:00'
+const num = ref(1)
+const handleChange = (value) => {
+  console.log(value)
+}
 
-  if (
-    mapEl &&
-    !mapEl.contains(e.target) &&
-    inputEl &&
-    !inputEl.contains(e.target)
-  ) {
-    showMap.value = false;
-  }
-};
+const labelPosition = ref('top')
+const itemLabelPosition = ref('')
 
-// 取得使用者位置
-const getCurrentPosition = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        form.value.latitude = position.coords.latitude;
-        form.value.longitude = position.coords.longitude;
-      },
-      () => {
-        console.log("使用者不同意取得位置");
-      }
-    );
-  } else {
-    console.log("此瀏覽器不支援定位功能");
-  }
-};
-
-onMounted(() => {
-  getCurrentPosition();
-  document.addEventListener("mousedown", handleClickOutside);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("mousedown", handleClickOutside);
-});
 
 const fileInput = ref(null); // 取得 input DOM
 const previewUrl = ref(null); // 存圖片預覽網址
@@ -110,128 +192,148 @@ const previewUrl = ref(null); // 存圖片預覽網址
 // 按下自訂按鈕 → 觸發隱藏 input
 const triggerFileInput = () => {
   fileInput.value.click();
+  console.log('觸發檔案選擇');
 };
 
 // 選擇檔案後處理
 const handleFileChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    previewUrl.value = URL.createObjectURL(file); // 產生臨時預覽網址
-  }
-};
+  const file = e.target.files?.[0]
+  if (!file) return
+  // 本地預覽
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value) // 換圖先釋放舊 URL（避免記憶體洩漏）
+  previewUrl.value = URL.createObjectURL(file)
+
+  // 表單欄位（讓 rules.required 生效）
+  ruleForm.activity_img = file
+
+  // 存到 Pinia（給預覽頁讀）
+  store.setImage(file)
+}
+
+
+
 </script>
 
 <template>
-  <Popup></Popup>
+  <Popup> </Popup>
   <div class="group-create-wrap">
-    <div class="banner-background">
-      <h2>發起揪團</h2>
-    </div>
-    <div class="form-wrap">
-      <label for="activity_name">活動名稱</label>
-      <input v-model="form.activity_name" type="text" id="activity_name" />
-      <label for="">活動日期時間</label>
-      <datePicker
-        v-model="dateRange"
-        range
-        :format="customRangeFormat"
-      ></datePicker>
-      <label for="category_name">活動類別</label>
-      <select
-        v-model="form.category_no"
-        id="category_name"
-        placeholder="請選擇"
-      >
-        <option
-          v-for="item in fakeActivityCategories"
-          :key="item.category_no"
-          :value="item.category_no"
-        >
-          {{ item.category_name }}
-        </option>
-      </select>
+  <div class="group-create-bakground">
+    <h3>發起揪團</h3>
+  </div>
+  <el-form :model="ruleForm" label-width="auto" ref="ruleFormRef" :rules="rules" :label-position="labelPosition" class="form-wrapper"  @submit.prevent >
+    <el-form-item label="活動名稱" prop="activity_name">
+      <el-input v-model="ruleForm.activity_name" />
+    </el-form-item>
+  <el-form-item label="活動時間日期" prop="dateRange">
+  <div >
+    <el-date-picker
+      v-model="ruleForm.dateRange"
+      type="datetimerange"
+      start-placeholder="開始日期"
+      end-placeholder="結束日期"
+      :default-time="defaultTime2"
+      class="acitvity-time"
+       :popper-class="'one-panel'"
+      
+    />
+  </div>
 
-      <label for="">成團人數</label>
-      <div class="participant-limitation">
-        <div class="group">
-          <span>最少人數</span>
-          <input v-model="form.min_participant" type="number" /> <span>人</span>
-        </div>
-        <div class="group">
-          <span>最多人數</span>
-          <input v-model="form.max_participant" type="number" /><span>人</span>
-        </div>
-      </div>
-      <label for="">活動地點</label>
-      <div class="location">
-        <select v-model="form.selectedCity" id="select-city">
-          <option value="" readonly>城市</option>
-          <option v-for="city in cityList" :key="city" :value="city">
-            {{ city }}
-          </option>
-        </select>
-        <input
-          id="location-input"
-          type="text"
-          v-model="form.location"
-          @focus="handleFocus"
+    </el-form-item>
+    <el-form-item label="活動類別" prop="category_no">
+      <el-select v-model="ruleForm.category_no" placeholder="請選擇活動類別" >
+        <el-option v-for="cat in activityCategories"
+        :value="cat.category_no"
+        :key="cat.category_no"
+        :label="cat.category_name"
         />
+      </el-select>
+    </el-form-item>
+   
+    <el-form-item label="成團人數" prop="min_participant">
+      <div class="participants"  :style="'display: flex; gap: 10px; padding: 0 10px; align-items: center;'">
+      <div class="min-participant">
+        <span>最少人數</span>
+       <el-input-number
+    v-model="ruleForm.min_participant"
+    :min="1"
+    :max="99"
+    size="small"
+    controls-position="right"
+    @change="handleChange"
+   :style="'padding:0 25px 0 5px; max-width:55px;'"
+  />
+      <span>人</span>
       </div>
-      <div
-        class="map-wrap"
-        id="map-wrapper"
-        v-if="showMap"
-        style="
-          width: 300px;
-          height: 300px;
-          border: 1px solid #ccc;
-          background: #fff;
-        "
-      >
-        <GoogleMap
-          api-key="AIzaSyAcYBlu72Zer6DOhpRIDiy0_L2BvBlC-M8"
-          :center="{
-            lat: form.latitude || 25.033964,
-            lng: form.longitude || 121.564468,
-          }"
-          :zoom="14"
-          style="width: 100%; height: 300px"
-        >
-          <Marker
-            :options="{
-              position: {
-                lat: form.latitude || 25.033964,
-                lng: form.longitude || 121.564468,
-              },
-            }"
-          />
-        </GoogleMap>
+       <div class="max-participant">
+        <span>最多人數</span>
+       <el-input-number
+    v-model="ruleForm.max_participant"
+    :min="1"
+    :max="99"
+    size="small"
+    controls-position="right"
+    @change="handleChange"
+    :style="'padding:0 25px 0 5px; max-width:55px;'"
+    
+  />
+      <span>人</span>
       </div>
-      <label for="">預估費用</label>
-      <input v-model="form.fee_note" />
-      <label for="">活動簡介</label>
-      <textarea
-        placeholder="說明一下活動內容，讓更多人有興趣參與"
-        v-model="form.activity_description"
-        class="description"
-      />
-      <label for="">揪團截止日</label>
-      <datePicker
-        v-model="form.registration_deadline"
-        format="yyyy/MM/dd"
-      ></datePicker>
-      <div class="limited">
-        <input type="checkbox" v-model="form.hasCondition" />
-        <label for="">跟團條件限制</label>
       </div>
-      <input type="text" v-model="form.participant_limitation" />
-      <div class="select-img">
-        <span>圖片上傳</span>
-        <Button type="button" theme="info" size="sm" @click="triggerFileInput"
+    </el-form-item>
+    
+  <el-form-item label="活動地點" prop="location">
+  <div class="location-wrapper">
+    <el-select v-model="ruleForm.location" placeholder="城市" class="city-select">
+      <el-option
+        v-for="city in cityList"
+        :key="city.name"
+        :label="city.name"
+        :value="city.name"
+      ></el-option>
+    </el-select>
+  
+
+  <el-input
+    v-model="ruleForm.address"
+    placeholder="請輸入詳細地址"
+  ></el-input>
+</div>
+</el-form-item>
+
+
+    <el-form-item label="預估費用" prop="fee_notes">
+      <el-input v-model="ruleForm.fee_notes" placeholder="請輸入預估費用" >
+
+      </el-input>
+    </el-form-item>
+
+
+    <el-form-item label="活動簡介" prop="activity_description">
+      <el-input v-model="ruleForm.activity_description" type="textarea" placeholder="說明一下活動內容，讓更多人有興趣參與" />
+    </el-form-item>
+    <el-form-item label="揪團截止日"  prop="registration_deadline" >
+      <el-date-picker v-model="ruleForm.registration_deadline" type="date" placeholder="請選擇揪團截止日" :editable="false" :clearable="false" class="registration-deadline">
+
+      </el-date-picker>
+
+    </el-form-item>
+
+    <el-form-item>
+      <el-checkbox>
+        揪團限制
+      </el-checkbox>
+      <el-input v-model="ruleForm.participant_limitation"></el-input>
+    </el-form-item>
+    <div class="select-img">
+<el-form-item label="圖片上傳" :label-position="'right'" prop="activity_img">
+
+<Button type="button" theme="info" size="sm" @click="triggerFileInput"
           >檔案</Button
         >
-      </div>
-      <input
+  
+</el-form-item>
+</div>
+<input
         class="hidden-input"
         type="file"
         ref="fileInput"
@@ -240,174 +342,183 @@ const handleFileChange = (e) => {
       />
 
       <div v-if="previewUrl" class="img-preview">
-        <p>預覽圖片：</p>
-        <img :src="previewUrl" alt="預覽" />
+  <p>預覽圖片：</p>
+  <img :src="previewUrl" alt="預覽" />
+</div>
+    <el-form-item>
+     <div class="submit-button">
+      <Button theme="primary" size="md" @click="submitForm">送出</Button>
       </div>
-    </div>
-    <div class="submit">
-      <Button theme="primary" size="md">送出</Button>
-    </div>
+    </el-form-item>
+  </el-form>
   </div>
 </template>
 
-<style scoped lang="scss">
-:deep(.dp__input) {
-  border: 1px solid $black;
-  border-radius: 3px;
-  padding: 5px 5px 5px 50px;
-  line-height: auto;
-}
-:deep(.dp__input_icons) {
-  padding: 0 12px;
-}
+
+
+<style lang="scss" scoped>
 .group-create-wrap {
   background-image: url(../../assets/img/group/group-explore/form-decoration.svg);
   background-position: bottom;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: 100%;
+  
 }
-.banner-background {
-  background-image: url(../../assets/img/group/group-create/group-create-banner-background.png);
-  background-size: cover;
-  background-repeat: no-repeat;
-  min-height: 150px;
-
+.group-create-bakground {
+   background-image: url(../../assets/img/group/group-create/group-create-banner-background.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top;
+    min-height: 100px;
   @include tablet() {
     //768-1023
     min-width: 768px;
-
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: top;
+    min-height: 200px;
+   
   }
 
   @include desktop() {
     //1024以上
+   
+
+    background-position: center;
     @include flex-center;
-    min-height: 400px;
+    min-height: 300px;
     width: 100%;
   }
   @media screen and (min-width: 1023px) and (max-width: 1199px) {
     //1023-1199
     min-width: 1024px;
     min-height: 300px;
-    background-size: contain;
+   
     background-repeat: no-repeat;
     background-position: top;
   }
+  
 }
-
-h2 {
+h3{
   display: none;
+}
+.form-wrapper {
+  margin: 20px auto;
+  max-width: 300px;
   @include tablet() {
     //768-1023
+  max-width: 500px;
   }
 
   @include desktop() {
     //1024以上
-    @include flex-center;
-    padding: 10px 0;
+     max-width: 800px;
   }
   @media screen and (min-width: 1023px) and (max-width: 1199px) {
     //1023-1199
+       max-width: 800px;
+  
   }
 }
-
-select {
-  border: 1px solid $black;
-  border-radius: 3px;
-  width: 100%;
-  padding: 8px 5px;
-  background-color: $white;
-}
-
-input {
-  display: flex;
-  border: 1px solid $black;
-  border-radius: 3px;
-  width: 100%;
-  padding: 8px 5px;
-  background-color: $white;
-}
-.form-wrap {
-  transform: translateY(-95px);
-  max-width: 350px;
-  display: flex;
-  flex-direction: column;
-  text-align: start;
-  justify-self: center;
-  gap: 15px;
-  > :nth-child(even) {
-    margin-bottom: 27px;
-  }
+:deep(.acitvity-time.el-date-editor.el-range-editor) {
+max-width: 300px;
   @include tablet() {
     //768-1023
-    transform: translateY(-150px);
-    max-width: 800px;
+  min-width: 500px;
   }
 
   @include desktop() {
-    transform: translateY(-100px);
     //1024以上
+     max-width: 800px;
   }
   @media screen and (min-width: 1023px) and (max-width: 1199px) {
     //1023-1199
+       max-width: 800px;
+  
   }
 }
-.description {
-  min-height: 200px;
-}
-.participant-limitation {
+
+.min-participant{
   display: flex;
-  gap: 20px;
-  text-align: center;
-}
-.group {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 5px;
+   span{
+  margin-top: 1px;
+}
+}
+.max-participant{
+    display: flex;
+  align-items: center;
+  gap: 5px;
+   span{
+  margin-top: 1px;
+}
+}
+:deep(.el-input-number--small.is-controls-right .el-input--small .el-input__wrapper){
+  padding:0px 5px 0px 5px;
+  max-width: 45px;
+}
+:deep(.el-picker-panel__content:last-child) {
+    display: none ;
+  }
+  /* 補滿可視寬度 */
+  .el-picker-panel {
+    width: 100% ;
+    max-width: 100% ;
+  }
 
-  input {
+  :depp(.el-input-number.is-center .el-input__inner){
+    text-align: left;
+  }
+
+.location-wrapper {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+
+  .city-select {
     width: 40%;
-    padding: 8px 5px;
-  }
-}
-.limited {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  input[type="checkbox"] {
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border: 1px solid $black;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: background 0.2s;
-    &:checked {
-      background-image: url("@/assets/img/icon/check.svg");
-      background-position: center;
-      background-repeat: no-repeat;
+    margin-right: 10px;
+    font-size: 14px;
+
+     :deep(> div:first-child) {
+      padding: 4px 10px;
     }
   }
 }
-.location {
-  display: flex;
-  gap: 10px;
-  #select-city {
-    width: 30%;
-    font-size: $font-size-p;
-    text-align: center;
+
+.registration-deadline{
+  min-width: 300px;
+  >div>div.el-input__wrapper{
+    max-width: 300px;
+  @include tablet() {
+    //768-1023
+  min-width: 500px;
   }
+
+  @include desktop() {
+    //1024以上
+     max-width: 800px;
+  }
+
+
+  @media screen and (min-width: 1023px) and (max-width: 1199px) {
+    //1023-1199
+       max-width: 800px;
+  
+  }
+}}
+.submit-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
 }
-.map-wrap {
-  min-width: 350px;
-  transform: translateY(-25px);
+:deep(.el-form-item__content):has(.submit-button) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .hidden-input {
   display: none;
 }
-
 .img-preview {
   max-width: 350px;
   p {
@@ -418,22 +529,4 @@ input {
   }
 }
 
-.select-img {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.submit {
-  @include flex-center;
-  padding-bottom: 80px;
-}
-.description {
-  border: 1px solid $black;
-  display: flex;
-  border: 1px solid $black;
-  border-radius: 3px;
-  width: 100%;
-  padding: 8px 5px;
-  background-color: $white;
-}
 </style>

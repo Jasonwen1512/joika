@@ -64,9 +64,9 @@ const insideCategoriesDouble = [...insideCategories, ...insideCategories];
       >
         <SwiperSlide v-for="cat in outsideCategoriesDouble" :key="cat.id">
           <CategoryCard
-            :title="cat.name"
+            :title="cat.category_name"
             :image-url="cat.img"
-            :category-no="cat.id"
+            :category-no="cat.category_no"
           />
         </SwiperSlide>
       </Swiper>
@@ -86,9 +86,9 @@ const insideCategoriesDouble = [...insideCategories, ...insideCategories];
       >
         <SwiperSlide v-for="cat in insideCategoriesDouble" :key="cat.id">
           <CategoryCard
-            :title="cat.name"
+            :title="cat.category_name"
             :image-url="cat.img"
-            :category-no="cat.id"
+            :category-no="cat.category_no"
           />
         </SwiperSlide>
       </Swiper>
