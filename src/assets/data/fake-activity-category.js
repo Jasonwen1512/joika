@@ -1,5 +1,5 @@
 export const ActivityCategories = [
-  { category_no: null, name: "全部" },
+  { category_no:"0", category_name: "全部" },
   {
     category_no: "CA001",
     classify: "outside",

@@ -82,7 +82,7 @@ const joinerRating = ref(4.5);
         </div>
         <div class="activity-location">
           <span>地點</span>
-          <span>{{ previewData.selectedCity }} {{ previewData.location }}</span>
+          <span>{{ previewData.location }} {{ previewData.address }}</span>
         </div>
         <div class="activity-participants">
           <span>成團人數</span>
@@ -151,8 +151,10 @@ const joinerRating = ref(4.5);
         感謝你用心揪團～<br>讓我們一起讓揪卡更精彩 🎈
       </p>
     </div>
+    <div class="background-decoration"> 
     <div class="submit-button">
     <Button theme="primary" size="md">送出</Button>
+    </div>
     </div>
   </div>
 </template>
@@ -162,11 +164,18 @@ h2{
   text-align: center;
   margin: 20px 0;
   font-size: $font-size-h2;
+    display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
 }
 h3 {
   text-align: left;
-  margin: 20px 0 10px 15px;
-  line-height: 1.5
+  margin: 20px 0 10px 10px;
+  line-height: 1.5;
+  padding-right: 70px;
+  display: flex;
+  justify-content: center;
 }
 .activity-time, .activity-participants, .activity-estimated-fee, .activity-location, .activity-deadline, .activity-limitation {
   display: flex;
@@ -174,7 +183,7 @@ h3 {
   margin: 10px 0;
   flex-wrap: wrap;
   span{
-    width: 30%;
+    width: 40%;
    
   }
 }
@@ -191,9 +200,9 @@ h3 {
   }
 }
 .form-check{
-  margin: 0 auto;
-  border: 2px solid $black;
-  width: 350px;
+  margin: 20px;
+   border: 2px solid $black;
+  max-width: 1200px;
   font-size: $font-size-p;
   padding: 10px;
 
@@ -207,10 +216,12 @@ li{
   display: flex;
   justify-content: right;
   margin: 30px 15px 20px 0;
+  
+  
 }
 .activity-content{
   margin: 0 auto;
-  width: 350px;
+  min-width: 350px;
   font-size: $font-size-p;
   padding: 10px;
   .activity-detail {
@@ -224,7 +235,7 @@ li{
   span{
     display: flex;
     justify-self: center;
-    margin: 2cqi 0;
+    margin: 20px 0;
   }
 }
 .hoster-img {
@@ -283,7 +294,7 @@ li{
 .final-check{
   margin: 30px auto;
   border: 2px solid $black;
-  max-width: 350px;
+  min-width: 350px;
   font-size: $font-size-p;
   padding: 20px;
   h4{
@@ -295,5 +306,15 @@ li{
 .submit-button>.button-wrapper {
  justify-content: center;
   margin: 20px auto;
+}
+
+.background-decoration{
+  background-image: url('@/assets/img/group/group-explore/group-explore-taiwan/bgc.svg');
+  min-height: 30vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;      
+  justify-content: center;
+  align-items: center;
 }
 </style>

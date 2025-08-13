@@ -20,7 +20,7 @@ const setDefaultCategory = () => {
   if (categoryFromQuery) {
     activeCategory.value = categoryFromQuery;
   } else {
-    activeCategory.value = "all";
+    activeCategory.value = 0;
     router.replace({ query: { category: activeCategory.value } });
   }
 };
@@ -28,7 +28,7 @@ const setDefaultCategory = () => {
 watch(
   () => route.query.category,
   (newVal) => {
-    activeCategory.value = newVal || "all";
+    activeCategory.value = newVal || 0;
     searchTrigger.value++;
   }
 );
@@ -76,12 +76,12 @@ const activities = ref(
   )
 );
 const categories = ActivityCategories;
-const activeCategory = ref("all");
+const activeCategory = ref("0");
 
 const selectCategory = (id) => {
   const current = route.query.category;
   if (current === id) {
-    router.push({ query: { category: null } });
+    router.push({ query: { category: "0" } });
   } else {
     router.push({ query: { category: id } });
   }
@@ -107,7 +107,7 @@ const filterActivities = computed(() => {
 
     // 如果只選了一天，把它複製成 [start, start]
     if (safeDateRange.length === 1) {
-      safeDateRange.push(safeDateRange[0]);
+      safeDateRange.push(safeDateRange["0"]);
     }
 
     if (safeDateRange.length === 2) {
@@ -124,7 +124,7 @@ const filterActivities = computed(() => {
 
     // 分類搜尋
     const matchCategory =
-      activeCategory.value === "all" ||
+      activeCategory.value === "0" ||
       act.category_no === activeCategory.value;
 
     return matchKeyword && matchDate && matchCategory;
@@ -271,11 +271,11 @@ onMounted(() => {
     <div class="category-list">
       <CategoryTag
         v-for="cat in categories"
-        :key="cat.id"
-        :label="cat.name"
+        :key="cat.category_no"
+        :label="cat.category_name"
         class="category-tag"
-        :isActive="activeCategory === cat.id"
-        @click="selectCategory(cat.id)"
+        :isActive="activeCategory === cat.category_no"
+        @click="selectCategory(cat.category_no)"
       ></CategoryTag>
     </div>
 
