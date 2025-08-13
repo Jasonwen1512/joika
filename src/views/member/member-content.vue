@@ -32,37 +32,7 @@ const eventColorMap = {
     其他: "#969696",
 };
 
-// //靜態資料 留言 之後要串
-// const comments = ref([
-//   {
-//     userid: "M0001",
-//     author: "SunnyDive",
-//     avatar: "https://i.pravatar.cc/150?u=sunnydive", // 假頭像，每次刷新會變
-//     timestamp: "2025/07/07 18:45",
-//     content: "我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！",
-//   },
-//   {
-//     userid: "M0002",
-//     author: "kelly_travel",
-//     avatar: "https://i.pravatar.cc/150?u=kellytravel",
-//     timestamp: "2025/07/07 20:13",
-//     content: "哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！",
-//   },
-//   {
-//     userid: "M0003",
-//     author: "ocean_rookie",
-//     avatar: "https://i.pravatar.cc/150?u=oceanrookie",
-//     timestamp: "2025/07/08 09:07",
-//     content: "我是這團的其中一員！很開心認識大家～謝謝你分享這段回憶❤️",
-//   },
-//   {
-//     userid: "M0004",
-//     author: "sandy_test",
-//     avatar: "https://i.pravatar.cc/150?u=sandy_test",
-//     timestamp: "2025/07/07 09:30",
-//     content: "有誰也有跟過嗎?好奇其他人的想法?",
-//   },
-// ]);
+
 const visibleCount = ref(2); // 預設電腦是 2 張
 
 //抓顏色
@@ -84,14 +54,32 @@ onBeforeUnmount(() => {
     window.removeEventListener("resize", handleResize);
 });
 
-const openActivities = computed(() => {
-    return FakeActivity.filter((a) => a.activity_status === "開團中");
-});
 
 const visibleActivities = computed(() => {
     return openActivities.value.slice(0, visibleCount.value);
 });
 const currentSubTab = ref("my-activity");
+//揪團狀態
+const selectedStatus = ref('');
+const isFilterVisible = ref(false); // 預設為 false，所以選單是隱藏的
+const filteredActivities = computed(() => {
+    let activitiesToDisplay = [];
+    activitiesToDisplay = FakeActivity;
+ // 根據下拉選單的選擇，對上面的列表進行二次篩選
+ //這邊目前是抓假資料裡面全部的揪團資訊，之後應該要多加一條篩選成會員ID有在該團才顯示
+    if (selectedStatus.value) { // 如果 selectedStatus 有值 (不是空字串)
+        return activitiesToDisplay.filter(activity => 
+            activity.activity_status === selectedStatus.value
+        );
+    }
+    
+    // 如果沒有選擇任何狀態，回傳完整的活動列表
+    return activitiesToDisplay;
+});
+//行事曆
+const openActivities = computed(() => {
+    return FakeActivity.filter((a) => a.activity_status === "開團中");
+});
 </script>
 
 <template>
@@ -184,6 +172,7 @@ const currentSubTab = ref("my-activity");
                 <div v-if="currentTab === 'group'">
                     <div class="member-activity-section">
                         <ul class="member-activity-btns">
+                            <div class="activity-items">
                             <li>
                                 <button
                                     :class="{
@@ -222,11 +211,36 @@ const currentSubTab = ref("my-activity");
                                     我的收藏
                                 </button>
                             </li>
+                        </div>
+                        <div class="filter-item">
+                            <li>                
+                                   <button 
+                                        class="select-btn"
+                                        @click="isFilterVisible = !isFilterVisible">篩選</button>
+                            </li>
+                            <li v-if="isFilterVisible">
+                            <select 
+                                id="status-filter" 
+                                 v-model="selectedStatus" 
+                                style="padding: 10px; border: 1px solid black;"
+                            >
+                                <option value="">全部狀態</option>
+                                <option value="開團中">開團中</option>
+                                <option value="審核中">審核中</option>
+                                <option value="已完成">已完成</option>
+                                <option value="已取消">已取消</option>
+                            </select>
+                            </li>
+                            <li>
+                                <button 
+                                class="select-btn">排序</button>
+                            </li>
+                            </div>
                         </ul>
                         <div class="member-activity-card-section">
                             <MemberActivityCard
-                                v-for="activity in FakeActivity.slice(0, 6)"
-                                :key="activity.id"
+                                v-for="activity in filteredActivities"
+                                :key="activity.activity_no"
                                 :item="activity"
                             />
                         </div>
@@ -241,6 +255,9 @@ const currentSubTab = ref("my-activity");
                                 :key="activity.id"
                                 :item="activity"
                             />
+                            <div v-if="filteredActivities.length === 0">
+        <p>目前沒有符合條件的活動。</p>
+    </div>
                         </div>
                     </div>
                     <div class="calerdar">
@@ -361,14 +378,17 @@ const currentSubTab = ref("my-activity");
     padding: 15px;
 }
 //揪團卡片頁籤-start
+
 .member-activity-btns {
     display: flex;
-    gap: 30px;
+    gap: 20px;
     margin-left: 20px;
     margin-bottom: 20px;
-
+    align-items: center;
+flex-wrap: wrap;
     button {
         border: 1px solid black;
+        border-radius: 3px;
         padding: 10px;
         cursor: pointer;
         background-color: #b1f0f7;
@@ -379,9 +399,49 @@ const currentSubTab = ref("my-activity");
             background-color: #4f8da8;
             color: white;
         }
-    }
-}
 
+    }
+    button.select-btn {
+        border: 1px solid black;
+        border-radius: 3px;
+        padding: 9px;
+        cursor: pointer;
+        background-color: #F5F0CD;
+        color: black;
+        transition: all 0.3s;
+         &:hover{
+            background-color: #FFF39C;
+
+         }
+       &:active {
+ 
+            background-color: #ADA572;
+            color: white;
+        }
+
+    }
+     @include desktop() {
+        border-radius: 6px;
+    }
+  @include desktop() {
+       gap:30px;
+    }
+
+}
+.activity-items {
+    display: flex
+;
+    gap: 30px;
+}
+//篩選
+
+ .filter-item {
+    display: flex;
+    gap: 20px;
+
+     @include desktop() {
+        margin-left: auto;    }
+     }
 //揪團卡片頁籤-end
 
 //行事曆

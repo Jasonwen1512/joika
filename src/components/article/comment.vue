@@ -616,6 +616,7 @@ function ReportIt() {
     display: flex;
     justify-content: space-between;
     border: black 1.5px solid;
+    margin-bottom: 20px;
     @include desktop() {
         border-radius: 6px;
     }
@@ -645,11 +646,6 @@ function ReportIt() {
     }
 }
 
-.reply-section {
-    padding-left: 20px;
-    border-left: 2px solid #f0f0f0;
-    margin-left: 50px;
-}
 .action-icon:hover {
     cursor: pointer;
 }
