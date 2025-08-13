@@ -348,7 +348,7 @@ function openReportModal() {
   }
 }
 .megaphone-box {
-    position: relative;
+  position: relative;
 }
 .megaphone-wrap {
   position: absolute;
@@ -440,6 +440,9 @@ function openReportModal() {
   position: relative;
   z-index: 4;
   cursor: pointer;
+  .more-btn {
+    cursor: pointer;
+  }
 }
 .options-menu {
   display: none;
@@ -486,6 +489,15 @@ function openReportModal() {
   background-image: url("@/assets/img/chat/chat-card-bg.png");
   border-radius: 3px;
   width: 120%;
+  z-index: 0;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0; /* top:0; right:0; bottom:0; left:0; */
+    background-color: rgba(255, 255, 255, 0.5); /* 半透明遮罩 */
+    pointer-events: none; /* 避免遮擋點擊 */
+    z-index: -1;
+  }
   img {
     width: 80px;
     position: absolute;
@@ -550,7 +562,7 @@ function openReportModal() {
   order: 2;
 }
 .chat-box {
-  width: 80%;
+  width: 100%;
   padding: 8px 12px;
   font-size: 16px;
 }
