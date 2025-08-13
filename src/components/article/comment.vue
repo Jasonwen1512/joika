@@ -2,7 +2,7 @@
 import { ref, computed, h, render } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { articleList } from "@/assets/data/fake-article";
-
+import axios from "axios";
 import reprot from "@/assets/img/icon/errorred.svg?url";
 import like from "@/assets/img/icon/likeicon.svg?url";
 import commenticon from "@/assets/img/icon/commenticon.svg?url";
@@ -23,100 +23,123 @@ const currentUser = {
     replies: [],
 };
 
-//假的留言們  展示用
-const comments = ref([
-    {
-        id: 1,
-        userid: "M0001",
-        author: "SunnyDive",
-        avatar: "https://i.pravatar.cc/150?u=sunnydive", // 假頭像，每次刷新會變
-        timestamp: "2025/07/07 18:45",
-        content: "我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！",
-        likenum: 0,
-        liked: false,
+// //假的留言們  展示用
+// const comments = ref([
+//     {
+//         id: 1,
+//         userid: "M0001",
+//         author: "SunnyDive",
+//         avatar: "https://i.pravatar.cc/150?u=sunnydive", // 假頭像，每次刷新會變
+//         timestamp: "2025/07/07 18:45",
+//         content: "我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！",
+//         likenum: 0,
+//         liked: false,
 
-        replies: [
-            // 為了展示，我們給第一則留言加上超過3則的回覆
-            {
-                id: 101,
-                author: "alex",
-                avatar: "https://i.pravatar.cc/150?u=suive", // 假頭像，每次刷新會變
-                timestamp: "2025/07/07 18:45",
-                content: "真的！",
-            },
-            {
-                id: 102,
-                author: "bob",
-                avatar: "https://i.pravatar.cc/150?u=s", // 假頭像，每次刷新會變
-                timestamp: "2025/07/07 19:45",
-                content: "超幸運",
-            },
-            {
-                id: 103,
-                author: "Cclemon",
-                avatar: "https://i.pravatar.cc/150?u=sive", // 假頭像，每次刷新會變
-                timestamp: "2025/07/07 20:39",
-                content: "下次也想跟",
-            },
-            {
-                id: 104,
-                author: "丁",
-                avatar: "https://i.pravatar.cc/150?u=ve", // 假頭像，每次刷新會變
-                timestamp: "2025/07/07 20:55",
-                content: "羨慕...",
-            },
-            {
-                id: 105,
-                author: "chii",
-                avatar: "https://i.pravatar.cc/150?u=su", // 假頭像，每次刷新會變
-                timestamp: "2025/07/07 22:05",
-                content: "推！",
-            },
-        ],
-        isRepliesExpanded: false,
-    },
+//         replies: [
+//             // 為了展示，我們給第一則留言加上超過3則的回覆
+//             {
+//                 id: 101,
+//                 author: "alex",
+//                 avatar: "https://i.pravatar.cc/150?u=suive", // 假頭像，每次刷新會變
+//                 timestamp: "2025/07/07 18:45",
+//                 content: "真的！",
+//             },
+//             {
+//                 id: 102,
+//                 author: "bob",
+//                 avatar: "https://i.pravatar.cc/150?u=s", // 假頭像，每次刷新會變
+//                 timestamp: "2025/07/07 19:45",
+//                 content: "超幸運",
+//             },
+//             {
+//                 id: 103,
+//                 author: "Cclemon",
+//                 avatar: "https://i.pravatar.cc/150?u=sive", // 假頭像，每次刷新會變
+//                 timestamp: "2025/07/07 20:39",
+//                 content: "下次也想跟",
+//             },
+//             {
+//                 id: 104,
+//                 author: "丁",
+//                 avatar: "https://i.pravatar.cc/150?u=ve", // 假頭像，每次刷新會變
+//                 timestamp: "2025/07/07 20:55",
+//                 content: "羨慕...",
+//             },
+//             {
+//                 id: 105,
+//                 author: "chii",
+//                 avatar: "https://i.pravatar.cc/150?u=su", // 假頭像，每次刷新會變
+//                 timestamp: "2025/07/07 22:05",
+//                 content: "推！",
+//             },
+//         ],
+//         isRepliesExpanded: false,
+//     },
 
-    {
-        id: 2,
-        userid: "M0002",
-        author: "kelly_travel",
-        avatar: "https://i.pravatar.cc/150?u=kellytravel",
-        timestamp: "2025/07/07 20:13",
-        content: "哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！",
-        likenum: 0,
-        replies: [],
-        liked: false,
+//     {
+//         id: 2,
+//         userid: "M0002",
+//         author: "kelly_travel",
+//         avatar: "https://i.pravatar.cc/150?u=kellytravel",
+//         timestamp: "2025/07/07 20:13",
+//         content: "哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！",
+//         likenum: 0,
+//         replies: [],
+//         liked: false,
 
-        isRepliesExpanded: false,
-    },
-    {
-        id: 3,
-        userid: "M0003",
-        author: "ocean_rookie",
-        avatar: "https://i.pravatar.cc/150?u=oceanrookie",
-        timestamp: "2025/07/08 09:07",
-        content: "我是這團的其中一員！很開心認識大家～謝謝你分享這段回憶❤️",
-        likenum: 0,
-        replies: [],
-        liked: false,
+//         isRepliesExpanded: false,
+//     },
+//     {
+//         id: 3,
+//         userid: "M0003",
+//         author: "ocean_rookie",
+//         avatar: "https://i.pravatar.cc/150?u=oceanrookie",
+//         timestamp: "2025/07/08 09:07",
+//         content: "我是這團的其中一員！很開心認識大家～謝謝你分享這段回憶❤️",
+//         likenum: 0,
+//         replies: [],
+//         liked: false,
 
-        isRepliesExpanded: false,
-    },
-    {
-        id: 4,
-        userid: "M0004",
-        author: "sandy_test",
-        avatar: "https://i.pravatar.cc/150?u=sandy_test",
-        timestamp: "2025/07/07 09:30",
-        content: "有誰也有跟過嗎?好奇其他人的想法?",
-        likenum: 0,
-        liked: false,
+//         isRepliesExpanded: false,
+//     },
+//     {
+//         id: 4,
+//         userid: "M0004",
+//         author: "sandy_test",
+//         avatar: "https://i.pravatar.cc/150?u=sandy_test",
+//         timestamp: "2025/07/07 09:30",
+//         content: "有誰也有跟過嗎?好奇其他人的想法?",
+//         likenum: 0,
+//         liked: false,
 
-        replies: [],
-        isRepliesExpanded: false,
-    },
-]);
-
+//         replies: [],
+//         isRepliesExpanded: false,
+//     },
+// ]);
+//APT 接留言資料
+const comments = ref([]);
+function getComments(activityNo) {
+    axios.get(`comments.php?activity_no=${activityNo}`)
+        .then(res => {
+            // 後端回傳的每一筆資料要轉成你前端留言系統需要的格式
+            comments.value = res.data.map(c => ({
+                id: c.ACTIVITY_COMMENT_NO,
+                userid: c.MEMBER_NO, // 假設後端有回傳會員編號
+                author: c.MEMBER_NAME || "匿名", // 後端沒給就顯示匿名
+                avatar: c.MEMBER_AVATAR || "https://i.pravatar.cc/150?u=default",
+                timestamp: c.CREATED_AT,
+                content: c.COMMENT_CONTENT,
+                likenum: Number(c.LIKE_NUM || 0),
+                liked: false,
+                replies: [], // 先給空陣列，如果之後有子留言再填
+                isRepliesExpanded: false,
+                animateLike: false
+            }));
+        })
+        .catch(err => {
+            console.error("取得留言失敗", err);
+        });
+}
 const newComment = ref("");
 const activeReplyId = ref(null);
 const isReplyAnimating = ref(false);
