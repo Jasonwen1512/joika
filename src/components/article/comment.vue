@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, h, render } from "vue";
+import { ref, defineProps ,computed, h, render ,watch} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { articleList } from "@/assets/data/fake-article";
 import axios from "axios";
@@ -23,7 +23,7 @@ const currentUser = {
     replies: [],
 };
 
-// //假的留言們  展示用
+//假的留言們  展示用
 // const comments = ref([
 //     {
 //         id: 1,
@@ -116,30 +116,25 @@ const currentUser = {
 //         isRepliesExpanded: false,
 //     },
 // ]);
-//APT 接留言資料
-const comments = ref([]);
-function getComments(activityNo) {
-    axios.get(`comments.php?activity_no=${activityNo}`)
-        .then(res => {
-            // 後端回傳的每一筆資料要轉成你前端留言系統需要的格式
-            comments.value = res.data.map(c => ({
-                id: c.ACTIVITY_COMMENT_NO,
-                userid: c.MEMBER_NO, // 假設後端有回傳會員編號
-                author: c.MEMBER_NAME || "匿名", // 後端沒給就顯示匿名
-                avatar: c.MEMBER_AVATAR || "https://i.pravatar.cc/150?u=default",
-                timestamp: c.CREATED_AT,
-                content: c.COMMENT_CONTENT,
-                likenum: Number(c.LIKE_NUM || 0),
-                liked: false,
-                replies: [], // 先給空陣列，如果之後有子留言再填
-                isRepliesExpanded: false,
-                animateLike: false
-            }));
-        })
-        .catch(err => {
-            console.error("取得留言失敗", err);
-        });
-}
+// 
+// 使用 defineProps 來接收從父元件傳入的留言資料
+const props = defineProps({
+  comments: {
+    type: Array,
+    required: true,
+    default: () => [] // 提供一個預設的空陣列，增加程式碼的穩健性
+  }
+});
+//偵錯
+watch(() => props.comments, (newComments) => {
+  console.log('【子元件】: comments prop 偵測到變化！');
+  console.log('【子元件】: 收到的新資料長度為:', newComments.length);
+  if (newComments.length > 0) {
+    console.log('【子元件】: 收到的第一筆資料:', JSON.stringify(newComments[0]));
+  }
+}, { deep: true }); // 使用 deep: true 確保能偵測到陣列內部的變化
+// ^^^^^^ 【請加入這一段】 ^^^^^^
+
 const newComment = ref("");
 const activeReplyId = ref(null);
 const isReplyAnimating = ref(false);
@@ -170,7 +165,7 @@ function postComment() {
         isRepliesExpanded: false, // <-- 2. 為新留言也加上狀態
     };
 
-    comments.value.push(newCommentObject);
+    props.comments.push(newCommentObject);
     newComment.value = "";
     goToCommentPage(totalCommentPages.value);
 }
@@ -183,14 +178,14 @@ const COMMENTS_PER_PAGE = 3;
 const currentCommentPage = ref(1);
 
 const totalCommentPages = computed(() => {
-    return Math.ceil(comments.value.length / COMMENTS_PER_PAGE);
+    return Math.ceil(props.comments.length / COMMENTS_PER_PAGE);
 });
 
 // 這會根據 currentCommentPage 的變化，自動從完整的 comments 陣列中「切」出對應的部分
 const paginatedComments = computed(() => {
     const startIndex = (currentCommentPage.value - 1) * COMMENTS_PER_PAGE;
     const endIndex = startIndex + COMMENTS_PER_PAGE;
-    return comments.value.slice(startIndex, endIndex);
+    return props.comments.slice(startIndex, endIndex);
 });
 
 const commentPaginationList = computed(() => {
@@ -284,9 +279,7 @@ function toggleReplies(comment) {
 }
 
 //喜歡
-const likeIt = (index) => {
-    const comment = comments.value[index];
-
+const likeIt = (comment) => { // 接收整個 comment 物件
     if (!comment.liked) {
         comment.likenum++;
         comment.liked = true;
@@ -294,14 +287,12 @@ const likeIt = (index) => {
         comment.likenum--;
         comment.liked = false;
     }
-
-    // 觸發動畫
     comment.animateLike = true;
-
     setTimeout(() => {
         comment.animateLike = false;
     }, 300);
 };
+
 //檢舉
 function ReportIt() {
     const container = document.createElement("div");
@@ -331,6 +322,8 @@ function ReportIt() {
     <!--           留言系統區塊             -->
     <!-- ================================== -->
     <section class="Comment">
+        <div v-if="props.comments && props.comments.length > 0">
+
         <!-- 1. 留言列表 -->
         <div class="comments-list">
             <!-- 
@@ -366,7 +359,7 @@ function ReportIt() {
                         <div
                             class="action-icon like"
                             :class="{ animate: comment.animateLike }"
-                            @click="likeIt(index)"
+                            @click="likeIt(comment)"
                         >
                             <img :src="like" />
                             <p v-if="comment.likenum > 0">
@@ -529,7 +522,10 @@ function ReportIt() {
                 />
             </button>
         </div>
-
+        </div>
+          <div v-else class="no-comments-placeholder">
+            <p>目前還沒有留言唷!</p>
+        </div>
         <!-- 3. 新增「父留言」的輸入框 -->
         <div class="my-comment">
             <input

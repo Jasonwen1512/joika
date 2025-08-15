@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, h, render, onMounted, onUnmounted } from "vue";
+import { ref, computed, h, render, onMounted, onUnmounted ,watch } from "vue";
 import Swal from "sweetalert2";
+import axios from "axios"; // <-- 新增 axios
 
 import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
@@ -12,7 +13,7 @@ import DeleteIcon from "@/assets/img/icon/delete.svg";
 import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from "@/assets/img/article/movie_konan.jpg";
 
-import comment from "@/components/article/comment.vue";
+import CommentComponent from "@/components/article/comment.vue"; // <-- 修改這裡
 
 import { usePreviewStore } from "@/stores/preview";
 
@@ -178,6 +179,77 @@ function DeleteCheck() {
 
   
 }
+
+//抓留言API
+const comments = ref(null); 
+const isLoading = ref(true); // 初始設為 true
+const error = ref(null);
+
+// --- 3. 強化 getPostComments 函式 ---
+function getPostComments(postNo) {
+    // 初始狀態設定 (可以保留或放在 onMounted 之前)
+    isLoading.value = true;
+    error.value = null;
+    comments.value = null; // 重置為 null，以配合 v-if="comments"
+
+    axios.get(`http://localhost:8888/joika-api/comments/post-list.php?post_no=${postNo}`)
+        .then(res => {
+            // 先宣告一個變數來存放最終要賦值的結果，初始為空陣列
+            let finalComments = [];
+
+            // 檢查 API 回應是否為包含資料的有效陣列
+            if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+                
+                // 在 if 內部進行資料轉換
+                // 並將結果存入我們在外面宣告的 finalComments 變數
+                finalComments = res.data.map(c => ({
+                    id: c.POST_COMMENT_NO,
+                    userid: c.MEMBER_ID,
+                    author: c.MEMBER_NICKNAME || "匿名",
+                    avatar: c.MEMBER_AVATAR || "https://i.pravatar.cc/150?u=default",
+                    timestamp: c.CREATED_AT,
+                    content: c.COMMENT_CONTENT,
+                    likenum: Number(c.LIKE_NUM || 0),
+                    liked: false,
+                    parentId: c.PARENT_NO,
+                    replies: [],
+                    isRepliesExpanded: false,
+                    animateLike: false
+                }));
+
+            } 
+            // 如果 API 回傳的是空陣列或無效資料，finalComments 會維持初始的空陣列 []
+            
+            // 【關鍵】在 .then 的最末端，只做一次賦值操作
+            // 無論 if 條件是否成立，finalComments 都是一個有效的陣列 (有資料或空的)
+            comments.value = finalComments;
+
+        })
+        .catch(err => {
+            console.error("取得文章留言失敗", err);
+            error.value = "無法載入留言，請稍後再試。";
+            comments.value = []; // 發生錯誤時也賦予空陣列，避免 v-if="comments" (null) 判斷出錯
+        })
+        .finally(() => {
+            isLoading.value = false;
+        });
+}
+
+// --- 4. 使用 watch 監聽路由變化並觸發 API ---
+watch(
+    () => route.params.postid,
+    (newPostId) => {
+        // 如果是預覽模式，或沒有 postid，就不要執行抓取
+        if (previewStore.isPreview || !newPostId) {
+            comments.value = []; // 確保在預覽模式下留言是清空的
+            return;
+        }
+        
+        // 正常模式下，呼叫 API
+        getPostComments(newPostId);
+    },
+    { immediate: true } // 立即執行一次，取代 onMounted
+);
 </script>
 
 <template>
@@ -241,11 +313,15 @@ function DeleteCheck() {
         <p>找不到這篇文章111。</p>
       </div>
     </section>
-    <div v-if="!isPreview" class="comments-section">
       <!-- ================================== -->
       <!--           留言系統區塊             -->
       <!-- ================================== -->
-      <comment></comment>
+       <!-- 將父元件的 `comments` 資料，透過名為 `comments-data` 的 prop 傳給子元件 -->
+  <div v-if="!isPreview" class="comments-section">
+     
+    <div v-if="isLoading">正在載入留言...</div>
+    <div v-else-if="error">{{ error }}</div>
+    <CommentComponent v-if="comments" :comments="comments" />
     </div>
   </main>
 </template>
