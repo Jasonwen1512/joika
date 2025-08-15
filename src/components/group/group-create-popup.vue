@@ -23,7 +23,7 @@ const nextArrow = ` <svg
     />
   </svg>`;
 
-
+const emit = defineEmits(['closed'])
 let currentPage = 1;
 const totalPage = 2;
 const mobileContent = () => {
@@ -151,20 +151,25 @@ const showPopup = () => {
         });
       }
     },
+ 
   });
 };
 
+
+const onResize = () => {
+  Swal.close()
+}
+
+
+
 onMounted(() => {
-  showPopup();
-  window.addEventListener("resize", () => {
-    Swal.close();
-  });
-});
+  showPopup()
+  window.addEventListener('resize', onResize)
+})
+
 onBeforeUnmount(() => {
-  window.removeEventListener("resize", () => {
-    Swal.close();
-  });
-});
+  window.removeEventListener('resize', onResize)
+})
 </script>
 
 <template>
@@ -300,4 +305,6 @@ onBeforeUnmount(() => {
     font-size: 20px;
   }
 }
+
+
 </style>
