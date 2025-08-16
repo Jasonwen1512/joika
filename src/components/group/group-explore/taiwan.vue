@@ -41,10 +41,10 @@ const fetchAndCategorize = async () => {
     // 串接 API
     const response = await axios.get(
       "http://localhost:8888/joika-api-server/activities/list.php"
-    ); // 或 fetch()
+    );
 
     FakeActivity.value = response.data;
-    // console.log(FakeActivity.value);
+    console.log(FakeActivity.value);
 
     // 資料拿到後再分類
     FakeActivity.value.forEach((item) => {

@@ -31,12 +31,12 @@ const formDate = (dateStr) => {
 
 const titleDate = computed(() => {
   if (!props.item) return "";
-  const start = formDate(props.item.activity_start_date);
-  const end = formDate(props.item.activity_end_date);
-  if (props.item.activity_start_date === props.item.activity_end_date) {
-    return `${start} ${props.item.activity_name}`;
+  const start = formDate(props.item.ACTIVITY_START_DATE);
+  const end = formDate(props.item.ACTIVITY_END_DATE);
+  if (props.item.ACTIVITY_START_DATE === props.item.ACTIVITY_END_DATE) {
+    return `${start} ${props.item.ACTIVITY_NAME}`;
   } else {
-    return `${start}-${end} ${props.item.activity_name}`;
+    return `${start}-${end} ${props.item.ACTIVITY_NAME}`;
   }
 });
 </script>
@@ -44,32 +44,32 @@ const titleDate = computed(() => {
 <template>
   <div class="activity-card" v-if="props.item">
     <RouterLink
-      :to="`/activity/${props.item.activity_no}`"
+      :to="`/activity/${props.item.ACTIVITY_NO}`"
       class="activity-img"
     >
-      <img :src="props.item.activity_img" :alt="props.item.activity_name" />
+      <img :src="props.item.ACTIVITY_IMG" :alt="props.ACTIVITY_NAME" />
     </RouterLink>
-    <RouterLink :to="`/activity/${props.item.activity_no}`"
+    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
       ><h4 class="activity-name">
         {{ titleDate }}
       </h4></RouterLink
     >
-    <RouterLink :to="`/activity/${props.item.activity_no}`"
+    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
       ><p class="activity-description">
-        {{ props.item.activity_description }}
+        {{ props.item.ACTIVITY_DESCRIPTION }}
       </p></RouterLink
     >
 
     <div class="button-group" @click.stop.prevent>
       <Button
-        @click.stop.prevent="gotoSignup(item.activity_no)"
+        @click.stop.prevent="gotoSignup(item.ACTIVITY_NO)"
         theme="primary"
         size="md"
         >我要跟團!</Button
       >
       <LikeButton
-        :isActive="likeMap[props.item.activity_no]"
-        @click.stop.prevent="toggleLike(item.activity_no)"
+        :isActive="likeMap[props.item.ACTIVITY_NO]"
+        @click.stop.prevent="toggleLike(item.ACTIVITY_NO)"
       ></LikeButton>
     </div>
   </div>
