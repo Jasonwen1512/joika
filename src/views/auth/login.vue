@@ -1,9 +1,12 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import Button from "@/components/Button.vue";
 import CaptchaBox from "@/components/auth/CaptchaBox.vue";
 import { useRouter } from "vue-router";
-import { watch } from "vue";
+import { useAuthStore } from "@/stores/useAuthStore";
+
+//登入
+const auth = useAuthStore();
 
 const realCaptcha = ref(""); // 接住 emit 的驗證碼
 const router = useRouter();
@@ -48,54 +51,31 @@ watch(
 );
 
 const handleLogin = () => {
-  // 清空錯誤
-  error.mobile = "";
-  error.password = "";
-  error.verifyCode = "";
+  let hasError = false
 
-  const hasError = ref(false);
+  if (!form.mobile) { error.mobile = "請輸入手機號碼"; hasError = true }
+  if (!form.password) { error.password = "請輸入密碼"; hasError = true }
+  if (!form.verifyCode) { error.verifyCode = "請輸入驗證碼"; hasError = true }
 
-  if (!form.mobile) {
-    error.mobile = "請輸入手機號碼";
-    hasError.value = true;
-  }
+  if (hasError) return
 
-  if (!form.password) {
-    error.password = "請輸入密碼";
-    hasError.value = true;
-  }
-
-  if (!form.verifyCode) {
-    error.verifyCode = "請輸入驗證碼";
-    hasError.value = true;
-  }
-
-  // 提早返回，防止空值比對
-  if (hasError.value) return;
-
-  // 驗證帳密與驗證碼
-  if (form.mobile !== mockUser.mobile) {
-    error.mobile = "手機號碼錯誤";
-    hasError.value = true;
-  }
-
-  if (form.password !== mockUser.password) {
-    error.password = "密碼錯誤";
-    hasError.value = true;
-  }
-
+  if (form.mobile !== mockUser.mobile) { error.mobile = "手機號碼錯誤"; return }
+  if (form.password !== mockUser.password) { error.password = "密碼錯誤"; return }
   if (form.verifyCode.toLowerCase() !== realCaptcha.value.toLowerCase()) {
-    error.verifyCode = "驗證碼錯誤";
-    hasError.value = true;
+    error.verifyCode = "驗證碼錯誤"; return
   }
 
-  if (hasError.value) return;
-  router.push("/member/member-content");
-};
+  // 驗證成功 ➜ 存到 Pinia
+  auth.login({
+    user: { id: 1, name: "Amo", mobile: form.mobile },
+    token: "fake-token-123"
+  })
 
-const goToRegister = () => {
-  router.push("/auth/signup");
-};
+const redirect = router.currentRoute.value.query.redirect
+router.push(redirect ? String(redirect) : "/member/member-content")
+}
+
+const goToRegister = () => router.push("/auth/signup")
 </script>
 
 <template>
@@ -109,15 +89,17 @@ const goToRegister = () => {
           <input
             type="tel"
             id="mobile"
-            @blur="validateMobile"
-            v-model="form.mobile"
+            v-model.trim="form.mobile"
           />
           <p class="error-msg" v-if="error.mobile">{{ error.mobile }}</p>
         </div>
 
         <div class="form-group">
           <label for="password">密碼</label>
-          <input type="password" id="password" v-model="form.password" />
+          <input 
+            type="password" 
+            id="password" 
+            v-model.trim="form.password" />
           <p class="error-msg" v-if="error.password">{{ error.password }}</p>
         </div>
 
@@ -127,7 +109,7 @@ const goToRegister = () => {
             <input type="text" id="verify-code" v-model="form.verifyCode" />
             <div class="captcha-overlay">
               <CaptchaBox
-                @updateIdentifyCode="(val) => (realCaptcha = val)"
+                @updateIdentifyCode="(val) => (realCaptcha.value = val)"
                 ref="captchaRef"
               />
             </div>

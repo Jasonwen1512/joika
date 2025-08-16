@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAuthStore } from '@/stores/useAuthStore'
 
 const routes = [
   {
@@ -11,10 +12,12 @@ const routes = [
   {
     path: "/member/member-notify",
     component: () => import("@/views/member/member-notify.vue"),
+    meta: { requiresAuth: true }
   },
   {
     path: "/member/member-content",
     component: () => import("@/views/member/member-content.vue"),
+    meta: { requiresAuth: true }
   },
   {
     path: "/group/group-explore",
@@ -31,9 +34,9 @@ const routes = [
   },
   { path: "/contact", component: () => import("@/views/contact/contact.vue") },
   { path: "/chat", component: () => import("@/views/chat/chat.vue") },
-  { path: "/auth/login", component: () => import("@/views/auth/login.vue") },
-  { path: "/auth/signup", component: () => import("@/views/auth/signup.vue") },
-  
+  { path: "/auth/login",  component: () => import("@/views/auth/login.vue"),  meta: { guestsOnly: true } },
+  { path: "/auth/signup", component: () => import("@/views/auth/signup.vue"), meta: { guestsOnly: true } },
+
 {
   path: "/article/article",
   component: () => import("@/views/article/article.vue"),
@@ -92,5 +95,21 @@ const router = createRouter({
     return { left: 0, top: 0 };
   },
 });
+
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+
+  // 需要登入的頁面，但尚未登入 → 轉去登入並帶上 redirect
+  if (to.meta.requiresAuth && !auth.isLogin) {
+    return { path: '/auth/login', query: { redirect: to.fullPath } }
+  }
+
+  // 訪客限定頁（login/signup），已登入者不應再看到 → 轉回首頁（可改成你要的頁）
+  if (to.meta.guestsOnly && auth.isLogin) {
+    return { path: '/home' }
+  }
+
+  return true
+})
 
 export default router;
