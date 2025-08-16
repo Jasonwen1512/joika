@@ -13,7 +13,8 @@ import East from "@/assets/img/group/group-explore/group-explore-taiwan/east.svg
 import South from "@/assets/img/group/group-explore/group-explore-taiwan/south.svg";
 import BigTaiwan from "@/assets/img/group/group-explore/group-explore-taiwan/taiwan.svg";
 
-import { FakeActivity } from "@/assets/data/fake-activity";
+// import { FakeActivity } from "@/assets/data/fake-activity";
+import axios from "axios";
 
 import PlaceholderImageBg from "@/components/placeholder-image-bg.vue";
 
@@ -27,6 +28,72 @@ import {
   computed,
   nextTick,
 } from "vue";
+
+const FakeActivity = ref([]);
+
+const northData = ref([]);
+const westData = ref([]);
+const southData = ref([]);
+const eastData = ref([]);
+
+const fetchAndCategorize = async () => {
+  try {
+    // 串接 API
+    const response = await axios.get(
+      "http://localhost:8888/joika-api-server/activities/list.php"
+    ); // 或 fetch()
+
+    FakeActivity.value = response.data;
+    // console.log(FakeActivity.value);
+
+    // 資料拿到後再分類
+    FakeActivity.value.forEach((item) => {
+      const targetRegion = getRegionByCity(item.LOCATION.slice(0, 3));
+      const targetDate = formatDate(item.ACTIVITY_START_DATE);
+
+      switch (targetRegion) {
+        case "北部":
+          northData.value.push({
+            no: item.ACTIVITY_NO,
+            title: item.ACTIVITY_NAME,
+            image: item.ACTIVITY_IMG,
+            date: targetDate,
+          });
+          break;
+        case "西部":
+          westData.value.push({
+            no: item.ACTIVITY_NO,
+            title: item.ACTIVITY_NAME,
+            image: item.ACTIVITY_IMG,
+            date: targetDate,
+          });
+          break;
+        case "南部":
+          southData.value.push({
+            no: item.ACTIVITY_NO,
+            title: item.ACTIVITY_NAME,
+            image: item.ACTIVITY_IMG,
+            date: targetDate,
+          });
+          break;
+        case "東部":
+          eastData.value.push({
+            no: item.ACTIVITY_NO,
+            title: item.ACTIVITY_NAME,
+            image: item.ACTIVITY_IMG,
+            date: targetDate,
+          });
+          break;
+      }
+    });
+  } catch (error) {
+    console.error("抓資料失敗:", error);
+  }
+};
+
+onMounted(() => {
+  fetchAndCategorize();
+});
 
 const isMobile = ref(true);
 const isTablet = ref(false);
@@ -299,10 +366,6 @@ const taiwanAreaSize = reactive({
 // 物件解構賦值
 const { north, west, east, south, bigTaiwan } = taiwanAreaSize;
 
-const northData = [];
-const westData = [];
-const southData = [];
-const eastData = [];
 //   {
 //     title: "花蓮七星潭之旅",
 //     image: "https://picsum.photos/seed/e1/300/200",
@@ -334,55 +397,6 @@ function getRegionByCity(cityName) {
   return "未知區域";
 }
 // console.log(FakeActivity);
-
-FakeActivity.forEach((item) => {
-  // title
-  // console.log(item.activity_name);
-
-  // 判斷區域
-  const targetRegion = getRegionByCity(item.location.slice(0, 3));
-
-  // image
-  // console.log(item.activity_img);
-
-  // date
-  const targetDate = formatDate(item.activity_start_date);
-
-  switch (targetRegion) {
-    case "北部":
-      northData.push({
-        no: item.activity_no,
-        title: item.activity_name,
-        image: item.activity_img,
-        date: targetDate,
-      });
-      break;
-    case "西部":
-      westData.push({
-        no: item.activity_no,
-        title: item.activity_name,
-        image: item.activity_img,
-        date: targetDate,
-      });
-      break;
-    case "南部":
-      southData.push({
-        no: item.activity_no,
-        title: item.activity_name,
-        image: item.activity_img,
-        date: targetDate,
-      });
-      break;
-    case "東部":
-      eastData.push({
-        no: item.activity_no,
-        title: item.activity_name,
-        image: item.activity_img,
-        date: targetDate,
-      });
-      break;
-  }
-});
 
 // taiwan-title 文字動畫
 gsap.registerPlugin(SplitText, ScrollTrigger);
