@@ -2,12 +2,22 @@
 import Header from "@/components/header.vue";
 import Footer from "@/components/footer.vue";
 
-import { useRoute } from "vue-router";
-import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { computed, onMounted } from "vue";
 
 const route = useRoute();
+const router = useRouter();
+
 const hideLayout = computed(() => {
   return route.path === "/" || route.meta?.hideLayout === true;
+});
+
+// 手機版自動跳轉
+onMounted(() => {
+  const isMobile = window.innerWidth <= 768; // 依需求調整閾值
+  if (isMobile && route.path !== "/home") {
+    router.push("/home");
+  }
 });
 </script>
 
