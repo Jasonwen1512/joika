@@ -279,15 +279,57 @@ const likeIt = (index) => {
         comment.animateLike = false;
     }, 300);
 };
+function mapReasonToNumber(reason) {
+    const map = {
+        spam: 1,
+        abuse: 2,
+        ads: 3,
+        fakeNews: 4,
+        LeakpersonalInfo: 5,
+        other: 6,
+    };
+    return map[reason] || 6;
+}
 //檢舉
 function ReportIt() {
     const container = document.createElement("div");
     render(
         h(ReportForm, {
-            onSubmit: (data) => {
-                console.log("檢舉資料：", data);
-                Swal.close();
-                Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+            onSubmit: async (data) => {
+                // ✅ 嘗試從 localStorage 取得使用者 ID
+                const user = JSON.parse(localStorage.getItem("user"));
+                const reporterId = user?.id;
+
+                if (!reporterId) {
+                    Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
+                    return;
+                }
+
+                const payload = {
+                    reporter_id: reporterId,
+                    post_no: postid,  // 頁面上的文章 ID
+                    report_reason_no: mapReasonToNumber(data.reason),
+                    report_description: data.detail,
+                };
+
+                try {
+                    const response = await fetch('VITE_API_BASE/reports/post-report.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        Swal.close();
+                        Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+                    } else {
+                        Swal.fire("發生錯誤", result.error || "請稍後再試", "error");
+                    }
+                } catch (error) {
+                    console.error('發生錯誤：', error);
+                    Swal.fire("錯誤", "無法連線至伺服器", "error");
+                }
             },
         }),
         container
