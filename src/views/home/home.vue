@@ -10,6 +10,21 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import { FreeMode, Pagination } from "swiper/modules";
+import axios from "axios";
+
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+
+const listLimited = ref([]);
+const listLatest = ref([]);
+
+onMounted(async () => {
+  const res1 = await axios.get(`${VITE_API_BASE}/activities/list-limited.php`);
+  listLimited.value = await res1.data;
+  const res2 = await axios.get(`${VITE_API_BASE}/activities/list-latest.php`);
+  listLatest.value = await res2.data;
+});
+
 // === 1. 引入我們做好的輪播元件 ===
 import Carousel from "@/components/carousel.vue";
 const modules = [FreeMode, Pagination];
@@ -316,13 +331,17 @@ onMounted(() => {
     </div>
 
     <div class="first-section">
-      <div class="card-grid">
-        <AtivityCard
-          v-for="item in FakeActivity.slice(0, 8)"
-          :key="item.activity_id"
-          :item="item"
-        />
+      <div v-if="listLimited.length > 0">
+        <div class="card-grid">
+          <AtivityCard
+            v-for="item in listLimited.slice(0, 8)"
+            :key="item.activity_id"
+            :item="item"
+          />
+        </div>
       </div>
+      <div v-else class="no-data">尚無限時活動</div>
+
       <img
         class="bg-img3"
         src="/src/assets/img/bg-decorate3.png"
@@ -343,13 +362,16 @@ onMounted(() => {
     <h2>最新揪團<br />差你一咖</h2>
   </div>
 
-  <div class="card-grid">
-    <AtivityCard
-      v-for="item in FakeActivity.slice(0, 8)"
-      :key="item.activity_id"
-      :item="item"
-    />
+  <div v-if="listLatest.length > 0">
+    <div class="card-grid">
+      <AtivityCard
+        v-for="item in listLatest.slice(0, 8)"
+        :key="item.activity_id"
+        :item="item"
+      />
+    </div>
   </div>
+  <div v-else class="no-data">尚無最新活動</div>
 
   <Marquee2 />
 
@@ -449,6 +471,19 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
+.no-data {
+  @include flex-center();
+  position: relative;
+  font-family: "MyFont", sans-serif;
+  font-size: 18px;
+  color: #afafaf;
+  @include tablet() {
+    font-size: 20px;
+  }
+  @include desktop() {
+    font-size: 24px;
+  }
+}
 h1 {
   position: relative;
   z-index: 2;

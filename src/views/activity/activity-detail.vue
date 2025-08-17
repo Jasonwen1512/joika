@@ -25,11 +25,20 @@ import "swiper/css/pagination";
 
 const route = useRoute();
 const activity_no = route.params.activity_id;
+const currentActivityId = computed(() => route.params.activity_no);
 
-const activity = computed(() =>
-  FakeActivity.find((item) => String(item.activity_no) === String(activity_no))
-);
+const activity = computed(() => {
+      console.log("Computed 'activity' is using ID:", currentActivityId.value);
 
+    // 加上一個保護，如果 URL 中沒有 ID，就回傳 null
+    if (!currentActivityId.value) {
+        return null;
+    }
+    // 使用 .value 來獲取 computed 的值
+    return FakeActivity.find(
+        (item) => String(item.activity_no) === String(currentActivityId.value)
+    );
+});
 const likeMap = ref({});
 
 const toggleLike = (id) => {
@@ -244,13 +253,17 @@ const comments = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
 
-function getActivityComments(activity_no) {
-    isLoading.value = true;
+function getActivityComments(activityId) { // 參數名改一下避免混淆
+      console.log(`準備為活動 ID: ${activityId} 請求留言 API`); // 偵錯 Log
+  
+  isLoading.value = true;
     error.value = null;
     comments.value = [];
 
-    axios.get(`http://localhost:8888/joika-api-server/comments/activities-list.php?activity_no=${activity_no}`)
+    axios.get(`http://localhost:8888/joika-api-server/comments/activities-list.php?activity_no=${activityId}`)
         .then(res => {
+             console.log("API 成功回傳留言:", res.data); // 偵錯 Log
+
             if (!res.data || !Array.isArray(res.data)) return;
 
             // --- 先把每筆留言整理成統一格式 ---
@@ -299,8 +312,10 @@ function getActivityComments(activity_no) {
 
 // --- 監聽路由或活動編號變化 ---
 watch(
-    () => route.params.activityNo,
+    // 直接監聽我們的 computed ID
+    currentActivityId,
     (newId) => {
+        // newId 現在就是 currentActivityId.value
         if (!newId) {
             comments.value = [];
             return;
