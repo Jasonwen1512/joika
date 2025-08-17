@@ -1,97 +1,49 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import Button from "@/components/Button.vue";
 import CaptchaBox from "@/components/auth/CaptchaBox.vue";
 import { useRouter } from "vue-router";
-import { watch } from "vue";
+import { loginByPhonePassword } from "@/assets/data/authState";
+;
 
 const realCaptcha = ref(""); // 接住 emit 的驗證碼
 const router = useRouter();
 const captchaRef = ref(null);
-const error = reactive({
-  mobile: "",
-  password: "",
-  verifyCode: "",
-});
 
-// 使用 reactive 建立一個響應式的表單資料物件
-const form = reactive({
-  mobile: "",
-  password: "",
-  verifyCode: "",
-});
-
-// 假資料帳號密碼
-const mockUser = {
-  mobile: "0912345678",
-  password: "1234",
-};
+const error = reactive({ mobile: "", password: "", verifyCode: "" });
+const form = reactive({ mobile: "", password: "", verifyCode: "" });
 
 // 即時輸入清除錯誤
-watch(
-  () => form.mobile,
-  (val) => {
-    if (error.mobile && val) error.mobile = "";
-  }
-);
-watch(
-  () => form.password,
-  (val) => {
-    if (error.password && val) error.password = "";
-  }
-);
-watch(
-  () => form.verifyCode,
-  (val) => {
-    if (error.verifyCode && val) error.verifyCode = "";
-  }
-);
+watch(() => form.mobile, v => { if (error.mobile && v) error.mobile = "" })
+watch(() => form.password, v => { if (error.password && v) error.password = "" })
+watch(() => form.verifyCode, v => { if (error.verifyCode && v) error.verifyCode = "" })
 
-const handleLogin = () => {
-  // 清空錯誤
-  error.mobile = "";
-  error.password = "";
-  error.verifyCode = "";
+//登入按鈕
+const handleLogin = async () => {
+  // 1) 必填檢查
+  error.mobile = error.password = error.verifyCode = ""
+  if (!form.mobile) error.mobile = "請輸入手機號碼"
+  if (!form.password) error.password = "請輸入密碼"
+  if (!form.verifyCode) error.verifyCode = "請輸入驗證碼"
+  if (error.mobile || error.password || error.verifyCode) return
 
-  const hasError = ref(false);
-
-  if (!form.mobile) {
-    error.mobile = "請輸入手機號碼";
-    hasError.value = true;
-  }
-
-  if (!form.password) {
-    error.password = "請輸入密碼";
-    hasError.value = true;
-  }
-
-  if (!form.verifyCode) {
-    error.verifyCode = "請輸入驗證碼";
-    hasError.value = true;
-  }
-
-  // 提早返回，防止空值比對
-  if (hasError.value) return;
-
-  // 驗證帳密與驗證碼
-  if (form.mobile !== mockUser.mobile) {
-    error.mobile = "手機號碼錯誤";
-    hasError.value = true;
-  }
-
-  if (form.password !== mockUser.password) {
-    error.password = "密碼錯誤";
-    hasError.value = true;
-  }
-
+  // 2) 驗證碼先過
   if (form.verifyCode.toLowerCase() !== realCaptcha.value.toLowerCase()) {
-    error.verifyCode = "驗證碼錯誤";
-    hasError.value = true;
+    error.verifyCode = "驗證碼錯誤"; return
   }
 
-  if (hasError.value) return;
-  router.push("/member/member-content");
-};
+  // 3) 呼叫後端登入（會自動收 Session Cookie）
+  const { ok, data } = await loginByPhonePassword({
+    phone: form.mobile, password: form.password
+  })
+
+  if (ok) router.push("/member/member-content")
+  else {
+    if (data?.code === "0001") error.mobile = "電話不存在"
+    else if (data?.code === "0002") error.password = "密碼錯誤"
+    else alert(data?.msg || "登入失敗")
+  }
+}
 
 const goToRegister = () => {
   router.push("/auth/signup");
@@ -108,7 +60,7 @@ const goToRegister = () => {
           <label for="mobile">手機</label>
           <input
             type="tel"
-            id="mobile"
+            id="member_phone" 
             @blur="validateMobile"
             v-model="form.mobile"
           />
@@ -117,7 +69,7 @@ const goToRegister = () => {
 
         <div class="form-group">
           <label for="password">密碼</label>
-          <input type="password" id="password" v-model="form.password" />
+          <input type="password" id="member_password" v-model="form.password" />
           <p class="error-msg" v-if="error.password">{{ error.password }}</p>
         </div>
 
