@@ -24,20 +24,16 @@ import "swiper/css/pagination";
 // --- End Swiper ---
 
 const route = useRoute();
-const activity_no = route.params.activity_id;
-const currentActivityId = computed(() => route.params.activity_no);
-
+const activity_id = route.params.activity_id;
+const currentActivityId = computed(() => route.params.activity_id);
+//抓活動ID
 const activity = computed(() => {
-      console.log("Computed 'activity' is using ID:", currentActivityId.value);
-
-    // 加上一個保護，如果 URL 中沒有 ID，就回傳 null
-    if (!currentActivityId.value) {
-        return null;
-    }
-    // 使用 .value 來獲取 computed 的值
-    return FakeActivity.find(
-        (item) => String(item.activity_no) === String(currentActivityId.value)
-    );
+  if (!currentActivityId.value) {
+    return null;
+  }
+  return FakeActivity.find(
+    (item) => String(item.activity_no) === String(currentActivityId.value)
+  );
 });
 const likeMap = ref({});
 
@@ -180,6 +176,10 @@ const participants = ref([
     role: "軟體開發",
   },
 ]);
+// //偵錯用
+// console.log("路由參數 activity_id:", currentActivityId.value);
+// console.log("FakeActivity 所有 id:", FakeActivity.map(a => a.activity_id));
+
 //=======留言區改用API串接==========
 // 2. 準備要傳遞給留言板的「留言列表」資料
 //    (我們先借用您頁面上現有的團員資料來展示，並用 map 整理成留言板要的格式)
@@ -254,16 +254,18 @@ const isLoading = ref(true);
 const error = ref(null);
 
 function getActivityComments(activityId) { // 參數名改一下避免混淆
-      console.log(`準備為活動 ID: ${activityId} 請求留言 API`); // 偵錯 Log
+    const activityNoNumeric = String(activityId).replace(/\D/g, "");
+
+      // console.log(`準備為活動 ID: ${activityId} 請求留言 API`); // 偵錯 Log
   
   isLoading.value = true;
     error.value = null;
     comments.value = [];
 
-    axios.get(`http://localhost:8888/joika-api-server/comments/activities-list.php?activity_no=${activityId}`)
-        .then(res => {
-             console.log("API 成功回傳留言:", res.data); // 偵錯 Log
-
+axios.get(`http://localhost:8888/joika-api-server/comments/activities-list.php?activity_no=${activityNoNumeric}`)
+    .then(res => {
+            // console.log("API 成功回傳留言:", res.data); // 偵錯 Log
+            // console.log('API 原始資料:', res.data);            
             if (!res.data || !Array.isArray(res.data)) return;
 
             // --- 先把每筆留言整理成統一格式 ---
@@ -324,7 +326,10 @@ watch(
     },
     { immediate: true }
 );
-
+// //偵錯用
+// watch(comments, (val) => {
+//   console.log('comments 內容:', val);
+// });
 
 // Swiper modules
 const swiperModules = [Pagination];
@@ -352,15 +357,15 @@ const swiperModules = [Pagination];
       <!-- 狀態一：尚未跟團 -->
       <template v-if="!isGroupJoined">
         <Button
-          @click.stop.prevent="gotoSignup(activity?.activity_no)"
+          @click.stop.prevent="gotoSignup(activity?.activity_id)"
           theme="primary"
           size="md"
         >
           我要跟團!
         </Button>
         <LikeButton
-          :isActive="likeMap[activity?.activity_no]"
-          @click.stop.prevent="toggleLike(activity?.activity_no)"
+          :isActive="likeMap[activity?.activity_id]"
+          @click.stop.prevent="toggleLike(activity?.activity_id)"
         ></LikeButton>
       </template>
 
