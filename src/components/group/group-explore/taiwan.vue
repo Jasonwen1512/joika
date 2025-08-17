@@ -88,7 +88,7 @@ const fetchAndCategorize = async () => {
       }
     });
   } catch (error) {
-    console.error("抓資料失敗:", error);
+    console.error("抓取list資料失敗:", error);
   }
 };
 
