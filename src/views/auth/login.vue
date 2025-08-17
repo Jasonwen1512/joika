@@ -79,7 +79,7 @@ const goToRegister = () => {
             <input type="text" id="verify-code" v-model="form.verifyCode" />
             <div class="captcha-overlay">
               <CaptchaBox
-                @updateIdentifyCode="(val) => (realCaptcha = val)"
+                @updateIdentifyCode="val => (realCaptcha.value = val)"
                 ref="captchaRef"
               />
             </div>
