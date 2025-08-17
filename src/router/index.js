@@ -20,10 +20,14 @@ const routes = [
     path: "/group/group-explore",
     component: () => import("@/views/group/group-explore.vue"),
   },
+
   {
-    path: "/group/group-create",
+    path: "/group/:mode(create|preview|edit)/:activity_no?",
+    name: "group-create",
     component: () => import("@/views/group/group-create.vue"),
+    props: true,
   },
+
   {
     path: "/group/group-signup/:id",
     component: () => import("@/views/group/group-signup.vue"),
@@ -33,33 +37,31 @@ const routes = [
   { path: "/chat", component: () => import("@/views/chat/chat.vue") },
   { path: "/auth/login", component: () => import("@/views/auth/login.vue") },
   { path: "/auth/signup", component: () => import("@/views/auth/signup.vue") },
-  
-{
-  path: "/article/article",
-  component: () => import("@/views/article/article.vue"),
-},
 
-{
-  path: "/article/preview",
-  name: 'ArticlePreview',
-  component: () => import("@/views/article/article-detail.vue"),
-    props: { isPreview: true }
+  {
+    path: "/article/article",
+    component: () => import("@/views/article/article.vue"),
+  },
 
-},
+  {
+    path: "/article/preview",
+    name: "ArticlePreview",
+    component: () => import("@/views/article/article-detail.vue"),
+    props: { isPreview: true },
+  },
 
-{
-  path: '/article/:mode(create|edit)/:postid?',
-  name: 'ArticleModify',
-  component: () => import('@/views/article/article-create.vue'),
-  props: true,
-},
+  {
+    path: "/article/:mode(create|edit)/:postid?",
+    name: "ArticleModify",
+    component: () => import("@/views/article/article-create.vue"),
+    props: true,
+  },
 
-{
-  path: "/article/:postid",
-  name: 'ArticleDetail', // 建議為您的路由加上 name
-  component: () => import("@/views/article/article-detail.vue"),
-},
-
+  {
+    path: "/article/:postid",
+    name: "ArticleDetail", // 建議為您的路由加上 name
+    component: () => import("@/views/article/article-detail.vue"),
+  },
 
   {
     path: "/activity",
@@ -71,20 +73,16 @@ const routes = [
     component: () => import("@/views/activity/activity-detail.vue"),
   },
 
-    {
-  path: '/member/member-list',
-  component: () => import('@/views/member/member-list.vue')
-},
   {
-    path: "/group/form-preview",
-    component: () => import("@/views/group/group-create-preview.vue"),
+    path: "/member/member-list",
+    component: () => import("@/views/member/member-list.vue"),
   },
+
   {
     path: "/:pathMatch(.*)*",
     name: "404",
     component: () => import("@/views/404.vue"),
   },
-
 ];
 
 const router = createRouter({

@@ -59,7 +59,7 @@ const targetPage = computed(() => {
     return "group-explore";
   }
   if (path === "/support") return "support";
-  if (path === "/group/group-create") return "group-create";
+   if (path === "/group/create" || path.startsWith("/group/edit")) return "group-create";
   if (path === "/auth/login" || path === "/auth/signup") return "login";
 
   return null;
@@ -153,7 +153,7 @@ const pageIndicator = new URL(
               v-show="targetPage === 'support'"
           /></router-link>
           <router-link
-            to="/group/group-create"
+            :to="{ name: 'group-create', params: { mode: 'create' } }"
             @click="shStatus = false"
             @mouseenter="onMouseEnter('group-create')"
             @mouseleave="onMouseLeave"

@@ -104,7 +104,7 @@ onMounted(() => {
         @mouseleave="hoverOut"
       >
         <!-- 先暫時都回到首頁，之後再改 -->
-        <router-link :to="`/activity?category=${item.id}`">
+        <router-link :to="`/activity?category=${item.category_no}`">
           <img :src="item.img" :alt="`img-${index + 1}`" />
         </router-link>
       </div>
