@@ -1,6 +1,7 @@
 <script setup>
+import axios from "axios";
 import { ref, onMounted, onUnmounted } from "vue";
-import { FakeActivity } from "@/assets/data/fake-activity";
+// import { FakeActivity } from "@/assets/data/fake-activity";
 import { useRouter } from "vue-router";
 
 const isMobile = ref(window.innerWidth < 768);
@@ -16,7 +17,7 @@ const { id } = defineProps({
   },
 });
 
-const data = FakeActivity.filter((item) => item.activity_no === id);
+// const data = FakeActivity.filter((item) => item.activity_no === id);
 const target = ref({
   no: "",
   name: "",
@@ -26,18 +27,35 @@ const target = ref({
   max: 0,
 });
 
-onMounted(() => {
+const data = ref([]);
+
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+
+onMounted(async () => {
   window.addEventListener("resize", checkMobile);
-  if (data.length > 0) {
-    target.value = {
-      no: data[0].activity_no,
-      name: data[0].activity_name,
-      date: data[0].activity_start_date.slice(-5).replace("-", "/"),
-      current: data[0].current_participant,
-      min: data[0].min_participant,
-      max: data[0].max_participant,
-    };
-    console.log(target.value);
+  try {
+    const res = await axios.get(`${VITE_API_BASE}/activities/list.php`);
+
+    data.value = res.data.filter((item) => item.ACTIVITY_NO === id);
+
+    if (data.value.length > 0) {
+      target.value = {
+        no: data.value[0].ACTIVITY_NO,
+        name: data.value[0].ACTIVITY_NAME,
+        startDate: data.value[0].ACTIVITY_START_DATE.slice(5, 10).replace(
+          "-",
+          "/"
+        ),
+        endDate: data.value[0].ACTIVITY_END_DATE.slice(5, 10).replace("-", "/"),
+        current: data.value[0].CURRENT_PARTICIPANT,
+        min: data.value[0].MIN_PARTICIPANT,
+        max: data.value[0].MAX_PARTICIPANT,
+      };
+      // console.log(target.value);
+    }
+  } catch (error) {
+    console.error("串接list.php失敗，或是target給值失敗", error);
   }
 });
 
@@ -54,8 +72,16 @@ const router = useRouter();
       <div class="title">來報名一起玩！</div>
       <router-link :to="`/activity/${target.no}`"
         ><div class="group-content">
-          <div class="A">{{ `${target.date} ${target.name}` }}</div>
-          <div class="B">{{ `活動日期：${target.date}` }}</div>
+          <div class="A">
+            {{ target.name }}
+          </div>
+          <div class="B">
+            {{ `活動日期：${target.startDate}` }}
+            <!-- 只有一天的話，只顯示當天日期 -->
+            <span v-if="target.startDate !== target.endDate">
+              - {{ target.endDate }}</span
+            >
+          </div>
           <div class="C">{{ `參團人數：${target.current}/${target.max}` }}</div>
         </div></router-link
       >

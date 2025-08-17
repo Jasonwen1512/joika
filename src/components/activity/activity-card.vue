@@ -4,6 +4,7 @@ import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { componentSizeMap } from "element-plus";
 
 const props = defineProps({
   item: Object,
@@ -21,9 +22,13 @@ const gotoSignup = (id) => {
 };
 
 const formDate = (dateStr) => {
-  const date = new Date(dateStr);
+  // 將 "YYYY-MM-DD HH:MM:SS" -> "YYYY-MM-DDTHH:MM:SS"
+  const isoStr = dateStr.replace(" ", "T");
+  const date = new Date(isoStr);
+
   const month = date.getMonth() + 1;
   const day = date.getDate();
+
   return `${month.toString().padStart(2, "0")}/${day
     .toString()
     .padStart(2, "0")}`;
@@ -33,7 +38,12 @@ const titleDate = computed(() => {
   if (!props.item) return "";
   const start = formDate(props.item.ACTIVITY_START_DATE);
   const end = formDate(props.item.ACTIVITY_END_DATE);
-  if (props.item.ACTIVITY_START_DATE === props.item.ACTIVITY_END_DATE) {
+
+  // console.log(
+  //   `start:${start}  end:${end} 活動名稱：${props.item.ACTIVITY_NAME}`
+  // );
+
+  if (start === end) {
     return `${start} ${props.item.ACTIVITY_NAME}`;
   } else {
     return `${start}-${end} ${props.item.ACTIVITY_NAME}`;

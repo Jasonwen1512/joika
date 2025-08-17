@@ -33,7 +33,7 @@ onMounted(async () => {
   try {
     const response = await axios.get(`${VITE_API_BASE}/activities/list.php`);
     activitiesData.value = response.data;
-    console.log(activitiesData.value);
+    // console.log(activitiesData.value);
   } catch (error) {
     console.error(`抓取list-all資料失敗${error}`);
   }
