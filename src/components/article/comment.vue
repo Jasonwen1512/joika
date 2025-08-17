@@ -119,19 +119,19 @@ const currentUser = {
 // 
 // 使用 defineProps 來接收從父元件傳入的留言資料
 const props = defineProps({
-  comments: {
+    comments: {
     type: Array,
     required: true,
     default: () => [] // 提供一個預設的空陣列，增加程式碼的穩健性
-  }
+    }
 });
 //偵錯
 watch(() => props.comments, (newComments) => {
-  console.log('【子元件】: comments prop 偵測到變化！');
-  console.log('【子元件】: 收到的新資料長度為:', newComments.length);
-  if (newComments.length > 0) {
+    console.log('【子元件】: comments prop 偵測到變化！');
+    console.log('【子元件】: 收到的新資料長度為:', newComments.length);
+    if (newComments.length > 0) {
     console.log('【子元件】: 收到的第一筆資料:', JSON.stringify(newComments[0]));
-  }
+    }
 }, { deep: true }); // 使用 deep: true 確保能偵測到陣列內部的變化
 // ^^^^^^ 【請加入這一段】 ^^^^^^
 
