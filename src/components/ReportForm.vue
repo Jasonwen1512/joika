@@ -14,7 +14,9 @@ const props = defineProps({
         alert('請選擇檢舉原因')
         return
     }
-    props.onSubmit({ reason: reason.value, detail: detail.value })
+    props.onSubmit({ 
+        reason: reason.value, 
+        detail: detail.value })
     }
     // 取消
     function cancelForm() {
@@ -22,47 +24,6 @@ const props = defineProps({
     import('sweetalert2').then(({ default: Swal }) => Swal.close())
     }
 
-    async function handleReportSubmit({ reason, detail }) {
-  // 對應 reason 字串轉成 reason_no
-    const reasonMap = {
-        spam: 1,
-        abuse: 2,
-        ads: 3,
-        fakeNews: 4,
-        LeakpersonalInfo: 5,
-        other: 6,
-    };
-
-    const report_reason_no = reasonMap[reason] ?? 6;
-
-    // 測試用固定資料，之後從登入資料或 route 取得
-    const reporter_id = 1;  // TODO: 從登入資訊取得
-    const post_no = 123;    // TODO: 傳入或從 route 取得
-
-    try {
-        const res = await fetch('http://localhost/joika-api-server/reports/post-report.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            reporter_id,
-            post_no,
-            report_reason_no,
-            report_description: detail,
-        }),
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-        alert('檢舉成功！');
-        } else {
-        alert(result.error || '檢舉失敗');
-        }
-    } catch (error) {
-        console.error('發生錯誤：', error);
-        alert('送出失敗，請稍後再試');
-    }
-    }
     </script>
 
     <template>

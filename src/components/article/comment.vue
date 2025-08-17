@@ -292,6 +292,7 @@ const likeIt = (comment) => { // 接收整個 comment 物件
         comment.animateLike = false;
     }, 300);
 };
+// 將檢舉原因映射到數字
 function mapReasonToNumber(reason) {
     const map = {
         spam: 1,
@@ -303,47 +304,48 @@ function mapReasonToNumber(reason) {
     };
     return map[reason] || 6;
 }
-//檢舉
+// 檢舉觸發函式
 function ReportIt() {
     const container = document.createElement("div");
+
     render(
         h(ReportForm, {
-            onSubmit: async (data) => {
-                // ✅ 嘗試從 localStorage 取得使用者 ID
-                const user = JSON.parse(localStorage.getItem("user"));
-                const reporterId = user?.id;
+        onSubmit: async (data) => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            const reporterId = user?.id;
 
-                if (!reporterId) {
-                    Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
-                    return;
+            if (!reporterId) {
+            Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
+            return;
+            }
+
+            const payload = {
+            reporter_id: reporterId,
+            post_no: postid,
+            report_reason_no: mapReasonToNumber(data.reason),
+            report_description: data.detail,
+            };
+
+            try {
+            const { data: result } = await axios.post(
+                `${import.meta.env.VITE_API_BASE}/reports/post-report.php`,
+                payload,
+                {
+                headers: { "Content-Type": "application/json" },
                 }
+            );
 
-                const payload = {
-                    reporter_id: reporterId,
-                    post_no: postid,  // 頁面上的文章 ID
-                    report_reason_no: mapReasonToNumber(data.reason),
-                    report_description: data.detail,
-                };
-
-                try {
-                    const response = await fetch('VITE_API_BASE/reports/post-report.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                    });
-
-                    const result = await response.json();
-                    if (result.success) {
-                        Swal.close();
-                        Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
-                    } else {
-                        Swal.fire("發生錯誤", result.error || "請稍後再試", "error");
-                    }
-                } catch (error) {
-                    console.error('發生錯誤：', error);
-                    Swal.fire("錯誤", "無法連線至伺服器", "error");
-                }
-            },
+            if (result.success) {
+                Swal.close();
+                Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+            } else {
+                Swal.fire("發生錯誤", result.error || "請稍後再試", "error");
+            }
+            } catch (error) {
+            console.error("檢舉 API 錯誤：", error.response?.data || error.message);
+            Swal.fire("錯誤", "無法連線至伺服器", "error");
+            }
+        },
         }),
         container
     );
