@@ -192,17 +192,13 @@ function getPostComments(postNo) {
     error.value = null;
     comments.value = null; // 重置為 null，以配合 v-if="comments"
 
-    axios.get(`http://localhost:8888/joika-api/comments/post-list.php?post_no=${postNo}`)
-        .then(res => {
-            // 先宣告一個變數來存放最終要賦值的結果，初始為空陣列
-            let finalComments = [];
+    axios.get(`http://localhost:8888/joika-api-server/comments/post-list.php?post_no=${postNo}`)
+         .then(res => {
+            let allComments = [];
 
-            // 檢查 API 回應是否為包含資料的有效陣列
-            if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-                
-                // 在 if 內部進行資料轉換
-                // 並將結果存入我們在外面宣告的 finalComments 變數
-                finalComments = res.data.map(c => ({
+            if (res.data && Array.isArray(res.data)) {
+                // 先把每一筆留言整理成統一格式
+                allComments = res.data.map(c => ({
                     id: c.POST_COMMENT_NO,
                     userid: c.MEMBER_ID,
                     author: c.MEMBER_NICKNAME || "匿名",
@@ -211,24 +207,38 @@ function getPostComments(postNo) {
                     content: c.COMMENT_CONTENT,
                     likenum: Number(c.LIKE_NUM || 0),
                     liked: false,
-                    parentId: c.PARENT_NO,
+                    parentId: c.PARENT_NO, // 父留言 ID
                     replies: [],
                     isRepliesExpanded: false,
                     animateLike: false
                 }));
+            }
 
-            } 
-            // 如果 API 回傳的是空陣列或無效資料，finalComments 會維持初始的空陣列 []
-            
-            // 【關鍵】在 .then 的最末端，只做一次賦值操作
-            // 無論 if 條件是否成立，finalComments 都是一個有效的陣列 (有資料或空的)
-            comments.value = finalComments;
+            // --- 關鍵步驟：把留言整理成樹狀 ---
+            const commentMap = {};  // 暫存所有留言，方便用 id 查
+            const rootComments = []; // 最外層留言（父留言）
 
+            allComments.forEach(c => {
+                commentMap[c.id] = c;
+            });
+
+            allComments.forEach(c => {
+                if (c.parentId && commentMap[c.parentId]) {
+                    // 如果有 parentId，且 parent 存在 → 放進 parent 的 replies
+                    commentMap[c.parentId].replies.push(c);
+                } else {
+                    // 沒有 parentId → 視為最上層留言
+                    rootComments.push(c);
+                }
+            });
+
+            // 只留下父留言 (每個父留言已經帶好 replies)
+            comments.value = rootComments;
         })
         .catch(err => {
             console.error("取得文章留言失敗", err);
             error.value = "無法載入留言，請稍後再試。";
-            comments.value = []; // 發生錯誤時也賦予空陣列，避免 v-if="comments" (null) 判斷出錯
+            comments.value = [];
         })
         .finally(() => {
             isLoading.value = false;

@@ -1,6 +1,6 @@
 export const FakeActivity = [
   {
-    activity_no: "ACT00001",
+    activity_no: "1",
     activity_name: "嘉明湖 一次攻兩座百岳！",
     category_name: "登山",
     location: "台東縣海端鄉 嘉明湖",
@@ -27,7 +27,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00002",
+    activity_no: "2",
     activity_name: "小琉球 夜潛拍攝海龜生態",
     category_name: "水上活動",
     location: "屏東縣琉球鄉 小琉球海域",
@@ -54,7 +54,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00003",
+    activity_no: "3",
     activity_name: "大安桌遊店 狼人殺整夜狂歡局",
     category_name: "桌遊",
     location: "台北市大安區 桌遊店",
@@ -80,7 +80,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00004",
+    activity_no: "4",
     activity_name: "陽明山 星空下的露營體驗",
     category_name: "露營",
     location: "台北市北投區 陽明山",
@@ -106,7 +106,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00005",
+    activity_no: "5",
     activity_name: "信義威秀 鐵達尼號重映之夜",
     category_name: "電影",
     location: "台北市信義區 信義威秀影城",
@@ -132,7 +132,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00006",
+    activity_no: "6",
     activity_name: "華山文創園區 手作陶藝下午班",
     category_name: "手作",
     location: "台北市中正區 華山文創園區",
@@ -158,7 +158,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00007",
+    activity_no: "7",
     activity_name: "台中都會公園 晨間瑜伽舒展課",
     category_name: "運動",
     location: "台中市北屯區 都會公園",
@@ -184,7 +184,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00008",
+    activity_no: "8",
     activity_name: "澎湖 北海岸SUP立槳初體驗",
     category_name: "水上活動",
     location: "澎湖縣白沙鄉 北海岸",
@@ -210,7 +210,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00009",
+    activity_no: "9",
     activity_name: "宜蘭老街 在地美食散步聚餐",
     category_name: "聚餐",
     location: "宜蘭縣宜蘭市 宜蘭老街",
@@ -236,7 +236,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00010",
+    activity_no: "10",
     activity_name: "南投溪頭 森林浴文化體驗",
     category_name: "文化體驗",
     location: "南投縣鹿谷鄉 溪頭自然教育園區",
@@ -262,7 +262,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00011",
+    activity_no: "11",
     activity_name: "饒河夜市 深夜小吃快閃團",
     category_name: "聚餐",
     location: "台北市松山區 饒河夜市",
@@ -288,7 +288,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00012",
+    activity_no: "12",
     activity_name: "合歡山 夜衝觀星登山行",
     category_name: "登山",
     location: "南投縣仁愛鄉 合歡山",
@@ -314,7 +314,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00013",
+    activity_no: "13",
     activity_name: "信義區 露天音樂表演之夜",
     category_name: "演出表演",
     location: "台北市信義區 四四南村廣場",
@@ -340,7 +340,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00014",
+    activity_no: "14",
     activity_name: "台北KTV 經典情歌大合唱",
     category_name: "唱歌",
     location: "台北市信義區 KTV商圈",
@@ -366,7 +366,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00015",
+    activity_no: "15",
     activity_name: "花蓮七星潭 日出攝影團",
     category_name: "其他",
     location: "花蓮縣新城鄉 七星潭",
@@ -392,7 +392,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00016",
+    activity_no: "16",
     activity_name: "木柵 貓空纜車文化散策",
     category_name: "文化體驗",
     location: "台北市文山區 貓空纜車站",
@@ -418,7 +418,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00017",
+    activity_no: "17",
     activity_name: "台中動漫展 Cosplay自由交流日",
     category_name: "展覽",
     location: "台中市西屯區 臺中國際展覽館",
@@ -444,7 +444,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00018",
+    activity_no: "18",
     activity_name: "小巨蛋 Coldplay現場表演",
     category_name: "演出表演",
     location: "台北市松山區 台北小巨蛋",
@@ -470,7 +470,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00019",
+    activity_no: "19",
     activity_name: "花蓮富里 金針花季健行之旅",
     category_name: "登山",
     location: "花蓮縣富里鄉 六十石山",
@@ -496,7 +496,7 @@ export const FakeActivity = [
     staff_id: "ST001",
   },
   {
-    activity_no: "ACT00020",
+    activity_no: "20",
     activity_name: "高雄駁二 插畫市集週末逛展",
     category_name: "展覽",
     location: "高雄市鹽埕區 駁二藝術特區",

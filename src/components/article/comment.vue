@@ -14,6 +14,8 @@ const route = useRoute();
 const router = useRouter();
 const postid = route.params.postid;
 const article = articleList.find((item) => item.postid === postid);
+
+
 //下方留言區
 //假的自己 展示用
 const currentUser = {
@@ -371,6 +373,9 @@ function ReportIt() {
                             @click="toggleReplyBox(comment.id)"
                         >
                             <img :src="commenticon" />
+                            <span v-if="comment.replies.length > 0" class="reply-count">
+                 {{ comment.replies.length }}
+                 </span>
                         </div>
                         <div
                             class="action-icon"
@@ -664,7 +669,16 @@ function ReportIt() {
         color: #333;
     }
 }
-
+.action-icon{
+    position: relative;
+}
+.reply-count {
+   position: absolute;
+    top: 30%;
+    right: 40%;
+    font-size: 12px;
+    color: #333;
+}
 .action-icon:hover {
     cursor: pointer;
 }
@@ -693,5 +707,10 @@ function ReportIt() {
     100% {
         transform: scale(1);
     }
+}
+.reply-section{
+   @include desktop() {
+margin-left: 20px;   
+}
 }
 </style>

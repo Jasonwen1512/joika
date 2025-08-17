@@ -1,14 +1,16 @@
 <script setup>
 // 1. 引入我們準備好的、獨立的留言板元件
 import commentSection from "@/components/activity/activity-detail/comment-section.vue";
+// import CommentComponent from "@/components/article/comment.vue"; // <-- 改用我的component
+
 import { useRoute, useRouter } from "vue-router";
 // === 第一步：在 import ref 的地方，加入 onMounted 和 onUnmounted ===
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, onMounted, onUnmounted ,watch} from "vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Button from "@/components/Button.vue";
 import LikeButton from "@/components/activity/like-button.vue";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-
+import axios from 'axios';
 // === 第二步：在這裡只引入您確定已存在的「彈窗元件」 ===
 import RatingModal from "@/components/activity/activity-detail/rating-modal.vue";
 // === 新增：為未來的「取消彈窗」預留 import 位置 ===
@@ -22,10 +24,10 @@ import "swiper/css/pagination";
 // --- End Swiper ---
 
 const route = useRoute();
-const activityNo = route.params.activity_id;
+const activity_no = route.params.activity_id;
 
 const activity = computed(() =>
-  FakeActivity.find((item) => String(item.activity_no) === String(activityNo))
+  FakeActivity.find((item) => String(item.activity_no) === String(activity_no))
 );
 
 const likeMap = ref({});
@@ -169,71 +171,145 @@ const participants = ref([
     role: "軟體開發",
   },
 ]);
-
+//=======留言區改用API串接==========
 // 2. 準備要傳遞給留言板的「留言列表」資料
 //    (我們先借用您頁面上現有的團員資料來展示，並用 map 整理成留言板要的格式)
 
-const fakeComments = [
-  "這活動真的太棒了，完全超出我的預期！下次還要再來！👍",
-  "主揪人超好，把所有事情都安排得妥妥當當，給個大大的讚！",
-  "哇，原來這裡這麼美！感謝分享，不然我都不知道這個好地方。",
-  "我是第一次參加，本來有點緊張，但大家都好親切，很開心認識大家！😊",
-  "有人知道主揪用的那款藍色背包是什麼牌子的嗎？好好看！",
-  "雖然那天有點小下雨，但完全不影響興致，反而有種特別的氛圍。",
-  "推！這是我今年參加過最棒的活動，沒有之一！",
-  "照片拍得真好！可以分享原圖給我嗎？謝謝你！",
-  "哈哈，我就是照片裡笑得最傻的那個！那天真的玩瘋了！🤣",
-  "可惜這次沒跟到，看你們玩得這麼開心，下次有團一定要通知我！",
-];
+// const fakeComments = [
+//   "這活動真的太棒了，完全超出我的預期！下次還要再來！👍",
+//   "主揪人超好，把所有事情都安排得妥妥當當，給個大大的讚！",
+//   "哇，原來這裡這麼美！感謝分享，不然我都不知道這個好地方。",
+//   "我是第一次參加，本來有點緊張，但大家都好親切，很開心認識大家！😊",
+//   "有人知道主揪用的那款藍色背包是什麼牌子的嗎？好好看！",
+//   "雖然那天有點小下雨，但完全不影響興致，反而有種特別的氛圍。",
+//   "推！這是我今年參加過最棒的活動，沒有之一！",
+//   "照片拍得真好！可以分享原圖給我嗎？謝謝你！",
+//   "哈哈，我就是照片裡笑得最傻的那個！那天真的玩瘋了！🤣",
+//   "可惜這次沒跟到，看你們玩得這麼開心，下次有團一定要通知我！",
+// ];
 
-const commentsForBoard = ref(
-  participants.value.map((p) => {
-    // === 魔法在這裡發生！===
-    // 1. 從我們的「台詞本」中，隨機選一個位置 (index)
-    const randomIndex = Math.floor(Math.random() * fakeComments.length);
+// const commentsForBoard = ref(
+//   participants.value.map((p) => {
+//     // === 魔法在這裡發生！===
+//     // 1. 從我們的「台詞本」中，隨機選一個位置 (index)
+//     const randomIndex = Math.floor(Math.random() * fakeComments.length);
 
-    // 2. 根據這個隨機位置，抽出對應的台詞
-    const randomComment = fakeComments[randomIndex];
 
-    // 3. 回傳組合好的、擁有獨一無二留言的資料
-    //    (注意：只有 content 欄位被修改了)
-    return {
-      id: p.id,
-      author: p.name,
-      avatar: p.avatar,
-      content: randomComment, // <-- 使用我們隨機抽出的台- 詞，取代掉原本固定的文字！
-      timestamp: new Date().toLocaleDateString(),
-      likenum: p.reviews,
-      replies: [],
-    };
-  })
+//     // 2. 根據這個隨機位置，抽出對應的台詞
+//     const randomComment = fakeComments[randomIndex];
+
+//     // 3. 回傳組合好的、擁有獨一無二留言的資料
+//     //    (注意：只有 content 欄位被修改了)
+//     return {
+//       id: p.id,
+//       author: p.name,
+//       avatar: p.avatar,
+//       content: randomComment, // <-- 使用我們隨機抽出的台- 詞，取代掉原本固定的文字！
+//       timestamp: new Date().toLocaleDateString(),
+//       likenum: p.reviews,
+//       replies: [],
+//     };
+//   })
+// );
+
+// // 監聽員一：負責處理「新增主留言」的請求
+// function handleAddNewComment(newCommentData) {
+//   commentsForBoard.value.push(newCommentData);
+// }
+
+// // 監聽員二：負責處理「新增回覆」的請求
+// function handleAddNewReply({ parentId, reply }) {
+//   // 1. 先從我們的留言黑板上，找到那則被回覆的父留言
+//   const parentComment = commentsForBoard.value.find((c) => c.id === parentId);
+
+//   // 2. 如果找到了，就把新的回覆加到它的 replies 背包裡
+//   if (parentComment) {
+//     if (!parentComment.replies) {
+//       parentComment.replies = [];
+//     }
+//     parentComment.replies.push(reply);
+//   }
+// }
+
+// // 3. 準備要傳遞給留言板的「當前使用者」資料
+// const currentUserForBoard = ref({
+//   userid: "M-MYSELF",
+//   author: "我本人",
+//   avatar: "https://i.pravatar.cc/150?u=me",
+// });
+
+//留言API
+
+const comments = ref([]);
+const isLoading = ref(true);
+const error = ref(null);
+
+function getActivityComments(activity_no) {
+    isLoading.value = true;
+    error.value = null;
+    comments.value = [];
+
+    axios.get(`http://localhost:8888/joika-api-server/comments/activities-list.php?activity_no=${activity_no}`)
+        .then(res => {
+            if (!res.data || !Array.isArray(res.data)) return;
+
+            // --- 先把每筆留言整理成統一格式 ---
+            const allComments = res.data.map(c => ({
+                id: c.ACTIVITY_COMMENT_NO,
+                userid: c.MEMBER_ID,
+                author: c.MEMBER_NICKNAME || '匿名',
+                avatar: c.MEMBER_AVATAR || 'https://i.pravatar.cc/150?u=default',
+                timestamp: c.CREATED_AT,
+                content: c.COMMENT_CONTENT,
+                likenum: Number(c.LIKE_NUM || 0),
+                liked: false,
+                parentId: c.PARENT_NO,
+                replies: [],
+                isRepliesExpanded: false,
+                animateLike: false
+            }));
+
+            // --- 將平面陣列整理成樹狀 ---
+            const commentMap = {};
+            const rootComments = [];
+
+            allComments.forEach(c => {
+                commentMap[c.id] = c;
+            });
+
+            allComments.forEach(c => {
+                if (c.parentId && commentMap[c.parentId]) {
+                    commentMap[c.parentId].replies.push(c);
+                } else {
+                    rootComments.push(c);
+                }
+            });
+
+            comments.value = rootComments;
+        })
+        .catch(err => {
+            console.error('取得留言失敗', err);
+            error.value = '無法載入留言，請稍後再試。';
+            comments.value = [];
+        })
+        .finally(() => {
+            isLoading.value = false;
+        });
+}
+
+// --- 監聽路由或活動編號變化 ---
+watch(
+    () => route.params.activityNo,
+    (newId) => {
+        if (!newId) {
+            comments.value = [];
+            return;
+        }
+        getActivityComments(newId);
+    },
+    { immediate: true }
 );
 
-// 監聽員一：負責處理「新增主留言」的請求
-function handleAddNewComment(newCommentData) {
-  commentsForBoard.value.push(newCommentData);
-}
-
-// 監聽員二：負責處理「新增回覆」的請求
-function handleAddNewReply({ parentId, reply }) {
-  // 1. 先從我們的留言黑板上，找到那則被回覆的父留言
-  const parentComment = commentsForBoard.value.find((c) => c.id === parentId);
-
-  // 2. 如果找到了，就把新的回覆加到它的 replies 背包裡
-  if (parentComment) {
-    if (!parentComment.replies) {
-      parentComment.replies = [];
-    }
-    parentComment.replies.push(reply);
-  }
-}
-
-// 3. 準備要傳遞給留言板的「當前使用者」資料
-const currentUserForBoard = ref({
-  userid: "M-MYSELF",
-  author: "我本人",
-  avatar: "https://i.pravatar.cc/150?u=me",
-});
 
 // Swiper modules
 const swiperModules = [Pagination];
@@ -437,12 +513,18 @@ const swiperModules = [Pagination];
     </section>
 
     <div class="comments-container">
-      <commentSection
+<div class="comments-section">
+     
+    <div v-if="isLoading">正在載入留言...</div>
+    <div v-else-if="error">{{ error }}</div>
+    <commentSection v-if="comments" :comments="comments" />
+    </div>
+      <!-- <commentSection
         :comments-data="commentsForBoard"
         :user-data="currentUserForBoard"
         @add-comment="handleAddNewComment"
         @add-reply="handleAddNewReply"
-      />
+      /> -->
     </div>
 
     <!-- === 第五步：在 template 的最下方，加入這段「彈窗元件」 === -->
