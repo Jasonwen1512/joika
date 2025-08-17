@@ -22,13 +22,9 @@ const gotoSignup = (id) => {
 };
 
 const formDate = (dateStr) => {
-  // 將 "YYYY-MM-DD HH:MM:SS" -> "YYYY-MM-DDTHH:MM:SS"
-  const isoStr = dateStr.replace(" ", "T");
-  const date = new Date(isoStr);
-
+  const date = new Date(dateStr);
   const month = date.getMonth() + 1;
   const day = date.getDate();
-
   return `${month.toString().padStart(2, "0")}/${day
     .toString()
     .padStart(2, "0")}`;
