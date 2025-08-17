@@ -124,8 +124,7 @@ const filterActivities = computed(() => {
 
     // 分類搜尋
     const matchCategory =
-      activeCategory.value === "0" ||
-      act.category_no === activeCategory.value;
+      activeCategory.value === "0" || act.category_no === activeCategory.value;
 
     return matchKeyword && matchDate && matchCategory;
   });
