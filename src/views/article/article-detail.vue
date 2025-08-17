@@ -51,32 +51,12 @@ const props = defineProps({
 
 // ===================================================================
 // 2. 使用 computed 智慧地決定要顯示哪一份文章資料
-//    這是整個修改的核心！
 // ===================================================================
 onUnmounted(() => {
   previewStore.isPreview = false;
 });
 const article = computed(() => {
-  // 【判斷 A】如果是預覽模式
-  // if (props.isPreview) {
-  //   // 從 history.state 中讀取我們傳過來的資料
-  //   const previewData = history.state.previewData;
-
-  //   if (previewData) {
-  //     console.log(
-  //       "%c使用 history.state 中的預覽資料進行渲染。",
-  //       "color: green; font-weight: bold;",
-  //       previewData
-  //     );
-  //     // 直接回傳這個物件
-  //     return previewData;
-  //   } else {
-  //     console.error(
-  //       "錯誤：處於預覽模式，但無法從 history.state 中找到預覽資料。"
-  //     );
-  //     return null;
-  //   }
-  // }
+  
   if (previewStore.isPreview) {
     // console.log("這是預覽模式");
     // console.log(previewStore.previewData);

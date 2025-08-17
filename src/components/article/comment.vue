@@ -152,22 +152,38 @@ function postComment() {
     setTimeout(() => {
         isMainCommentAnimating.value = false;
     }, 300);
-    // 2. 建立一個新的留言物件
-    // 這個物件的結構必須和 `comments` 陣列裡的其他物件一樣
-    const newCommentObject = {
-        // 使用 Date.now() 來產生一個獨一無二的 ID，作為 v-for 的 key
-        id: Date.now(),
-        userid: currentUser.userid,
-        author: currentUser.author,
-        avatar: currentUser.avatar,
-        timestamp: new Date().toLocaleString("zh-TW"),
-        content: newComment.value,
-        likenum: 0,
-        replies: [],
-        isRepliesExpanded: false, // <-- 2. 為新留言也加上狀態
-    };
-
-    props.comments.push(newCommentObject);
+    //這邊改用API
+    // // 2. 建立一個新的留言物件
+    // // 這個物件的結構必須和 `comments` 陣列裡的其他物件一樣
+    // const newCommentObject = {
+    //     // 使用 Date.now() 來產生一個獨一無二的 ID，作為 v-for 的 key
+    //     id: Date.now(),
+    //     userid: currentUser.userid,
+    //     author: currentUser.author,
+    //     avatar: currentUser.avatar,
+    //     timestamp: new Date().toLocaleString("zh-TW"),
+    //     content: newComment.value,
+    //     likenum: 0,
+    //     replies: [],
+    //     isRepliesExpanded: false, // <-- 2. 為新留言也加上狀態
+    // };
+    // props.comments.push(newCommentObject);
+     axios.post("http://localhost/joika-api-server/post-create.php", {
+        post_no: postid,
+        member_id: currentUser.userid,
+        comment_content: newComment.value,
+        parent_no: null
+    })
+    .then(res => {
+        console.log("新增成功：", res.data);
+        // 通知父層重新抓留言
+        emit("comment-added");
+        newComment.value = "";
+        goToCommentPage(totalCommentPages.value);
+    })
+    .catch(err => {
+        console.error("錯誤：", err);
+    });
     newComment.value = "";
     goToCommentPage(totalCommentPages.value);
 }
