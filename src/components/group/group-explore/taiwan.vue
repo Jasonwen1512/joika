@@ -18,6 +18,9 @@ import axios from "axios";
 
 import PlaceholderImageBg from "@/components/placeholder-image-bg.vue";
 
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+
 import {
   ref,
   reactive,
@@ -39,12 +42,10 @@ const eastData = ref([]);
 const fetchAndCategorize = async () => {
   try {
     // 串接 API
-    const response = await axios.get(
-      "http://localhost:8888/joika-api-server/activities/list.php"
-    );
+    const response = await axios.get(`${VITE_API_BASE}/activities/list.php`);
 
     FakeActivity.value = response.data;
-    console.log(FakeActivity.value);
+    // console.log(FakeActivity.value);
 
     // 資料拿到後再分類
     FakeActivity.value.forEach((item) => {

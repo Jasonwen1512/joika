@@ -12,17 +12,16 @@ import "swiper/css/pagination";
 import { FreeMode, Pagination } from "swiper/modules";
 import axios from "axios";
 
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+
 const listLimited = ref([]);
 const listLatest = ref([]);
 
 onMounted(async () => {
-  const res1 = await axios.get(
-    "http://localhost:8888/joika-api-server/activities/list-limited.php"
-  );
+  const res1 = await axios.get(`${VITE_API_BASE}/activities/list-limited.php`);
   listLimited.value = await res1.data;
-  const res2 = await axios.get(
-    "http://localhost:8888/joika-api-server/activities/list-latest.php"
-  );
+  const res2 = await axios.get(`${VITE_API_BASE}/activities/list-latest.php`);
   listLatest.value = await res2.data;
 });
 
