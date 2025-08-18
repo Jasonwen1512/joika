@@ -292,18 +292,6 @@ const likeIt = (comment) => { // 接收整個 comment 物件
         comment.animateLike = false;
     }, 300);
 };
-// 將檢舉原因映射到數字
-function mapReasonToNumber(reason) {
-    const map = {
-        spam: 1,
-        abuse: 2,
-        ads: 3,
-        fakeNews: 4,
-        LeakpersonalInfo: 5,
-        other: 6,
-    };
-    return map[reason] || 6;
-}
 // 檢舉觸發函式
 function ReportIt() {
     const container = document.createElement("div");
