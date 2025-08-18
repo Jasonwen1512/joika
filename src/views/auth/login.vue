@@ -7,6 +7,13 @@ import { loginByPhonePassword } from "@/assets/data/authState";
 ;
 
 const realCaptcha = ref(""); // 接住 emit 的驗證碼
+
+// ✅ 專用接收器：保證 realCaptcha 保持是 ref，不會被改壞成字串
+const onCaptchaUpdate = (val) => {
+  realCaptcha.value = String(val || '')
+  console.log('[login] captcha =', realCaptcha.value)  
+}
+
 const router = useRouter();
 const captchaRef = ref(null);
 
@@ -61,7 +68,6 @@ const goToRegister = () => {
           <input
             type="tel"
             id="member_phone" 
-            @blur="validateMobile"
             v-model="form.mobile"
           />
           <p class="error-msg" v-if="error.mobile">{{ error.mobile }}</p>
@@ -79,7 +85,7 @@ const goToRegister = () => {
             <input type="text" id="verify-code" v-model="form.verifyCode" />
             <div class="captcha-overlay">
               <CaptchaBox
-                @updateIdentifyCode="val => (realCaptcha.value = val)"
+                @updateIdentifyCode="onCaptchaUpdate"
                 ref="captchaRef"
               />
             </div>

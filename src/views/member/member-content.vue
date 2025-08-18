@@ -4,13 +4,15 @@ import Button from "@/components/Button.vue";
 import EditIcon from "@/assets/img/icon/edit.svg";
 import NotifyIcon from "@/assets/img/icon/notification.svg";
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRouter } from 'vue-router'
 import FullCalendar from "@/components/member/member-content/FullCalendar.vue";
 import { articleList } from "@/assets/data/fake-article"; //引入文章假資料
 import MemberActivityCard from "@/components/member/member-activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
-import memberarticle from "@//components/member/member-post.vue";
-import membercomment from "@//components/member/member-comment.vue";
+import memberarticle from "@/components/member/member-post.vue";
+import membercomment from "@/components/member/member-comment.vue";
+import { authState, isAuthenticated, logout } from '@/assets/data/authState'
+
 //靜態資料 活動類別與標籤顏色
 const activities = ["水上活動", "露營", "登山"];
 
@@ -80,6 +82,25 @@ const filteredActivities = computed(() => {
 const openActivities = computed(() => {
     return FakeActivity.filter((a) => a.activity_status === "開團中");
 });
+
+//登出
+const router = useRouter()
+const loading = ref(false)
+
+const handleLogout = async () => {
+    if (loading.value) return
+    loading.value = true
+    try {
+        await logout()               // 呼叫 /users/logout.php，清掉 PHP session
+        // authState.user 會在 logout() 裡被設為 null，UI 會自動變成未登入
+        router.replace('/auth/login') // 導回登入頁（用 replace 避免「上一頁」回到會員頁）
+    } catch (e) {
+        console.error(e)
+        alert('登出失敗，稍後再試')
+    } finally {
+        loading.value = false
+    }
+}
 </script>
 
 <template>
@@ -138,6 +159,10 @@ const openActivities = computed(() => {
                     theme="info"
                     >編輯檔案</Button
                 >
+
+                <Button isOutline theme="secondary" size="lg" @click="handleLogout">
+                    {{ loading ? '登出中…' : '登出' }}
+                </Button>
             </div>
         </div>
 
