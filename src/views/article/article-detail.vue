@@ -193,12 +193,20 @@ const comments = ref(null);
 const isLoading = ref(true); // 初始設為 true
 const error = ref(null);
 
-// --- 3. 強化 getPostComments 函式 ---
-function getPostComments(postNo) {
-  // 初始狀態設定 (可以保留或放在 onMounted 之前)
+async function fetchComments() {
+  const postNo = route.params.postid;
+
+  // 如果是預覽模式，或沒有 postid，就不要執行抓取
+  if (previewStore.isPreview || !postNo) {
+    comments.value = []; // 確保在預覽模式下留言是清空的
+    isLoading.value = false;
+    return;
+  }
+
+  console.log(`父元件：開始為文章 #${postNo} 抓取留言...`);
   isLoading.value = true;
   error.value = null;
-  comments.value = null; // 重置為 null，以配合 v-if="comments"
+  // comments.value = null; // 重置為 null，以配合 v-if="comments"
 
   axios
     .get(
@@ -213,7 +221,8 @@ function getPostComments(postNo) {
           id: c.POST_COMMENT_NO,
           userid: c.MEMBER_ID,
           author: c.MEMBER_NICKNAME || "匿名",
-          avatar: c.MEMBER_AVATAR || "https://i.pravatar.cc/150?u=default",
+          avatar:
+            c.MEMBER_AVATAR || `https://i.pravatar.cc/150?u=${c.MEMBER_ID}`,
           timestamp: c.CREATED_AT,
           content: c.COMMENT_CONTENT,
           likenum: Number(c.LIKE_NUM || 0),
@@ -259,17 +268,10 @@ function getPostComments(postNo) {
 // --- 4. 使用 watch 監聽路由變化並觸發 API ---
 watch(
   () => route.params.postid,
-  (newPostId) => {
-    // 如果是預覽模式，或沒有 postid，就不要執行抓取
-    if (previewStore.isPreview || !newPostId) {
-      comments.value = []; // 確保在預覽模式下留言是清空的
-      return;
-    }
-
-    // 正常模式下，呼叫 API
-    getPostComments(newPostId);
+  () => {
+    fetchComments();
   },
-  { immediate: true } // 立即執行一次，取代 onMounted
+  { immediate: true }
 );
 </script>
 
@@ -348,7 +350,11 @@ watch(
     <div v-if="!isPreview" class="comments-section">
       <div v-if="isLoading">正在載入留言...</div>
       <div v-else-if="error">{{ error }}</div>
-      <CommentComponent v-if="comments" :comments="comments" />
+      <CommentComponent
+        v-if="comments"
+        :comments="comments"
+        @comment-added="fetchComments"
+      />
     </div>
   </main>
 </template>

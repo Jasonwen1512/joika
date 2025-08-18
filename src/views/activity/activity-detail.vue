@@ -5,12 +5,12 @@ import commentSection from "@/components/activity/activity-detail/comment-sectio
 
 import { useRoute, useRouter } from "vue-router";
 // === 第一步：在 import ref 的地方，加入 onMounted 和 onUnmounted ===
-import { computed, ref, onMounted, onUnmounted ,watch} from "vue";
+import { computed, ref, onMounted, onUnmounted, watch } from "vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Button from "@/components/Button.vue";
 import LikeButton from "@/components/activity/like-button.vue";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import axios from 'axios';
+import axios from "axios";
 // === 第二步：在這裡只引入您確定已存在的「彈窗元件」 ===
 import RatingModal from "@/components/activity/activity-detail/rating-modal.vue";
 // === 新增：為未來的「取消彈窗」預留 import 位置 ===
@@ -203,7 +203,6 @@ const participants = ref([
 //     // 1. 從我們的「台詞本」中，隨機選一個位置 (index)
 //     const randomIndex = Math.floor(Math.random() * fakeComments.length);
 
-
 //     // 2. 根據這個隨機位置，抽出對應的台詞
 //     const randomComment = fakeComments[randomIndex];
 
@@ -249,82 +248,86 @@ const participants = ref([
 
 //留言API
 
-const comments = ref([]);
+const comments = ref(null);
 const isLoading = ref(true);
 const error = ref(null);
 
-function getActivityComments(activityId) { // 參數名改一下避免混淆
-    const activityNoNumeric = String(activityId).replace(/\D/g, "");
+function getActivityComments(activityId) {
+  // 參數名改一下避免混淆
+  const activityNoNumeric = String(activityId).replace(/\D/g, "");
 
-      // console.log(`準備為活動 ID: ${activityId} 請求留言 API`); // 偵錯 Log
-  
+  // console.log(`準備為活動 ID: ${activityId} 請求留言 API`); // 偵錯 Log
+
   isLoading.value = true;
-    error.value = null;
-    comments.value = [];
+  error.value = null;
+  comments.value = [];
 
-axios.get(`http://localhost:8888/joika-api-server/comments/activities-list.php?activity_no=${activityNoNumeric}`)
-    .then(res => {
-            // console.log("API 成功回傳留言:", res.data); // 偵錯 Log
-            // console.log('API 原始資料:', res.data);            
-            if (!res.data || !Array.isArray(res.data)) return;
+  axios
+    .get(
+      `http://localhost:8888/joika-api-server/comments/activities-list.php?activity_no=${activityNoNumeric}`
+    )
+    .then((res) => {
+      // console.log("API 成功回傳留言:", res.data); // 偵錯 Log
+      // console.log('API 原始資料:', res.data);
+      if (!res.data || !Array.isArray(res.data)) return;
 
-            // --- 先把每筆留言整理成統一格式 ---
-            const allComments = res.data.map(c => ({
-                id: c.ACTIVITY_COMMENT_NO,
-                userid: c.MEMBER_ID,
-                author: c.MEMBER_NICKNAME || '匿名',
-                avatar: c.MEMBER_AVATAR || 'https://i.pravatar.cc/150?u=default',
-                timestamp: c.CREATED_AT,
-                content: c.COMMENT_CONTENT,
-                likenum: Number(c.LIKE_NUM || 0),
-                liked: false,
-                parentId: c.PARENT_NO,
-                replies: [],
-                isRepliesExpanded: false,
-                animateLike: false
-            }));
+      // --- 先把每筆留言整理成統一格式 ---
+      const allComments = res.data.map((c) => ({
+        id: c.ACTIVITY_COMMENT_NO,
+        userid: c.MEMBER_ID,
+        author: c.MEMBER_NICKNAME || "匿名",
+        avatar: c.MEMBER_AVATAR || `https://i.pravatar.cc/150?u=${c.MEMBER_ID}`,
+        timestamp: c.CREATED_AT,
+        content: c.COMMENT_CONTENT,
+        likenum: Number(c.LIKE_NUM || 0),
+        liked: false,
+        parentId: c.PARENT_NO,
+        replies: [],
+        isRepliesExpanded: false,
+        animateLike: false,
+      }));
 
-            // --- 將平面陣列整理成樹狀 ---
-            const commentMap = {};
-            const rootComments = [];
+      // --- 將平面陣列整理成樹狀 ---
+      const commentMap = {};
+      const rootComments = [];
 
-            allComments.forEach(c => {
-                commentMap[c.id] = c;
-            });
+      allComments.forEach((c) => {
+        commentMap[c.id] = c;
+      });
 
-            allComments.forEach(c => {
-                if (c.parentId && commentMap[c.parentId]) {
-                    commentMap[c.parentId].replies.push(c);
-                } else {
-                    rootComments.push(c);
-                }
-            });
+      allComments.forEach((c) => {
+        if (c.parentId && commentMap[c.parentId]) {
+          commentMap[c.parentId].replies.push(c);
+        } else {
+          rootComments.push(c);
+        }
+      });
 
-            comments.value = rootComments;
-        })
-        .catch(err => {
-            console.error('取得留言失敗', err);
-            error.value = '無法載入留言，請稍後再試。';
-            comments.value = [];
-        })
-        .finally(() => {
-            isLoading.value = false;
-        });
+      comments.value = rootComments;
+    })
+    .catch((err) => {
+      console.error("取得留言失敗", err);
+      error.value = "無法載入留言，請稍後再試。";
+      comments.value = [];
+    })
+    .finally(() => {
+      isLoading.value = false;
+    });
 }
 
 // --- 監聽路由或活動編號變化 ---
 watch(
-    // 直接監聽我們的 computed ID
-    currentActivityId,
-    (newId) => {
-        // newId 現在就是 currentActivityId.value
-        if (!newId) {
-            comments.value = [];
-            return;
-        }
-        getActivityComments(newId);
-    },
-    { immediate: true }
+  // 直接監聽我們的 computed ID
+  currentActivityId,
+  (newId) => {
+    // newId 現在就是 currentActivityId.value
+    if (!newId) {
+      comments.value = [];
+      return;
+    }
+    getActivityComments(newId);
+  },
+  { immediate: true }
 );
 // //偵錯用
 // watch(comments, (val) => {
@@ -531,14 +534,17 @@ const swiperModules = [Pagination];
         </swiper>
       </div>
     </section>
-
+    <!-- 留言區 -->
     <div class="comments-container">
-<div class="comments-section">
-     
-    <div v-if="isLoading">正在載入留言...</div>
-    <div v-else-if="error">{{ error }}</div>
-    <commentSection v-if="comments" :comments="comments" />
-    </div>
+      <div class="comments-section">
+        <div v-if="isLoading">正在載入留言...</div>
+        <div v-else-if="error">{{ error }}</div>
+        <commentSection
+          v-if="comments"
+          :comments="comments"
+          @comment-added="getActivityComments(currentActivityId)"
+        />
+      </div>
       <!-- <commentSection
         :comments-data="commentsForBoard"
         :user-data="currentUserForBoard"
@@ -611,7 +617,6 @@ const swiperModules = [Pagination];
     width: 360px;
     height: 210px;
     object-fit: cover;
-  
 
     @include desktop() {
       width: 1030px;
@@ -662,7 +667,6 @@ const swiperModules = [Pagination];
   @include desktop() {
     margin-bottom: 0;
     padding-bottom: 0;
-    
   }
 
   .info-grid {
@@ -676,7 +680,6 @@ const swiperModules = [Pagination];
     @include desktop() {
       border-top: 1px solid #000;
       flex-direction: row;
-      
     }
   }
 
@@ -694,7 +697,7 @@ const swiperModules = [Pagination];
   .info-row {
     display: flex;
     padding-bottom: 8px;
-    align-items: center; 
+    align-items: center;
 
     strong {
       font-size: 24px;
@@ -1033,7 +1036,7 @@ const swiperModules = [Pagination];
     .participants-slider {
       width: 100%;
     }
-    
+
     // --- 終極關鍵修正 ---
     // Swiper.js 會在其實例 (class="swiper") 上強制加上 position: relative。
     // 我們必須用 !important 來覆蓋它，才能打破這個定位上下文。
@@ -1055,11 +1058,11 @@ const swiperModules = [Pagination];
 }
 
 .comments-container {
-  max-width: 1200px; 
+  max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
   margin-block: 7.5vh;
-  padding: 0 20px; 
-  box-sizing: border-box; 
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 </style>
