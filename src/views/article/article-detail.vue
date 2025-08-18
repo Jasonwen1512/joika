@@ -1,21 +1,21 @@
 <script setup>
-import { ref, computed, h, render, onMounted, onUnmounted ,watch } from "vue";
+// 這裡先用假的登入者資料
+const currentUser = ref({ userid: "M0001" });
+import { ref, computed, h, render, onMounted, onUnmounted, watch } from "vue";
 import Swal from "sweetalert2";
 import axios from "axios"; // <-- 新增 axios
 
 import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
 const router = useRouter();
-
 import { articleList } from "@/assets/data/fake-article";
 import Button from "@/components/Button.vue";
 import DeleteIcon from "@/assets/img/icon/delete.svg";
 import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from "@/assets/img/article/movie_konan.jpg";
-
 import CommentComponent from "@/components/article/comment.vue"; // <-- 修改這裡
-
 import { usePreviewStore } from "@/stores/preview";
+import ReportForm from "@/components/ReportForm.vue";
 
 const previewStore = usePreviewStore();
 // console.log(previewData);
@@ -56,7 +56,7 @@ onUnmounted(() => {
   previewStore.isPreview = false;
 });
 const article = computed(() => {
-  
+  // 預覽模式
   if (previewStore.isPreview) {
     // console.log("這是預覽模式");
     // console.log(previewStore.previewData);
@@ -64,7 +64,7 @@ const article = computed(() => {
     return previewStore.previewData;
   }
 
-  // 【判斷 B】正常瀏覽模式 (保持不變)
+  // 正常瀏覽模式 (保持不變)
   const postId = route.params.postid;
   if (!postId) return null;
 
@@ -76,6 +76,10 @@ const article = computed(() => {
   return null;
 });
 
+//判斷是不是發文者
+const isOwner = computed(() => {
+  return article.value && currentUser.value.userid === article.value.userid;
+});
 function EditArticle() {
   // 防禦性檢查
   if (!article.value) {
@@ -156,89 +160,116 @@ function DeleteCheck() {
       console.log("使用者取消了刪除操作。");
     }
   });
-
-  
+}
+function openReportModal() {
+  const container = document.createElement("div");
+  render(
+    h(ReportForm, {
+      onSubmit: (data) => {
+        console.log("檢舉資料：", data);
+        Swal.close();
+        Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+      },
+    }),
+    container
+  );
+  Swal.fire({
+    title: "檢舉留言",
+    html: container,
+    showCancelButton: false,
+    showConfirmButton: false,
+    willClose: () => {
+      render(null, container);
+      document.body.style.paddingRight = "";
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+    },
+    zIndex: 20000,
+  });
 }
 
 //抓留言API
-const comments = ref(null); 
+const comments = ref(null);
 const isLoading = ref(true); // 初始設為 true
 const error = ref(null);
 
 // --- 3. 強化 getPostComments 函式 ---
 function getPostComments(postNo) {
-    // 初始狀態設定 (可以保留或放在 onMounted 之前)
-    isLoading.value = true;
-    error.value = null;
-    comments.value = null; // 重置為 null，以配合 v-if="comments"
+  // 初始狀態設定 (可以保留或放在 onMounted 之前)
+  isLoading.value = true;
+  error.value = null;
+  comments.value = null; // 重置為 null，以配合 v-if="comments"
 
-    axios.get(`http://localhost:8888/joika-api-server/comments/post-list.php?post_no=${postNo}`)
-         .then(res => {
-            let allComments = [];
+  axios
+    .get(
+      `http://localhost:8888/joika-api-server/comments/post-list.php?post_no=${postNo}`
+    )
+    .then((res) => {
+      let allComments = [];
 
-            if (res.data && Array.isArray(res.data)) {
-                // 先把每一筆留言整理成統一格式
-                allComments = res.data.map(c => ({
-                    id: c.POST_COMMENT_NO,
-                    userid: c.MEMBER_ID,
-                    author: c.MEMBER_NICKNAME || "匿名",
-                    avatar: c.MEMBER_AVATAR || "https://i.pravatar.cc/150?u=default",
-                    timestamp: c.CREATED_AT,
-                    content: c.COMMENT_CONTENT,
-                    likenum: Number(c.LIKE_NUM || 0),
-                    liked: false,
-                    parentId: c.PARENT_NO, // 父留言 ID
-                    replies: [],
-                    isRepliesExpanded: false,
-                    animateLike: false
-                }));
-            }
+      if (res.data && Array.isArray(res.data)) {
+        // 先把每一筆留言整理成統一格式
+        allComments = res.data.map((c) => ({
+          id: c.POST_COMMENT_NO,
+          userid: c.MEMBER_ID,
+          author: c.MEMBER_NICKNAME || "匿名",
+          avatar: c.MEMBER_AVATAR || "https://i.pravatar.cc/150?u=default",
+          timestamp: c.CREATED_AT,
+          content: c.COMMENT_CONTENT,
+          likenum: Number(c.LIKE_NUM || 0),
+          liked: false,
+          parentId: c.PARENT_NO, // 父留言 ID
+          replies: [],
+          isRepliesExpanded: false,
+          animateLike: false,
+        }));
+      }
 
-            // --- 關鍵步驟：把留言整理成樹狀 ---
-            const commentMap = {};  // 暫存所有留言，方便用 id 查
-            const rootComments = []; // 最外層留言（父留言）
+      // --- 關鍵步驟：把留言整理成樹狀 ---
+      const commentMap = {}; // 暫存所有留言，方便用 id 查
+      const rootComments = []; // 最外層留言（父留言）
 
-            allComments.forEach(c => {
-                commentMap[c.id] = c;
-            });
+      allComments.forEach((c) => {
+        commentMap[c.id] = c;
+      });
 
-            allComments.forEach(c => {
-                if (c.parentId && commentMap[c.parentId]) {
-                    // 如果有 parentId，且 parent 存在 → 放進 parent 的 replies
-                    commentMap[c.parentId].replies.push(c);
-                } else {
-                    // 沒有 parentId → 視為最上層留言
-                    rootComments.push(c);
-                }
-            });
+      allComments.forEach((c) => {
+        if (c.parentId && commentMap[c.parentId]) {
+          // 如果有 parentId，且 parent 存在 → 放進 parent 的 replies
+          commentMap[c.parentId].replies.push(c);
+        } else {
+          // 沒有 parentId → 視為最上層留言
+          rootComments.push(c);
+        }
+      });
 
-            // 只留下父留言 (每個父留言已經帶好 replies)
-            comments.value = rootComments;
-        })
-        .catch(err => {
-            console.error("取得文章留言失敗", err);
-            error.value = "無法載入留言，請稍後再試。";
-            comments.value = [];
-        })
-        .finally(() => {
-            isLoading.value = false;
-        });
+      // 只留下父留言 (每個父留言已經帶好 replies)
+      comments.value = rootComments;
+    })
+    .catch((err) => {
+      console.error("取得文章留言失敗", err);
+      error.value = "無法載入留言，請稍後再試。";
+      comments.value = [];
+    })
+    .finally(() => {
+      isLoading.value = false;
+    });
 }
 
 // --- 4. 使用 watch 監聽路由變化並觸發 API ---
 watch(
-    () => route.params.postid,
-    (newPostId) => {
-        // 如果是預覽模式，或沒有 postid，就不要執行抓取
-        if (previewStore.isPreview || !newPostId) {
-            comments.value = []; // 確保在預覽模式下留言是清空的
-            return;
-        }
-        
-        // 正常模式下，呼叫 API
-        getPostComments(newPostId);
-    },
-    { immediate: true } // 立即執行一次，取代 onMounted
+  () => route.params.postid,
+  (newPostId) => {
+    // 如果是預覽模式，或沒有 postid，就不要執行抓取
+    if (previewStore.isPreview || !newPostId) {
+      comments.value = []; // 確保在預覽模式下留言是清空的
+      return;
+    }
+
+    // 正常模式下，呼叫 API
+    getPostComments(newPostId);
+  },
+  { immediate: true } // 立即執行一次，取代 onMounted
 );
 </script>
 
@@ -258,21 +289,26 @@ watch(
         <p>{{ article.userid }}</p>
       </div>
       <div v-if="!isPreview" class="btn-list">
-        <Button
-          @click="EditArticle"
-          :suffixIcon="SmEditIcon"
-          theme="info"
-          size="sm"
-          >編輯</Button
-        >
-        <Button
-          @click="DeleteCheck"
-          isOutline
-          :suffixIcon="DeleteIcon"
-          theme="secondary"
-          size="sm"
-          >刪除</Button
-        >
+        <template v-if="isOwner">
+          <Button
+            @click="EditArticle"
+            :suffixIcon="SmEditIcon"
+            theme="info"
+            size="sm"
+            >編輯</Button
+          >
+          <Button
+            @click="DeleteCheck"
+            isOutline
+            :suffixIcon="DeleteIcon"
+            theme="secondary"
+            size="sm"
+            >刪除</Button
+          >
+        </template>
+        <template v-else>
+          <Button @click="openReportModal" theme="info" size="sm">檢舉</Button>
+        </template>
       </div>
     </section>
 
@@ -295,23 +331,24 @@ watch(
         </div>
         <p v-html="article.content" alt="內文"></p>
 
-         <div v-if="previewStore.isPreview" class="btn">
-      <Button  theme="primary" size="md" @click="submitArticle"> 送出 </Button>
-    </div>
+        <div v-if="previewStore.isPreview" class="btn">
+          <Button theme="primary" size="md" @click="submitArticle">
+            送出
+          </Button>
+        </div>
       </div>
       <div v-else>
         <p>找不到這篇文章111。</p>
       </div>
     </section>
-      <!-- ================================== -->
-      <!--           留言系統區塊             -->
-      <!-- ================================== -->
-       <!-- 將父元件的 `comments` 資料，透過名為 `comments-data` 的 prop 傳給子元件 -->
-  <div v-if="!isPreview" class="comments-section">
-     
-    <div v-if="isLoading">正在載入留言...</div>
-    <div v-else-if="error">{{ error }}</div>
-    <CommentComponent v-if="comments" :comments="comments" />
+    <!-- ================================== -->
+    <!--           留言系統區塊             -->
+    <!-- ================================== -->
+    <!-- 將父元件的 `comments` 資料，透過名為 `comments-data` 的 prop 傳給子元件 -->
+    <div v-if="!isPreview" class="comments-section">
+      <div v-if="isLoading">正在載入留言...</div>
+      <div v-else-if="error">{{ error }}</div>
+      <CommentComponent v-if="comments" :comments="comments" />
     </div>
   </main>
 </template>
@@ -581,6 +618,12 @@ main {
 //預覽的送出
 .btn {
   padding-block: 20px;
-    margin: auto;
+  margin: auto;
+}
+button {
+  border-radius: 3px;
+  @include desktop() {
+    border-radius: 6px;
+  }
 }
 </style>
