@@ -2,6 +2,7 @@
 import { reactive, ref, watch } from "vue";
 import Button from "@/components/Button.vue";
 import CaptchaBox from "@/components/auth/CaptchaBox.vue";
+import Swal from "sweetalert2"
 import { useRouter } from "vue-router";
 import { loginByPhonePassword } from "@/assets/data/authState";
 ;
@@ -36,7 +37,12 @@ const handleLogin = async () => {
 
   // 2) 驗證碼先過
   if (form.verifyCode.toLowerCase() !== realCaptcha.value.toLowerCase()) {
-    error.verifyCode = "驗證碼錯誤"; return
+    Swal.fire({
+        icon: "error",
+        title: "登入失敗",
+        text: "驗證碼錯誤"
+    })
+    return
   }
 
   // 3) 呼叫後端登入（會自動收 Session Cookie）
@@ -46,9 +52,11 @@ const handleLogin = async () => {
 
   if (ok) router.push("/member/member-content")
   else {
-    if (data?.code === "0001") error.mobile = "電話不存在"
-    else if (data?.code === "0002") error.password = "密碼錯誤"
-    else alert(data?.msg || "登入失敗")
+      Swal.fire({
+        icon: "error",
+        title: "登入失敗",
+        text: data?.msg
+    })
   }
 }
 

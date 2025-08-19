@@ -11,7 +11,49 @@ import MemberActivityCard from "@/components/member/member-activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import memberarticle from "@/components/member/member-post.vue";
 import membercomment from "@/components/member/member-comment.vue";
-import { authState, isAuthenticated, logout } from '@/assets/data/authState'
+import { authState, isAuthenticated, logout } from '@/assets/data/authState';
+
+//登入的會員資料
+const member = ref(null)   // 會員資料
+const pageLoading = ref(true) // 載入中
+const error = ref("")      // 錯誤訊息
+const router = useRouter()
+
+async function loadMember() {
+    pageLoading.value = true
+    error.value = ""
+
+    try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/profile-get.php`, {
+        method: "GET",
+        credentials: "include"
+        })
+
+        if (res.status === 401) {
+            router.replace("/auth/login")
+            return
+        }
+
+        if (!res.ok) {
+            throw new Error("伺服器錯誤")
+        }
+
+        const data = await res.json()
+        // 若你的 profile-get.php 回傳 { code, msg, data }，要記得取 data
+        member.value = data.data ?? data
+
+    } catch (err) {
+        error.value = err.message   
+    } finally {
+        pageLoading.value = false   
+    }
+}
+
+onMounted(() => {
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    loadMember()
+})
 
 //靜態資料 活動類別與標籤顏色
 const activities = ["水上活動", "露營", "登山"];
@@ -47,11 +89,6 @@ const handleResize = () => {
     visibleCount.value = window.innerWidth < 768 ? 1 : 2;
 };
 
-onMounted(() => {
-    handleResize(); // 初次判斷
-    window.addEventListener("resize", handleResize);
-});
-
 onBeforeUnmount(() => {
     window.removeEventListener("resize", handleResize);
 });
@@ -84,224 +121,227 @@ const openActivities = computed(() => {
 });
 
 //登出
-const router = useRouter()
-const loading = ref(false)
-
+const logoutLoading = ref(false)
 const handleLogout = async () => {
-    if (loading.value) return
-    loading.value = true
+    if (logoutLoading.value) return
+    logoutLoading.value = true
     try {
-        await logout()               // 呼叫 /users/logout.php，清掉 PHP session
-        // authState.user 會在 logout() 裡被設為 null，UI 會自動變成未登入
-        router.replace('/auth/login') // 導回登入頁（用 replace 避免「上一頁」回到會員頁）
+        await logout() // 仍呼叫你的 /users/logout.php
+        router.replace('/auth/login')
     } catch (e) {
         console.error(e)
         alert('登出失敗，稍後再試')
     } finally {
-        loading.value = false
+        logoutLoading.value = false
     }
 }
 </script>
 
 <template>
     <div class="member-content">
-        <div class="member-header">
-            <div class="member-details">
-                <div class="member-image">
-                    <img
-                        src="/src/assets/img/member/headshot.jpg"
-                        alt="Member Headshot"
-                    />
-                </div>
-                <div class="member-info">
-                    <p class="user-name">Amooo.___.</p>
-                    <StarRating
-                        :score="5.0"
-                        :count="3"
-                        color="yellow"
-                        showScore
-                        class="score"
-                    />
-                    <StarRating
-                        :score="4.0"
-                        :count="1"
-                        color="blue"
-                        showScore
-                        class="score"
-                    />
-                    <p class="user-demographics">基隆市 | 29歲 | 社畜</p>
-                    <div class="tags">
-                        <div
-                            v-for="(activity, index) in activities"
-                            :key="index"
-                            class="tag"
-                            :style="{
-                                backgroundColor: GetEventColor(activity),
-                            }"
-                        >
-                            {{ activity }}
-                        </div>
+        <div v-if="pageLoading">載入中…</div>
+        <div v-else-if="error">{{ error }}</div>
+        <template v-else>
+            <div class="member-header">
+                <div class="member-details">
+                    <div class="member-image">
+                        <img
+                            src="/src/assets/img/member/headshot.jpg"
+                            alt="Member Headshot"
+                        />
                     </div>
-                </div>
-            </div>
-            <div class="button-group">
-                <RouterLink :to="`member-notify`"
-                    ><Button
-                        :prefixIcon="NotifyIcon"
-                        size="lg"
-                        theme="primary"
-                        >通知訊息</Button
-                    ></RouterLink
-                >
-                <Button
-                    :prefixIcon="EditIcon"
-                    size="lg"
-                    theme="info"
-                    >編輯檔案</Button
-                >
-
-                <Button isOutline theme="secondary" size="lg" @click="handleLogout">
-                    {{ loading ? '登出中…' : '登出' }}
-                </Button>
-            </div>
-        </div>
-
-        <div class="member-body">
-            <div class="tab-bar">
-                <button
-                    :class="{ active: currentTab === 'group' }"
-                    @click="currentTab = 'group'"
-                >
-                    揪團
-                </button>
-                <button
-                    :class="{ active: currentTab === 'calendar' }"
-                    @click="currentTab = 'calendar'"
-                >
-                    行事曆
-                </button>
-                <button
-                    :class="{ active: currentTab === 'post' }"
-                    @click="currentTab = 'post'"
-                >
-                    貼文
-                </button>
-                <button
-                    :class="{ active: currentTab === 'comment' }"
-                    @click="currentTab = 'comment'"
-                >
-                    評論
-                </button>
-            </div>
-            <div class="tab-content">
-                <div v-if="currentTab === 'group'">
-                    <div class="member-activity-section">
-                        <ul class="member-activity-btns">
-                            <div class="activity-items">
-                            <li>
-                                <button
-                                    :class="{
-                                        active: currentSubTab === 'my-activity',
-                                    }"
-                                    @click="currentSubTab = 'my-activity'"
-                                >
-                                    我開的揪團
-                                </button>
-                            </li>
-                            <li>
-                                <button
-                                    :class="{
-                                        active:
-                                            currentSubTab ===
-                                            'my-follow-activity',
-                                    }"
-                                    @click="
-                                        currentSubTab = 'my-follow-activity'
-                                    "
-                                >
-                                    參與的揪團
-                                </button>
-                            </li>
-                            <li>
-                                <button
-                                    :class="{
-                                        active:
-                                            currentSubTab ===
-                                            'my-activity-collection',
-                                    }"
-                                    @click="
-                                        currentSubTab = 'my-activity-collection'
-                                    "
-                                >
-                                    我的收藏
-                                </button>
-                            </li>
-                        </div>
-                        <div class="filter-item">
-                            <li>                
-                                   <button 
-                                        class="select-btn"
-                                        @click="isFilterVisible = !isFilterVisible">篩選</button>
-                            </li>
-                            <li v-if="isFilterVisible">
-                            <select 
-                                id="status-filter" 
-                                 v-model="selectedStatus" 
-                                style="padding: 10px; border: 1px solid black;"
+                    <div class="member-info">
+                        <p class="user-name">{{ member?.MEMBER_NICKNAME }}</p>
+                        <StarRating
+                            :score="5.0"
+                            :count="3"
+                            color="yellow"
+                            showScore
+                            class="score"
+                        />
+                        <StarRating
+                            :score="4.0"
+                            :count="1"
+                            color="blue"
+                            showScore
+                            class="score"
+                        />
+                        <p v-if="member" class="user-demographics">
+                            {{ member.MEMBER_CITY }} | {{ member.age }}歲 | {{ member.MEMBER_OCCUPATION }}
+                        </p>
+                        <div class="tags">
+                            <div
+                                v-for="(activity, index) in activities"
+                                :key="index"
+                                class="tag"
+                                :style="{
+                                    backgroundColor: GetEventColor(activity),
+                                }"
                             >
-                                <option value="">全部狀態</option>
-                                <option value="開團中">開團中</option>
-                                <option value="審核中">審核中</option>
-                                <option value="已完成">已完成</option>
-                                <option value="已取消">已取消</option>
-                            </select>
-                            </li>
-                            <li>
-                                <button 
-                                class="select-btn">排序</button>
-                            </li>
+                                {{ activity }}
                             </div>
-                        </ul>
-                        <div class="member-activity-card-section">
-                            <MemberActivityCard
-                                v-for="activity in filteredActivities"
-                                :key="activity.activity_no"
-                                :item="activity"
-                            />
                         </div>
                     </div>
                 </div>
-                <div v-else-if="currentTab === 'calendar'">
-                    <div class="activity-card-groups">
-                        <p class="section-title">下一個揪團</p>
-                        <div class="activity-card-list">
-                            <MemberActivityCard
-                                v-for="activity in visibleActivities"
-                                :key="activity.id"
-                                :item="activity"
-                            />
-                            <div v-if="filteredActivities.length === 0">
-        <p>目前沒有符合條件的活動。</p>
-    </div>
-                        </div>
-                    </div>
-                    <div class="calerdar">
-                        <FullCalendar />
-                    </div>
-                </div>
-                <div v-else-if="currentTab === 'post'">
-                    <!-- //我發表的文章-->
+                <div class="button-group">
+                    <RouterLink :to="`member-notify`"
+                        ><Button
+                            :prefixIcon="NotifyIcon"
+                            size="lg"
+                            theme="primary"
+                            >通知訊息</Button
+                        ></RouterLink
+                    >
+                    <Button
+                        :prefixIcon="EditIcon"
+                        size="lg"
+                        theme="info"
+                        >編輯檔案</Button
+                    >
 
-                    <memberarticle></memberarticle>
-                    <!-- 到這邊結束 -->
-                </div>
-                <div v-else-if="currentTab === 'comment'">
-                    <!-- //我發表的留言-->
-                    <!-- 這邊資料串接有問題 因為留言資料裡面沒有對應的文章ID 無法抓取 ，之後要做修正-->
-                    <membercomment></membercomment>
+                    <Button isOutline theme="secondary" size="lg" @click="handleLogout">
+                        {{ logoutLoading ? '登出中…' : '登出' }}
+                    </Button>
                 </div>
             </div>
+
+            <div class="member-body">
+                <div class="tab-bar">
+                    <button
+                        :class="{ active: currentTab === 'group' }"
+                        @click="currentTab = 'group'"
+                    >
+                        揪團
+                    </button>
+                    <button
+                        :class="{ active: currentTab === 'calendar' }"
+                        @click="currentTab = 'calendar'"
+                    >
+                        行事曆
+                    </button>
+                    <button
+                        :class="{ active: currentTab === 'post' }"
+                        @click="currentTab = 'post'"
+                    >
+                        貼文
+                    </button>
+                    <button
+                        :class="{ active: currentTab === 'comment' }"
+                        @click="currentTab = 'comment'"
+                    >
+                        評論
+                    </button>
+                </div>
+                <div class="tab-content">
+                    <div v-if="currentTab === 'group'">
+                        <div class="member-activity-section">
+                            <ul class="member-activity-btns">
+                                <div class="activity-items">
+                                <li>
+                                    <button
+                                        :class="{
+                                            active: currentSubTab === 'my-activity',
+                                        }"
+                                        @click="currentSubTab = 'my-activity'"
+                                    >
+                                        我開的揪團
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        :class="{
+                                            active:
+                                                currentSubTab ===
+                                                'my-follow-activity',
+                                        }"
+                                        @click="
+                                            currentSubTab = 'my-follow-activity'
+                                        "
+                                    >
+                                        參與的揪團
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        :class="{
+                                            active:
+                                                currentSubTab ===
+                                                'my-activity-collection',
+                                        }"
+                                        @click="
+                                            currentSubTab = 'my-activity-collection'
+                                        "
+                                    >
+                                        我的收藏
+                                    </button>
+                                </li>
+                            </div>
+                            <div class="filter-item">
+                                <li>                
+                                    <button 
+                                            class="select-btn"
+                                            @click="isFilterVisible = !isFilterVisible">篩選</button>
+                                </li>
+                                <li v-if="isFilterVisible">
+                                <select 
+                                    id="status-filter" 
+                                    v-model="selectedStatus" 
+                                    style="padding: 10px; border: 1px solid black;"
+                                >
+                                    <option value="">全部狀態</option>
+                                    <option value="開團中">開團中</option>
+                                    <option value="審核中">審核中</option>
+                                    <option value="已完成">已完成</option>
+                                    <option value="已取消">已取消</option>
+                                </select>
+                                </li>
+                                <li>
+                                    <button 
+                                    class="select-btn">排序</button>
+                                </li>
+                                </div>
+                            </ul>
+                            <div class="member-activity-card-section">
+                                <MemberActivityCard
+                                    v-for="activity in filteredActivities"
+                                    :key="activity.activity_no"
+                                    :item="activity"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else-if="currentTab === 'calendar'">
+                        <div class="activity-card-groups">
+                            <p class="section-title">下一個揪團</p>
+                            <div class="activity-card-list">
+                                <MemberActivityCard
+                                    v-for="activity in visibleActivities"
+                                    :key="activity.id"
+                                    :item="activity"
+                                />
+                                <div v-if="filteredActivities.length === 0">
+            <p>目前沒有符合條件的活動。</p>
         </div>
+                            </div>
+                        </div>
+                        <div class="calerdar">
+                            <FullCalendar />
+                        </div>
+                    </div>
+                    <div v-else-if="currentTab === 'post'">
+                        <!-- //我發表的文章-->
+
+                        <memberarticle></memberarticle>
+                        <!-- 到這邊結束 -->
+                    </div>
+                    <div v-else-if="currentTab === 'comment'">
+                        <!-- //我發表的留言-->
+                        <!-- 這邊資料串接有問題 因為留言資料裡面沒有對應的文章ID 無法抓取 ，之後要做修正-->
+                        <membercomment></membercomment>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 </template>
 
