@@ -208,20 +208,7 @@ function toggleReplies(comment) {
 }
 
 // 喜歡
-// const likeIt = (comment) => {
-//   // 接收整個 comment 物件
-//   if (!comment.liked) {
-//     comment.likenum++;
-//     comment.liked = true;
-//   } else {
-//     comment.likenum--;
-//     comment.liked = false;
-//   }
-//   comment.animateLike = true;
-//   setTimeout(() => {
-//     comment.animateLike = false;
-//   }, 300);
-// };
+
 const likeIt = async (comment) => {
   // 假設您的 currentUser 物件存在且有 member_id
   // 如果您是從 localStorage 拿，也可以用 const user = JSON.parse(localStorage.getItem("user"));
