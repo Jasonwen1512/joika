@@ -5,7 +5,7 @@ export const isAuthenticated = computed(() => !!authState.user)
 
 export async function fetchMe() {
     try {
-        const res = await fetch('http://localhost:8888/JOIKA_PHP/users/me.php', {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/me.php`, {
         credentials: 'include'
         })
         const data = await res.json()
@@ -17,7 +17,7 @@ export async function fetchMe() {
 
     export async function loginByPhonePassword({ phone, password }) {
     const body = new URLSearchParams({ member_phone: phone, password })
-    const res = await fetch('http://localhost:8888/JOIKA_PHP/users/login.php', {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/login.php`, {
         method: 'POST',
         body,
         credentials: 'include'
@@ -28,7 +28,7 @@ export async function fetchMe() {
     }
 
     export async function logout() {
-    await fetch('http://localhost:8888/JOIKA_PHP/users/logout.php', {
+    await fetch(`${import.meta.env.VITE_API_BASE}//users/logout.php`, {
         credentials: 'include'
     })
     authState.user = null
