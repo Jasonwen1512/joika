@@ -1,100 +1,220 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import Button from "@/components/Button.vue";
-import InputField from '@/components/auth/Inputfield.vue'
-import InterestSelector from '@/components/auth/Interestselector.vue'
+import InputField from "@/components/auth/Inputfield.vue";
+import InterestSelector from "@/components/auth/Interestselector.vue";
 
 const currentStep = ref(1);
-const avatarUrl = ref('');
-const genderOptions = ['男性', '女性']
-const occupationOptions = ['學生', '工程師', '設計師', '自由業', '其他']
+const avatarUrl = ref("");
+// const genderOptions = ["男性", "女性"];
+const genderOptions = [
+  { label: "男性", value: "M" },
+  { label: "女性", value: "F" },
+];
+const cityOptions = ref([]); // 縣市
+const occupationOptions = ref([]); // 職業
+const interestOptions = ref([]); // 興趣
+const tmpId = ref(""); // step 1 暫存資料 id
 
 const form = ref({
-  email: '',
-  phone: '',
-  password: '',
-  confirmPassword: '',
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
   agreed: false,
-  name: '',
-  nickname: '',
-  gender: '',
-  birthdate: '',
-  location: '',
-  occupation: '',
-  interests: '',
-})
+  name: "",
+  nickname: "",
+  gender: "",
+  birthdate: "",
+  location: "",
+  occupation: "",
+  interests: [],
+});
 
 const errors = ref({
-  email: '',
-  phone: '',
-  password: '',
-  confirmPassword: '',
-  agreed: '',
-  name: '',
-  nickname: '',
-  gender: '',
-  birthdate: '',
-  location: '',
-  occupation: '',
-  interests: '',
-})
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  agreed: "",
+  name: "",
+  nickname: "",
+  gender: "",
+  birthdate: "",
+  location: "",
+  occupation: "",
+  interests: "",
+});
 
-const validateStepOne = () => {
+const selectedInterests = ref([]); // v-model 綁定多選興趣
+
+onMounted(async () => {
+  try {
+    const res = await fetch("http://localhost:8888/joika-api/users/get-registration-options.php");
+    const data = await res.json();
+    if (data.success === "true") {
+      cityOptions.value = data.data.cities;
+      occupationOptions.value = data.data.occupations;
+      interestOptions.value = data.data.interests; // 直接用
+    }
+  } catch (err) {
+    console.error("載入選項失敗", err);
+  }
+});
+
+// 自動清除錯誤
+function setupAutoClearError(dataRef, errorRef) {
+  Object.keys(dataRef.value).forEach((key) => {
+    watch(
+      () => dataRef.value[key],
+      (val) => {
+        if (errorRef.value[key] && val) {
+          errorRef.value[key] = "";
+        }
+      }
+    );
+  });
+}
+
+// step1 驗證
+const validateStepOne = async () => {
   // 清除錯誤
-  Object.keys(errors.value).forEach(key => errors.value[key] = '')
+  Object.keys(errors.value).forEach((key) => (errors.value[key] = ""));
 
   const { email, phone, password, confirmPassword, agreed } = form.value;
   let hasError = false;
 
   if (!email) {
-    errors.value.email = '請輸入信箱';
+    errors.value.email = "請輸入信箱";
     hasError = true;
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.value.email = '信箱格式錯誤';
+    errors.value.email = "信箱格式錯誤";
     hasError = true;
   }
 
   if (!phone) {
-    errors.value.phone = '請輸入手機';
+    errors.value.phone = "請輸入手機";
     hasError = true;
   } else if (!/^09\d{8}$/.test(phone)) {
-    errors.value.phone = '手機格式錯誤';
+    errors.value.phone = "手機格式錯誤";
     hasError = true;
   }
 
   if (!password) {
-    errors.value.password = '請輸入密碼';
+    errors.value.password = "請輸入密碼";
     hasError = true;
   }
 
   if (!confirmPassword) {
-    errors.value.confirmPassword = '請確認密碼';
+    errors.value.confirmPassword = "請確認密碼";
     hasError = true;
   } else if (password !== confirmPassword) {
-    errors.value.confirmPassword = '密碼不一致';
+    errors.value.confirmPassword = "密碼不一致";
     hasError = true;
   }
 
   if (!agreed) {
-    errors.value.agreed = '請勾選會員條款';
+    errors.value.agreed = "請勾選會員條款";
     hasError = true;
   }
 
   if (!hasError) {
-    goNext();
-  }
-}
+    // goNext();
+    // step1 送到後端暫存
+    try {
+      const res = await fetch("http://localhost:8888/joika-api/users/register.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          step: 1,
+          email: email,
+          phone: phone,
+          password: password,
+        }),
+      });
 
-const goNext = () => {
-  if (currentStep.value < 3) {
-    currentStep.value++
-  }
-}
+      const data = await res.json();
 
-const getStepState = (step) => {
-  if (currentStep.value > step) return 'completed';
-  if (currentStep.value === step) return 'current';
-  return '';
+      if (data.success) {
+        tmpId.value = data.tmp_id;
+        currentStep.value = 2; // 前進 Step2
+      } else if (data.errors) {
+        // 後端檢查錯誤回填
+        Object.assign(errors.value, data.errors);
+      }
+    } catch (err) {
+      console.error("Step1 暫存失敗", err);
+    }
+  }
+};
+
+// step2
+async function handleStepTwoSubmit() {
+  // 清空錯誤
+  Object.keys(errors.value).forEach((key) => (errors.value[key] = ""));
+
+  // 基本驗證
+  let hasError = false;
+  if (!form.value.name) {
+    errors.value.name = "請輸入姓名";
+    hasError = true;
+  }
+  if (!form.value.nickname) {
+    errors.value.nickname = "請輸入暱稱";
+    hasError = true;
+  }
+  if (!form.value.birthdate) {
+    errors.value.birthdate = "請選擇生日";
+    hasError = true;
+  }
+  if (!form.value.location) {
+    errors.value.location = "請選擇居住城市";
+    hasError = true;
+  }
+  if (!form.value.occupation) {
+    errors.value.occupation = "請選擇職業";
+    hasError = true;
+  }
+  if (!form.value.interests || form.value.interests.length === 0) {
+    errors.value.interests = "請至少選擇一個興趣";
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  const payload = new FormData();
+  payload.append("step", 2);
+  payload.append("tmp_id", tmpId.value);
+  payload.append("name", form.value.name);
+  payload.append("nickname", form.value.nickname);
+  payload.append("gender", form.value.gender);
+  payload.append("birthdate", form.value.birthdate);
+  payload.append("location", form.value.location);
+  payload.append("occupation", form.value.occupation);
+  form.value.interests.forEach((i) => payload.append("interests[]", i));
+
+  // avatar
+  const fileInput = document.getElementById("avatar-input");
+  if (fileInput && fileInput.files[0]) {
+    payload.append("avatar", fileInput.files[0]);
+  }
+
+  try {
+    const res = await fetch("http://localhost:8888/joika-api/users/register.php", {
+      method: "POST",
+      credentials: "include",
+      body: payload,
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentStep.value = 3; // 註冊完成
+    } else if (data.errors) {
+      Object.assign(errors.value, data.errors);
+    }
+  } catch (err) {
+    console.error("Step2 註冊失敗", err);
+  }
 }
 
 const handleAvatarChange = (e) => {
@@ -102,24 +222,16 @@ const handleAvatarChange = (e) => {
   if (file) {
     avatarUrl.value = URL.createObjectURL(file);
   }
-}
+};
 
-function setupAutoClearError(dataRef, errorRef) {
-  Object.keys(dataRef.value).forEach((key) => {
-    watch(
-      () => dataRef.value[key],
-      (val) => {
-        if (errorRef.value[key] && val) {
-          errorRef.value[key] = ''
-        }
-      }
-    )
-  })
-}
+setupAutoClearError(form, errors);
 
-setupAutoClearError(form, errors)
+const getStepState = (step) => {
+  if (currentStep.value > step) return "completed";
+  if (currentStep.value === step) return "current";
+  return "";
+};
 </script>
-
 
 <template>
   <div class="signup-page">
@@ -127,22 +239,15 @@ setupAutoClearError(form, errors)
       <div class="registration-header">
         <h1>註冊</h1>
         <ul class="progress-bar" id="progress-bar">
-          <li
-            :class="['progress-step', getStepState(1)]"
-            data-step="1"
-          >
+          <li :class="['progress-step', getStepState(1)]" data-step="1">
             <div class="step-label">帳號申請</div>
             <div class="step-circle"></div>
           </li>
-          <li
-            :class="['progress-step', getStepState(2)]"
-          >
+          <li :class="['progress-step', getStepState(2)]">
             <div class="step-label">基本資料</div>
             <div class="step-circle"></div>
           </li>
-          <li
-            :class="['progress-step', getStepState(3)]"
-          >
+          <li :class="['progress-step', getStepState(3)]">
             <div class="step-label">註冊完成</div>
             <div class="step-circle"></div>
           </li>
@@ -158,7 +263,11 @@ setupAutoClearError(form, errors)
             type="email"
             v-model="form.email"
             :error="errors.email"
-          />
+            @blur="
+              () => {
+                errors.email = '';
+              }
+            " />
 
           <InputField
             id="phone"
@@ -166,7 +275,11 @@ setupAutoClearError(form, errors)
             type="tel"
             v-model="form.phone"
             :error="errors.phone"
-          />
+            @blur="
+              () => {
+                errors.phone = '';
+              }
+            " />
 
           <InputField
             id="password"
@@ -174,7 +287,11 @@ setupAutoClearError(form, errors)
             type="password"
             v-model="form.password"
             :error="errors.password"
-          />
+            @blur="
+              () => {
+                errors.password = '';
+              }
+            " />
 
           <InputField
             id="confirm-password"
@@ -182,7 +299,11 @@ setupAutoClearError(form, errors)
             type="password"
             v-model="form.confirmPassword"
             :error="errors.confirmPassword"
-          />
+            @blur="
+              () => {
+                errors.confirmPassword = '';
+              }
+            " />
           <div class="tos-group">
             <input type="checkbox" id="tos" v-model="form.agreed" />
             <label for="tos">我已閱讀並同意 JOIKA 會員條款</label>
@@ -195,79 +316,37 @@ setupAutoClearError(form, errors)
       </section>
 
       <!-- 步驟 2-->
-<section v-show="currentStep === 2" class="form-step">
-  <form @submit.prevent="validateStepOne">
-    <div class="avatar-upload">
-      <label for="avatar-input" class="avatar-label">
-        <div class="avatar-circle">
-          <img v-if="avatarUrl" :src="avatarUrl" alt="預覽頭貼" />
-          <span v-else>頭貼上傳</span>
-        </div>
-      </label>
-      <input type="file" id="avatar-input" accept="image/*" @change="handleAvatarChange" hidden />
-    </div>
+      <section v-show="currentStep === 2" class="form-step">
+        <form @submit.prevent="handleStepTwoSubmit">
+          <div class="avatar-upload">
+            <label for="avatar-input" class="avatar-label">
+              <div class="avatar-circle">
+                <img v-if="avatarUrl" :src="avatarUrl" alt="預覽頭貼" />
+                <span v-else>頭貼上傳</span>
+              </div>
+            </label>
+            <input type="file" id="avatar-input" accept="image/*" @change="handleAvatarChange" hidden />
+          </div>
 
-    <InputField
-      id="name"
-      label="姓名"
-      type="text"
-      v-model="form.name"
-      :error="errors.name"
-    />
+          <InputField id="name" label="姓名" type="text" v-model="form.name" :error="errors.name" />
 
-    <InputField
-      id="nickname"
-      label="暱稱"
-      type="text"
-      v-model="form.nickname"
-      :error="errors.nickname"
-    />
+          <InputField id="nickname" label="暱稱" type="text" v-model="form.nickname" :error="errors.nickname" />
 
-    <InputField
-      id="gender"
-      label="性別"
-      type="select"
-      :options="genderOptions"
-      v-model="form.gender"
-      :error="errors.gender"
-    />
+          <InputField id="gender" label="性別" type="select" :options="genderOptions" v-model="form.gender" :error="errors.gender" />
 
-    <InputField
-      id="birthdate"
-      label="生日"
-      type="text"
-      v-model="form.birthdate"
-      :error="errors.birthdate"
-    />
+          <InputField id="birthdate" label="生日" type="date" v-model="form.birthdate" :error="errors.birthdate" />
 
-    <InputField
-      id="location"
-      label="居住地"
-      type="text"
-      v-model="form.location"
-      :error="errors.location"
-    />
+          <InputField id="location" label="居住地" type="select" :options="cityOptions" v-model="form.location" :error="errors.location" />
 
-    <InputField
-      id="occupation"
-      label="職業"
-      type="select"
-      :options="occupationOptions"
-      v-model="form.occupation"
-      :error="errors.occupation"
-    />
+          <InputField id="occupation" label="職業" type="select" :options="occupationOptions" v-model="form.occupation" :error="errors.occupation" />
 
-    <InterestSelector
-      v-model="form.interests"
-      :error="errors.interests"
-      :max="3" 
-    />
+          <InterestSelector v-model="form.interests" :options="interestOptions" :error="errors.interests" :max="3" />
 
-    <div class="button-group">
-      <Button size="md" theme="primary" @click="goNext">下一步</Button>
-    </div>
-  </form>
-</section>
+          <div class="button-group">
+            <Button size="md" theme="primary" @click="handleStepTwoSubmit">下一步</Button>
+          </div>
+        </form>
+      </section>
 
       <!-- 步驟 3: 註冊完成 -->
       <section v-show="currentStep === 3" class="form-step">
@@ -286,7 +365,6 @@ setupAutoClearError(form, errors)
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  // border: 1px solid red;
 }
 
 .signup-page {
@@ -319,7 +397,7 @@ setupAutoClearError(form, errors)
     aspect-ratio: 406 / 518;
     width: 150px;
     bottom: -50px;
-    right:0;
+    right: 0;
     z-index: -1;
   }
 }
@@ -363,25 +441,24 @@ setupAutoClearError(form, errors)
     justify-content: center;
   }
 
-  .subtitle{
-    font-size:$font-size-h3;
-    color:$blue ;
+  .subtitle {
+    font-size: $font-size-h3;
+    color: $blue;
     text-align: center;
     margin-bottom: 30px;
   }
 
-  .info{
+  .info {
     text-align: center;
-    color:$black;
+    color: $black;
     margin-bottom: 30px;
-
   }
 }
 
 .registration-header {
   align-items: center;
   margin-bottom: 30px;
-    
+
   .progress-bar {
     display: flex;
     justify-content: space-between;
@@ -420,21 +497,20 @@ setupAutoClearError(form, errors)
         transform: translateY(-50%);
       }
     }
-    
+
     &:last-child .step-circle::after {
       display: none;
     }
 
     &.completed .step-circle {
-      background-color: #C6F1FB; // 淺藍色（已完成）
+      background-color: #c6f1fb; // 淺藍色（已完成）
     }
 
     &.current .step-circle {
-      background-color: #4A87A7; // 深藍色（當下步驟）
+      background-color: #4a87a7; // 深藍色（當下步驟）
     }
   }
 }
-
 
 .avatar-upload {
   display: flex;
@@ -468,7 +544,6 @@ setupAutoClearError(form, errors)
   }
 }
 
-
 @media (min-width: 768px) {
   .signup-page {
     &::before {
@@ -478,8 +553,7 @@ setupAutoClearError(form, errors)
     &::after {
       width: 200px;
     }
-}
-
+  }
 
   .signup-container {
     border-radius: 6px;
@@ -490,7 +564,6 @@ setupAutoClearError(form, errors)
       font-weight: 600;
       margin-bottom: 30px;
     }
-
   }
 
   .registration-header {
@@ -507,23 +580,22 @@ setupAutoClearError(form, errors)
     }
   }
 
-    .subtitle{
-      font-size:$font-size-h2;
-      margin-bottom: 50px;
-    }
-
-    .info{
-      text-align: center;
-      color:$black;
-      margin-bottom: 50px;
-    }
+  .subtitle {
+    font-size: $font-size-h2;
+    margin-bottom: 50px;
   }
 
+  .info {
+    text-align: center;
+    color: $black;
+    margin-bottom: 50px;
+  }
+}
+
 .avatar-upload {
-  .avatar-circle{
+  .avatar-circle {
     width: 200px;
     height: 200px;
   }
 }
-
 </style>
