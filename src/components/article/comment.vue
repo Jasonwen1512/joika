@@ -16,6 +16,9 @@ const postid = route.params.postid;
 const article = articleList.find((item) => item.postid === postid);
 const emit = defineEmits(["comment-added"]);
 
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+
 //下方留言區
 //假的自己 展示用
 const currentUser = {
@@ -162,7 +165,7 @@ function postComment() {
   //這邊改用API
 
   axios
-    .post("http://localhost:8888/joika-api-server/comments/post-create.php", {
+    .post(`${VITE_API_BASE}/comments/post-create.php`, {
       post_no: postid,
       member_id: currentUser.member_id,
       comment_content: newComment.value,
@@ -305,49 +308,52 @@ const likeIt = (comment) => {
 };
 // 檢舉觸發函式
 function ReportIt() {
-    const container = document.createElement("div");
+  const container = document.createElement("div");
 
-    render(
-        h(ReportForm, {
-        onSubmit: async (data) => {
-            const user = JSON.parse(localStorage.getItem("user"));
-            const reporterId = user?.id;
+  render(
+    h(ReportForm, {
+      onSubmit: async (data) => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const reporterId = user?.id;
 
-            if (!reporterId) {
-            Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
-            return;
+        if (!reporterId) {
+          Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
+          return;
+        }
+
+        const payload = {
+          reporter_id: reporterId,
+          post_no: postid,
+          report_reason_no: mapReasonToNumber(data.reason),
+          report_description: data.detail,
+        };
+
+        try {
+          const { data: result } = await axios.post(
+            `${import.meta.env.VITE_API_BASE}/reports/post-report.php`,
+            payload,
+            {
+              headers: { "Content-Type": "application/json" },
             }
+          );
 
-            const payload = {
-            reporter_id: reporterId,
-            post_no: postid,
-            report_reason_no: mapReasonToNumber(data.reason),
-            report_description: data.detail,
-            };
-
-            try {
-            const { data: result } = await axios.post(
-                `${import.meta.env.VITE_API_BASE}/reports/post-report.php`,
-                payload,
-                {
-                headers: { "Content-Type": "application/json" },
-                }
-            );
-
-            if (result.success) {
-                Swal.close();
-                Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
-            } else {
-                Swal.fire("發生錯誤", result.error || "請稍後再試", "error");
-            }
-            } catch (error) {
-            console.error("檢舉 API 錯誤：", error.response?.data || error.message);
-            Swal.fire("錯誤", "無法連線至伺服器", "error");
-            }
-        },
-        }),
-        container
-    );
+          if (result.success) {
+            Swal.close();
+            Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+          } else {
+            Swal.fire("發生錯誤", result.error || "請稍後再試", "error");
+          }
+        } catch (error) {
+          console.error(
+            "檢舉 API 錯誤：",
+            error.response?.data || error.message
+          );
+          Swal.fire("錯誤", "無法連線至伺服器", "error");
+        }
+      },
+    }),
+    container
+  );
 
   Swal.fire({
     title: "檢舉留言",

@@ -277,7 +277,7 @@ function getActivityComments(activityId) {
 
   axios
     .get(
-      `http://localhost:8888/joika-api-server/comments/activities-list.php?activity_no=${activityNoNumeric}`
+      `${VITE_API_BASE}/comments/activities-list.php?activity_no=${activityNoNumeric}`
     )
     .then((res) => {
       // console.log("API 成功回傳留言:", res.data); // 偵錯 Log

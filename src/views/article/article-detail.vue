@@ -20,6 +20,9 @@ import ReportForm from "@/components/ReportForm.vue";
 const previewStore = usePreviewStore();
 // console.log(previewData);
 
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+
 //分類顏色
 const EventColorMap = {
   登山: "#6DE1D2",
@@ -209,11 +212,10 @@ async function fetchComments() {
   // comments.value = null; // 重置為 null，以配合 v-if="comments"
 
   axios
-    .get(
-      `http://localhost:8888/joika-api-server/comments/post-list.php?post_no=${postNo}`
-    )
+    .get(`${VITE_API_BASE}/comments/post-list.php?post_no=${postNo}`)
     .then((res) => {
       let allComments = [];
+      console.log(res.data);
 
       if (res.data && Array.isArray(res.data)) {
         // 先把每一筆留言整理成統一格式
