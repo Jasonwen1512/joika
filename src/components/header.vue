@@ -16,6 +16,8 @@ const shStatus = ref(false);
 //   headerZIndex.value = isScrolled.value ? 5 : 0;
 // };
 
+const loginStatus = ref(null);
+
 onMounted(() => {
   fetchMe();
 });
@@ -27,8 +29,10 @@ watch(
       fetchMe();
       console.log("第一次初始化完成，但尚未登入");
     } else if (newVal) {
-      console.log("使用者已登入:", newVal);
+      loginStatus.value = newVal;
+      console.log("使用者已登入:", loginStatus);
     } else {
+      loginStatus.value = null;
       console.log("使用者登出或未登入");
     }
   },
@@ -82,6 +86,8 @@ const targetPage = computed(() => {
   if (path === "/group/create" || path.startsWith("/group/edit"))
     return "group-create";
   if (path === "/auth/login" || path === "/auth/signup") return "login";
+  if (path === "/member/member-content") return "member-content";
+  if (path === "/member/member-notify") return "member-notify";
 
   return null;
 });
@@ -192,6 +198,7 @@ const pageIndicator = new URL(
             @click="shStatus = false"
             @mouseenter="onMouseEnter('login')"
             @mouseleave="onMouseLeave"
+            v-if="!loginStatus"
           >
             <svg
               viewBox="0 0 21 21"
@@ -215,7 +222,61 @@ const pageIndicator = new URL(
               v-show="targetPage === 'login'"
             />
           </router-link>
+          <router-link
+            to="/member/member-notify"
+            class="notify"
+            v-if="loginStatus"
+            @click="shStatus = false"
+            @mouseenter="onMouseEnter('member-notify')"
+            @mouseleave="onMouseLeave"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              :width="isMobile ? 24 : 30"
+              :height="isMobile ? 24 : 30"
+              viewBox="0 0 26 33"
+              fill="none"
+            >
+              <path
+                d="M17.5005 27.0329C17.5005 28.2264 17.0264 29.371 16.1825 30.2149C15.3386 31.0588 14.194 31.5329 13.0005 31.5329C11.8071 31.5329 10.6625 31.0588 9.81855 30.2149C8.97464 29.371 8.50053 28.2264 8.50053 27.0329M14.082 6.03744L11.883 6.03294C6.86703 6.02094 2.51253 10.0964 2.47803 15.0329L2.47803 20.7179C2.47803 21.9029 2.32803 23.0594 1.68153 24.0449L1.25103 24.7019C0.595531 25.6979 1.30053 27.0329 2.47803 27.0329L23.523 27.0329C24.7005 27.0329 25.404 25.6979 24.75 24.7019L24.3195 24.0449C23.6745 23.0594 23.523 21.9014 23.523 20.7164L23.523 15.0344C23.463 10.0964 19.098 6.04944 14.082 6.03744Z"
+                stroke="rgba(0, 0, 0, 0.9)"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M13.001 1.53294C13.7966 1.53294 14.5597 1.84901 15.1223 2.41162C15.6849 2.97423 16.001 3.73729 16.001 4.53294L16.001 6.03294L10.001 6.03294L10.001 4.53294C10.001 3.73729 10.317 2.97423 10.8797 2.41162C11.4423 1.84901 12.2053 1.53294 13.001 1.53294Z"
+                stroke="rgba(0, 0, 0, 0.9)"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
 
+            <img
+              :src="pageIndicator"
+              alt="page-indicator"
+              class="page-indicator"
+              v-show="targetPage === 'member-notify'"
+          /></router-link>
+          <router-link
+            to="/member/member-content"
+            class="isLogin"
+            v-if="loginStatus"
+            @click="shStatus = false"
+            @mouseenter="onMouseEnter('member-content')"
+            @mouseleave="onMouseLeave"
+          >
+            <div>
+              <img :src="loginStatus.avatar" alt="avatar" />
+            </div>
+            <img
+              :src="pageIndicator"
+              alt="page-indicator"
+              class="page-indicator"
+              v-show="targetPage === 'member-content'"
+            />
+          </router-link>
           <label for="switch-hamburger" class="hamburger"
             ><svg
               xmlns="http://www.w3.org/2000/svg"
@@ -311,7 +372,7 @@ const pageIndicator = new URL(
       // border: 2px solid rgba(0, 0, 0, 0.6);
     }
     &.isScroll {
-      width: calc(55px + 15px * 2 + 15px);
+      width: calc(55px + 15px * 2 + 55px);
       @include desktop() {
         width: calc(100% + 40px + 120px);
       }
@@ -321,8 +382,9 @@ const pageIndicator = new URL(
 nav {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 15px;
   position: relative;
+  align-items: center;
   .page-indicator {
     position: absolute;
     opacity: 0.9;
@@ -342,8 +404,36 @@ nav {
     width: 100%;
     vertical-align: middle;
   }
+  .notify {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    .page-indicator {
+      width: 50%;
+    }
+    @include flex-center();
+    @include tablet() {
+      width: 30px;
+      height: 30px;
+    }
+  }
+  .isLogin {
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(0, 0, 0, 0.9);
+    border-radius: 50%;
+    cursor: pointer;
+    .page-indicator {
+      width: 50%;
+    }
+    @include flex-center();
+    @include tablet() {
+      width: 30px;
+      height: 30px;
+    }
+  }
   @include desktop() {
-    gap: 20px;
+    gap: 50px;
     .hamburger {
       display: none;
     }
