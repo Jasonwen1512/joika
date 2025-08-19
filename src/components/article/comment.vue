@@ -19,8 +19,8 @@ const emit = defineEmits(["comment-added"]);
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
-//下方留言區
-//假的自己 展示用
+// 下方留言區
+// 假的自己 展示用
 const currentUser = {
   member_id: "1", // 假設這是當前使用者的 ID
   author: "展示用", // 您的名字
@@ -256,7 +256,6 @@ const likeIt = async (comment) => {
     };
 
     // 步驟 4: 呼叫您的 PHP API
-    // !! 請將 '/your-api-folder/like-toggle.php' 換成您 API 的真實路徑 !!
     const response = await axios.post(
       `${VITE_API_BASE}/comments/post-like-toggle.php`,
       payload
@@ -275,8 +274,8 @@ const likeIt = async (comment) => {
     comment.liked = originalLiked;
     comment.likenum = originalLikeNum;
 
-    // // (可選) 跳出錯誤提示
-    // Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
+    // (可選) 跳出錯誤提示
+    Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
   }
 };
 // 檢舉觸發函式
