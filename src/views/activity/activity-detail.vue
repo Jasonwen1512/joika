@@ -23,18 +23,31 @@ import "swiper/css";
 import "swiper/css/pagination";
 // --- End Swiper ---
 
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+
 const route = useRoute();
-const activity_id = route.params.activity_id;
+const activityNo = route.params.activity_id;
+
 const currentActivityId = computed(() => route.params.activity_id);
-//抓活動ID
-const activity = computed(() => {
-  if (!currentActivityId.value) {
-    return null;
+
+const activitiesData = ref([]);
+onMounted(async () => {
+  try {
+    const response = await axios.get(`${VITE_API_BASE}/activities/list.php`);
+    activitiesData.value = response.data;
+    // console.log(activitiesData.value);
+  } catch (error) {
+    console.error(`抓取list-all資料失敗${error}`);
   }
-  return FakeActivity.find(
-    (item) => String(item.activity_no) === String(currentActivityId.value)
-  );
 });
+
+const activity = computed(() =>
+  activitiesData.value.find(
+    (item) => String(item.ACTIVITY_NO) === String(activityNo)
+  )
+);
+
 const likeMap = ref({});
 
 const toggleLike = (id) => {
@@ -347,12 +360,12 @@ const swiperModules = [Pagination];
 
     <!-- 圖片 -->
     <div class="activity-image">
-      <img :src="activity?.activity_img" :alt="activity?.activity_name" />
+      <img :src="activity?.ACTIVITY_IMG" :alt="activity?.ACTIVITY_NAME" />
     </div>
 
     <!-- 標題 -->
     <div class="activity-title-wrap">
-      <h2>{{ activity?.activity_name }}</h2>
+      <h2>{{ activity?.ACTIVITY_NAME }}</h2>
     </div>
 
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
@@ -360,15 +373,15 @@ const swiperModules = [Pagination];
       <!-- 狀態一：尚未跟團 -->
       <template v-if="!isGroupJoined">
         <Button
-          @click.stop.prevent="gotoSignup(activity?.activity_id)"
+          @click.stop.prevent="gotoSignup(activity?.ACTIVITY_NO)"
           theme="primary"
           size="md"
         >
           我要跟團!
         </Button>
         <LikeButton
-          :isActive="likeMap[activity?.activity_id]"
-          @click.stop.prevent="toggleLike(activity?.activity_id)"
+          :isActive="likeMap[activity?.ACTIVITY_NO]"
+          @click.stop.prevent="toggleLike(activity?.ACTIVITY_NO)"
         ></LikeButton>
       </template>
 
@@ -405,20 +418,20 @@ const swiperModules = [Pagination];
           <div class="info-row">
             <strong>日期與時間</strong>
             <span
-              >{{ activity?.activity_start_date }} ~ <br />{{
-                activity?.activity_end_date
+              >{{ activity?.ACTIVITY_START_DATE }} ~ <br />{{
+                activity?.ACTIVITY_END_DATE
               }}</span
             >
           </div>
           <div class="info-row">
             <strong>地點</strong>
-            <span>{{ activity?.location }}</span>
+            <span>{{ activity?.LOCATION }}</span>
           </div>
           <div class="info-row">
             <strong>揪團人數</strong>
             <span
-              >{{ activity?.current_participant }}/{{
-                activity?.max_participant
+              >{{ activity?.CURRENT_PARTICIPANT }}/{{
+                activity?.MAX_PARTICIPANT
               }}人</span
             >
           </div>
@@ -428,15 +441,15 @@ const swiperModules = [Pagination];
         <div class="info-col">
           <div class="info-row">
             <strong>預估費用</strong>
-            <span>{{ activity?.fee_notes }}</span>
+            <span>{{ activity?.MAX_PARTICIPANT }}</span>
           </div>
           <div class="info-row">
             <strong>揪團截止日</strong>
-            <span>{{ activity?.registration_deadline }}</span>
+            <span>{{ activity?.REGISTRATION_DEADLINE }}</span>
           </div>
           <div class="info-row">
             <strong>跟團限制</strong>
-            <span>{{ activity?.participant_limitation }}</span>
+            <span>{{ activity?.PARTICIPANT_LIMITATION }}</span>
           </div>
         </div>
       </div>
@@ -482,7 +495,7 @@ const swiperModules = [Pagination];
     <!-- 活動詳情 -->
     <section class="activity-description">
       <div class="description-title">詳細</div>
-      <p class="description-content">{{ activity?.activity_description }}</p>
+      <p class="description-content">{{ activity?.ACTIVITY_DESCRIPTION }}</p>
     </section>
 
     <!-- 目前團員 -->
