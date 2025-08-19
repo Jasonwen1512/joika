@@ -4,30 +4,35 @@ import smEditIcon from "@/assets/img/icon/edit.svg";
 import { useRouter } from "vue-router";
 import { useGroupFormStore } from "@/stores/group-form";
 import { computed, ref } from "vue";
+import axios from "axios";
+import Swal from "sweetalert2";
 const store = useGroupFormStore();
 const router = useRouter();
 
-
-const emit = defineEmits(['back', 'confirm'])     // ✅ 宣告事件
+const emit = defineEmits(["back", "confirm"]); // ✅ 宣告事件
 const props = defineProps({
-  form:   { type: Object, required: true },
-  image:  { type: Object, default: () => ({ previewUrl: '', filename: '', mime: '' }) },
-})
-const previewUrl = computed(() => store.image?.previewUrl || '')
+  form: { type: Object, required: true },
+  image: {
+    type: Object,
+    default: () => ({ previewUrl: "", filename: "", mime: "" }),
+  },
+});
+const previewUrl = computed(() => store.image?.previewUrl || "");
 const previewData = computed(() => store.formData);
 async function submit() {
   // 上傳檔案拿 URL，填到 activity_img 後送 API
-  store.clearDraft()
-  store.resetForm()
-  router.replace('/group/success')
+  store.clearDraft();
+  store.resetForm();
+  router.replace("/group/success");
 }
 const goBackToEdit = () => {
-  
-  emit('back')
+  emit("back");
 
-
-  router.push({ name: 'group-create', params: { mode: 'edit', activity_no: '1' } })
-}
+  router.push({
+    name: "group-create",
+    params: { mode: "edit", activity_no: "1" },
+  });
+};
 const formatDateTime = (date) => {
   if (!date) return "";
   const d = new Date(date);
@@ -46,10 +51,93 @@ const formatDate = (date) => {
   const day = String(d.getDate()).padStart(2, "0");
   return `${m}/${day}`;
 };
+
+const sqlFormatDateTime = (date) => {
+  if (!date) return ""; // 沒值就回空字串（後面會擋）
+  const d = new Date(date);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
+const submitting = ref(false);
 const hosterRating = ref(3.8);
 const joinerRating = ref(4.5);
 
+//處理分類編號
+function parseCategoryNo(code) {
+  // CA001 → 1
+  return parseInt(code.replace("CA", ""), 10);
+}
 
+async function onSubmit() {
+  if (submitting.value) return;
+  submitting.value = true;
+
+  try {
+    const fd = new FormData();
+    const f = store.formData;
+    fd.append("activity_name", f.activity_name);
+    fd.append("category_no", parseCategoryNo(f.category_no));
+    fd.append("min_participant", f.min_participant ?? 1);
+    if (f.max_participant !== null && f.max_participant !== "") {
+      fd.append("max_participant", f.max_participant);
+    }
+    fd.append("location", f.location);
+    fd.append("address", f.address);
+    fd.append("fee_notes", f.fee_notes ?? "");
+    fd.append("activity_description", f.activity_description ?? "");
+    fd.append(
+      "registration_start_date",
+      sqlFormatDateTime(f.registration_start_date)
+    );
+    fd.append(
+      "registration_deadline",
+      sqlFormatDateTime(f.registration_deadline)
+    );
+    fd.append("activity_start_date", sqlFormatDateTime(f.activity_start_date));
+    fd.append("activity_end_date", sqlFormatDateTime(f.activity_end_date));
+    if (store.image?.file) {
+      fd.append(
+        "activity_img",
+        store.image.file,
+        store.image.filename || "upload"
+      );
+    } else if (store.image?.previewUrl?.startsWith("data:")) {
+      const file = dataURLtoFile(
+        store.image.previewUrl,
+        store.image.filename || "upload.png"
+      );
+      fd.append("activity_img", file, file.name);
+    }
+
+    const { data } = await axios.post(
+      `${import.meta.env.VITE_API_BASE}/activities/create.php`,
+      fd
+    );
+
+    // ✅ 成功彈窗
+    await Swal.fire({
+      icon: "success",
+      title: "已成功建立活動",
+      text: `活動編號：${data.id}`,
+      confirmButtonText: "確定",
+    });
+    router.push(`/activity/:activity_no`);
+    if (store.image?.previewUrl) URL.revokeObjectURL(store.image.previewUrl);
+    store.resetForm();
+  } catch (err) {
+    const res = err?.response?.data;
+    await Swal.fire({
+      icon: "error",
+      title: res?.message || "送出失敗",
+      text: res?.detail || "",
+    });
+  } finally {
+    submitting.value = false;
+  }
+}
 // const activityFormToEdit = activityFormList.find(
 //       (item) => item.activity_no === props.activity_no
 //     );
@@ -58,9 +146,9 @@ const joinerRating = ref(4.5);
 <template>
   <div class="preview-form-wrap">
     <div class="title">
-    <p>🎉揪團完成啦！ </p>
-     <p> 來看一下你的活動長什麼樣</p>
-</div>
+      <p>🎉揪團完成啦！</p>
+      <p>來看一下你的活動長什麼樣</p>
+    </div>
     <div class="form-check">
       <p>
         感謝你發起活動
@@ -82,9 +170,9 @@ const joinerRating = ref(4.5);
     </div>
 
     <div class="form-preview">
-      <div class="edit-button" >
+      <div class="edit-button">
         <Button
-        type="button"
+          type="button"
           :prefixIcon="smEditIcon"
           theme="secondary"
           size="sm"
@@ -95,7 +183,7 @@ const joinerRating = ref(4.5);
 
       <div class="activity-content">
         <h2>
-          {{ formatDate(previewData.dateRange[0]) }}
+          {{ formatDate(previewData.activity_start_date) }}
           {{ previewData.activity_name }}
         </h2>
         <div class="activity-img">
@@ -106,8 +194,8 @@ const joinerRating = ref(4.5);
           <div class="activity-time">
             <span>日期與時間 </span>
             <span
-              >{{ formatDateTime(previewData.dateRange[0]) }} ~
-              {{ formatDateTime(previewData.dateRange[1]) }}</span
+              >{{ formatDateTime(previewData.activity_start_date) }} ~
+              {{ formatDateTime(previewData.activity_end_date) }}</span
             >
           </div>
           <div class="activity-location">
@@ -134,7 +222,7 @@ const joinerRating = ref(4.5);
         <hr />
         <div class="activity-hoster">
           <div class="hoster-intro">
-          <span>主揪</span>
+            <span>主揪</span>
           </div>
           <div class="hoster-img">
             <img
@@ -163,21 +251,19 @@ const joinerRating = ref(4.5);
               </div>
             </div>
             <div class="info">
-            <ul class="hoster-info">
-              <li>台中市</li>
-              <li>30歲</li>
-              <li>健身教練</li>
-            </ul>
+              <ul class="hoster-info">
+                <li>台中市</li>
+                <li>30歲</li>
+                <li>健身教練</li>
+              </ul>
             </div>
           </div>
-         
-          
         </div>
-         <hr />
+        <hr />
         <div class="activity-detail">
-            <span>活動詳情</span>
-            <p>{{ previewData.activity_description }}</p>
-          </div>
+          <span>活動詳情</span>
+          <p>{{ previewData.activity_description }}</p>
+        </div>
       </div>
     </div>
     <div class="final-check">
@@ -191,7 +277,13 @@ const joinerRating = ref(4.5);
   </div>
   <div class="background-decoration">
     <div class="submit-button">
-      <Button theme="primary" size="md" @click="emit('confirm')">送出</Button>
+      <Button
+        theme="primary"
+        size="md"
+        :isDisabled="submitting"
+        :on-click="onSubmit"
+        >送出</Button
+      >
     </div>
   </div>
 </template>
@@ -201,7 +293,6 @@ const joinerRating = ref(4.5);
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  
 }
 h2 {
   text-align: center;
@@ -215,30 +306,24 @@ h2 {
 .title {
   max-width: 720px;
   width: 100%;
-display: flex;
-flex-direction: column;
+  display: flex;
+  flex-direction: column;
   text-align: left;
-   margin: auto 0 ;
+  margin: auto 0;
   justify-content: left;
   @include desktop() {
-      //1024以上
-flex-direction: row;
-    }
-
-    @media screen and (min-width: 1023px) and (max-width: 1199px) {
-      //1023-1199
-      flex-direction: row;
-      
-  
-    }
- p {
-    font-size: $font-size-h4;
-    margin: 0;
-   
-    
+    //1024以上
+    flex-direction: row;
   }
 
-
+  @media screen and (min-width: 1023px) and (max-width: 1199px) {
+    //1023-1199
+    flex-direction: row;
+  }
+  p {
+    font-size: $font-size-h4;
+    margin: 0;
+  }
 }
 
 .activity-time,
@@ -253,14 +338,11 @@ flex-direction: row;
   flex-wrap: wrap;
   span {
     width: 40%;
-
   }
-@include tablet() {
-      //768-1023
-justify-content: space-evenly;
-    }
-
-
+  @include tablet() {
+    //768-1023
+    justify-content: space-evenly;
+  }
 }
 .activity-img {
   margin: 50px auto;
@@ -281,9 +363,8 @@ justify-content: space-evenly;
   font-size: $font-size-p;
   padding: 10px;
 }
-.ranting{
+.ranting {
   width: 100%;
-
 }
 li {
   list-style: disc;
@@ -296,7 +377,7 @@ li {
 }
 .activity-content {
   margin: 0 auto;
-  
+
   font-size: $font-size-p;
   padding: 10px;
   .activity-intro {
@@ -305,86 +386,70 @@ li {
     gap: 10px;
     margin: 10px 0;
 
-     @include tablet() {
+    @include tablet() {
       //768-1023
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-
     }
 
     @include desktop() {
       //1024以上
-
     }
 
     @media screen and (min-width: 1023px) and (max-width: 1199px) {
       //1023-1199
-  
     }
   }
 }
 
-.activity-detail{
+.activity-detail {
   margin: 20px 0;
   padding: 10px;
   gap: 10px;
   display: flex;
   flex-direction: column;
-  
+
   p {
     margin: 5px 0;
     font-size: $font-size-p;
   }
   @include tablet() {
-      //768-1023
-     margin: 0 20px ;
+    //768-1023
+    margin: 0 20px;
+  }
 
-    }
+  @include desktop() {
+    //1024以上
+  }
 
-    @include desktop() {
-      //1024以上
-
-    }
-
-    @media screen and (min-width: 1023px) and (max-width: 1199px) {
-      //1023-1199
-  
-    }
+  @media screen and (min-width: 1023px) and (max-width: 1199px) {
+    //1023-1199
+  }
 }
 
-
-
-
-
 .activity-hoster {
-   
   @include tablet() {
     //768-1023
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    margin: auto ;
-    
+    margin: auto;
   }
-  
-  
+
   @include desktop() {
     display: flex;
-    
+
     align-items: center;
     gap: 20px;
-      
-    }
+  }
   span {
-  
     justify-self: center;
     margin: 20px 0;
-   
   }
 }
 .hoster-img {
- max-width: 120px;
+  max-width: 120px;
   height: 120px;
   border-radius: 50%;
   overflow: hidden;
@@ -419,36 +484,34 @@ li {
   --el-rate-fill-color: #81bfda;
 }
 .hoster-profile {
-    margin: 20px 20px 10px 20px;
-  
+  margin: 20px 20px 10px 20px;
+
   @include tablet() {
-      //768-1023
+    //768-1023
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: left;
     width: 40%;
-     
-    p{
+
+    p {
       width: 100%;
     }
-    }
+  }
 
-    @include desktop() {
-      //1024以上
-     display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+  @include desktop() {
+    //1024以上
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
 
-    @media screen and (min-width: 1023px) and (max-width: 1199px) {
-      //1023-1199
-  display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-  
+  @media screen and (min-width: 1023px) and (max-width: 1199px) {
+    //1023-1199
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
 }
 .hoster-intro {
   display: flex;
@@ -459,30 +522,16 @@ li {
   text-align: center;
 
   @include tablet() {
-      //768-1023
-    flex-direction:row;
+    //768-1023
+    flex-direction: row;
     align-items: center;
     gap: 50px;
     width: 30%;
     margin-left: 10px;
-    }
-
-    @include desktop() {
-      //1024以上
-
-    }
-
-    @media screen and (min-width: 1023px) and (max-width: 1199px) {
-      //1023-1199
-  
-    }
-
-
-
-
+  }
 }
 .info {
- width: 100%;
+  width: 100%;
 }
 .hoster-info {
   display: flex;
@@ -544,7 +593,7 @@ li {
   justify-content: center;
   align-items: center;
 }
-.edit-button{
+.edit-button {
   max-width: 700px;
   margin: 0 auto;
 }

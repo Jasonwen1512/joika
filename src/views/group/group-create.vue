@@ -134,8 +134,13 @@ const rules = reactive({
   ],
   participant_limitation: [
     {
-      required: true,
-      message: "請輸入參團者限制",
+      validator: (rule, value, callback) => {
+        if (ruleForm.hasLimitation && !value.trim()) {
+          callback(new Error("請輸入限制內容"));
+        } else {
+          callback();
+        }
+      },
       trigger: "blur",
     },
   ],
@@ -153,7 +158,35 @@ const rules = reactive({
 const activityCategories = ActivityCategories.filter(
   (item) => item.category_no !== "0"
 );
-const dateRange = ref([]);
+const at00 = (d) => {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
+const addDays = (d, n) => {
+  const x = new Date(d); x.setDate(x.getDate() + n); 
+  return at00(x)
+}
+const today = at00(new Date())
+const minStart = addDays(today, 3)
+const disableActivityDate = (date) => {return at00(date) < minStart}
+
+const disableDeadline = (date) => {
+  const start = ruleForm.dateRange?.[0]
+  if (!start) return true             
+  const latest = addDays(at00(new Date(start)), -1)
+  return at00(date) > latest         
+}
+
+watch(() => ruleForm.dateRange?.[0], (start) => {
+  if (!start) {ruleForm.registration_deadline = null; return }
+  if (!ruleForm.registration_deadline) return
+  const latest = addDays(at00(new Date(start)), -1)
+  if (at00(form.registration_deadline) > latest) {
+    ruleForm.registration_deadline = latest        
+  }
+})
+
+
+
 const cityList = taiwanDistricts.map((city) => {
   return {
     name: city.city,
@@ -261,7 +294,7 @@ onBeforeRouteLeave((to) => {
     store.resetForm()
   }
 })
-
+// 顯示彈出視窗
 watch(
   () => route.params.mode,
   (newMode) => {
@@ -270,6 +303,29 @@ watch(
     }
   }
 )
+// 監聽 participant_limitation 狀態變化，若有輸入則勾選 hasLimitation
+watch(() => ruleForm.participant_limitation, (val) => {
+  ruleForm.hasLimitation = !!val.trim();
+});
+
+// 監聽 hasLimitation 狀態變化，若取消勾選則清空 participant_limitation
+watch(() => ruleForm.hasLimitation, (checked) => {
+  if (!checked) ruleForm.participant_limitation = "";
+});
+
+watch(() => ruleForm.dateRange, (range) => {
+  if (!range || range.length < 2) {
+    ruleForm.activity_start_date = null
+    ruleForm.activity_end_date = null
+    return
+  }
+  // Element Plus datePicker 拿到的是 Date 物件，要轉成後端要的字串
+  const format = (d) =>
+    d ? new Date(d).toISOString().slice(0, 19).replace('T', ' ') : ''
+
+  ruleForm.activity_start_date = format(range[0])
+  ruleForm.activity_end_date   = format(range[1])
+}, { immediate: true })
 </script>
 
 <template>
@@ -303,6 +359,7 @@ watch(
             end-placeholder="結束日期"
             :default-time="defaultTime2"
             :popper-class="'one-panel'"
+            :disabled-date="disableActivityDate"
           />
         </div>
       </el-form-item>
@@ -393,13 +450,15 @@ watch(
           placeholder="請選擇揪團截止日"
           :editable="false"
           :clearable="false"
+          :disabled="!ruleForm.dateRange?.[0]"
+           :disabled-date="disableDeadline"
         >
         </el-date-picker>
         </div>
       </el-form-item>
 
-      <el-form-item>
-        <el-checkbox> 揪團限制 </el-checkbox>
+      <el-form-item prop="participant_limitation">
+        <el-checkbox v-model="ruleForm.hasLimitation"> 揪團限制 </el-checkbox>
         <el-input v-model="ruleForm.participant_limitation"></el-input>
       </el-form-item>
       <div class="select-img">
