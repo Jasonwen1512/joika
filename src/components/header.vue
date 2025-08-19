@@ -1,7 +1,8 @@
 <script setup>
 import Logo from "@/components/logo.vue";
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRoute } from "vue-router";
+import { authState, fetchMe } from "@/assets/data/authState.js";
 
 const route = useRoute();
 
@@ -14,6 +15,25 @@ const shStatus = ref(false);
 //   isScrolled.value = window.scrollY > 200;
 //   headerZIndex.value = isScrolled.value ? 5 : 0;
 // };
+
+onMounted(() => {
+  fetchMe();
+});
+
+watch(
+  () => authState.user,
+  (newVal, oldVal) => {
+    if (oldVal === null && newVal === undefined) {
+      fetchMe();
+      console.log("第一次初始化完成，但尚未登入");
+    } else if (newVal) {
+      console.log("使用者已登入:", newVal);
+    } else {
+      console.log("使用者登出或未登入");
+    }
+  },
+  { immediate: true } // 立即觸發一次
+);
 
 const checkIsMobile = () => {
   // header 寬度<=1024的一律當作手機（平板沿用手機版）
@@ -59,7 +79,8 @@ const targetPage = computed(() => {
     return "group-explore";
   }
   if (path === "/support") return "support";
-   if (path === "/group/create" || path.startsWith("/group/edit")) return "group-create";
+  if (path === "/group/create" || path.startsWith("/group/edit"))
+    return "group-create";
   if (path === "/auth/login" || path === "/auth/signup") return "login";
 
   return null;
