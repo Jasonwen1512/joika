@@ -76,6 +76,7 @@ const titleDate = computed(() => {
       <LikeButton
         :isActive="likeMap[props.item.ACTIVITY_NO]"
         @click.stop.prevent="toggleLike(item.ACTIVITY_NO)"
+        :data-no="item.ACTIVITY_NO"
       ></LikeButton>
     </div>
   </div>
