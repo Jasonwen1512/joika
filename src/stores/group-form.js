@@ -7,7 +7,7 @@ const emptyForm = () => ({
   activity_name: "",
   category_no: "",
   location: "",
-  registration_deadline: "",
+  registration_deadline: null,
   activity_start_date: null,
   activity_end_date: null,
   max_participant: null,
@@ -18,6 +18,8 @@ const emptyForm = () => ({
   dateRange: [],
   participant_limitation: "",
   activity_img: "",
+   hasLimitation: false,   
+   registration_start_date: null,
 });
 
 export const useGroupFormStore = defineStore("groupForm", {
@@ -79,6 +81,7 @@ export const useGroupFormStore = defineStore("groupForm", {
       const toDate = (v) => (v ? new Date(v) : null);
       const revived = { ...form };
       revived.registration_deadline = toDate(form.registration_deadline);
+      revived.registration_start_date = toDate(form.registration_start_date);
       revived.activity_start_date = toDate(form.activity_start_date);
       revived.activity_end_date = toDate(form.activity_end_date);
       revived.dateRange = Array.isArray(form.dateRange)
