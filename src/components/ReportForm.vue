@@ -14,13 +14,16 @@ const props = defineProps({
         alert('請選擇檢舉原因')
         return
     }
-    props.onSubmit({ reason: reason.value, detail: detail.value })
+    props.onSubmit({ 
+        reason: reason.value, 
+        detail: detail.value })
     }
     // 取消
     function cancelForm() {
     // 直接關閉 SweetAlert
     import('sweetalert2').then(({ default: Swal }) => Swal.close())
-}
+    }
+
     </script>
 
     <template>

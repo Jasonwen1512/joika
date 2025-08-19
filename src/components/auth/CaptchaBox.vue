@@ -1,159 +1,89 @@
 <script setup>
-import { ref, onMounted, watch } from "vue"
+import { ref, onMounted, nextTick } from 'vue'
 
-    // 當前產生的驗證碼
-    const curIdentifyCode = ref("")
+const emit = defineEmits(['updateIdentifyCode'])
+const props = defineProps({
+  contentWidth:  { type: Number, default: 110 },
+  contentHeight: { type: Number, default: 36 },
+  fontSizeMin:   { type: Number, default: 18 },
+  fontSizeMax:   { type: Number, default: 24 },
+})
 
-    // 父層可傳入的參數
-    const props = defineProps({
-    identifyCode: {
-        type: String,
-        default: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    },
-    fontSizeMin: { type: Number, default: 16 },
-    fontSizeMax: { type: Number, default: 40 },
-    backgroundColorMin: { type: Number, default: 180 },
-    backgroundColorMax: { type: Number, default: 240 },
-    colorMin: { type: Number, default: 50 },
-    colorMax: { type: Number, default: 160 },
-    lineColorMin: { type: Number, default: 40 },
-    lineColorMax: { type: Number, default: 180 },
-    dotColorMin: { type: Number, default: 0 },
-    dotColorMax: { type: Number, default: 255 },
-    contentWidth: { type: Number, default: 112 },
-    contentHeight: { type: Number, default: 38 }
-    })
+const canvasRef = ref(null)
+const code = ref('')
 
-    // 發送驗證碼給父元件
-    const emit = defineEmits(["updateIdentifyCode"])
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min }
+function randColor(min, max) {
+  const r = rand(min, max), g = rand(min, max), b = rand(min, max)
+  return `rgb(${r},${g},${b})`
+}
+function genCode(len = 4) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let s = ''
+  for (let i = 0; i < len; i++) s += chars[rand(0, chars.length - 1)]
+  return s
+}
 
-    // 當驗證碼變動時，重畫畫面
-    watch(curIdentifyCode, () => {
-    drawPic()
-    })
+function draw() {
+  const c = canvasRef.value
+  const ctx = c?.getContext?.('2d')
+  if (!c || !ctx) return
 
-    /* ---------- 驗證碼核心邏輯 ---------- */
+  c.width  = props.contentWidth
+  c.height = props.contentHeight
+  const w = c.width, h = c.height
 
-    // 隨機數
-    const randomNum = (min, max) => {
-    return Math.floor(Math.random() * (max - min) + min)
-    }
+  // 背景
+  ctx.clearRect(0, 0, w, h)
+  ctx.fillStyle = randColor(235, 250)
+  ctx.fillRect(0, 0, w, h)
 
-    // 隨機顏色
-    const randomColor = (min, max) => {
-    let r = randomNum(min, max)
-    let g = randomNum(min, max)
-    let b = randomNum(min, max)
-    return `rgb(${r},${g},${b})`
-    }
-
-    // 繪製整體驗證碼畫面
-    const drawPic = () => {
-    const canvas = document.getElementById("s-canvas")
-    const ctx = canvas.getContext("2d")
-    ctx.textBaseline = "bottom"
-
-    // 背景色
-    ctx.fillStyle = randomColor(props.backgroundColorMin, props.backgroundColorMax)
-    ctx.fillRect(0, 0, props.contentWidth, props.contentHeight)
-
-    // 畫驗證碼字元
-    for (let i = 0; i < curIdentifyCode.value.length; i++) {
-        drawText(ctx, curIdentifyCode.value[i], i)
-    }
-
-    drawLine(ctx)
-    drawDot(ctx)
-    }
-
-    // 畫每個字
-    const drawText = (ctx, txt, i) => {
-    ctx.fillStyle = randomColor(props.colorMin, props.colorMax)
-    ctx.font = randomNum(props.fontSizeMin, props.fontSizeMax) + "px SimHei"
-
-    const x = (i + 1) * (props.contentWidth / (curIdentifyCode.value.length + 1))
-    const y = randomNum(props.fontSizeMax, props.contentHeight - 10)
-    const deg = randomNum(-45, 45)
-
+  // 字
+  ctx.textBaseline = 'middle'
+  ctx.textAlign = 'center'
+  const step = w / (code.value.length + 1)
+  for (let i = 0; i < code.value.length; i++) {
+    ctx.save()
+    const x = step * (i + 1)
+    const y = h / 2
     ctx.translate(x, y)
-    ctx.rotate((deg * Math.PI) / 180)
-    ctx.fillText(txt, 0, 0)
-    ctx.rotate((-deg * Math.PI) / 180)
-    ctx.translate(-x, -y)
-    }
+    ctx.rotate((Math.random() - 0.5) * 0.4)
+    ctx.font = `${rand(props.fontSizeMin, props.fontSizeMax)}px sans-serif`
+    ctx.fillStyle = randColor(40, 140)
+    ctx.fillText(code.value[i], 0, 0)
+    ctx.restore()
+  }
 
-    // 畫干擾線
-    const drawLine = (ctx) => {
-    for (let i = 0; i < 3; i++) {
-        ctx.strokeStyle = randomColor(props.lineColorMin, props.lineColorMax)
-        ctx.beginPath()
-        ctx.moveTo(randomNum(0, props.contentWidth), randomNum(0, props.contentHeight))
-        ctx.lineTo(randomNum(0, props.contentWidth), randomNum(0, props.contentHeight))
-        ctx.stroke()
-    }
-    }
+  // 干擾線
+  for (let i = 0; i < 3; i++) {
+    ctx.strokeStyle = randColor(80, 180)
+    ctx.beginPath()
+    ctx.moveTo(rand(0, w), rand(0, h))
+    ctx.lineTo(rand(0, w), rand(0, h))
+    ctx.stroke()
+  }
+  // 雜點
+  for (let i = 0; i < 30; i++) {
+    ctx.fillStyle = randColor(0, 255)
+    ctx.fillRect(rand(0, w), rand(0, h), 1, 1)
+  }
+}
 
-    // 畫干擾點
-    const drawDot = (ctx) => {
-    for (let i = 0; i < 30; i++) {
-        ctx.fillStyle = randomColor(props.dotColorMin, props.dotColorMax)
-        ctx.beginPath()
-        ctx.arc(randomNum(0, props.contentWidth), randomNum(0, props.contentHeight), 1, 0, 2 * Math.PI)
-        ctx.fill()
-    }
-    }
+function refreshCode() {
+  code.value = genCode(4)
+  emit('updateIdentifyCode', code.value)  // ★ 先生碼→回傳父層
+  draw()                                  // ★ 再畫圖
+}
 
-    // 重新產生驗證碼（供點擊與父層調用）
-    const refreshCode = () => {
-    curIdentifyCode.value = ""
-    makeCode(props.identifyCode, 4)
-    }
+onMounted(async () => {
+  await nextTick()
+  refreshCode()
+})
 
-    // 組成驗證碼字串
-    const makeCode = (sourceStr, length) => {
-    for (let i = 0; i < length; i++) {
-        curIdentifyCode.value += sourceStr[randomNum(0, sourceStr.length)]
-    }
-    emit("updateIdentifyCode", curIdentifyCode.value)
-    }
-
-    // 元件掛載後自動產生驗證碼
-    onMounted(() => {
-    drawPic()
-    refreshCode()
-    })
-
-    // 讓父元件可以透過 ref 使用 refreshCode()
-    defineExpose({
-    refreshCode
-    })
+defineExpose({ refreshCode })
 </script>
 
 <template>
-    <!-- 外層容器：點擊可重新產生驗證碼 -->
-    <div class="s-canvas" @click="refreshCode">
-        <canvas
-        id="s-canvas"
-        :width="contentWidth"
-        :height="contentHeight"
-        ></canvas>
-    </div>
+  <!-- 直接給固定尺寸，避免被父層 100% 壓扁 -->
+  <canvas ref="canvasRef" style="display:block;width:110px;height:36px;border-radius:8px;"></canvas>
 </template>
-
-<style scoped>
-.s-canvas {
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-    display: flex;
-}
-
-canvas {
-    width: 100% ;
-    height: 100% ;
-    display: block;
-}
-</style>
