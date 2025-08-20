@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { authState, isAuthenticated, fetchMe } from '@/assets/data/authState'
 
 const routes = [
   {
@@ -11,10 +12,12 @@ const routes = [
   {
     path: "/member/member-notify",
     component: () => import("@/views/member/member-notify.vue"),
+    meta: { requiresAuth: true }
   },
   {
     path: "/member/member-content",
     component: () => import("@/views/member/member-content.vue"),
+    meta: { requiresAuth: true }
   },
   {
     path: "/group/group-explore",
@@ -34,9 +37,17 @@ const routes = [
     props: true,
   },
   { path: "/contact", component: () => import("@/views/contact/contact.vue") },
-  { path: "/chat", component: () => import("@/views/chat/chat.vue") },
-  { path: "/auth/login", component: () => import("@/views/auth/login.vue") },
-  { path: "/auth/signup", component: () => import("@/views/auth/signup.vue") },
+  { path: "/chat", component: () => import("@/views/chat/chat.vue"),meta: { requiresAuth: true } },
+  
+  { path: "/auth/login",
+    name: "login",
+    component: () => import("@/views/auth/login.vue"),
+    props: route => ({ redirect: route.query.redirect || '/home' }) },
+
+  { path: "/auth/signup",
+    name: "signup", 
+    component: () => import("@/views/auth/signup.vue"),
+    meta: { guestOnly: true }},
 
   {
     path: "/article/article",
@@ -55,6 +66,7 @@ const routes = [
     name: "ArticleModify",
     component: () => import("@/views/article/article-create.vue"),
     props: true,
+    meta: { requiresAuth: true },
   },
 
   {
@@ -95,3 +107,29 @@ const router = createRouter({
 });
 
 export default router;
+
+let checkedOnce = false
+async function ensureAuthReady() {
+  if (!checkedOnce) { checkedOnce = true; await fetchMe() }
+  else if (!authState.ready) { await fetchMe() }
+}
+
+
+router.beforeEach(async (to) => {
+  await ensureAuthReady()
+
+  const needsLogin = to.matched.some(r => r.meta?.requiresAuth)
+  if (needsLogin && !isAuthenticated.value) {
+    // [CHANGE] 改為回傳導向（v4 推薦）
+    return { name: 'login', query: { redirect: to.fullPath } } // or path: '/auth/login'
+  }
+
+  // [ADD] 使用 meta.guestOnly：已登入就不要進登入/註冊
+  const guestOnly = to.matched.some(r => r.meta?.guestOnly)
+  if (guestOnly && isAuthenticated.value) {
+    const back = (typeof to.query.redirect === 'string' && to.query.redirect) ? to.query.redirect : '/home'
+    return back // 或 return { path: back }
+  }
+
+  return true // 放行
+  })

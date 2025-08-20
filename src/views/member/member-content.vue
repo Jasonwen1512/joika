@@ -152,22 +152,28 @@ const handleLogout = async () => {
                     </div>
                     <div class="member-info">
                         <p class="user-name">{{ member?.MEMBER_NICKNAME }}</p>
-                        <StarRating
-                            :score="5.0"
-                            :count="3"
-                            color="yellow"
-                            showScore
-                            class="score"
-                        />
-                        <StarRating
-                            :score="4.0"
-                            :count="1"
+                        <div class="rate">
+                            <p>主揪評價:</p>
+                            <StarRating
+                                :score= "member.hostAvg"
+                                :count= "member.HOST_COUNT_TOTAL"
+                                color="yellow"
+                                showScore
+                                class="score"
+                            />
+                        </div>
+                        <div class="rate">
+                            <p>參團評價:</p>
+                            <StarRating
+                            :score="member.joinerAvg"
+                            :count="member.JOINER_COUNT_TOTAL"
                             color="blue"
                             showScore
                             class="score"
                         />
+                        </div>
                         <p v-if="member" class="user-demographics">
-                            {{ member.MEMBER_CITY }} | {{ member.age }}歲 | {{ member.MEMBER_OCCUPATION }}
+                            {{ member.MEMBER_CITY_NAME }} | {{ member.age }}歲 | {{ member.MEMBER_OCCUPATION_NAME }}
                         </p>
                         <div class="tags">
                             <div
@@ -591,6 +597,12 @@ flex-wrap: wrap;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 40px;
+    }
+
+    .rate{
+        display: flex;
+        justify-content: center;
+        gap: 10px;
     }
 }
 </style>
