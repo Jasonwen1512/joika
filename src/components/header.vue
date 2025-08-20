@@ -293,7 +293,10 @@ const pageIndicator = new URL(
             </svg>
           </label>
         </nav>
-        <div class="header-bg" :class="{ isScroll: isScrolledDown }"></div>
+        <div
+          class="header-bg"
+          :class="{ isScroll: isScrolledDown, isLogin: loginStatus }"
+        ></div>
       </div>
     </div>
     <label class="overlay" for="switch-hamburger"></label>
@@ -372,9 +375,15 @@ const pageIndicator = new URL(
       // border: 2px solid rgba(0, 0, 0, 0.6);
     }
     &.isScroll {
-      width: calc(55px + 15px * 2 + 55px);
+      width: calc(55px + 15px * 2 + 15px);
+      &.isLogin {
+        width: calc(55px + 15px * 2 + 55px);
+      }
       @include desktop() {
         width: calc(100% + 40px + 120px);
+        &.isLogin {
+          width: calc(100% + 40px + 120px);
+        }
       }
     }
   }
