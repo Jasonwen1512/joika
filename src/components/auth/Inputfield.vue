@@ -4,18 +4,18 @@ defineProps({
   label: String,
   type: {
     type: String,
-    default: 'text' // 支援 'text', 'email', 'password', 'select' 等
+    default: "text", // 支援 'text', 'email', 'password', 'select' 等
   },
   modelValue: String,
   error: String,
   placeholder: String,
   options: {
     type: Array,
-    default: () => []
-  }
-})
+    default: () => [],
+  },
+});
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(["update:modelValue"]);
 </script>
 
 <template>
@@ -23,27 +23,15 @@ const emit = defineEmits(['update:modelValue'])
     <label :for="id">{{ label }}</label>
 
     <!-- 下拉選單 -->
-    <select
-      v-if="type === 'select'"
-      :id="id"
-      :value="modelValue"
-      @change="emit('update:modelValue', $event.target.value)"
-    >
+    <select v-if="type === 'select'" :id="id" :value="modelValue" @change="emit('update:modelValue', $event.target.value)">
       <option disabled value="">請選擇</option>
-      <option v-for="(opt, i) in options" :key="i" :value="opt">
-        {{ opt }}
+      <option v-for="(opt, i) in options" :key="i" :value="opt.value">
+        {{ opt.label }}
       </option>
     </select>
 
     <!-- 所有 input 類型：text, email, password, tel... -->
-    <input
-      v-else
-      :id="id"
-      :type="type"
-      :placeholder="placeholder"
-      :value="modelValue"
-      @input="emit('update:modelValue', $event.target.value)"
-    />
+    <input v-else :id="id" :type="type" :placeholder="placeholder" :value="modelValue" @input="emit('update:modelValue', $event.target.value)" />
 
     <p v-if="error" class="error-text">{{ error }}</p>
   </div>
