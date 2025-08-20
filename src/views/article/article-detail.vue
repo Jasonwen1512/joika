@@ -206,7 +206,7 @@ async function fetchComments() {
     return;
   }
 
-  console.log(`父元件：開始為文章 #${postNo} 抓取留言...`);
+  // console.log(`父元件：開始為文章 #${postNo} 抓取留言...`);
   isLoading.value = true;
   error.value = null;
   // comments.value = null; // 重置為 null，以配合 v-if="comments"

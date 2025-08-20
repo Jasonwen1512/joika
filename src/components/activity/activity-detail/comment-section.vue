@@ -15,7 +15,10 @@ const router = useRouter();
 const activityid = route.params.activity_id;
 const article = articleList.find((item) => item.activityid === activityid);
 const emit = defineEmits(["comment-added"]);
+const activityNoNumeric = String(activityid).replace(/\D/g, ""); //先把活動ID轉成數字
 
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 //下方留言區
 //假的自己 展示用
 const currentUser = {
@@ -25,99 +28,6 @@ const currentUser = {
   replies: [],
 };
 
-//假的留言們  展示用
-// const comments = ref([
-//     {
-//         id: 1,
-//         member_id: "M0001",
-//         author: "SunnyDive",
-//         avatar: "https://i.pravatar.cc/150?u=sunnydive", // 假頭像，每次刷新會變
-//         timestamp: "2025/07/07 18:45",
-//         content: "我們那天也在那欸哈哈～真的超美！Joika平台揪團越來越專業了！",
-//         likenum: 0,
-//         liked: false,
-
-//         replies: [
-//             // 為了展示，我們給第一則留言加上超過3則的回覆
-//             {
-//                 id: 101,
-//                 author: "alex",
-//                 avatar: "https://i.pravatar.cc/150?u=suive", // 假頭像，每次刷新會變
-//                 timestamp: "2025/07/07 18:45",
-//                 content: "真的！",
-//             },
-//             {
-//                 id: 102,
-//                 author: "bob",
-//                 avatar: "https://i.pravatar.cc/150?u=s", // 假頭像，每次刷新會變
-//                 timestamp: "2025/07/07 19:45",
-//                 content: "超幸運",
-//             },
-//             {
-//                 id: 103,
-//                 author: "Cclemon",
-//                 avatar: "https://i.pravatar.cc/150?u=sive", // 假頭像，每次刷新會變
-//                 timestamp: "2025/07/07 20:39",
-//                 content: "下次也想跟",
-//             },
-//             {
-//                 id: 104,
-//                 author: "丁",
-//                 avatar: "https://i.pravatar.cc/150?u=ve", // 假頭像，每次刷新會變
-//                 timestamp: "2025/07/07 20:55",
-//                 content: "羨慕...",
-//             },
-//             {
-//                 id: 105,
-//                 author: "chii",
-//                 avatar: "https://i.pravatar.cc/150?u=su", // 假頭像，每次刷新會變
-//                 timestamp: "2025/07/07 22:05",
-//                 content: "推！",
-//             },
-//         ],
-//         isRepliesExpanded: false,
-//     },
-
-//     {
-//         id: 2,
-//         member_id: "M0002",
-//         author: "kelly_travel",
-//         avatar: "https://i.pravatar.cc/150?u=kellytravel",
-//         timestamp: "2025/07/07 20:13",
-//         content: "哇我也有看到這團但沒報名到 QAQ 希望下次還有類似的！",
-//         likenum: 0,
-//         replies: [],
-//         liked: false,
-
-//         isRepliesExpanded: false,
-//     },
-//     {
-//         id: 3,
-//         member_id: "M0003",
-//         author: "ocean_rookie",
-//         avatar: "https://i.pravatar.cc/150?u=oceanrookie",
-//         timestamp: "2025/07/08 09:07",
-//         content: "我是這團的其中一員！很開心認識大家～謝謝你分享這段回憶❤️",
-//         likenum: 0,
-//         replies: [],
-//         liked: false,
-
-//         isRepliesExpanded: false,
-//     },
-//     {
-//         id: 4,
-//         member_id: "M0004",
-//         author: "sandy_test",
-//         avatar: "https://i.pravatar.cc/150?u=sandy_test",
-//         timestamp: "2025/07/07 09:30",
-//         content: "有誰也有跟過嗎?好奇其他人的想法?",
-//         likenum: 0,
-//         liked: false,
-
-//         replies: [],
-//         isRepliesExpanded: false,
-//     },
-// ]);
 //
 // 使用 defineProps 來接收從父元件傳入的留言資料
 const props = defineProps({
@@ -158,7 +68,6 @@ function postComment() {
   }, 300);
   //這邊改用API
 
-  const activityNoNumeric = String(activityid).replace(/\D/g, ""); //先把活動ID轉成數字
   const postData = {
     activity_no: activityNoNumeric,
     member_id: currentUser.member_id,
@@ -170,10 +79,7 @@ function postComment() {
   console.log("準備發送到後端的資料:", postData);
   //
   axios
-    .post(
-      "http://localhost:8888/joika-api-server/comments/activities-create.php",
-      postData
-    ) // <--- 使用上面建立的物件
+    .post(`${VITE_API_BASE}/comments/activities-create.php`, postData) // <--- 使用上面建立的物件
     // {
     //         activity_no: activityNoNumeric,
     //         member_id: currentUser.member_id,
@@ -279,43 +185,93 @@ function postReply(parentComment) {
     isReplyAnimating.value = false;
   }, 300);
   // 建立一個新的「回覆物件」
-  const replyObject = {
-    id: Date.now(),
-    member_id: currentUser.member_id, // 記得您在上一階段已經建立過 currentUser 物件
-    author: currentUser.author,
-    avatar: currentUser.avatar,
-    timestamp: new Date().toLocaleString("zh-TW"),
-    content: newReplyText.value,
-    likenum: 0,
+  const replyPayload = {
+    activity_no: activityNoNumeric,
+    member_id: currentUser.member_id,
+    comment_content: newReplyText.value.trim(),
+    parent_no: parentComment.id,
   };
+  // / 使用 axios 發送 POST 請求
+  axios
+    .post(`${VITE_API_BASE}/comments/activities-create.php`, replyPayload)
+    .then((res) => {
+      console.log("新增回覆成功：", res.data);
 
-  // 【最關鍵】把新的回覆物件，加到「父留言」自己的 replies 陣列背包裡
-  parentComment.replies.push(replyObject);
+      // 成功後，一樣通知父元件重新抓取所有留言，以確保資料同步
+      emit("comment-added");
 
-  // 清空回覆輸入框
-  newReplyText.value = "";
+      // 清空回覆輸入框
+      newReplyText.value = "";
+      //   activeReplyId.value = null; // 可以選擇性地在成功後關閉回覆框
+    })
+    .catch((err) => {
+      console.error("新增回覆錯誤：", err);
+      // 可以在這裡加入錯誤提示，例如 Swal.fire(...)
+    });
 }
-// 3. 新增這個函式來切換子留言的展開/收合
+//切換子留言的展開/收合
 function toggleReplies(comment) {
   comment.isRepliesExpanded = !comment.isRepliesExpanded;
 }
 
 //喜歡
-const likeIt = (comment) => {
-  // 接收整個 comment 物件
-  if (!comment.liked) {
-    comment.likenum++;
-    comment.liked = true;
-  } else {
-    comment.likenum--;
-    comment.liked = false;
+
+const likeIt = async (comment) => {
+  // 假設您的 currentUser 物件存在且有 member_id
+  // 如果您是從 localStorage 拿，也可以用 const user = JSON.parse(localStorage.getItem("user"));
+  if (!currentUser || !currentUser.member_id) {
+    Swal.fire("請先登入", "登入後才能對留言按讚喔！", "warning");
+    return;
   }
+
+  // 步驟 1: 立即觸發動畫，提供即時的視覺回饋
   comment.animateLike = true;
   setTimeout(() => {
     comment.animateLike = false;
   }, 300);
-};
 
+  // 步驟 2: 「樂觀更新 (Optimistic Update)」 - 先假設 API 會成功，立即更新畫面
+  // 這樣使用者體驗會更好，不用等待網路延遲
+  const originalLiked = comment.liked;
+  const originalLikeNum = comment.likenum;
+
+  if (comment.liked) {
+    comment.likenum--;
+  } else {
+    comment.likenum++;
+  }
+  comment.liked = !comment.liked;
+
+  try {
+    // 步驟 3: 準備要發送到後端的資料
+    const payload = {
+      comment_no: comment.id, // 注意：前端的 comment.id 對應到後端的 comment_no
+      member_id: currentUser.member_id, // 前端的 member_id 對應到後端的 member_id
+    };
+
+    // 步驟 4: 呼叫您的 PHP API
+    const response = await axios.post(
+      `${VITE_API_BASE}/comments/activities-like-toggle.php`,
+      payload
+    );
+
+    // 步驟 5: 【最重要】用後端回傳的「真實」資料來同步前端畫面
+    // 這可以確保畫面的數字和狀態絕對正確
+    const { liked, like_count } = response.data;
+    comment.liked = liked;
+    comment.likenum = like_count;
+
+    console.log("點讚狀態更新成功:", response.data);
+  } catch (error) {
+    // 步驟 6: 如果 API 呼叫失敗，將畫面回復到操作前的狀態
+    console.error("點讚失敗:", error);
+    comment.liked = originalLiked;
+    comment.likenum = originalLikeNum;
+
+    // (可選) 跳出錯誤提示
+    Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
+  }
+};
 //檢舉
 function ReportIt() {
   const container = document.createElement("div");
