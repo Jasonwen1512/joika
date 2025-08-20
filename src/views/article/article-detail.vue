@@ -192,12 +192,17 @@ async function fetchArticle() {
     );
     // 資料欄位轉換
     const raw = response.data;
+    // --- 處理圖片路徑 ---
+    const backendImagePath = raw.POST_IMG; // ← 用 raw
+    const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
+    const fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+
     apiArticleData.value = {
       postid: raw.POST_NO,
       title: raw.POST_TITLE,
       userid: raw.MEMBER_ID,
       content: raw.POST_CONTENT,
-      image: raw.POST_IMG,
+      image: fullImageUrl,
       date: raw.CREATED_AT,
       event: raw.CATEGORY_NO,
     };
