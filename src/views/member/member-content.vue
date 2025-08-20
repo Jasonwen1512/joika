@@ -49,6 +49,21 @@ async function loadMember() {
     }
 }
 
+const avatarUrl = computed(() => {
+    const base = import.meta.env.VITE_API_BASE  // e.g. http://localhost:8888/JOIKA_PHP
+    const avatar = member.value?.MEMBER_AVATAR
+
+    if (!avatar) return "" // 沒有上傳 → 空字串
+
+    // 只給檔名時，固定拼上 /upload/avatars/
+    return `${base.replace(/\/$/, '')}/upload/member/${encodeURIComponent(avatar)}`
+})
+
+/** ✅ 圖片載入失敗時換預設圖 */
+// function onAvatarError(e) {
+//   e.target.src = '/images/default-avatar.png' // 放你專案的預設頭像路徑
+// }
+
 onMounted(() => {
     handleResize()
     window.addEventListener("resize", handleResize)
@@ -146,8 +161,8 @@ const handleLogout = async () => {
                 <div class="member-details">
                     <div class="member-image">
                         <img
-                            src="/src/assets/img/member/headshot.jpg"
-                            alt="Member Headshot"
+                            :src= avatarUrl
+                            :alt= "member.MEMBER_NICKNAME"
                         />
                     </div>
                     <div class="member-info">
