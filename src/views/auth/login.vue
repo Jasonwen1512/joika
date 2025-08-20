@@ -3,8 +3,8 @@ import { reactive, ref, watch } from "vue";
 import Button from "@/components/Button.vue";
 import CaptchaBox from "@/components/auth/CaptchaBox.vue";
 import Swal from "sweetalert2"
-import { useRouter } from "vue-router";
-import { loginByPhonePassword } from "@/assets/data/authState";
+import { useRouter, useRoute } from "vue-router";
+import { loginByPhonePassword,fetchMe } from "@/assets/data/authState";
 ;
 
 const realCaptcha = ref(""); // 接住 emit 的驗證碼
@@ -16,10 +16,13 @@ const onCaptchaUpdate = (val) => {
 }
 
 const router = useRouter();
+const route = useRoute();
 const captchaRef = ref(null);
 
 const error = reactive({ mobile: "", password: "", verifyCode: "" });
 const form = reactive({ mobile: "", password: "", verifyCode: "" });
+
+const loading = ref(false);
 
 // 即時輸入清除錯誤
 watch(() => form.mobile, v => { if (error.mobile && v) error.mobile = "" })
@@ -28,41 +31,61 @@ watch(() => form.verifyCode, v => { if (error.verifyCode && v) error.verifyCode 
 
 //登入按鈕
 const handleLogin = async () => {
-  // 1) 必填檢查
-  error.mobile = error.password = error.verifyCode = ""
-  if (!form.mobile) error.mobile = "請輸入手機號碼"
-  if (!form.password) error.password = "請輸入密碼"
-  if (!form.verifyCode) error.verifyCode = "請輸入驗證碼"
-  if (error.mobile || error.password || error.verifyCode) return
+  if (loading.value) return;
+  loading.value = true;
 
-  // 2) 驗證碼先過
-  if (form.verifyCode.toLowerCase() !== realCaptcha.value.toLowerCase()) {
-    Swal.fire({
+  try {
+    // 1) 必填檢查
+    error.mobile = error.password = error.verifyCode = "";
+    form.mobile = String(form.mobile || "").trim();
+    form.password = String(form.password || "");
+    form.verifyCode = String(form.verifyCode || "");
+
+    if (!form.mobile)   { error.mobile = "請輸入手機號碼"; return }
+    if (!form.password) { error.password = "請輸入密碼";   return }
+    if (!form.verifyCode) { error.verifyCode = "請輸入驗證碼"; return }
+
+    // 2) 驗證碼先過
+    if (form.verifyCode.toLowerCase() !== realCaptcha.value.toLowerCase()) {
+      await Swal.fire({ icon: "error", title: "登入失敗", text: "驗證碼錯誤" });
+      captchaRef?.value?.refreshCode?.();
+      return;
+    }
+
+    // 3) 呼叫後端登入
+    const { ok, data } = await loginByPhonePassword({
+      phone: form.mobile, password: form.password
+    });
+
+    if (ok) {
+      await Swal.fire({ icon: "success", title: "登入成功", timer: 900, showConfirmButton: false });
+      const back = (typeof route.query.redirect === 'string' && route.query.redirect)
+        ? route.query.redirect
+        : "/member/member-content";
+      router.replace(back);
+    } else {
+      await Swal.fire({
         icon: "error",
         title: "登入失敗",
-        text: "驗證碼錯誤"
-    })
-    return
+        text: data?.msg || "帳號或密碼錯誤"
+      });
+      captchaRef?.value?.refreshCode?.();
+      return;
+    }
+  } catch (err) {
+    await Swal.fire({ icon: "error", title: "登入失敗", text: "連線異常，請稍後再試" });
+    captchaRef?.value?.refreshCode?.();
+  } finally {
+    loading.value = false; // ✅ 無論哪個 return 都會執行
   }
+};
 
-  // 3) 呼叫後端登入（會自動收 Session Cookie）
-  const { ok, data } = await loginByPhonePassword({
-    phone: form.mobile, password: form.password
-  })
-
-  if (ok) router.push("/member/member-content")
-  else {
-      Swal.fire({
-        icon: "error",
-        title: "登入失敗",
-        text: data?.msg
-    })
-  }
-}
 
 const goToRegister = () => {
   router.push("/auth/signup");
 };
+
+
 </script>
 
 <template>
@@ -75,22 +98,35 @@ const goToRegister = () => {
           <label for="mobile">手機</label>
           <input
             type="tel"
-            id="member_phone" 
+            id="mobile"                 
             v-model="form.mobile"
+            autocomplete="username" 
+            :disabled="loading"
           />
           <p class="error-msg" v-if="error.mobile">{{ error.mobile }}</p>
         </div>
 
         <div class="form-group">
           <label for="password">密碼</label>
-          <input type="password" id="member_password" v-model="form.password" />
+          <input
+            type="password"
+            id="password"               
+            v-model="form.password"
+            autocomplete="current-password" 
+            :disabled="loading"
+          />
           <p class="error-msg" v-if="error.password">{{ error.password }}</p>
         </div>
 
         <div class="form-group">
           <label for="verify-code">驗證碼</label>
           <div class="captcha-input-wrapper">
-            <input type="text" id="verify-code" v-model="form.verifyCode" />
+            <input
+              type="text"
+              id="verify-code"
+              v-model="form.verifyCode"
+              :disabled="loading"
+            />
             <div class="captcha-overlay">
               <CaptchaBox
                 @updateIdentifyCode="onCaptchaUpdate"
@@ -105,20 +141,18 @@ const goToRegister = () => {
               />
             </div>
           </div>
-          <p class="error-msg" v-if="error.verifyCode">
-            {{ error.verifyCode }}
-          </p>
+          <p class="error-msg" v-if="error.verifyCode">{{ error.verifyCode }}</p>
         </div>
 
-        <a href="#" class="forgot-password">忘記密碼</a>
+  <a href="#" class="forgot-password">忘記密碼</a>
 
-        <div class="button-group">
-          <Button size="md" theme="info" type="button" @click="goToRegister"
-            >註冊</Button
-          >
-          <Button size="md" theme="primary" type="submit">登入</Button>
-        </div>
-      </form>
+  <div class="button-group">
+    <Button size="md" theme="info" type="button" @click="goToRegister" :disabled="loading">註冊</Button>
+    <Button size="md" theme="primary" type="submit" :disabled="loading">
+      {{ loading ? '登入中…' : '登入' }}
+    </Button>
+  </div>
+</form>
     </div>
   </div>
 </template>
