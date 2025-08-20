@@ -1,31 +1,47 @@
 <script setup>
-// 這裡先用假的登入者資料
-//const currentUser = ref({ userid: "M0001" });
-const currentUser = ref({
-  userid: Number(localStorage.getItem('member_id')) || 0
-})
-import { ref, computed, h, render, onMounted, onUnmounted, watch } from "vue";
-import Swal from "sweetalert2";
-import axios from "axios"; // <-- 新增 axio
+//整理一下//
 
+import { ref, computed, h, render, onMounted, onUnmounted, watch } from "vue";
+import axios from "axios"; // <-- 新增 axio
 import { useRoute, useRouter } from "vue-router";
-const route = useRoute();
-const router = useRouter();
-import { articleList } from "@/assets/data/fake-article";
+import Swal from "sweetalert2";
+import { usePreviewStore } from "@/stores/preview";
+
+//引入元件
+// import { articleList } from "@/assets/data/fake-article"; 假資料已再不使用
 import Button from "@/components/Button.vue";
+import CommentComponent from "@/components/article/comment.vue"; // <-- 修改這裡
+import ReportForm from "@/components/ReportForm.vue";
+//引入靜態資源
 import DeleteIcon from "@/assets/img/icon/delete.svg";
 import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from "@/assets/img/article/movie_konan.jpg";
-import CommentComponent from "@/components/article/comment.vue"; // <-- 修改這裡
-import { usePreviewStore } from "@/stores/preview";
-import ReportForm from "@/components/ReportForm.vue";
 
+// 這裡先用假的登入者資料
+const currentUser = ref({
+  userid: Number(localStorage.getItem("member_id")) || 0,
+});
+
+// 環境變數與初始設定
 const previewStore = usePreviewStore();
-// console.log(previewData);
-
-// 環境變數
+const route = useRoute();
+const router = useRouter();
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
-
+// ===================================================================
+// Props 定義 (Single Source of Truth)
+// 【重要】我們需要 'mode' prop 來讓 'submitArticle' 函式正常運作
+// ===================================================================
+const props = defineProps({
+  isPreview: {
+    type: Boolean,
+    default: false,
+  },
+  mode: {
+    // 【新增】補上您在 submitArticle 中用到的 mode
+    type: String,
+    default: "create", // 'create' 或 'edit'
+  },
+});
 //分類顏色
 const EventColorMap = {
   登山: "#6DE1D2",
@@ -45,47 +61,160 @@ const EventColorMap = {
 const GetEventColor = (eventName) => {
   return EventColorMap[eventName] || "#adb5bd";
 };
-// ===================================================================
-// 1. 使用 defineProps 接收來自路由的「指令」和「預覽資料」
-// ===================================================================
-const props = defineProps({
-  isPreview: {
-    type: Boolean,
-    default: false,
-  },
-});
 
+// 將後端 API 的分類 ID (數字) 轉換為中文名稱的對照表
+const categoryMap = {
+  1: "登山",
+  2: "水上活動",
+  3: "運動",
+  4: "露營",
+  5: "唱歌",
+  6: "展覽",
+  7: "聚餐",
+  8: "桌遊",
+  9: "電影",
+  10: "手作",
+  11: "文化體驗",
+  12: "演出表演",
+  13: "其他",
+};
+
+// 文章區塊的狀態
+const apiArticleData = ref(null);
+const postError = ref(null);
+const postIsLoading = ref(true);
 // ===================================================================
-// 2. 使用 computed 智慧地決定要顯示哪一份文章資料
+// 使用 computed 智慧地決定要顯示哪一份文章資料
 // ===================================================================
-onUnmounted(() => {
-  previewStore.isPreview = false;
-});
+// onMounted(async () => {
+//   if (!previewStore.isPreview) {
+//     try {
+//       const postNo= route.params.postid;
+//       if (!postNo) {
+//         throw new Error('找不到文章 ID');
+//       }
+
+//       const response = await axios.get(`http://localhost/your_api_path/getArticle.php?id=${postNo}`);
+
+//       if (response.status === 200) {
+//         apiArticleData.value = response.data;
+//       } else {
+//         throw new Error(response.data.error || '載入文章失敗');
+//       }
+
+//     } catch (err) {
+//       // 將錯誤訊息存入更名後的 postError
+//       if (err.response) {
+//         postError.value = err.response.data.error || '發生未知的伺服器錯誤';
+//       } else if (err.request) {
+//         postError.value = '無法連線到伺服器';
+//       } else {
+//         postError.value = err.message || '載入文章時發生錯誤';
+//       }
+//       console.error('API 請求失敗:', err);
+//     } finally {
+//       // 更新更名後的 postIsLoading
+//       postIsLoading.value = false;
+//     }
+//   } else {
+//     // 預覽模式，同樣更新更名後的 postIsLoading
+//     postIsLoading.value = false;
+//   }
+// });
+
+// const article = computed(() => {
+//   if (previewStore.isPreview) {
+//     return previewStore.previewData;
+//   } else {
+//     return apiArticleData.value;
+//   }
+// });
+
+// computed 屬性：根據 props 決定最終要顯示的文章資料
 const article = computed(() => {
-  // 預覽模式
-  if (previewStore.isPreview) {
-    // console.log("這是預覽模式");
-    // console.log(previewStore.previewData);
-
-    return previewStore.previewData;
+  // 【關鍵修改】統一使用 props.isPreview 進行判斷
+  if (props.isPreview) {
+    return previewStore.previewData; // 預覽模式，從 Store 取資料
+  } else {
+    return apiArticleData.value; // 一般模式，從 API 取資料
   }
-
-  // 正常瀏覽模式 (保持不變)
-  const postId = route.params.postid;
-  if (!postId) return null;
-
-  const foundArticle = articleList.find((item) => item.postid === postId);
-  if (foundArticle) {
-    return foundArticle;
-  }
-
-  return null;
 });
 
-//判斷是不是發文者
+// computed 屬性：判斷是否為文章擁有者
 const isOwner = computed(() => {
-  return article.value && currentUser.value.userid === article.value.userid;
+  return (
+    article.value && currentUser.value.userid === article.value.POST_USER_ID
+  ); // 請確認資料庫欄位名稱是否為 POST_USER_ID
 });
+
+// 生命週期鉤子：在元件掛載時獲取資料
+onMounted(() => {
+  fetchArticle();
+  fetchComments();
+});
+
+// 監聽路由參數變化，以便在不同文章間切換時重新載入資料
+watch(
+  () => route.params.postid,
+  (newId, oldId) => {
+    if (newId !== oldId) {
+      fetchArticle();
+      fetchComments();
+    }
+  }
+);
+
+// 函式：獲取文章內容
+async function fetchArticle() {
+  console.log("fetchArticle 函式已開始執行..."); // 偵錯用
+
+  // 【關鍵修改】如果是預覽模式，就直接結束，不發送 API 請求
+  if (props.isPreview) {
+    postIsLoading.value = false;
+    console.log("正在預覽模式"); // 偵錯用
+
+    return;
+  }
+
+  postIsLoading.value = true;
+  postError.value = null;
+  const postNo = route.params.postid;
+  if (!postNo) {
+    postError.value = "找不到文章 ID";
+    postIsLoading.value = false;
+    return;
+  }
+
+  try {
+    // 【修改】請將 URL 換成您 PHP API 的實際位址
+    const response = await axios.get(
+      `${VITE_API_BASE}/posts/detail.php?id=${postNo}`
+    );
+    // 資料欄位轉換
+    const raw = response.data;
+    apiArticleData.value = {
+      postid: raw.POST_NO,
+      title: raw.POST_TITLE,
+      userid: raw.MEMBER_ID,
+      content: raw.POST_CONTENT,
+      image: raw.POST_IMG,
+      date: raw.CREATED_AT,
+      event: raw.CATEGORY_NO,
+    };
+  } catch (err) {
+    if (err.response) {
+      postError.value = err.response.data.error || "發生未知的伺服器錯誤";
+    } else if (err.request) {
+      postError.value = "無法連線到伺服器";
+    } else {
+      postError.value = err.message || "載入文章時發生錯誤";
+    }
+    console.error("獲取文章失敗:", err);
+  } finally {
+    postIsLoading.value = false;
+  }
+}
+
 function EditArticle() {
   // 防禦性檢查
   if (!article.value) {
@@ -185,14 +314,14 @@ function openReportModal() {
           reporter_id: reporterId,
           post_no: postNo,
           report_reason_no: Number(data.reason),
-          report_description: data.detail
+          report_description: data.detail,
         });
 
         try {
           const res = await axios.post(`${baseURL}/reports/post-report.php`, {
             reporter_id: reporterId,
             post_no: postNo,
-            report_reason_no: Number(data.reason), 
+            report_reason_no: Number(data.reason),
             report_description: data.detail,
           });
 
@@ -226,6 +355,7 @@ function openReportModal() {
 }
 
 //抓留言API
+//留言的狀態
 const comments = ref(null);
 const isLoading = ref(true); // 初始設為 true
 const error = ref(null);
@@ -249,7 +379,7 @@ async function fetchComments() {
     .get(`${VITE_API_BASE}/comments/post-list.php?post_no=${postNo}`)
     .then((res) => {
       let allComments = [];
-      console.log(res.data);
+      // console.log(res.data);
 
       if (res.data && Array.isArray(res.data)) {
         // 先把每一筆留言整理成統一格式
@@ -309,6 +439,11 @@ watch(
   },
   { immediate: true }
 );
+
+// 清理函式 (Cleanup)
+onUnmounted(() => {
+  previewStore.isPreview = false;
+});
 </script>
 
 <template>
@@ -356,9 +491,10 @@ watch(
         <div class="article-head">
           <span
             class="event-label"
-            :style="{ borderColor: GetEventColor(article.event) }"
-            >{{ article.event }}</span
+            :style="{ borderColor: GetEventColor(categoryMap[article.event]) }"
           >
+            {{ categoryMap[article.event] }}
+          </span>
           <p>{{ article.date }}</p>
         </div>
         <span v-if="previewStore.isPreview" class="preview"
@@ -376,7 +512,7 @@ watch(
         </div>
       </div>
       <div v-else>
-        <p>找不到這篇文章111。</p>
+        <p>找不到這篇文章。</p>
       </div>
     </section>
     <!-- ================================== -->
