@@ -1,9 +1,12 @@
 <script setup>
 // 這裡先用假的登入者資料
-const currentUser = ref({ userid: "M0001" });
+//const currentUser = ref({ userid: "M0001" });
+const currentUser = ref({
+  userid: Number(localStorage.getItem('member_id')) || 0
+})
 import { ref, computed, h, render, onMounted, onUnmounted, watch } from "vue";
 import Swal from "sweetalert2";
-import axios from "axios"; // <-- 新增 axios
+import axios from "axios"; // <-- 新增 axio
 
 import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
@@ -164,14 +167,45 @@ function DeleteCheck() {
     }
   });
 }
+//文章檢舉功能
 function openReportModal() {
   const container = document.createElement("div");
   render(
     h(ReportForm, {
-      onSubmit: (data) => {
-        console.log("檢舉資料：", data);
-        Swal.close();
-        Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+      onSubmit: async (data) => {
+        const baseURL = import.meta.env.VITE_API_BASE;
+        const reporterId = currentUser.value.userid;
+        const postNo = article.value?.postid;
+
+        if (!postNo) {
+          Swal.fire("錯誤", "找不到文章編號", "error");
+          return;
+        }
+        console.log({
+          reporter_id: reporterId,
+          post_no: postNo,
+          report_reason_no: Number(data.reason),
+          report_description: data.detail
+        });
+
+        try {
+          const res = await axios.post(`${baseURL}/reports/post-report.php`, {
+            reporter_id: reporterId,
+            post_no: postNo,
+            report_reason_no: Number(data.reason), 
+            report_description: data.detail,
+          });
+
+          if (res.data.success) {
+            Swal.close();
+            Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+          } else {
+            Swal.fire("送出失敗", res.data.error || "請稍後再試", "error");
+          }
+        } catch (error) {
+          console.error("檢舉 API 錯誤：", error);
+          Swal.fire("錯誤", "發送失敗，請稍後再試", "error");
+        }
       },
     }),
     container

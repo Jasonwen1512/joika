@@ -1,13 +1,25 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Button from "@/components/Button.vue";
+import axios from 'axios';
 
 const props = defineProps({
     onSubmit: Function
-    })
+})
 
     const reason = ref('')
     const detail = ref('')
+    const reasons = ref([])
+
+    onMounted(async () => {
+    try {
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE}/reports/report-reasons.php`)
+        console.log(res.data)
+        reasons.value = res.data
+    } catch (err) {
+        console.error("檢舉原因清單載入失敗", err)
+    }
+})
 
     function submitForm() {
     if (!reason.value) {
@@ -32,12 +44,13 @@ const props = defineProps({
             <label>檢舉原因：</label>
             <select v-model="reason" class="reason-select">
                 <option value="">請選擇</option>
-                <option value="spam">垃圾訊息</option>
-                <option value="abuse">辱罵/騷擾</option>
-                <option value="ads">廣告/推銷內容</option>
-                <option value="fakeNews">散佈不實消息</option>
-                <option value="LeakpersonalInfo">洩漏他人個資</option>
-                <option value="other">其他</option>
+                <option 
+                    v-for="r in reasons" 
+                    :key="r.REASON_NO" 
+                    :value="r.REASON_NO"
+                >
+                    {{ r.REASON }}
+                </option>
             </select>
 
             <textarea class="report-detail" v-model="detail" placeholder="請簡短說明"></textarea>
