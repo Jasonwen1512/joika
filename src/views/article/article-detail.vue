@@ -201,6 +201,7 @@ async function fetchArticle() {
       postid: raw.POST_NO,
       title: raw.POST_TITLE,
       userid: raw.MEMBER_ID,
+      nickname: raw.MEMBER_NICKNAME,
       content: raw.POST_CONTENT,
       image: fullImageUrl,
       date: raw.CREATED_AT,
@@ -464,7 +465,7 @@ onUnmounted(() => {
           src="/src/assets/img/member/headshot.jpg"
           alt="Member Headshot"
         />
-        <p>{{ article.userid }}</p>
+        <p>{{ article.nickname }}</p>
       </div>
       <div v-if="!isPreview" class="btn-list">
         <template v-if="isOwner">
