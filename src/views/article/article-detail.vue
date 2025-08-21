@@ -19,7 +19,8 @@ import konanImage from "@/assets/img/article/movie_konan.jpg";
 
 // 這裡先用假的登入者資料
 const currentUser = ref({
-  userid: Number(localStorage.getItem("member_id")) || 0,
+  // userid: Number(localStorage.getItem("member_id")) || 0,
+  userid: 1,
 });
 
 // 環境變數與初始設定
@@ -143,7 +144,7 @@ const article = computed(() => {
 // computed 屬性：判斷是否為文章擁有者
 const isOwner = computed(() => {
   return (
-    article.value && currentUser.value.userid === article.value.POST_USER_ID
+    article.value && currentUser.value.userid === article.value.post_user_id
   ); // 請確認資料庫欄位名稱是否為 POST_USER_ID
 });
 
@@ -200,7 +201,7 @@ async function fetchArticle() {
     apiArticleData.value = {
       postid: raw.POST_NO,
       title: raw.POST_TITLE,
-      userid: raw.MEMBER_ID,
+      post_user_id: raw.MEMBER_ID, // ← 改這裡
       nickname: raw.MEMBER_NICKNAME,
       content: raw.POST_CONTENT,
       image: fullImageUrl,
