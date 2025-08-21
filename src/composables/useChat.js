@@ -51,7 +51,7 @@ export function useChat(uidRef) {
         }
     }
 
-    //關鍵修改：send 函式現在接收一個物件
+    //send 函式現在接收一個物件
     const send = async (messageObj) => {
         if (!messageObj || !messageObj.text || !messageObj.senderId) {
             console.error('無效的訊息物件', messageObj)

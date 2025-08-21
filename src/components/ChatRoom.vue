@@ -29,7 +29,7 @@ const containsBannedWords = text => {
     return bannedWords.some(word => text.toLowerCase().includes(word))
 }
 
-//將 useChat 的呼叫移到 setup 的頂層
+// 將 useChat 的呼叫移到 setup 的頂層
 const { messages, send, boxRef } = useChat(currentUserId)
 
 // 發送訊息
@@ -48,7 +48,7 @@ function handleSend() {
         return
     }
 
-// 關鍵修改：傳遞一個完整的物件給 send 函式
+// 傳遞一個完整的物件給 send 函式
     send({
         text: trimmed,
         senderId: currentUserId.value,
@@ -312,11 +312,6 @@ onMounted(async () => {
     padding: 10px;
     position: relative;
     }
-    .chat-message.me{
-        .chat-content{ 
-            background-color:$color-highlight;
-        }
-    }
     .avatar-section {
     display: flex;
     align-items: center;
@@ -359,13 +354,9 @@ onMounted(async () => {
     gap: 8px;
     position: relative;
     z-index: 2;
-    }
-
-    .my-chat-content {
-    background-color: #f0f0f0;
-    border: 2px solid black;
-    padding: 10px;
-    border-radius: 3px;
+    .chat-content{ 
+            background-color:$color-highlight;
+        }
     }
     //chat-me-end
 
