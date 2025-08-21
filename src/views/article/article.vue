@@ -217,6 +217,7 @@ onMounted(async () => {
       `${import.meta.env.VITE_API_BASE}/posts/list.php`
     );
     const dataFromApi = response.data;
+
     // 確保收到的資料是陣列
     if (Array.isArray(dataFromApi)) {
       articleList.value = dataFromApi.map((post) => {
