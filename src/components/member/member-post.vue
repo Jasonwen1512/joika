@@ -29,6 +29,24 @@ const GetEventColor = (eventName) => {
 
   return eventColorMap[eventName] || "#adb5bd";
 };
+function getCategoryName(categoryNo) {
+  const map = {
+    1: "登山",
+    2: "水上活動",
+    3: "運動",
+    4: "露營",
+    5: "唱歌",
+    6: "展覽",
+    7: "聚餐",
+    8: "桌遊",
+    9: "電影",
+    10: "手作",
+    11: "文化體驗",
+    12: "演出表演",
+    13: "其他",
+  };
+  return map[categoryNo] || "其他";
+}
 onMounted(async () => {
   try {
     const response = await axios.get(
@@ -138,10 +156,9 @@ const visibleCount = ref(2); // 預設電腦是 2 張
   overflow: hidden;
 
   flex-direction: column;
-  @include desktop() {
-    max-width: 285px;
-    max-height: 190px;
-  }
+
+  max-width: 285px;
+  max-height: 190px;
 }
 // .article-img img{
 //   width: 100%;
