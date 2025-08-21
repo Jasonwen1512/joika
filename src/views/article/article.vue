@@ -224,9 +224,8 @@ onMounted(async () => {
         // --- 處理圖片路徑 ---
         const backendImagePath = post.POST_IMG; // e.g., "../img/..."
         const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
-        const fullImageUrl = `${
-          import.meta.env.VITE_PHP_BASE_URL
-        }/${cleanedPath}`;
+        // console.log("清理後的圖片路徑:", cleanedPath); // 偵錯用
+        const fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
 
         return {
           postid: post.POST_NO,
