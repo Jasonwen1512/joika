@@ -1,11 +1,10 @@
 <script setup>
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
 import { componentSizeMap } from "element-plus";
-
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 const props = defineProps({
   item: Object,
 });
@@ -16,6 +15,10 @@ const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
 
+const imageUrl = computed(() => {
+  const src = props.item?.ACTIVITY_IMG || "";
+  return /^https?:\/\//i.test(src) ? src : `${VITE_API_BASE}${src}`;
+});
 const router = useRouter();
 const gotoSignup = (id) => {
   router.push(`/group/group-signup/${id}`);
@@ -35,6 +38,7 @@ const titleDate = computed(() => {
   const start = formDate(props.item.ACTIVITY_START_DATE);
   const end = formDate(props.item.ACTIVITY_END_DATE);
 
+
   // console.log(
   //   `start:${start}  end:${end} 活動名稱：${props.item.ACTIVITY_NAME}`
   // );
@@ -53,7 +57,7 @@ const titleDate = computed(() => {
       :to="`/activity/${props.item.ACTIVITY_NO}`"
       class="activity-img"
     >
-      <img :src="props.item.ACTIVITY_IMG" :alt="props.ACTIVITY_NAME" />
+      <img :src="imageUrl" :alt="props.item.ACTIVITY_NAME" />
     </RouterLink>
     <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
       ><h4 class="activity-name">

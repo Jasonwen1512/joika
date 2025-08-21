@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { RouterLink } from "vue-router";
-import AtivityCard from "@/components/activity/activity-card.vue";
+import ActivityCard from "@/components/activity/activity-card.vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
 import Marquee from "@/components/marquee.vue";
 import Marquee2 from "@/components/marquee2.vue";
@@ -333,7 +333,7 @@ onMounted(() => {
     <div class="first-section">
       <div v-if="listLimited.length > 0">
         <div class="card-grid">
-          <AtivityCard
+          <ActivityCard
             v-for="item in listLimited.slice(0, 8)"
             :key="item.activity_id"
             :item="item"
@@ -364,7 +364,7 @@ onMounted(() => {
 
   <div v-if="listLatest.length > 0">
     <div class="card-grid">
-      <AtivityCard
+      <ActivityCard
         v-for="item in listLatest.slice(0, 8)"
         :key="item.activity_id"
         :item="item"

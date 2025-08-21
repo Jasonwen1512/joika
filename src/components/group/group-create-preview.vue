@@ -19,12 +19,7 @@ const props = defineProps({
 });
 const previewUrl = computed(() => store.image?.previewUrl || "");
 const previewData = computed(() => store.formData);
-async function submit() {
-  // 上傳檔案拿 URL，填到 activity_img 後送 API
-  store.clearDraft();
-  store.resetForm();
-  router.replace("/group/success");
-}
+
 const goBackToEdit = () => {
   emit("back");
 

@@ -1,4 +1,5 @@
 <script setup>
+
 // 1. 引入我們準備好的、獨立的留言板元件
 import commentSection from "@/components/activity/activity-detail/comment-section.vue";
 // import CommentComponent from "@/components/article/comment.vue"; // <-- 改用我的component
@@ -15,7 +16,6 @@ import axios from "axios";
 import RatingModal from "@/components/activity/activity-detail/rating-modal.vue";
 // === 新增：為未來的「取消彈窗」預留 import 位置 ===
 import CancelModal from "@/components/activity/activity-detail/cancel-modal.vue";
-
 // --- Swiper  ---
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination } from "swiper/modules";
@@ -25,6 +25,7 @@ import "swiper/css/pagination";
 
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+axios.defaults.withCredentials = true;
 
 const route = useRoute();
 const activityNo = route.params.activity_id;
@@ -42,6 +43,8 @@ onMounted(async () => {
   }
 });
 
+console.log(activitiesData.value);
+const isCancelled = computed(() => activity.value?.ACTIVITY_STATUS === '已取消')
 const activity = computed(() =>
   activitiesData.value.find(
     (item) => String(item.ACTIVITY_NO) === String(activityNo)
@@ -54,14 +57,15 @@ const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
 
-const aloha = () => {
-  alert("我要跟團！");
-};
 
 const router = useRouter();
 const gotoSignup = (id) => {
-  router.push(`/group/group-signup/${id}`);
-};
+  if (isCancelled.value) {
+    alert('此活動已取消，無法報名')
+    return
+  }
+  router.push(`/group/group-signup/${id}`)
+}
 
 // === 第三步：在 aloha 函式的正下方，貼上所有「新的邏輯」 ===
 
@@ -102,6 +106,7 @@ const submitRatings = (ratingsData) => {
 
 // === 新增：取消彈窗相關邏輯 ===
 const isCancelModalVisible = ref(false); // 取消彈窗的「開關」
+const modalResetKey = ref(0)
 
 const openCancelModal = () => {
   isCancelModalVisible.value = true; // 打開取消彈窗
@@ -111,13 +116,95 @@ const closeCancelModal = () => {
   isCancelModalVisible.value = false; // 關閉取消彈窗
 };
 
-// 這個函式將用於接收從彈窗傳來的取消原因，並在提交後切換回原來的按鈕狀態
-const handleCancelSubmit = (reason) => {
-  console.log("收到的取消原因:", reason);
-  alert("已提交取消申請。");
-  closeCancelModal(); // 關閉彈窗
-  isGroupJoined.value = false; // 將按鈕狀態切換回去
-};
+
+const currentUserId = ref(null)
+const meLoading = ref(true)
+async function fetchMe() {
+  try {
+    const { data } = await axios.get(`${VITE_API_BASE}/users/me.php`)
+    //  console.log('me =', data) 
+      currentUserId.value = data?.user?.id ?? null
+  } catch (e) {
+    currentUserId.value = null
+  } finally {
+    meLoading.value = false
+  }
+}
+onMounted(fetchMe)
+
+
+const isHost = computed(() => {
+  return !!(activity.value?.HOST_MEMBER_ID && currentUserId.value) &&
+         Number(activity.value.HOST_MEMBER_ID) === Number(currentUserId.value)
+})
+
+const isJoiner = computed(() => false)
+
+
+//主揪取消活動API
+async function handleCancelSubmit(payload) {
+  try {
+    const actNo = activity.value?.ACTIVITY_NO
+
+    const { data, status } = await axios.patch(
+       `${VITE_API_BASE}/activities/cancel-hoster.php?id=${actNo}`,
+      payload,
+      {
+        headers: { "Content-Type": "application/json" }
+      }
+    )
+
+    if (status >= 200 && status < 300 && !data.error) {
+     
+      isCancelModalVisible.value = false
+      modalResetKey.value++
+      activitiesData.value = activitiesData.value.map(statusChange =>
+        String(statusChange.ACTIVITY_NO) === String(actNo)
+          ? { ...statusChange, ACTIVITY_STATUS: '已取消' }
+          : statusChange
+      )
+       alert("取消成功")
+       router.push("/home") 
+    } else {
+      alert(data.error || "取消失敗")
+    }
+  } catch (err) {
+    alert("取消失敗：" + err.message)
+  }
+}
+
+const imageUrl = computed(() => {
+
+  const img = activity.value?.ACTIVITY_IMG
+  //if (!img) return ''  // 還沒載到資料就回空字串
+
+  if (!img){
+  
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(img)) {
+    // 完整 URL
+   
+    return img
+  } else if (img.startsWith('/')) {
+ 
+    // 例如 /upload/activities-img/xxx.jpg
+    return `${VITE_API_BASE}${img}`
+  } else {
+    // 只有檔名
+
+    return `${VITE_API_BASE}/upload/activities-img/${img}`
+  }
+})
+console.log('VITE_API_BASE =', VITE_API_BASE)
+console.log('raw ACTIVITY_IMG =', activity.value?.ACTIVITY_IMG)
+console.log('final imageUrl    =', imageUrl.value)
+
+
+// watch(activity, a => {
+//   // console.log('HOST_MEMBER_ID from activity =', a?.HOST_MEMBER_ID)
+// })
 // === End 新增 ===
 
 // 團員假資料
@@ -349,6 +436,7 @@ watch(
 
 // Swiper modules
 const swiperModules = [Pagination];
+console.log(activity.value?.ACTIVITY_IMG, imageUrl.value)
 </script>
 
 <template>
@@ -357,10 +445,9 @@ const swiperModules = [Pagination];
     <div class="activity-hero-bg">
       <div class="hint">揪團探索/揪團列表/{{ activity?.category_name }}</div>
     </div>
-
     <!-- 圖片 -->
     <div class="activity-image">
-      <img :src="activity?.ACTIVITY_IMG" :alt="activity?.ACTIVITY_NAME" />
+      <img :src="imageUrl" :alt="activity?.ACTIVITY_NAME" />
     </div>
 
     <!-- 標題 -->
@@ -371,7 +458,22 @@ const swiperModules = [Pagination];
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
     <div class="activity-button-wrap">
       <!-- 狀態一：尚未跟團 -->
-      <template v-if="!isGroupJoined">
+     
+
+      <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
+      <template v-if="!meLoading && (isHost || isJoiner)">
+        <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
+        <Button
+          @click="openCancelModal"
+          theme="cancel"
+          :is-outline="true"
+          size="md"
+          >取消</Button
+        >
+        <Button @click="openRatingModal" theme="primary" size="md">評價</Button>
+      </template>
+
+       <template v-else>
         <Button
           @click.stop.prevent="gotoSignup(activity?.ACTIVITY_NO)"
           theme="primary"
@@ -383,19 +485,6 @@ const swiperModules = [Pagination];
           :isActive="likeMap[activity?.ACTIVITY_NO]"
           @click.stop.prevent="toggleLike(activity?.ACTIVITY_NO)"
         ></LikeButton>
-      </template>
-
-      <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
-      <template v-else>
-        <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
-        <Button
-          @click="openCancelModal"
-          theme="cancel"
-          :is-outline="true"
-          size="md"
-          >取消</Button
-        >
-        <Button @click="openRatingModal" theme="primary" size="md">評價</Button>
       </template>
     </div>
 
@@ -568,6 +657,7 @@ const swiperModules = [Pagination];
 
     <!-- === 第五步：在 template 的最下方，加入這段「彈窗元件」 === -->
     <RatingModal
+      v-if="activity"
       :show="isRatingModalVisible"
       :activity="activity"
       :participants="participants"
@@ -578,6 +668,8 @@ const swiperModules = [Pagination];
     <!-- === 新增：為未來的「取消彈窗」預留的元件位置 === -->
 
     <CancelModal
+      v-if="activity"
+      :key="modalResetKey"
       :show="isCancelModalVisible"
       :activity="activity"
       @close="closeCancelModal"
