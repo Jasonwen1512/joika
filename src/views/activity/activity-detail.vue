@@ -292,7 +292,7 @@ function getActivityComments(activityId) {
         avatar: c.MEMBER_AVATAR || `https://i.pravatar.cc/150?u=${c.MEMBER_ID}`,
         timestamp: c.CREATED_AT,
         content: c.COMMENT_CONTENT,
-        likenum: Number(c.LIKE_NUM || 0),
+        likenum: Number(c.LIKE_COUNT || 0),
         liked: false,
         parentId: c.PARENT_NO,
         replies: [],
