@@ -1,4 +1,5 @@
 <script setup>
+import axios from "axios";
 import { reactive, ref, watch, toRefs, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router"; // 引入 useRoute
 import { articleList } from "@/assets/data/fake-article";
@@ -18,6 +19,7 @@ import "tinymce/plugins/table";
 import "tinymce/plugins/quickbars";
 import "tinymce/plugins/autoresize";
 import "tinymce/plugins/image"; // 確保 image 外掛已引入
+
 // 語言包
 import "tinymce-i18n/langs5/zh_TW.js";
 
@@ -26,6 +28,8 @@ import Editor from "@tinymce/tinymce-vue";
 import { usePreviewStore } from "@/stores/preview";
 
 const previewStore = usePreviewStore();
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
 // --- Props (保持不變) ---
 const title = ref(null);
@@ -142,27 +146,36 @@ async function submitArticle() {
 // --- 圖片上傳處理邏輯 (保持不變) ---
 const uploadImageAndGetUrl = (blobInfo) =>
   new Promise((resolve, reject) => {
+    console.log(blobInfo, 666);
     const formData = new FormData();
-    formData.append("file", blobInfo.blob(), blobInfo.filename());
-
-    // 請將 '/api/upload-image' 換成您真實的後端上傳 API 位址
-    fetch("/api/upload-image", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
+    formData.append("activity_img", blobInfo.blob(), blobInfo.filename());
+    console.log(formData);
+    // // 請將 '/api/upload-image' 換成您真實的後端上傳 API 位址
+    // fetch(`${VITE_API_BASE}/posts/upload-image.php`, {
+    //   method: "POST",
+    //   body: formData,
+    // })
+    //   .then((response) => {
+    //     if (!response.ok)
+    //       throw new Error(`HTTP error! status: ${response.status}`);
+    //     return response.json();
+    //   })
+    //   .then((json) => {
+    //     if (!json || typeof json.location !== "string") {
+    //       throw new Error("無效的 JSON 格式: " + JSON.stringify(json));
+    //     }
+    //     resolve(json.location); // 成功，回傳圖片 URL
+    //   })
+    //   .catch((error) => {
+    //     reject("圖片上傳失敗: " + error.message);
+    //   });
+    axios
+      .post(`${VITE_API_BASE}/posts/upload-image.php`, formData)
+      .then((res) => {
+        console.log("新增成功：", res.data);
       })
-      .then((json) => {
-        if (!json || typeof json.location !== "string") {
-          throw new Error("無效的 JSON 格式: " + JSON.stringify(json));
-        }
-        resolve(json.location); // 成功，回傳圖片 URL
-      })
-      .catch((error) => {
-        reject("圖片上傳失敗: " + error.message);
+      .catch((err) => {
+        console.error("錯誤：", err);
       });
   });
 
@@ -188,20 +201,7 @@ const handleFilePicker = (callback, value, meta) => {
         const blobInfo = blobCache.create(id, file, base64);
         blobCache.add(blobInfo);
 
-        // 上傳圖片並取得 URL
-        uploadImageAndGetUrl(blobInfo)
-          .then((url) => {
-            // 將 URL 回傳給 TinyMCE 對話框
-            callback(url, { title: file.name });
-          })
-          .catch((error) => {
-            console.error(error);
-            // 可以在這裡加入錯誤提示
-            tinymce.activeEditor.notificationManager.open({
-              text: "圖片上傳失敗",
-              type: "error",
-            });
-          });
+        callback(blobInfo.blobUri(), { title: file.name });
       };
       reader.readAsDataURL(file);
     };
@@ -234,6 +234,8 @@ const init = reactive({
   // [建議] 允許直接貼上圖片並觸發上傳
   paste_data_images: true,
 });
+window["tinymce"] = tinymce;
+window["Editor"] = Editor;
 
 // --- 其他 Vue 生命週期與邏輯 (保持不變) ---
 const { modelValue } = toRefs(props);

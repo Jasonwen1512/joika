@@ -1,5 +1,14 @@
 <script setup>
-import { ref, defineProps, computed, h, render, watch, defineEmits } from "vue";
+import {
+  ref,
+  defineProps,
+  computed,
+  h,
+  render,
+  watch,
+  defineEmits,
+  onMounted,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { articleList } from "@/assets/data/fake-article";
 import axios from "axios";
@@ -10,6 +19,7 @@ import Swal from "sweetalert2";
 import ReportForm from "@/components/ReportForm.vue";
 import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
 import NextIcon from "@/assets/img/icon/next-arrow.svg?url";
+import { authState } from "@/assets/data/authState";
 const route = useRoute();
 const router = useRouter();
 const postid = route.params.postid;
@@ -22,11 +32,12 @@ const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 // 下方留言區
 // 假的自己 展示用
 const currentUser = {
-  member_id: "1", // 假設這是當前使用者的 ID
-  author: "展示用", // 您的名字
+  member_id: authState.user.id, // 假設這是當前使用者的 ID
+  author: authState.user.nickname, // 您的名字
   avatar: "https://i.pravatar.cc/150?u=me", // 一個代表您自己的頭像
   replies: [],
 };
+console.log({ currentUser });
 
 //
 // 使用 defineProps 來接收從父元件傳入的留言資料
@@ -323,6 +334,13 @@ function ReportIt() {
     zIndex: 20000,
   });
 }
+</script>
+<script>
+export default {
+  mounted() {
+    window["that"] = this; // 這裡的 this 才是元件實例
+  },
+};
 </script>
 <template>
   <!-- ================================== -->
