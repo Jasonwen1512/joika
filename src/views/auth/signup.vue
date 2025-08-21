@@ -1,12 +1,11 @@
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import Button from "@/components/Button.vue";
 import InputField from "@/components/auth/Inputfield.vue";
 import InterestSelector from "@/components/auth/Interestselector.vue";
 
 const currentStep = ref(1);
 const avatarUrl = ref("");
-// const genderOptions = ["男性", "女性"];
 const genderOptions = [
   { label: "男性", value: "M" },
   { label: "女性", value: "F" },
@@ -50,12 +49,12 @@ const selectedInterests = ref([]); // v-model 綁定多選興趣
 
 onMounted(async () => {
   try {
-    const res = await fetch("http://localhost:8888/joika-api/users/get-registration-options.php");
+    const res = await fetch("http://localhost:8888/joika-api-server/users/get-registration-options.php");
     const data = await res.json();
-    if (data.success === "true") {
+    if (data.success) {
       cityOptions.value = data.data.cities;
       occupationOptions.value = data.data.occupations;
-      interestOptions.value = data.data.interests; // 直接用
+      interestOptions.value = data.data.interests;
     }
   } catch (err) {
     console.error("載入選項失敗", err);
@@ -103,6 +102,9 @@ const validateStepOne = async () => {
   if (!password) {
     errors.value.password = "請輸入密碼";
     hasError = true;
+  } else if (password.length < 6 || password.length > 12) {
+    errors.value.password = "密碼長度需介於 6 ~ 12 字元";
+    hasError = true;
   }
 
   if (!confirmPassword) {
@@ -113,16 +115,15 @@ const validateStepOne = async () => {
     hasError = true;
   }
 
-  if (!agreed) {
+  if (!form.value.agreed) {
     errors.value.agreed = "請勾選會員條款";
     hasError = true;
   }
 
   if (!hasError) {
-    // goNext();
     // step1 送到後端暫存
     try {
-      const res = await fetch("http://localhost:8888/joika-api/users/register.php", {
+      const res = await fetch("http://localhost:8888/joika-api-server/users/register.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -164,6 +165,10 @@ async function handleStepTwoSubmit() {
     errors.value.nickname = "請輸入暱稱";
     hasError = true;
   }
+  if (!form.value.gender) {
+    errors.value.gender = "請選擇性別";
+    hasError = true;
+  }
   if (!form.value.birthdate) {
     errors.value.birthdate = "請選擇生日";
     hasError = true;
@@ -194,14 +199,38 @@ async function handleStepTwoSubmit() {
   payload.append("occupation", form.value.occupation);
   form.value.interests.forEach((i) => payload.append("interests[]", i));
 
+  const avatarUrl = computed(() => {
+    const base = import.meta.env.VITE_API_BASE; // e.g. http://localhost:8888/JOIKA_PHP
+    const avatar = member.value?.MEMBER_AVATAR;
+
+    if (!avatar) return ""; // 沒有上傳 → 空字串
+
+    // 只給檔名時，固定拼上 /upload/avatars/
+    return `${base.replace(/\/$/, "")}/upload/member/${encodeURIComponent(avatar)}`;
+  });
+
   // avatar
   const fileInput = document.getElementById("avatar-input");
   if (fileInput && fileInput.files[0]) {
-    payload.append("avatar", fileInput.files[0]);
+    const file = fileInput.files[0];
+    const maxSize = 5 * 1024 * 1024; // 限制 5MB
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+
+    if (!allowedTypes.includes(file.type)) {
+      errors.value.avatar = "僅允許 JPEG / PNG / GIF 圖檔";
+      return;
+    }
+
+    if (file.size > maxSize) {
+      errors.value.avatar = "檔案需小於 5MB";
+      return;
+    }
+
+    payload.append("avatar", file);
   }
 
   try {
-    const res = await fetch("http://localhost:8888/joika-api/users/register.php", {
+    const res = await fetch("http://localhost:8888/joika-api-server/users/register.php", {
       method: "POST",
       credentials: "include",
       body: payload,
@@ -308,6 +337,7 @@ const getStepState = (step) => {
             <input type="checkbox" id="tos" v-model="form.agreed" />
             <label for="tos">我已閱讀並同意 JOIKA 會員條款</label>
           </div>
+          <p v-if="errors.agreed" class="error-text">{{ errors.agreed }}</p>
 
           <div class="button-group">
             <Button size="md" theme="primary">送出</Button>
@@ -324,6 +354,7 @@ const getStepState = (step) => {
                 <img v-if="avatarUrl" :src="avatarUrl" alt="預覽頭貼" />
                 <span v-else>頭貼上傳</span>
               </div>
+              <p v-if="errors.avatar" class="restriction-notice">{{ errors.avatar }}</p>
             </label>
             <input type="file" id="avatar-input" accept="image/*" @change="handleAvatarChange" hidden />
           </div>
@@ -597,5 +628,17 @@ const getStepState = (step) => {
     width: 200px;
     height: 200px;
   }
+}
+
+.error-text {
+  color: red;
+  font-size: 14px;
+  margin-top: -26px; // 抵銷 .tos-group 的 margin-bottom: 30px，確保 .error-text 與 .tos-group 的間距為 4px
+}
+
+.restriction-notice {
+  color: red;
+  font-size: 14px;
+  text-align: center;
 }
 </style>
