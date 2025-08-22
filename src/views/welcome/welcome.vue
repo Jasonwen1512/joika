@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import logoSvg from "@/assets/img/welcome/logo.svg?url";
 import pointDown from "@/assets/img/welcome/point-down.svg?url"; // 使用?url強制將svg轉換為url字串
+import { rectangle } from "leaflet";
 
 // 背景色塊
 const backgroundDecoration = ref({
@@ -100,10 +101,14 @@ const communityCardInfo = ref([
 ]);
 
 // 骰子轉動狀態
+const showHint = ref(true);
 const isRolling = ref(false);
 
 // 骰子投擲結果文字區域
 const currentResultText = ref("？");
+const showResult = ref(false);
+const currentResultLink = ref("#");
+const isBlinking = ref(false);
 const resultTextClass = computed(() => {
   const textLength = currentResultText.value.length;
   return textLength <= 2 ? "result-text-two-words" : "result-text-four-words";
@@ -129,9 +134,17 @@ onMounted(() => {
 
   // === 文字漂浮區域 ===
   const floatingTexts = gsap.utils.toArray(".floating-text");
+  const floatingTextbgs = gsap.utils.toArray(".floating-text-bg");
 
-  // 初始化，隱藏所有文字
+  // 初始化，隱藏所有元素
   floatingTexts.forEach((el) => {
+    gsap.set(el, {
+      opacity: 0,
+      y: 30,
+    });
+  });
+
+  floatingTextbgs.forEach((el) => {
     gsap.set(el, {
       opacity: 0,
       y: 30,
@@ -156,6 +169,10 @@ onMounted(() => {
           y: 0,
           duration: 1,
         });
+
+        if (triggerCount === 0) gsap.to(floatingTextbgs[0], { opacity: 1, y: 0, duration: 1 });
+        if (triggerCount === 4) gsap.to(floatingTextbgs[1], { opacity: 1, y: 0, duration: 1 });
+
         triggerCount++;
       }
     },
@@ -263,18 +280,18 @@ onMounted(() => {
   const diceState = {
     // 全部活動分類
     activityCategories: {
-      1: { category: "水上活動", image: new URL("@/assets/img/index-img/diving.png", import.meta.url).href, color: "#4F8DA8" },
-      2: { category: "電影", image: new URL("@/assets/img/index-img/movie.png", import.meta.url).href, color: "#FFA68D" },
-      3: { category: "運動", image: new URL("@/assets/img/index-img/sports.png", import.meta.url).href, color: "#FADA7A" },
-      4: { category: "登山", image: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href, color: "#90DA81" },
-      5: { category: "露營", image: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href, color: "#A281DA" },
-      6: { category: "桌遊", image: new URL("@/assets/img/index-img/board-games.png", import.meta.url).href, color: "#F315BB" },
-      7: { category: "展覽", image: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href, color: "#FFFCE2" },
-      8: { category: "聚餐", image: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href, color: "#FB900C" },
-      9: { category: "手作", image: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href, color: "#81BFDA" },
-      10: { category: "文化體驗", image: new URL("@/assets/img/index-img/cultural-experience.png", import.meta.url).href, color: "#1FB92C" },
-      11: { category: "演出表演", image: new URL("@/assets/img/index-img/concert.png", import.meta.url).href, color: "#FFE100" },
-      12: { category: "唱歌", image: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href, color: "#2AA9FF" },
+      1: { category: "登山", image: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href, color: "#90DA81", link: "/cjd101/g2/front/activity?category=CA001" },
+      2: { category: "桌遊", image: new URL("@/assets/img/index-img/board-games.png", import.meta.url).href, color: "#F315BB", link: "/cjd101/g2/front/activity?category=CA002" },
+      3: { category: "運動", image: new URL("@/assets/img/index-img/sports.png", import.meta.url).href, color: "#FADA7A", link: "/cjd101/g2/front/activity?category=CA003" },
+      4: { category: "露營", image: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href, color: "#A281DA", link: "/cjd101/g2/front/activity?category=CA004" },
+      5: { category: "唱歌", image: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href, color: "#2AA9FF", link: "/cjd101/g2/front/activity?category=CA005" },
+      6: { category: "展覽", image: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href, color: "#FFFCE2", link: "/cjd101/g2/front/activity?category=CA006" },
+      7: { category: "水上活動", image: new URL("@/assets/img/index-img/diving.png", import.meta.url).href, color: "#4F8DA8", link: "/cjd101/g2/front/activity?category=CA007" },
+      8: { category: "聚餐", image: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href, color: "#FB900C", link: "/cjd101/g2/front/activity?category=CA008" },
+      9: { category: "電影", image: new URL("@/assets/img/index-img/movie.png", import.meta.url).href, color: "#FFA68D", link: "/cjd101/g2/front/activity?category=CA009" },
+      10: { category: "手作", image: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href, color: "#81BFDA", link: "/cjd101/g2/front/activity?category=CA010" },
+      11: { category: "文化體驗", image: new URL("@/assets/img/index-img/cultural-experience.png", import.meta.url).href, color: "#1FB92C", link: "/cjd101/g2/front/activity?category=CA011" },
+      12: { category: "演出表演", image: new URL("@/assets/img/index-img/concert.png", import.meta.url).href, color: "#FFE100", link: "/cjd101/g2/front/activity?category=CA012" },
     },
 
     // 12 類中選 6 類，以 Array 記錄被選出的 key (1 ~ 12)
@@ -339,8 +356,8 @@ onMounted(() => {
 
   // 骰子投擲結果顯示後，自動捲動至最下方，3秒後再跳轉至JOIKA首頁
   function triggerAutoScroll() {
-    // 顯示 "頁面跳轉緩衝區域"
-    showLearnMore.value = true;
+    showHint.value = false;
+    showLearnMore.value = true; // 顯示 "頁面跳轉緩衝區域"
 
     // 延遲一段時間後捲動
     setTimeout(() => {
@@ -349,20 +366,20 @@ onMounted(() => {
         behavior: "smooth",
         block: "end",
       });
-      // 倒數 3 秒
-      let countdown = 3;
-      countdownText.value = `${countdown} 秒後進入首頁`;
+      // // 倒數 3 秒
+      // let countdown = 3;
+      // countdownText.value = `${countdown} 秒後進入首頁`;
 
-      countdownTimer = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-          countdownText.value = `${countdown} 秒後進入首頁`;
-        } else {
-          countdownText.value = "Let's Go!!!";
-          clearInterval(countdownTimer);
-          window.location.href = "/cjd101/g2/front/home";
-        }
-      }, 1000);
+      // countdownTimer = setInterval(() => {
+      //   countdown--;
+      //   if (countdown > 0) {
+      //     countdownText.value = `${countdown} 秒後進入首頁`;
+      //   } else {
+      //     countdownText.value = "Let's Go!!!";
+      //     clearInterval(countdownTimer);
+      //     window.location.href = "/cjd101/g2/front/home";
+      //   }
+      // }, 1000);
     }, 1000);
   }
 
@@ -403,16 +420,7 @@ onMounted(() => {
       dice.style.transform = `rotateX(${currentAngleX}deg) rotateY(${currentAngleY}deg)`;
 
       // 中間動畫過程顯示亂數
-      if (t < 0.8) {
-        const randomArrayIndex = Math.floor(Math.random() * 6); // 隨機取 Array 索引值 (0 ~ 5)
-        const randomActivityKey = diceState.selectedActivityKeys[randomArrayIndex]; // 取出 "selectedActivityKeys" 中的 key
-        currentResultText.value = diceState.selectedActivityCategories[randomActivityKey].category; // 使用 key 取出物件中的活動類別
-        frame++;
-        requestAnimationFrame(animate);
-      } else if (t >= 0.8 && t < 1) {
-        // 最後 20% 顯示最終結果
-        const activityKey = diceState.selectedActivityKeys[targetFace - 1];
-        currentResultText.value = diceState.selectedActivityCategories[activityKey].category;
+      if (t < 1) {
         frame++;
         requestAnimationFrame(animate);
       } else {
@@ -422,6 +430,9 @@ onMounted(() => {
         currentY = faceY;
         dice.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
         currentResultText.value = diceState.selectedActivityCategories[activityKey].category;
+        currentResultLink.value = diceState.selectedActivityCategories[activityKey].link;
+        showResult.value = true;
+        isBlinking.value = true;
         triggerAutoScroll();
       }
     }
@@ -457,8 +468,8 @@ onUnmounted(() => {
       <h3 class="floating-text" id="floating-text-4">沒人一起露營</h3>
       <h3 class="floating-text" id="floating-text-5">說走就走怎麼那麼難</h3>
       <h3 class="floating-text" id="floating-text-6">永遠差一咖</h3>
-      <img id="bg-skyblue1" :src="backgroundDecoration.bgSkyblue1" alt="背景色塊 skyblue" />
-      <img id="bg-green" :src="backgroundDecoration.bgGreen" alt="背景色塊 green" />
+      <img class="floating-text-bg" id="bg-skyblue1" :src="backgroundDecoration.bgSkyblue1" alt="背景色塊 skyblue" />
+      <img class="floating-text-bg" id="bg-green" :src="backgroundDecoration.bgGreen" alt="背景色塊 green" />
     </div>
   </section>
 
@@ -531,15 +542,23 @@ onUnmounted(() => {
   <section class="dice-wrapper">
     <h2 class="entrance-slogan">不知道揪什麼？</h2>
     <img id="bg-skyblue2" :src="backgroundDecoration.bgSkyblue2" alt="背景色塊 skyblue" />
-    <img id="bg-yellow2" :src="backgroundDecoration.bgYellow2" alt="背景色塊 yellow" />
-    <div class="text-content-group">
+    <img id="bg-yellow2" v-show="showResult" :src="backgroundDecoration.bgYellow2" alt="背景色塊 yellow" />
+    <div class="text-content-group" v-show="showResult">
       <h3 class="text-content">來揪點</h3>
       <h3 class="text-content">前往專區</h3>
-      <h3 :class="resultTextClass" id="result-text">{{ currentResultText }}</h3>
+      <a :class="resultTextClass" :href="currentResultLink">
+        <p id="result-text">{{ currentResultText }}</p>
+      </a>
     </div>
 
     <!-- 3D骰子 -->
     <div class="scene">
+      <p class="hint-text" v-show="showHint">請點擊骰子</p>
+      <p class="hint-text" :class="{ blinking: isBlinking }" v-show="!showHint">
+        請點擊 " {{ currentResultText }} "，前往專區
+        <br />
+        或往下捲動，前往首頁
+      </p>
       <div class="dice" :class="{ rolling: isRolling }">
         <div class="dice-face point1"></div>
         <div class="dice-face point2"></div>
@@ -574,7 +593,7 @@ onUnmounted(() => {
 
 // === 文字漂浮區域 ===
 .floating-text-wrapper {
-  height: 197.5vh; // 容器捲動總長度 (300vh = 197.5vh) (100vh = 62.5vw with screen ratio 16:10)
+  height: 312.5vw; // 容器捲動總長度 (500vh = 312.5vw) (100vh = 62.5vw with screen ratio 16:10)
 
   .floating-text-scroll-wrapper {
     height: 43.75vw; // 容器顯示長度 (70vh = 43.75vw) (100vh = 62.5vw with screen ratio 16:10)
@@ -902,13 +921,18 @@ onUnmounted(() => {
       top: 26.823vw;
       right: 20.313vw;
     }
+    #result-text {
+      font-family: "MyFont", sans-serif;
+      font-size: clamp(32px, 3.333vw, 64px);
+      animation: text-shifting 1.5s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+    }
     .result-text-two-words {
       color: $blue;
       font-size: clamp(32px, 3.333vw, 64px);
       width: 6.666vw;
       text-align: center;
       position: absolute;
-      top: 20.625vw;
+      top: 20vw;
       right: 16.042vw;
     }
     .result-text-four-words {
@@ -917,7 +941,7 @@ onUnmounted(() => {
       width: 13.333vw;
       text-align: center;
       position: absolute;
-      top: 20.625vw;
+      top: 20vw;
       right: 9.376vw;
     }
   }
@@ -927,6 +951,23 @@ onUnmounted(() => {
     top: 10vw;
     left: 30vw;
 
+    .hint-text {
+      width: 100%;
+      position: absolute;
+      color: $red;
+      font-size: clamp(16px, 1.563vw, 30px);
+      opacity: 1;
+      animation: text-blinking 3s infinite;
+    }
+    .hint-text:nth-child(1) {
+      text-align: center;
+      top: -4vw;
+      left: 0;
+    }
+    .hint-text:nth-child(2) {
+      top: 5vw;
+      left: 37.5vw;
+    }
     .dice {
       margin: 5vw;
       width: 16vw;
@@ -969,10 +1010,48 @@ onUnmounted(() => {
       }
     }
 
+    @keyframes text-blinking {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+    }
+    @keyframes text-shifting {
+      0% {
+        transform: translateY(0);
+      }
+      10% {
+        transform: translateY(-1px);
+      }
+      25% {
+        transform: translateY(-2px);
+      }
+      40% {
+        transform: translateY(-1px);
+      }
+      50% {
+        transform: translateY(0);
+      }
+      60% {
+        transform: translateY(1px);
+      }
+      75% {
+        transform: translateY(2px);
+      }
+      90% {
+        transform: translateY(1px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
     @keyframes dice-float {
       0%,
       100% {
-        transform: rotateX(-15deg) rotateY(-15deg) translateY(0) scale3d(1, 1, 1);
+        transform: rotateX(-15deg) rotateY(-15deg) translateY(0) scale3d(1.1, 1.1, 1.1);
       }
       50% {
         transform: rotateX(-15deg) rotateY(-15deg) translateY(-10px) scale3d(0.9, 0.9, 0.9);
