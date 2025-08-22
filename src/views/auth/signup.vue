@@ -9,6 +9,8 @@ const avatarUrl = ref("");
 const genderOptions = [
   { label: "男性", value: "M" },
   { label: "女性", value: "F" },
+  { label: "其他", value: "O" },
+  { label: "不透露", value: "N" },
 ];
 const cityOptions = ref([]); // 縣市
 const occupationOptions = ref([]); // 職業
@@ -49,7 +51,7 @@ const selectedInterests = ref([]); // v-model 綁定多選興趣
 
 onMounted(async () => {
   try {
-    const res = await fetch("http://localhost:8888/joika-api-server/users/get-registration-options.php");
+    const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/get-registration-options.php`);
     const data = await res.json();
     if (data.success) {
       cityOptions.value = data.data.cities;
@@ -123,7 +125,7 @@ const validateStepOne = async () => {
   if (!hasError) {
     // step1 送到後端暫存
     try {
-      const res = await fetch("http://localhost:8888/joika-api-server/users/register.php", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/register.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -230,7 +232,7 @@ async function handleStepTwoSubmit() {
   }
 
   try {
-    const res = await fetch("http://localhost:8888/joika-api-server/users/register.php", {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/register.php`, {
       method: "POST",
       credentials: "include",
       body: payload,
@@ -365,7 +367,12 @@ const getStepState = (step) => {
 
           <InputField id="gender" label="性別" type="select" :options="genderOptions" v-model="form.gender" :error="errors.gender" />
 
-          <InputField id="birthdate" label="生日" type="date" v-model="form.birthdate" :error="errors.birthdate" />
+          <!-- <InputField id="birthdate" label="生日" type="date" v-model="form.birthdate" :error="errors.birthdate" /> -->
+          <div class="form-group">
+            <label class="form-label" for="birthdate">生日</label>
+            <el-date-picker id="birthdate" v-model="form.birthdate" type="date" value-format="YYYY-MM-DD" placeholder="請選擇出生年月日" class="custom-date" />
+            <p v-if="errors.birthdate" class="error-text birthdate-error-text">{{ errors.birthdate }}</p>
+          </div>
 
           <InputField id="location" label="居住地" type="select" :options="cityOptions" v-model="form.location" :error="errors.location" />
 
@@ -631,14 +638,57 @@ const getStepState = (step) => {
 }
 
 .error-text {
-  color: red;
+  color: $red;
   font-size: 14px;
   margin-top: -26px; // 抵銷 .tos-group 的 margin-bottom: 30px，確保 .error-text 與 .tos-group 的間距為 4px
 }
 
 .restriction-notice {
-  color: red;
+  color: $red;
   font-size: 14px;
   text-align: center;
+}
+
+.form-group {
+  margin-bottom: 30px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* === 套用你原本 input/select 樣式到 DatePicker === */
+:deep(.custom-date.el-date-editor) {
+  display: block;
+  width: 100%;
+}
+
+:deep(.custom-date .el-input__wrapper) {
+  width: 100%;
+  padding: 7px 15px;
+  border: 1px solid black;
+  border-radius: 3px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &.is-focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 2px rgba($color-primary, 0.3);
+  }
+}
+
+:deep(.el-input__inner) {
+  color: black;
+  font-size: 16px;
+}
+
+.error-text {
+  color: red;
+  font-size: 14px;
+}
+
+.birthdate-error-text {
+  margin-top: 18px;
 }
 </style>
