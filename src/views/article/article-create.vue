@@ -8,6 +8,7 @@ import bgImgUrl from "@/assets/img/support/bg.svg?url";
 import articleimg from "@/assets/img/article/article-img.png?url";
 import Illustration from "@/components/article/Illustration.vue";
 import AirPlane from "@/assets/img/article/airplane.png";
+import axios from "axios";
 // ... (外觀、Icon、其他外掛的 import 省略，請保留您原有的) ...
 import "tinymce/skins/ui/oxide/skin.css";
 import "tinymce/themes/silver";
@@ -131,22 +132,48 @@ async function submitArticle() {
     alert("文章更新成功！");
   } else {
     // --- 未來串接 API 的位置 (新增/POST) ---
+    try { 
+      const categoryIndex = categories.indexOf(form.event); 
+      const categoryNo = categoryIndex >= 0 ? 
+      categoryIndex + 1 : null; 
+
+      if (categoryIndex === -1) { 
+        alert("請選擇有效的分類"); 
+        return; 
+      }
+      const formData = new FormData(); 
+      formData.append("category_no", categoryNo); 
+      formData.append("post_title", form.title);  
+      formData.append("post_content", form.content);
+
+      const res = await axios.post( 
+        `${import.meta.env.VITE_API_BASE}/posts/create.php`, 
+      formData, 
+      { 
+        headers: { "Content-Type": "multipart/form-data", }, 
+        withCredentials: true,
+        });
+    router.push("/article/article");
     // const newArticle = await createArticleAPI(form);
     console.log("正在【新增】文章:", form);
     alert("文章發表成功！");
-  }
+    }catch (err) { 
+      console.error("發表失敗:", err); 
+      alert("文章發表失敗，請稍後再試！"); return;  
+    }
   // 成功後跳轉回列表頁
-  router.push("/article/article");
+  //router.push("/article/article");
+  }
 }
-
 // --- 圖片上傳處理邏輯 (保持不變) ---
+
 const uploadImageAndGetUrl = (blobInfo) =>
   new Promise((resolve, reject) => {
     const formData = new FormData();
     formData.append("file", blobInfo.blob(), blobInfo.filename());
 
     // 請將 '/api/upload-image' 換成您真實的後端上傳 API 位址
-    fetch("/api/upload-image", {
+    fetch(`${import.meta.env.VITE_API_BASE}/posts/upload-image.php`, {
       method: "POST",
       body: formData,
     })
@@ -166,7 +193,7 @@ const uploadImageAndGetUrl = (blobInfo) =>
       });
   });
 
-// [關鍵修正] 新增 file_picker_callback 函式
+// 新增 file_picker_callback 函式
 const handleFilePicker = (callback, value, meta) => {
   // 只針對圖片類型的檔案選擇器生效
   if (meta.filetype === "image") {

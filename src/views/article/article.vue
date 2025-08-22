@@ -5,7 +5,7 @@ import Button from "@/components/Button.vue";
 import { ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-
+import defaultImg from "@/assets/img/article/nopicture.jpg" // 預設圖片
 import konanImage from "@/assets/img/article/movie_konan.jpg";
 import ArticleDetail from "./article-detail.vue";
 import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
@@ -341,7 +341,7 @@ watch(ActiveCategory, () => {
           class="article-text-link"
         >
           <div class="article-img">
-            <img :src="article.image" :alt="article.title" />
+            <img :src="article.image || defaultImg" :alt="article.title" />
           </div>
 
           <div class="article-text">
