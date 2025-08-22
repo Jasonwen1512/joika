@@ -108,18 +108,12 @@ function postComment() {
   //這邊改用API
 
   axios
-    .post(
-      `${VITE_API_BASE}/comments/post-create.php`,
-      {
-        post_no: Number(postid),
-        member_id: Number(currentUser.value.member_id),
-        comment_content: newComment.value,
-        parent_no: null,
-      },
-      {
-        withCredentials: true,
-      }
-    )
+    .post(`${VITE_API_BASE}/comments/post-create.php`, {
+      post_no: postid,
+      member_id: props.currentUser.member_id,
+      comment_content: newComment.value,
+      parent_no: null,
+    })
     .then((res) => {
       console.log("新增成功：", res.data);
       // 通知父層重新抓留言
@@ -373,13 +367,13 @@ function ReportIt() {
   });
 }
 </script>
-<script>
+<!-- <script>
 export default {
   mounted() {
     window["that"] = this; // 這裡的 this 才是元件實例
   },
 };
-</script>
+</script> -->
 <template>
   <!-- ================================== -->
   <!--           留言系統區塊             -->

@@ -2,19 +2,18 @@
 import { useRoute, useRouter } from "vue-router";
 import { ActivityCategories } from "@/assets/data/fake-activity-category";
 import ActivityCard from "@/components/activity/activity-card.vue";
-import { FakeActivity } from "@/assets/data/fake-activity";
 import Button from "@/components/Button.vue";
 import { ref, computed, watch, onMounted } from "vue";
 import DatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import SearchIcon from "@/assets/img/icon/search1.svg";
 import CategoryTag from "@/components/activity/category-tag.vue";
-import PreArrow from "@/assets/img/icon/pre-arrow.svg";
-import NextArrow from "@/assets/img/icon/next-arrow.svg";
+import axios from "axios";
+import {normalizeActivity} from "@/assets/utils/normalize"
 
 const route = useRoute();
 const router = useRouter();
-
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 const setDefaultCategory = () => {
   const categoryFromQuery = route.query.category;
   if (categoryFromQuery) {
@@ -68,15 +67,34 @@ const handleSearch = () => {
   searchTrigger.value++;
 };
 
-const activities = ref(
-  [...FakeActivity].sort(
-    (a, b) =>
-      new Date(a.activity_start_date).getTime() -
-      new Date(b.activity_start_date).getTime()
-  )
-);
+
+const activities = ref([]);
 const categories = ActivityCategories;
 const activeCategory = ref("0");
+
+//串活動資料API
+const loading = ref(false);
+async function fetchActivities(){
+  loading.value=true;
+  try{
+    const{ data } = await axios.get(`${VITE_API_BASE}/activities/list.php`);
+    activities.value = (Array.isArray(data) ? data : [] )
+    .map(normalizeActivity)
+    .sort(
+      (a, b)=>
+      new Date(a.activity_start_date).getTime() -
+      new Date(b.activity_start_date).getTime()
+    );
+    searchTrigger.value++
+    currentPage.value = 1;
+  }catch (err) {
+     errorMsg.value="抓取活動失敗";
+  }finally {
+    loading.value = false;
+  }
+}
+
+
 
 const selectCategory = (id) => {
   const current = route.query.category;
@@ -107,7 +125,7 @@ const filterActivities = computed(() => {
 
     // 如果只選了一天，把它複製成 [start, start]
     if (safeDateRange.length === 1) {
-      safeDateRange.push(safeDateRange["0"]);
+      safeDateRange.push(safeDateRange[0]);
     }
 
     if (safeDateRange.length === 2) {
@@ -130,76 +148,29 @@ const filterActivities = computed(() => {
   });
 });
 
-const itemsPerPage = ref(12);
+const pageSize = ref(12);
 const currentPage = ref(1);
-const updateItemPerPage = () => {
-  if (window.innerWidth < 769) {
-    itemsPerPage.value = 6;
-  } else {
-    itemsPerPage.value = 12;
-  }
-};
-const totalPages = computed(() => {
-  return Math.ceil(filterActivities.value.length / itemsPerPage.value);
-});
+const total = computed(() => filterActivities.value.length)
+
+const updatePageSize = () => {
+  pageSize.value = window.innerWidth < 769 ? 6 : 12
+}
+
 
 const paginatedActivities = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
   return filterActivities.value.slice(start, end);
 });
 watch(activeCategory, () => {
   currentPage.value = 1;
 });
 
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    window.scrollTo(0, 0);
-  }
-};
-
-const prePage = () => {
-  if (currentPage.value > 1) currentPage.value--;
-  window.scrollTo(0, 0);
-};
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
-  window.scrollTo(0, 0);
-};
-
-const paginationPages = computed(() => {
-  const total = totalPages.value;
-  const current = currentPage.value;
-  const pages = [];
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i);
-  } else {
-    pages.push(1);
-
-    if (current > 3) pages.push("...");
-
-    for (
-      let i = Math.max(2, current - 1);
-      i <= Math.min(total - 1, current + 1);
-      i++
-    ) {
-      pages.push(i);
-    }
-
-    if (current < total - 2) pages.push("...");
-
-    pages.push(total);
-  }
-
-  return pages;
-});
 onMounted(() => {
   setDefaultCategory();
-  updateItemPerPage();
-  window.addEventListener("resize", updateItemPerPage);
+  updatePageSize();
+  window.addEventListener("resize", updatePageSize);
+  fetchActivities();
 });
 </script>
 
@@ -286,40 +257,25 @@ onMounted(() => {
           v-for="item in paginatedActivities"
           :key="item.activity_no"
         >
-          ></ActivityCard
+          </ActivityCard
         >
       </template>
 
       <!-- 沒資料顯示提示 -->
-      <p v-else class="no-data">查無資料</p>
+      <p v-else class="no-data">該分類目前沒有活動唷!快來新增一個吧!</p>
     </div>
 
-    <div
-      class="pagination"
-      v-if="totalPages > 1 && paginatedActivities.length > 0"
-    >
-      <button class="pre-arrow" @click="prePage" :disabled="currentPage === 1">
-        <PreArrow></PreArrow>
-      </button>
-
-      <button
-        class="pages"
-        v-for="page in paginationPages"
-        :key="page"
-        @click="typeof page === 'number' && changePage(page)"
-        :class="{ active: currentPage === page }"
-        :disabled="page === '...'"
-      >
-        {{ page }}
-      </button>
-      <button
-        class="next-arrow"
-        @click="nextPage"
-        :disabled="currentPage === totalPages"
-      >
-        <NextArrow></NextArrow>
-      </button>
-    </div>
+    <el-pagination
+  v-if="total > 0"
+  :current-page="currentPage"
+  :page-size="pageSize"
+  :total="total"
+  :page-sizes="[6,12,24]"
+  layout="prev, pager, next"
+  default
+  @current-change="p => { currentPage = p; window.scrollTo(0,0) }"
+  @size-change="s => { pageSize = s; currentPage = 1; window.scrollTo(0,0) }"
+/>
   </div>
 </template>
 
@@ -327,6 +283,9 @@ onMounted(() => {
 .activity-wrap {
   position: relative;
   min-height: 100vh;
+  
+margin-bottom: 20vh;
+
 }
 .banner {
   margin: 0 auto;
@@ -505,61 +464,7 @@ onMounted(() => {
     width: 1024px;
   }
 }
-.pagination {
-  gap: 10px;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 5vh;
-}
 
-.pre-arrow,
-.next-arrow {
-  padding: 3px 5px 0 5px;
-  cursor: pointer;
-  &:hover {
-    opacity: 0.5;
-    transition: transform 0.5s ease;
-    transform: translate(5px);
-  }
-  &:disabled {
-    color: $gray-disabled;
-    cursor: not-allowed;
-    background-color: transparent;
-    pointer-events: none;
-  }
-}
-.pre-arrow {
-  &:hover {
-    transform: translate(-5px);
-  }
-}
-.pages {
-  @include flex-center;
-  font-size: $font-size-p;
-  cursor: pointer;
-  padding: 5px 10px;
-  border: 2px solid $blue;
-  border-radius: 3px;
-  background-color: $white;
-  color: $blue;
-  @include tablet() {
-    border-radius: 6px;
-  }
-
-  @include desktop() {
-    border-radius: 6px;
-  }
-
-  &:not(.active):hover {
-    background-color: $gray-disabled;
-    opacity: 0.5;
-  }
-  &.active {
-    background-color: $color-primary;
-    pointer-events: none;
-    color: $black;
-  }
-}
 
 .bg-decorate2 {
   position: absolute;
@@ -597,4 +502,52 @@ onMounted(() => {
     width: 15%;
   }
 }
+
+:deep(.el-pagination){
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 5vh;
+}
+:deep(.el-pager){
+    gap: 10px;
+}
+
+:deep(.el-pagination .el-pager li){
+border: #4f8da8 2px solid;
+  border-radius: 6px;
+  padding: 5px 10px;
+  background: #ffffff;
+  cursor: pointer;
+  color: #4f8da8;
+  font-weight: none;
+  @media (max-width: 768px) {
+    border-radius: 3px;
+  }
+  &.is-active {
+    background: #81bfda;
+    color: #000;
+  }
+}
+:deep(.el-pagination button[aria-disabled="true"]) {
+  background: none;     
+  color: #ccc;         
+  cursor: not-allowed;  
+  opacity: 0.5;        
+}
+:deep(.btn-next.is-last){
+  background:none;
+  font-weight:bold;
+}
+:deep(.btn-prev.is-first){
+    background:none;
+  font-weight:bold;
+}
+:deep(.el-pagination button .el-icon) {
+  font-size: 16px;   /* 控制大小 */
+  font-weight:bold; /* 粗細（部分 icon 線條可見差異） */
+  stroke-width: 12px; /* 若要調整 SVG 線條粗細，可以加這個 */
+}
+
+
 </style>

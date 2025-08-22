@@ -15,20 +15,25 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'submit']);
+const selectedReasonNo = ref(null);
 
 // 2. 內部狀態
-const selectedReason = ref('');
+
 const details = ref('');
 const isDropdownOpen = ref(false); // 新增：控制自訂下拉選單的開關
 const dropdownRef = ref(null); // 新增：用於偵測點擊範圍
 
 const reasonOptions = [
-  '時間無法配合',
-  '活動地點太遠',
-  '找到其他活動',
-  '臨時有事',
-  '其他原因'
+ { no: 1, label: '時間無法配合' },
+  { no: 2, label: '活動地點太遠' },
+  { no: 3, label: '找到其他活動' },
+  { no: 4, label: '臨時有事' },
+  { no: 5, label: '其他原因' },
 ];
+const selectReason = (no) => {
+  selectedReasonNo.value = no
+  isDropdownOpen.value = false
+}
 
 // 3. 事件處理函式
 const handleClose = () => {
@@ -36,13 +41,13 @@ const handleClose = () => {
 };
 
 const handleSubmit = () => {
-  if (!selectedReason.value) {
+  if (selectedReasonNo.value === null) {
     alert('請選擇一個取消原因');
     return;
   }
   emit('submit', {
-    reason: selectedReason.value,
-    details: details.value
+    reason_no: Number(selectedReasonNo.value),
+    reason_detail: details.value ? details.value.trim() : ''
   });
 };
 
@@ -51,10 +56,7 @@ const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
 
-const selectReason = (reason) => {
-  selectedReason.value = reason;
-  isDropdownOpen.value = false; // 選擇後關閉選單
-};
+
 
 // 處理點擊外部區域關閉選單的邏輯
 const handleClickOutside = (event) => {
@@ -75,7 +77,7 @@ onUnmounted(() => {
 // 監聽 show prop 的變化，當彈窗關閉時重設內部狀態
 watch(() => props.show, (newVal) => {
   if (!newVal) {
-    selectedReason.value = '';
+    selectedReasonNo.value = null;
     details.value = '';
     isDropdownOpen.value = false; // 確保下拉選單也關閉
   }
@@ -100,18 +102,18 @@ watch(() => props.show, (newVal) => {
           <!-- === 修改：將 select 替換為自訂的 dropdown === -->
           <div class="custom-select" ref="dropdownRef">
             <div class="select-trigger" @click="toggleDropdown">
-              <span v-if="selectedReason" class="selected-text">{{ selectedReason }}</span>
+              <span v-if="selectedReasonNo !== null" class="selected-text">{{ (reasonOptions.find(reason => reason.no === selectedReasonNo) || {}).label }}</span>
               <span v-else class="placeholder">取消原因</span>
               <span class="arrow" :class="{ 'is-open': isDropdownOpen }">▼</span>
             </div>
             <ul v-if="isDropdownOpen" class="options-list">
               <li
                 v-for="reason in reasonOptions"
-                :key="reason"
-                @click="selectReason(reason)"
+                :key="reason.no"
+                @click="selectReason(reason.no)"
                 class="option-item"
               >
-                {{ reason }}
+                {{ reason.label }}
               </li>
             </ul>
           </div>

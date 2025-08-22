@@ -69,6 +69,26 @@ const form = reactive({
   image: "", // 預設圖片
 });
 
+// === 新增：首圖上傳（檔案與預覽） ===
+const coverFile = ref(null);
+const coverPreview = ref(""); // Object URL for preview
+function onCoverChange(e) {
+  const file = e.target.files?.[0];
+  if (!file) {
+    coverFile.value = null;
+    coverPreview.value = "";
+    return;
+  }
+  coverFile.value = file;
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value);
+  coverPreview.value = URL.createObjectURL(file);
+}
+// 清理預覽 URL（避免記憶體洩漏）
+onBeforeUnmount(() => {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value);
+});
+// === 新增結束 ===
+
 // 3.【關鍵】當處於「編輯模式」時，載入舊資料
 onMounted(() => {
   window.addEventListener("resize", handleResize);
@@ -155,6 +175,12 @@ async function submitArticle() {
       formData.append("category_no", categoryNo);
       formData.append("post_title", form.title);
       formData.append("post_content", form.content);
+
+      // === 新增：若有選首圖，夾帶 POST_IMG 給後端 ===
+      if (coverFile.value) {
+        formData.append("post_img", coverFile.value); // 後端 create.php 會存成封面
+      }
+      // === 新增結束 ===
 
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE}/posts/create.php`,
@@ -373,6 +399,26 @@ function selectType(typeName) {
         </option>
       </select>
     </div>
+
+    <!-- === 新增：首圖上傳區塊（預覽 + 檔案 input） === -->
+    <div class="cover-upload">
+      <label class="cover-label">首圖（選填）：</label>
+      <div class="cover-uploader">
+        <input
+          class="cover-input"
+          type="file"
+          accept="image/*"
+          @change="onCoverChange"
+        />
+        <div v-if="coverPreview" class="cover-preview">
+          <img :src="coverPreview" alt="首圖預覽" />
+        </div>
+        <div v-else class="cover-placeholder">未選擇圖片</div>
+      </div>
+      <small class="cover-hint">建議比例 16:9、JPG/PNG，小於 5MB</small>
+    </div>
+    <!-- === 新增結束 === -->
+
     <div class="text-editor">
       <editor v-model="editorContent" :init="init" @onInit="handleEditorInit" />
       <p class="notice">
@@ -452,7 +498,7 @@ function selectType(typeName) {
   gap: 25px;
   padding: 0 15px;
   box-sizing: border-box;
-  /* [關鍵修正] 明確定義 Grid 欄位 */
+  /* 明確定義 Grid 欄位 */
   grid-template-columns: 1fr;
   z-index: 5;
 }
@@ -500,7 +546,7 @@ select {
 }
 .text-editor {
   width: 100%;
-  /* [關鍵修正] 覆蓋 Grid/Flex item 的預設最小寬度 */
+  /* 覆蓋 Grid/Flex item 的預設最小寬度 */
   min-width: 0;
 }
 
@@ -559,4 +605,42 @@ select {
 .create {
   gap: 15px;
 }
+
+/* === 首圖上傳樣式 === */
+.cover-upload {
+  display: grid;
+  gap: 8px;
+}
+.cover-label {
+  font-weight: 600;
+}
+.cover-uploader {
+  display: grid;
+  gap: 10px;
+  align-items: start;
+}
+.cover-input {
+  display: block;
+  width: 200px;
+}
+.cover-preview {
+  max-width: 100%;
+  border: 1px dashed #ccc;
+  padding: 8px;
+  border-radius: 6px;
+  background: #fff;
+}
+.cover-preview img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.cover-placeholder {
+  font-size: 14px;
+  color: #888;
+}
+.cover-hint {
+  color: #999;
+}
+/* === 新增結束 === */
 </style>

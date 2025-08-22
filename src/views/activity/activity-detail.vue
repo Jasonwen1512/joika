@@ -15,16 +15,17 @@ import axios from "axios";
 import RatingModal from "@/components/activity/activity-detail/rating-modal.vue";
 // === 新增：為未來的「取消彈窗」預留 import 位置 ===
 import CancelModal from "@/components/activity/activity-detail/cancel-modal.vue";
-
 // --- Swiper  ---
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import { normalizeActivity } from "@/assets/utils/normalize";
 // --- End Swiper ---
 
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+axios.defaults.withCredentials = true;
 
 const route = useRoute();
 const activityNo = route.params.activity_id;
@@ -35,18 +36,29 @@ const activitiesData = ref([]);
 onMounted(async () => {
   try {
     const response = await axios.get(`${VITE_API_BASE}/activities/list.php`);
-    activitiesData.value = response.data;
+    activitiesData.value = (
+      Array.isArray(response.data) ? response.data : []
+    ).map((r) => normalizeActivity(r, VITE_API_BASE));
     // console.log(activitiesData.value);
   } catch (error) {
     console.error(`抓取list-all資料失敗${error}`);
   }
 });
 
-const activity = computed(() =>
-  activitiesData.value.find(
-    (item) => String(item.ACTIVITY_NO) === String(activityNo)
-  )
+const isCancelled = computed(
+  () => activity.value?.ACTIVITY_STATUS === "已取消"
 );
+const rawRouteId = computed(() => String(route.params.activity_id || ""));
+const routeIdNumeric = computed(() => {
+  const n = Number(rawRouteId.value.replace(/\D/g, ""));
+  return Number.isFinite(n) ? n : null;
+});
+const activity = computed(() => {
+  return (
+    activitiesData.value.find((a) => a.id === routeIdNumeric.value) ||
+    activitiesData.value.find((a) => a.activity_no === rawRouteId.value)
+  );
+});
 
 const likeMap = ref({});
 
@@ -54,12 +66,12 @@ const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
 
-const aloha = () => {
-  alert("我要跟團！");
-};
-
 const router = useRouter();
 const gotoSignup = (id) => {
+  if (isCancelled.value) {
+    alert("此活動已取消，無法報名");
+    return;
+  }
   router.push(`/group/group-signup/${id}`);
 };
 
@@ -102,6 +114,7 @@ const submitRatings = (ratingsData) => {
 
 // === 新增：取消彈窗相關邏輯 ===
 const isCancelModalVisible = ref(false); // 取消彈窗的「開關」
+const modalResetKey = ref(0);
 
 const openCancelModal = () => {
   isCancelModalVisible.value = true; // 打開取消彈窗
@@ -111,13 +124,76 @@ const closeCancelModal = () => {
   isCancelModalVisible.value = false; // 關閉取消彈窗
 };
 
-// 這個函式將用於接收從彈窗傳來的取消原因，並在提交後切換回原來的按鈕狀態
-const handleCancelSubmit = (reason) => {
-  console.log("收到的取消原因:", reason);
-  alert("已提交取消申請。");
-  closeCancelModal(); // 關閉彈窗
-  isGroupJoined.value = false; // 將按鈕狀態切換回去
+const currentUserId = ref(null);
+const meLoading = ref(true);
+async function fetchMe() {
+  try {
+    const { data } = await axios.get(`${VITE_API_BASE}/users/me.php`);
+    //  console.log('me =', data)
+    currentUserId.value = data?.user?.id ?? null;
+  } catch (e) {
+    currentUserId.value = null;
+  } finally {
+    meLoading.value = false;
+  }
+}
+onMounted(fetchMe);
+
+const isHost = computed(() => {
+  const hostId =
+    activity.value?.HOST_MEMBER_ID ?? activity.value?.host_member_id;
+  return (
+    !!(hostId && currentUserId.value) &&
+    Number(hostId) === Number(currentUserId.value)
+  );
+});
+
+const isJoiner = computed(() => false);
+
+//主揪取消活動API
+async function handleCancelSubmit(payload) {
+  try {
+    const actNo = activity.value?.activity_no;
+
+    const { data, status } = await axios.patch(
+      `${VITE_API_BASE}/activities/cancel-hoster.php?id=${actNo}`,
+      payload,
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (status >= 200 && status < 300 && !data.error) {
+      isCancelModalVisible.value = false;
+      modalResetKey.value++;
+      activitiesData.value = activitiesData.value.map((statusChange) =>
+        String(statusChange.activity_no) === String(actNo)
+          ? { ...statusChange, activity_status: "已取消" }
+          : statusChange
+      );
+      alert("取消成功");
+      router.push("/home");
+    } else {
+      alert(data.error || "取消失敗");
+    }
+  } catch (err) {
+    alert("取消失敗：" + err.message);
+  }
+}
+
+const formDate = (dateStr) => {
+  const date = new Date(dateStr);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year.toString().padStart(2, "0")}/${month
+    .toString()
+    .padStart(2, "0")}/${day.toString().padStart(2, "0")}`;
 };
+
+// watch(activity, a => {
+//   // console.log('HOST_MEMBER_ID from activity =', a?.HOST_MEMBER_ID)
+// })
 // === End 新增 ===
 
 // 團員假資料
@@ -357,15 +433,14 @@ const swiperModules = [Pagination];
     <div class="activity-hero-bg">
       <div class="hint">揪團探索/揪團列表/{{ activity?.category_name }}</div>
     </div>
-
     <!-- 圖片 -->
     <div class="activity-image">
-      <img :src="activity?.ACTIVITY_IMG" :alt="activity?.ACTIVITY_NAME" />
+      <img :src="activity?.activity_img" :alt="activity?.activity_name" />
     </div>
 
     <!-- 標題 -->
     <div class="activity-title-wrap">
-      <h2>{{ activity?.ACTIVITY_NAME }}</h2>
+      <h2>{{ activity?.activity_name }}</h2>
     </div>
 
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
@@ -383,7 +458,7 @@ const swiperModules = [Pagination];
       </template>
 
       <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
-      <template v-else>
+      <template v-if="!meLoading && (isHost || isJoiner)">
         <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
         <Button
           @click="openCancelModal"
@@ -393,6 +468,20 @@ const swiperModules = [Pagination];
           >取消</Button
         >
         <Button @click="openRatingModal" theme="primary" size="md">評價</Button>
+      </template>
+
+      <template v-else>
+        <Button
+          @click.stop.prevent="gotoSignup(activity?.activity_no)"
+          theme="primary"
+          size="md"
+        >
+          我要跟團!
+        </Button>
+        <LikeButton
+          :isActive="likeMap[activity?.activity_no]"
+          @click.stop.prevent="toggleLike(activity?.activity_no)"
+        ></LikeButton>
       </template>
     </div>
 
@@ -415,20 +504,20 @@ const swiperModules = [Pagination];
           <div class="info-row">
             <strong>日期與時間</strong>
             <span
-              >{{ activity?.ACTIVITY_START_DATE }} ~ <br />{{
-                activity?.ACTIVITY_END_DATE
+              >{{ activity?.activity_start_date }} ~ <br />{{
+                activity?.activity_end_date
               }}</span
             >
           </div>
           <div class="info-row">
             <strong>地點</strong>
-            <span>{{ activity?.LOCATION }}</span>
+            <span>{{ activity?.location }}</span>
           </div>
           <div class="info-row">
             <strong>揪團人數</strong>
             <span
-              >{{ activity?.CURRENT_PARTICIPANT }}/{{
-                activity?.MAX_PARTICIPANT
+              >{{ activity?.current_participant }}/{{
+                activity?.max_participant
               }}人</span
             >
           </div>
@@ -438,15 +527,15 @@ const swiperModules = [Pagination];
         <div class="info-col">
           <div class="info-row">
             <strong>預估費用</strong>
-            <span>{{ activity?.MAX_PARTICIPANT }}</span>
+            <span>{{ activity?.fee_notes }}</span>
           </div>
           <div class="info-row">
             <strong>揪團截止日</strong>
-            <span>{{ activity?.REGISTRATION_DEADLINE }}</span>
+            <span>{{ formDate(activity?.registration_deadline) }}</span>
           </div>
           <div class="info-row">
             <strong>跟團限制</strong>
-            <span>{{ activity?.PARTICIPANT_LIMITATION }}</span>
+            <span>{{ activity?.participant_limitation }}</span>
           </div>
         </div>
       </div>
@@ -492,7 +581,7 @@ const swiperModules = [Pagination];
     <!-- 活動詳情 -->
     <section class="activity-description">
       <div class="description-title">詳細</div>
-      <p class="description-content">{{ activity?.ACTIVITY_DESCRIPTION }}</p>
+      <p class="description-content">{{ activity?.activity_description }}</p>
     </section>
 
     <!-- 目前團員 -->
@@ -565,6 +654,7 @@ const swiperModules = [Pagination];
 
     <!-- === 第五步：在 template 的最下方，加入這段「彈窗元件」 === -->
     <RatingModal
+      v-if="activity"
       :show="isRatingModalVisible"
       :activity="activity"
       :participants="participants"
@@ -575,6 +665,8 @@ const swiperModules = [Pagination];
     <!-- === 新增：為未來的「取消彈窗」預留的元件位置 === -->
 
     <CancelModal
+      v-if="activity"
+      :key="modalResetKey"
       :show="isCancelModalVisible"
       :activity="activity"
       @close="closeCancelModal"

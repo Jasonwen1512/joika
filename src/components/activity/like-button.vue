@@ -56,6 +56,8 @@ onMounted(() => {
   color: $red;
   cursor: pointer;
   display: flex;
+  padding-right: 2px;
+  padding-bottom:2px;
   &:hover {
     color: $pink;
     transition: all 0.3s ease-in-out;
