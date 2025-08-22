@@ -180,7 +180,15 @@ async function handleCancelSubmit(payload) {
   }
 }
 
-
+const formDate = (dateStr) => {
+  const date = new Date(dateStr);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year.toString().padStart(2, "0")}/${month.toString().padStart(2, "0")}/${day
+    .toString()
+    .padStart(2, "0")}`;
+};
 
 // watch(activity, a => {
 //   // console.log('HOST_MEMBER_ID from activity =', a?.HOST_MEMBER_ID)
@@ -513,7 +521,7 @@ const swiperModules = [Pagination];
           </div>
           <div class="info-row">
             <strong>揪團截止日</strong>
-            <span>{{ activity?.registration_deadline }}</span>
+            <span>{{ formDate(activity?.registration_deadline) }}</span>
           </div>
           <div class="info-row">
             <strong>跟團限制</strong>
@@ -563,7 +571,7 @@ const swiperModules = [Pagination];
     <!-- 活動詳情 -->
     <section class="activity-description">
       <div class="description-title">詳細</div>
-      <p class="description-content">{{ activity?.ACTIVITY_DESCRIPTION }}</p>
+      <p class="description-content">{{ activity?.activity_description }}</p>
     </section>
 
     <!-- 目前團員 -->
