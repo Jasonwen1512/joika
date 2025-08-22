@@ -1,11 +1,10 @@
 <script setup>
-//整理一下//
-
 import { ref, computed, h, render, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios"; // <-- 新增 axio
 import { useRoute, useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import { usePreviewStore } from "@/stores/preview";
+import { authState } from "@/assets/data/authState";
 
 //引入元件
 // import { articleList } from "@/assets/data/fake-article"; 假資料已再不使用
@@ -18,16 +17,47 @@ import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from "@/assets/img/article/movie_konan.jpg";
 
 // 這裡先用假的登入者資料
-const currentUser = ref({
-  // userid: Number(localStorage.getItem("member_id")) || 0,
-  userid: 1,
-});
+// 假的自己 展示用
+// const currentUser = {
+//   member_id: authState.user.id, // 假設這是當前使用者的 ID
+//   author: authState.user.nickname, // 您的名字
+//   avatar: "https://i.pravatar.cc/150?u=me", // 一個代表您自己的頭像
+//   replies: [],
+// };
+// console.log({ currentUser });
 
 // 環境變數與初始設定
 const previewStore = usePreviewStore();
 const route = useRoute();
 const router = useRouter();
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+
+// ...existing code...
+const currentUser = ref({
+  member_id: null,
+  author: "",
+  avatar: "",
+  replies: [],
+});
+
+async function fetchCurrentUser() {
+  try {
+    const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
+      withCredentials: true,
+    });
+    if (res.data.authenticated && res.data.user) {
+      currentUser.value.member_id = res.data.user.id;
+      currentUser.value.author = res.data.user.nickname;
+      currentUser.value.avatar =
+        res.data.user.avatar ||
+        `https://i.pravatar.cc/150?u=${res.data.user.id}`;
+      console.log("取得登入者資料：", res.data);
+      console.log("currentUser:", currentUser.value);
+    }
+  } catch (err) {
+    console.error("取得登入者資料失敗", err);
+  }
+}
 // ===================================================================
 // Props 定義 (Single Source of Truth)
 // 【重要】我們需要 'mode' prop 來讓 'submitArticle' 函式正常運作
@@ -144,12 +174,13 @@ const article = computed(() => {
 // computed 屬性：判斷是否為文章擁有者
 const isOwner = computed(() => {
   return (
-    article.value && currentUser.value.userid === article.value.post_user_id
+    article.value && currentUser.value.member_id === article.value.post_user_id
   ); // 請確認資料庫欄位名稱是否為 POST_USER_ID
 });
 
 // 生命週期鉤子：在元件掛載時獲取資料
 onMounted(() => {
+  fetchCurrentUser();
   fetchArticle();
   fetchComments();
 });
@@ -398,7 +429,7 @@ async function fetchComments() {
             c.MEMBER_AVATAR || `https://i.pravatar.cc/150?u=${c.MEMBER_ID}`,
           timestamp: c.CREATED_AT,
           content: c.COMMENT_CONTENT,
-          likenum: Number(c.LIKE_NUM || 0),
+          likenum: Number(c.LIKE_COUNT || 0),
           liked: false,
           parentId: c.PARENT_NO, // 父留言 ID
           replies: [],
