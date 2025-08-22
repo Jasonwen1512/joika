@@ -44,7 +44,7 @@ const currentUser = ref({
 
 async function fetchCurrentUser() {
   try {
-    const res = await axios.get(`${VITE_API_BASE}/me.php`, {
+    const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
       withCredentials: true, // 若有跨域 session
     });
     if (res.data.authenticated && res.data.user) {
@@ -564,7 +564,7 @@ onUnmounted(() => {
       <CommentComponent
         v-if="comments"
         :comments="comments"
-        :current-user="currentUser.value"
+        :current-user="currentUser"
         @comment-added="fetchComments"
       />
     </div>

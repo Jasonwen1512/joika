@@ -94,7 +94,7 @@ function postComment() {
   axios
     .post(`${VITE_API_BASE}/comments/post-create.php`, {
       post_no: postid,
-      member_id: currentUser.member_id,
+      member_id: props.currentUser.member_id,
       comment_content: newComment.value,
       parent_no: null,
     })
@@ -344,13 +344,13 @@ function ReportIt() {
   });
 }
 </script>
-<script>
+<!-- <script>
 export default {
   mounted() {
     window["that"] = this; // 這裡的 this 才是元件實例
   },
 };
-</script>
+</script> -->
 <template>
   <!-- ================================== -->
   <!--           留言系統區塊             -->
