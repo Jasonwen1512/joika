@@ -19,7 +19,7 @@ import Swal from "sweetalert2";
 import ReportForm from "@/components/ReportForm.vue";
 import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
 import NextIcon from "@/assets/img/icon/next-arrow.svg?url";
-import { authState } from "@/assets/data/authState";
+// import { authState } from "@/assets/data/authState";
 const route = useRoute();
 const router = useRouter();
 const postid = route.params.postid;
@@ -31,13 +31,13 @@ const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
 // 下方留言區
 // 假的自己 展示用
-const currentUser = {
-  member_id: authState.user.id, // 假設這是當前使用者的 ID
-  author: authState.user.nickname, // 您的名字
-  avatar: "https://i.pravatar.cc/150?u=me", // 一個代表您自己的頭像
-  replies: [],
-};
-console.log({ currentUser });
+// const currentUser = {
+//   member_id: authState.user.id, // 假設這是當前使用者的 ID
+//   author: authState.user.nickname, // 您的名字
+//   avatar: "https://i.pravatar.cc/150?u=me", // 一個代表您自己的頭像
+//   replies: [],
+// };
+// console.log({ currentUser });
 
 //
 // 使用 defineProps 來接收從父元件傳入的留言資料
@@ -45,7 +45,16 @@ const props = defineProps({
   comments: {
     type: Array,
     required: true,
-    default: () => [], // 提供一個預設的空陣列，增加程式碼的穩健性
+    default: () => [],
+  },
+  currentUser: {
+    type: Object,
+    default: () => ({
+      member_id: null,
+      author: "",
+      avatar: "",
+      replies: [],
+    }),
   },
 });
 //偵錯
