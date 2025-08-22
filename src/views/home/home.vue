@@ -1,8 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { RouterLink } from "vue-router";
-import AtivityCard from "@/components/activity/activity-card.vue";
-import { FakeActivity } from "@/assets/data/fake-activity";
+import ActivityCard from "@/components/activity/activity-card.vue";
 import Marquee from "@/components/marquee.vue";
 import Marquee2 from "@/components/marquee2.vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -11,7 +10,7 @@ import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import { FreeMode, Pagination } from "swiper/modules";
 import axios from "axios";
-
+import {normalizeActivity} from "@/assets/utils/normalize"
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -20,10 +19,11 @@ const listLatest = ref([]);
 
 onMounted(async () => {
   const res1 = await axios.get(`${VITE_API_BASE}/activities/list-limited.php`);
-  listLimited.value = await res1.data;
+  listLimited.value = (Array.isArray(res1.data) ? res1.data : []).map(normalizeActivity)
   const res2 = await axios.get(`${VITE_API_BASE}/activities/list-latest.php`);
-  listLatest.value = await res2.data;
+  listLatest.value = (Array.isArray(res2.data) ? res2.data : []).map(normalizeActivity)
 });
+
 
 // === 1. 引入我們做好的輪播元件 ===
 import Carousel from "@/components/carousel.vue";
@@ -333,7 +333,7 @@ onMounted(() => {
     <div class="first-section">
       <div v-if="listLimited.length > 0">
         <div class="card-grid">
-          <AtivityCard
+          <ActivityCard
             v-for="item in listLimited.slice(0, 8)"
             :key="item.activity_id"
             :item="item"
@@ -364,7 +364,7 @@ onMounted(() => {
 
   <div v-if="listLatest.length > 0">
     <div class="card-grid">
-      <AtivityCard
+      <ActivityCard
         v-for="item in listLatest.slice(0, 8)"
         :key="item.activity_id"
         :item="item"
