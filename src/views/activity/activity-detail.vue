@@ -379,10 +379,7 @@ const swiperModules = [Pagination];
         >
           我要跟團!
         </Button>
-        <LikeButton
-          :isActive="likeMap[activity?.ACTIVITY_NO]"
-          @click.stop.prevent="toggleLike(activity?.ACTIVITY_NO)"
-        ></LikeButton>
+        <LikeButton :activity-no="activityNo"></LikeButton>
       </template>
 
       <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
