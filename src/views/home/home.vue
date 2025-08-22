@@ -2,7 +2,6 @@
 import { ref, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import ActivityCard from "@/components/activity/activity-card.vue";
-import { FakeActivity } from "@/assets/data/fake-activity";
 import Marquee from "@/components/marquee.vue";
 import Marquee2 from "@/components/marquee2.vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -11,38 +10,13 @@ import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import { FreeMode, Pagination } from "swiper/modules";
 import axios from "axios";
-
+import {normalizeActivity} from "@/assets/utils/normalize"
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
 const listLimited = ref([]);
 const listLatest = ref([]);
-function formatCategoryNo(no) {
-  return `CA${String(no).padStart(3, "0")}`
-}
-function formatActivityNo(no) {
-  return `ACT${String(no).padStart(5, "0")}`
-}
-function imageUrl(img) {
-  if (!img) return ""
-  if (/^https?:\/\//i.test(img)) return img
-  if (img.startsWith("/upload")) return `${VITE_API_BASE}${img}`
-  return `${VITE_API_BASE}/upload/activities-img/${img}`
-}
 
-function normalizeActivity(r) {
-  const img = r.ACTIVITY_IMG ?? r.activity_img ?? ""
-  return {
-    activity_no: formatActivityNo(r.ACTIVITY_NO ?? r.activity_no),
-    activity_name: r.ACTIVITY_NAME ?? r.activity_name ?? "",
-    activity_description: r.ACTIVITY_DESCRIPTION ?? r.activity_description ?? "",
-    location: r.LOCATION ?? r.location ?? "",
-    activity_start_date: r.ACTIVITY_START_DATE ?? r.activity_start_date ?? "",
-    activity_end_date: r.ACTIVITY_END_DATE ?? r.activity_end_date ?? "",
-    category_no: formatCategoryNo(r.CATEGORY_NO ?? r.category_no ?? 0),
-    activity_img: imageUrl(img),
-  }
-}
 onMounted(async () => {
   const res1 = await axios.get(`${VITE_API_BASE}/activities/list-limited.php`);
   listLimited.value = (Array.isArray(res1.data) ? res1.data : []).map(normalizeActivity)

@@ -9,7 +9,7 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import SearchIcon from "@/assets/img/icon/search1.svg";
 import CategoryTag from "@/components/activity/category-tag.vue";
 import axios from "axios";
-
+import {normalizeActivity} from "@/assets/utils/normalize"
 
 const route = useRoute();
 const router = useRouter();
@@ -67,35 +67,7 @@ const handleSearch = () => {
   searchTrigger.value++;
 };
 
-function formatCategoryNo(no) {
-  return `CA${String(no).padStart(3, "0")}`;
-}
-function formatActivityNo(no) {
-  return `ACT${String(no).padStart(5, "0")}`;
-}
-const errorMsg = ref("");
-function imageUrl(img) {
-  if (!img) return "";
-  // 已是絕對網址
-  if (/^https?:\/\//i.test(img)) return img;
-  // 後端給 /upload/... -> 直接接在 API_BASE 後面
-  if (img.startsWith("/upload")) return `${VITE_API_BASE}${img}`;
-  // 只有檔名 -> 補上資料夾
-  return `${VITE_API_BASE}/upload/activities-img/${img}`;
-}
-const normalizeActivity = (r) => {
-  const img = r.ACTIVITY_IMG ?? r.activity_img ?? "";
-  return {
-    activity_no: formatActivityNo(r.ACTIVITY_NO ?? r.activity_no),
-    activity_name: r.ACTIVITY_NAME ?? r.activity_name ?? "",
-    location: r.LOCATION ?? r.location ?? "",
-    activity_start_date: r.ACTIVITY_START_DATE ?? r.activity_start_date ?? "",
-    activity_end_date: r.ACTIVITY_END_DATE ?? r.activity_end_date ?? "",
-    category_no: formatCategoryNo(r.CATEGORY_NO ?? r.category_no ?? 0),
-activity_description:r.ACTIVITY_DESCRIPTION ?? r.activity_description ?? "",
-    activity_img: imageUrl(img),
-  };
-};
+
 const activities = ref([]);
 const categories = ActivityCategories;
 const activeCategory = ref("0");
@@ -120,7 +92,6 @@ async function fetchActivities(){
   }finally {
     loading.value = false;
   }
-
 }
 
 

@@ -21,6 +21,7 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import {normalizeActivity} from "@/assets/utils/normalize"
 // --- End Swiper ---
 
 // 環境變數
@@ -36,7 +37,8 @@ const activitiesData = ref([]);
 onMounted(async () => {
   try {
     const response = await axios.get(`${VITE_API_BASE}/activities/list.php`);
-    activitiesData.value = response.data;
+    activitiesData.value =  (Array.isArray(response.data) ? response.data : [])
+      .map(r => normalizeActivity(r, VITE_API_BASE));
     // console.log(activitiesData.value);
   } catch (error) {
     console.error(`抓取list-all資料失敗${error}`);
@@ -44,11 +46,17 @@ onMounted(async () => {
 });
 
 const isCancelled = computed(() => activity.value?.ACTIVITY_STATUS === '已取消')
-const activity = computed(() =>
-  activitiesData.value.find(
-    (item) => String(item.ACTIVITY_NO) === String(activityNo)
-  )
-);
+const rawRouteId = computed(() => String(route.params.activity_id || ''));
+const routeIdNumeric = computed(() => {
+  const n = Number(rawRouteId.value.replace(/\D/g, ''));
+  return Number.isFinite(n) ? n : null;
+});
+const activity = computed(() => {
+  return (
+    activitiesData.value.find(a => a.id === routeIdNumeric.value) ||
+    activitiesData.value.find(a => a.activity_no === rawRouteId.value)
+  );
+});
 
 const likeMap = ref({});
 
@@ -172,30 +180,7 @@ async function handleCancelSubmit(payload) {
   }
 }
 
-const imageUrl = computed(() => {
 
-  const img = activity.value?.ACTIVITY_IMG
-  //if (!img) return ''  // 還沒載到資料就回空字串
-
-  if (!img){
-  
-    return "";
-  }
-
-  if (/^https?:\/\//i.test(img)) {
-    // 完整 URL
-   
-    return img
-  } else if (img.startsWith('/')) {
- 
-    // 例如 /upload/activities-img/xxx.jpg
-    return `${VITE_API_BASE}${img}`
-  } else {
-    // 只有檔名
-
-    return `${VITE_API_BASE}/upload/activities-img/${img}`
-  }
-})
 
 // watch(activity, a => {
 //   // console.log('HOST_MEMBER_ID from activity =', a?.HOST_MEMBER_ID)
@@ -431,7 +416,6 @@ watch(
 
 // Swiper modules
 const swiperModules = [Pagination];
-console.log(activity.value?.ACTIVITY_IMG, imageUrl.value)
 </script>
 
 <template>
@@ -442,12 +426,12 @@ console.log(activity.value?.ACTIVITY_IMG, imageUrl.value)
     </div>
     <!-- 圖片 -->
     <div class="activity-image">
-      <img :src="imageUrl" :alt="activity?.ACTIVITY_NAME" />
+      <img :src="activity?.activity_img" :alt="activity?.activity_name" />
     </div>
 
     <!-- 標題 -->
     <div class="activity-title-wrap">
-      <h2>{{ activity?.ACTIVITY_NAME }}</h2>
+      <h2>{{ activity?.activity_name }}</h2>
     </div>
 
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
@@ -470,15 +454,15 @@ console.log(activity.value?.ACTIVITY_IMG, imageUrl.value)
 
        <template v-else>
         <Button
-          @click.stop.prevent="gotoSignup(activity?.ACTIVITY_NO)"
+          @click.stop.prevent="gotoSignup(activity?.activity_no)"
           theme="primary"
           size="md"
         >
           我要跟團!
         </Button>
         <LikeButton
-          :isActive="likeMap[activity?.ACTIVITY_NO]"
-          @click.stop.prevent="toggleLike(activity?.ACTIVITY_NO)"
+          :isActive="likeMap[activity?.activity_no]"
+          @click.stop.prevent="toggleLike(activity?.activity_no)"
         ></LikeButton>
       </template>
     </div>
@@ -502,20 +486,20 @@ console.log(activity.value?.ACTIVITY_IMG, imageUrl.value)
           <div class="info-row">
             <strong>日期與時間</strong>
             <span
-              >{{ activity?.ACTIVITY_START_DATE }} ~ <br />{{
-                activity?.ACTIVITY_END_DATE
+              >{{ activity?.activity_start_date }} ~ <br />{{
+                activity?.activity_end_date
               }}</span
             >
           </div>
           <div class="info-row">
             <strong>地點</strong>
-            <span>{{ activity?.LOCATION }}</span>
+            <span>{{ activity?.location }}</span>
           </div>
           <div class="info-row">
             <strong>揪團人數</strong>
             <span
-              >{{ activity?.CURRENT_PARTICIPANT }}/{{
-                activity?.MAX_PARTICIPANT
+              >{{ activity?.current_participant }}/{{
+                activity?.max_participant
               }}人</span
             >
           </div>
@@ -525,15 +509,15 @@ console.log(activity.value?.ACTIVITY_IMG, imageUrl.value)
         <div class="info-col">
           <div class="info-row">
             <strong>預估費用</strong>
-            <span>{{ activity?.MAX_PARTICIPANT }}</span>
+            <span>{{ activity?.max_participant }}</span>
           </div>
           <div class="info-row">
             <strong>揪團截止日</strong>
-            <span>{{ activity?.REGISTRATION_DEADLINE }}</span>
+            <span>{{ activity?.registration_deadline }}</span>
           </div>
           <div class="info-row">
             <strong>跟團限制</strong>
-            <span>{{ activity?.PARTICIPANT_LIMITATION }}</span>
+            <span>{{ activity?.participant_limitation }}</span>
           </div>
         </div>
       </div>
