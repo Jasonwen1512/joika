@@ -43,7 +43,6 @@ onMounted(async () => {
   }
 });
 
-console.log(activitiesData.value);
 const isCancelled = computed(() => activity.value?.ACTIVITY_STATUS === '已取消')
 const activity = computed(() =>
   activitiesData.value.find(
@@ -197,10 +196,6 @@ const imageUrl = computed(() => {
     return `${VITE_API_BASE}/upload/activities-img/${img}`
   }
 })
-console.log('VITE_API_BASE =', VITE_API_BASE)
-console.log('raw ACTIVITY_IMG =', activity.value?.ACTIVITY_IMG)
-console.log('final imageUrl    =', imageUrl.value)
-
 
 // watch(activity, a => {
 //   // console.log('HOST_MEMBER_ID from activity =', a?.HOST_MEMBER_ID)

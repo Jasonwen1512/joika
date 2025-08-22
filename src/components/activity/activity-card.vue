@@ -3,7 +3,6 @@ import { RouterLink, useRouter } from "vue-router";
 import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
 import { ref, computed } from "vue";
-import { componentSizeMap } from "element-plus";
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 const props = defineProps({
   item: Object,
@@ -16,7 +15,7 @@ const toggleLike = (id) => {
 };
 
 const imageUrl = computed(() => {
-  const src = props.item?.ACTIVITY_IMG || "";
+  const src = props.item?.activity_img || "";
   return /^https?:\/\//i.test(src) ? src : `${VITE_API_BASE}${src}`;
 });
 const router = useRouter();
@@ -35,8 +34,8 @@ const formDate = (dateStr) => {
 
 const titleDate = computed(() => {
   if (!props.item) return "";
-  const start = formDate(props.item.ACTIVITY_START_DATE);
-  const end = formDate(props.item.ACTIVITY_END_DATE);
+  const start = formDate(props.item.activity_start_date);
+  const end = formDate(props.item.activity_end_date);
 
 
   // console.log(
@@ -44,9 +43,9 @@ const titleDate = computed(() => {
   // );
 
   if (start === end) {
-    return `${start} ${props.item.ACTIVITY_NAME}`;
+    return `${start} ${props.item.activity_name}`;
   } else {
-    return `${start}-${end} ${props.item.ACTIVITY_NAME}`;
+    return `${start}-${end} ${props.item.activity_name}`;
   }
 });
 </script>
@@ -54,33 +53,33 @@ const titleDate = computed(() => {
 <template>
   <div class="activity-card" v-if="props.item">
     <RouterLink
-      :to="`/activity/${props.item.ACTIVITY_NO}`"
+      :to="`/activity/${props.item.activity_no}`"
       class="activity-img"
     >
-      <img :src="imageUrl" :alt="props.item.ACTIVITY_NAME" />
+      <img :src="imageUrl" :alt="props.item.activity_name" />
     </RouterLink>
-    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
+    <RouterLink :to="`/activity/${props.item.activity_no}`"
       ><h4 class="activity-name">
         {{ titleDate }}
       </h4></RouterLink
     >
-    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
+    <RouterLink :to="`/activity/${props.item.activity_no}` " class="desc-link"
       ><p class="activity-description">
-        {{ props.item.ACTIVITY_DESCRIPTION }}
+        {{ props.item.activity_description }}
       </p></RouterLink
     >
 
     <div class="button-group" @click.stop.prevent>
       <Button
-        @click.stop.prevent="gotoSignup(item.ACTIVITY_NO)"
+        @click.stop.prevent="gotoSignup(item.activity_no)"
         theme="primary"
         size="md"
         >我要跟團!</Button
       >
       <LikeButton
-        :isActive="likeMap[props.item.ACTIVITY_NO]"
-        @click.stop.prevent="toggleLike(item.ACTIVITY_NO)"
-        :data-no="item.ACTIVITY_NO"
+        :isActive="likeMap[props.item.activity_no]"
+        @click.stop.prevent="toggleLike(item.activity_no)"
+        :data-no="item.activity_no"
       ></LikeButton>
     </div>
   </div>
@@ -145,10 +144,15 @@ const titleDate = computed(() => {
   padding: 10px 0 0;
   line-height: 1.7;
   max-width: 264px;
+  flex:1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
+}
+.desc-link{
+  display: flex;
+  flex:1;
 }
 
 .button-group {
