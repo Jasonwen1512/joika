@@ -71,30 +71,38 @@ const form = reactive({
 
 // 3.【關鍵】當處於「編輯模式」時，載入舊資料
 onMounted(() => {
-  // 1. 監聽視窗大小變化
   window.addEventListener("resize", handleResize);
-
-  // 2. 觸發標題動畫
   isVisible.value = true;
 
-  // 3. 根據模式決定行為
   if (props.mode === "edit" && props.postid) {
-    // 編輯模式
     titleText.value = "編輯你的故事";
-    const articleToEdit = articleList.find(
-      (item) => item.postid === props.postid
-    );
-    if (articleToEdit) {
-      // 將找到的舊資料填入 form 物件
-      Object.assign(form, articleToEdit);
-      // // 手動觸發 emit，確保 TinyMCE 元件接收到初始內容
-      // emit('update:modelValue', form.content);
-    } else {
-      console.error("找不到要編輯的文章！");
-      router.push("/article/article");
-    }
+    // 串接資料庫 API 抓文章
+    axios
+      .get(`${VITE_API_BASE}/posts/detail.php?id=${props.postid}`)
+      .then((response) => {
+        const raw = response.data;
+        // 處理圖片路徑（依你的資料庫欄位調整）
+        const backendImagePath = raw.POST_IMG || "";
+        const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
+        const fullImageUrl = `${VITE_API_BASE}/${cleanedPath}`;
+
+        // 填入表單
+        Object.assign(form, {
+          postid: raw.POST_NO,
+          userid: raw.MEMBER_ID,
+          title: raw.POST_TITLE,
+          content: raw.POST_CONTENT,
+          event: raw.CATEGORY_NO,
+          type: "揪團心得", // 可依你的資料庫欄位調整
+          date: raw.CREATED_AT,
+          image: fullImageUrl,
+        });
+      })
+      .catch((err) => {
+        console.error("找不到要編輯的文章！", err);
+        router.push("/article/article");
+      });
   } else {
-    // 新增模式
     titleText.value = "今天想說點什麼？";
   }
 });

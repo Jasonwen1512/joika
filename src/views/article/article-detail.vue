@@ -174,7 +174,7 @@ const article = computed(() => {
 // computed 屬性：判斷是否為文章擁有者
 const isOwner = computed(() => {
   return (
-    article.value && currentUser.value.userid === article.value.post_user_id
+    article.value && currentUser.value.member_id === article.value.post_user_id
   ); // 請確認資料庫欄位名稱是否為 POST_USER_ID
 });
 
