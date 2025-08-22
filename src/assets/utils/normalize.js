@@ -30,6 +30,7 @@ function normalizeActivity(r, baseUrl) {
     participant_limitation: r.PARTICIPANT_LIMITATION ?? r.participant_limitation ?? "",
     host_member_id: r.HOST_MEMBER_ID ?? r.hoster_member_id ?? null,
     activity_status: r.ACTIVITY_STATUS ?? r.activity_status ?? "",
+    fee_notes:r.FEE_NOTES ?? r.fee_notes ?? "",
   };
 }
 

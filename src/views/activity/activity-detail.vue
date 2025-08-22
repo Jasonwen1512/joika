@@ -166,8 +166,8 @@ async function handleCancelSubmit(payload) {
       isCancelModalVisible.value = false
       modalResetKey.value++
       activitiesData.value = activitiesData.value.map(statusChange =>
-        String(statusChange.ACTIVITY_NO) === String(actNo)
-          ? { ...statusChange, ACTIVITY_STATUS: '已取消' }
+        String(statusChange.activity_no) === String(actNo)
+          ? { ...statusChange, activity_status: '已取消' }
           : statusChange
       )
        alert("取消成功")
@@ -509,7 +509,7 @@ const swiperModules = [Pagination];
         <div class="info-col">
           <div class="info-row">
             <strong>預估費用</strong>
-            <span>{{ activity?.max_participant }}</span>
+            <span>{{ activity?.fee_notes }}</span>
           </div>
           <div class="info-row">
             <strong>揪團截止日</strong>
