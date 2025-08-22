@@ -19,7 +19,7 @@ import Swal from "sweetalert2";
 import ReportForm from "@/components/ReportForm.vue";
 import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
 import NextIcon from "@/assets/img/icon/next-arrow.svg?url";
-// import { authState } from "@/assets/data/authState";
+import { authState } from "@/assets/data/authState";
 const route = useRoute();
 const router = useRouter();
 const postid = route.params.postid;
@@ -29,32 +29,48 @@ const emit = defineEmits(["comment-added"]);
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
-// 下方留言區
-// 假的自己 展示用
+// // 下方留言區
+// // 假的自己 展示用
 // const currentUser = {
 //   member_id: authState.user.id, // 假設這是當前使用者的 ID
 //   author: authState.user.nickname, // 您的名字
-//   avatar: "https://i.pravatar.cc/150?u=me", // 一個代表您自己的頭像
+//   avatar: `https://i.pravatar.cc/150?u=${user.id}`, // 一個代表您自己的頭像
 //   replies: [],
 // };
 // console.log({ currentUser });
 
-//
+// //
+
+// ...existing code...
+const currentUser = ref({
+  member_id: null,
+  author: "",
+  avatar: "",
+  replies: [],
+});
+
+async function fetchCurrentUser() {
+  try {
+    const res = await axios.get(`${VITE_API_BASE}/me.php`, {
+      withCredentials: true, // 若有跨域 session
+    });
+    if (res.data.authenticated && res.data.user) {
+      currentUser.value.member_id = res.data.user.id;
+      currentUser.value.author = res.data.user.nickname;
+      currentUser.value.avatar =
+        res.data.user.avatar ||
+        `https://i.pravatar.cc/150?u=${res.data.user.id}`;
+    }
+  } catch (err) {
+    console.error("取得登入者資料失敗", err);
+  }
+}
 // 使用 defineProps 來接收從父元件傳入的留言資料
 const props = defineProps({
   comments: {
     type: Array,
     required: true,
-    default: () => [],
-  },
-  currentUser: {
-    type: Object,
-    default: () => ({
-      member_id: null,
-      author: "",
-      avatar: "",
-      replies: [],
-    }),
+    default: () => [], // 提供一個預設的空陣列，增加程式碼的穩健性
   },
 });
 //偵錯
@@ -92,12 +108,18 @@ function postComment() {
   //這邊改用API
 
   axios
-    .post(`${VITE_API_BASE}/comments/post-create.php`, {
-      post_no: postid,
-      member_id: currentUser.member_id,
-      comment_content: newComment.value,
-      parent_no: null,
-    })
+    .post(
+      `${VITE_API_BASE}/comments/post-create.php`,
+      {
+        post_no: Number(postid),
+        member_id: Number(currentUser.value.member_id),
+        comment_content: newComment.value,
+        parent_no: null,
+      },
+      {
+        withCredentials: true,
+      }
+    )
     .then((res) => {
       console.log("新增成功：", res.data);
       // 通知父層重新抓留言
@@ -186,40 +208,46 @@ function toggleReplyBox(commentId) {
  * @param {object} parentComment - 要在哪一則父留言底下新增回覆
  */
 function postReply(parentComment) {
-  // 防呆：不讓使用者送出空的回覆
   if (!newReplyText.value.trim()) {
     alert("請輸入留言");
     return;
   }
+  // 檢查 parentComment.id 是否有值
+  if (!parentComment.id) {
+    alert("回覆目標留言 id 不存在");
+    return;
+  }
+  // 檢查使用者是否有登入 壞掉中先註解掉
+  // if (!currentUser.value.member_id) {
+  //   alert("請先登入");
+  //   return;
+  // }
   isReplyAnimating.value = true;
-
   setTimeout(() => {
     isReplyAnimating.value = false;
   }, 300);
-  // 建立一個新的「回覆物件」
+
+  // 修正型別
   const replyPayload = {
-    post_no: postid,
-    member_id: currentUser.member_id,
+    post_no: Number(postid),
+    member_id: Number(currentUser.value.member_id),
     comment_content: newReplyText.value,
-    parent_no: parentComment.id,
+    parent_no: Number(parentComment.id),
   };
 
-  // / 使用 axios 發送 POST 請求
+  console.log("送出 replyPayload:", replyPayload); // 偵錯用
+
   axios
-    .post(`${VITE_API_BASE}/comments/post-create.php`, replyPayload)
+    .post(`${VITE_API_BASE}/comments/post-create.php`, replyPayload, {
+      withCredentials: true,
+    })
     .then((res) => {
       console.log("新增回覆成功：", res.data);
-
-      // 成功後，一樣通知父元件重新抓取所有留言，以確保資料同步
       emit("comment-added");
-
-      // 清空回覆輸入框
       newReplyText.value = "";
-      //   activeReplyId.value = null; // 可以選擇性地在成功後關閉回覆框
     })
     .catch((err) => {
       console.error("新增回覆錯誤：", err);
-      // 可以在這裡加入錯誤提示，例如 Swal.fire(...)
     });
 }
 //切換子留言的展開/收合
@@ -230,12 +258,11 @@ function toggleReplies(comment) {
 // 喜歡
 
 const likeIt = async (comment) => {
-  // 假設您的 currentUser 物件存在且有 member_id
-  // 如果您是從 localStorage 拿，也可以用 const user = JSON.parse(localStorage.getItem("user"));
-  if (!currentUser || !currentUser.member_id) {
-    Swal.fire("請先登入", "登入後才能對留言按讚喔！", "warning");
-    return;
-  }
+  // 壞掉中 先註解掉
+  // if (!currentUser.value.member_id) {
+  //   Swal.fire("請先登入", "登入後才能對留言按讚喔！", "warning");
+  //   return;
+  // }
 
   // 步驟 1: 立即觸發動畫，提供即時的視覺回饋
   comment.animateLike = true;
@@ -265,7 +292,10 @@ const likeIt = async (comment) => {
     // 步驟 4: 呼叫您的 PHP API
     const response = await axios.post(
       `${VITE_API_BASE}/comments/post-like-toggle.php`,
-      payload
+      payload,
+      {
+        withCredentials: true,
+      }
     );
 
     // 步驟 5: 【最重要】用後端回傳的「真實」資料來同步前端畫面
@@ -292,13 +322,12 @@ function ReportIt() {
   render(
     h(ReportForm, {
       onSubmit: async (data) => {
-        const user = JSON.parse(localStorage.getItem("user"));
-        const reporterId = user?.id;
-
-        if (!reporterId) {
-          Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
-          return;
-        }
+        const reporterId = currentUser.value.member_id;
+        // 壞掉中 先註解掉
+        // if (!reporterId) {
+        //   Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
+        //   return;
+        // }
 
         const payload = {
           reporter_id: reporterId,

@@ -9,7 +9,6 @@ import bgImgUrl from "@/assets/img/support/bg.svg?url";
 import articleimg from "@/assets/img/article/article-img.png?url";
 import Illustration from "@/components/article/Illustration.vue";
 import AirPlane from "@/assets/img/article/airplane.png";
-import axios from "axios";
 // ... (外觀、Icon、其他外掛的 import 省略，請保留您原有的) ...
 import "tinymce/skins/ui/oxide/skin.css";
 import "tinymce/themes/silver";

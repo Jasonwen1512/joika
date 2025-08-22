@@ -1,12 +1,10 @@
 <script setup>
-//整理一下//
-
 import { ref, computed, h, render, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios"; // <-- 新增 axio
 import { useRoute, useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import { usePreviewStore } from "@/stores/preview";
-// import { authState } from "@/assets/data/authState";
+import { authState } from "@/assets/data/authState";
 
 //引入元件
 // import { articleList } from "@/assets/data/fake-article"; 假資料已再不使用
@@ -44,8 +42,8 @@ const currentUser = ref({
 
 async function fetchCurrentUser() {
   try {
-    const res = await axios.get(`${VITE_API_BASE}/me.php`, {
-      withCredentials: true, // 若有跨域 session
+    const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
+      withCredentials: true,
     });
     if (res.data.authenticated && res.data.user) {
       currentUser.value.member_id = res.data.user.id;
@@ -53,12 +51,13 @@ async function fetchCurrentUser() {
       currentUser.value.avatar =
         res.data.user.avatar ||
         `https://i.pravatar.cc/150?u=${res.data.user.id}`;
+      console.log("取得登入者資料：", res.data);
+      console.log("currentUser:", currentUser.value);
     }
   } catch (err) {
     console.error("取得登入者資料失敗", err);
   }
 }
-// ...existing code...
 // ===================================================================
 // Props 定義 (Single Source of Truth)
 // 【重要】我們需要 'mode' prop 來讓 'submitArticle' 函式正常運作
@@ -175,13 +174,13 @@ const article = computed(() => {
 // computed 屬性：判斷是否為文章擁有者
 const isOwner = computed(() => {
   return (
-    article.value && currentUser.value.member_id === article.value.post_user_id
+    article.value && currentUser.value.userid === article.value.post_user_id
   ); // 請確認資料庫欄位名稱是否為 POST_USER_ID
 });
 
 // 生命週期鉤子：在元件掛載時獲取資料
 onMounted(() => {
-  fetchCurrentUser(); // 先取得登入者資料
+  fetchCurrentUser();
   fetchArticle();
   fetchComments();
 });
@@ -564,7 +563,6 @@ onUnmounted(() => {
       <CommentComponent
         v-if="comments"
         :comments="comments"
-        :current-user="currentUser.value"
         @comment-added="fetchComments"
       />
     </div>
