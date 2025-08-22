@@ -141,8 +141,8 @@ onMounted(fetchMe)
 
 
 const isHost = computed(() => {
-  return !!(activity.value?.HOST_MEMBER_ID && currentUserId.value) &&
-         Number(activity.value.HOST_MEMBER_ID) === Number(currentUserId.value)
+  const hostId = activity.value?.HOST_MEMBER_ID ?? activity.value?.host_member_id
+  return !!(hostId && currentUserId.value) && Number(hostId) === Number(currentUserId.value)
 })
 
 const isJoiner = computed(() => false)
@@ -151,7 +151,7 @@ const isJoiner = computed(() => false)
 //主揪取消活動API
 async function handleCancelSubmit(payload) {
   try {
-    const actNo = activity.value?.ACTIVITY_NO
+    const actNo = activity.value?.activity_no
 
     const { data, status } = await axios.patch(
        `${VITE_API_BASE}/activities/cancel-hoster.php?id=${actNo}`,
