@@ -1,10 +1,20 @@
 <script setup>
 import ActivityTag from "@/components/member/activity-status-tag.vue";
 import Button from "@/components/Button.vue";
+import {computed } from "vue";
+
 const props = defineProps({
     item: Object,
     status: String,
 });
+
+const titleDate = computed(() => {
+    if (!props.item) return "";
+    const no = props.item.activity_day ?? "";
+    const name = props.item.activity_name ?? "";
+  return `${no} ${name}`; // 可讀性更好
+});
+
 </script>
 
 <template>
@@ -12,28 +22,43 @@ const props = defineProps({
         v-if="item"
         class="member-activity-card"
     >
-        <div class="img">
+        <RouterLink :to="`/activity/${item.activity_no}`">
+        <div class="img">   
             <img
                 :src="item.activity_img"
                 :alt="item.activity_name"
             />
             <ActivityTag :activity_status="item.activity_status" />
         </div>
-        <h3 class="activity-name">{{ item.activity_name }}</h3>
+        </RouterLink>
+        <RouterLink :to="`/activity/${item.activity_no}`">
+        <h3 class="activity-name">{{ titleDate }}</h3>
+        </RouterLink>
+        <RouterLink :to="`/activity/${item.activity_no}`">
         <p class="activity-description">{{ item.activity_description }}</p>
+        </RouterLink>
+
         <div class="button-group">
-            <RouterLink :to="'/member/member-list'">
-                <Button
-                    theme="info"
-                    size="sm"
-                    >團員列表</Button
-                ></RouterLink
-            >
+            <template v-if="item.activity_status === '已取消'">
+                <Button theme="disabled" size="sm" disabled>團員列表</Button>
+            </template>
+            <template v-else>
+                <RouterLink :to="'/member/member-list'">
+                <Button theme="info" size="sm">團員列表</Button>
+                </RouterLink>
+            </template>
         </div>
+
     </div>
 </template>
 
 <style lang="scss" scoped>
+
+a {
+  color: inherit;         // 繼承父層顏色
+  text-decoration: none;  // 移除底線
+}
+
 .member-activity-card {
     width: 284px;
     height: 390px;
@@ -42,7 +67,6 @@ const props = defineProps({
     margin: 20px;
 }
 .img {
-    width: 264px;
     height: 200px;
     position: relative;
 }
@@ -81,5 +105,13 @@ const props = defineProps({
 
     padding-top: 10px;
     max-width: 264px;
+}
+
+button[disabled],
+button.disabled {
+  background-color: #ccc;  // 灰色
+  color: #666;             // 字也變淡
+  cursor: not-allowed;     // 滑鼠移過去顯示禁止符號
+  pointer-events: none;    // 確保不能被點擊
 }
 </style>
