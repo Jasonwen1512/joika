@@ -446,20 +446,7 @@ const swiperModules = [Pagination];
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
     <div class="activity-button-wrap">
       <!-- 狀態一：尚未跟團 -->
-<<<<<<< HEAD
      
-=======
-      <template v-if="!isGroupJoined">
-        <Button
-          @click.stop.prevent="gotoSignup(activity?.ACTIVITY_NO)"
-          theme="primary"
-          size="md"
-        >
-          我要跟團!
-        </Button>
-        <LikeButton :activity-no="activityNo"></LikeButton>
-      </template>
->>>>>>> ff5e95503cdb807ed0c79b23defdf5f7a3ee4f02
 
       <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
       <template v-if="!meLoading && (isHost || isJoiner)">
