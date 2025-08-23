@@ -41,7 +41,10 @@ const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
 // //
 
-// ...existing code...
+onMounted(() => {
+  fetchCurrentUser();
+});
+
 const currentUser = ref({
   member_id: null,
   author: "",
@@ -51,7 +54,7 @@ const currentUser = ref({
 
 async function fetchCurrentUser() {
   try {
-    const res = await axios.get(`${VITE_API_BASE}/me.php`, {
+    const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
       withCredentials: true, // 若有跨域 session
     });
     if (res.data.authenticated && res.data.user) {
@@ -108,12 +111,18 @@ function postComment() {
   //這邊改用API
 
   axios
-    .post(`${VITE_API_BASE}/comments/post-create.php`, {
-      post_no: postid,
-      member_id: props.currentUser.member_id,
-      comment_content: newComment.value,
-      parent_no: null,
-    })
+    .post(
+      `${VITE_API_BASE}/comments/post-create.php`,
+      {
+        post_no: postid,
+        // member_id: currentUser.value.member_id,
+        comment_content: newComment.value,
+        parent_no: null,
+      },
+      {
+        withCredentials: true,
+      }
+    )
     .then((res) => {
       console.log("新增成功：", res.data);
       // 通知父層重新抓留言
