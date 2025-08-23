@@ -329,12 +329,31 @@ const likeIt = async (comment) => {
     Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
   }
 };
+/**
+ * 檢舉理由字串對應編號
+ * @param {string} reason
+ * @returns {number}
+ */
+function mapReasonToNumber(reason) {
+  const reasonMap = {
+    垃圾訊息: 1,
+    "辱罵/騷擾": 2,
+    "廣告/推銷內容": 3,
+    散佈不實消息: 4,
+    洩漏他人個資: 5,
+    其他: 6,
+  };
+  return reasonMap[reason] || 6;
+}
+
 // 檢舉觸發函式
-function ReportIt() {
+function ReportIt(commentId) {
   const container = document.createElement("div");
 
   render(
     h(ReportForm, {
+      commentId, // ← 傳給 ReportForm
+
       onSubmit: async (data) => {
         const reporterId = currentUser.value.member_id;
         // 壞掉中 先註解掉
@@ -342,17 +361,17 @@ function ReportIt() {
         //   Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
         //   return;
         // }
-
+        // const reporterId = currentUser.value.member_id;
         const payload = {
           reporter_id: reporterId,
-          post_no: postid,
+          post_comment_no: commentId, // ← 直接用外層 commentId
           report_reason_no: mapReasonToNumber(data.reason),
           report_description: data.detail,
         };
 
         try {
           const { data: result } = await axios.post(
-            `${import.meta.env.VITE_API_BASE}/reports/post-report.php`,
+            `${import.meta.env.VITE_API_BASE}/reports/comment-report.php`,
             payload,
             {
               headers: { "Content-Type": "application/json" },
@@ -444,7 +463,7 @@ export default {
                   {{ comment.replies.length }}
                 </span>
               </div>
-              <div class="action-icon" @click="ReportIt">
+              <div class="action-icon" @click="ReportIt(comment.id)">
                 <img :src="reprot" />
               </div>
             </div>

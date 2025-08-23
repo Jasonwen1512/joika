@@ -64,6 +64,8 @@ function getCategoryName(categoryNo) {
   return map[categoryNo] || "其他";
 }
 onMounted(async () => {
+  await fetchCurrentUser(); // 先取得會員資料
+
   try {
     const response = await axios.get(
       `${import.meta.env.VITE_API_BASE}/posts/list.php`
@@ -71,7 +73,7 @@ onMounted(async () => {
     const dataFromApi = response.data;
     if (Array.isArray(dataFromApi)) {
       articleList.value = dataFromApi
-        .filter((post) => post.MEMBER_ID === currentUserId) // 只取指定會員
+        .filter((post) => post.MEMBER_ID == currentUserId.value) // 只取指定會員
         .map((post) => {
           const backendImagePath = post.POST_IMG || "";
           const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
