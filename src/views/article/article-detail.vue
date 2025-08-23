@@ -15,6 +15,7 @@ import ReportForm from "@/components/ReportForm.vue";
 import DeleteIcon from "@/assets/img/icon/delete.svg";
 import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from "@/assets/img/article/movie_konan.jpg";
+import defaultImg from "@/assets/img/article/nopicture.jpg";
 
 // 這裡先用假的登入者資料
 // 假的自己 展示用
@@ -76,13 +77,13 @@ const props = defineProps({
 //分類顏色
 const EventColorMap = {
   登山: "#6DE1D2",
-  水上活動: "#77BEF0",
+  桌遊: "#FFD63A",
   運動: "#FFD63A",
   露營: "#FF8C86",
   唱歌: "#FFA955",
   展覽: "#6DE1D2",
+  水上活動: "#77BEF0",
   聚餐: "#77BEF0",
-  桌遊: "#FFD63A",
   電影: "#FF8C86",
   手作: "#FFA955",
   文化體驗: "#6DE1D2",
@@ -96,13 +97,13 @@ const GetEventColor = (eventName) => {
 // 將後端 API 的分類 ID (數字) 轉換為中文名稱的對照表
 const categoryMap = {
   1: "登山",
-  2: "水上活動",
+  2: "桌遊",
   3: "運動",
   4: "露營",
   5: "唱歌",
   6: "展覽",
-  7: "聚餐",
-  8: "桌遊",
+  7: "水上活動",
+  8: "聚餐",
   9: "電影",
   10: "手作",
   11: "文化體驗",
@@ -225,14 +226,17 @@ async function fetchArticle() {
     // 資料欄位轉換
     const raw = response.data;
     // --- 處理圖片路徑 ---
-    const backendImagePath = raw.POST_IMG; // ← 用 raw
-    const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
-    const fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+    const backendImagePath = raw.POST_IMG;
+    let fullImageUrl = defaultImg; // 先設定為預設圖片
 
+    if (backendImagePath && typeof backendImagePath === "string") {
+      const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
+      fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+    }
     apiArticleData.value = {
       postid: raw.POST_NO,
       title: raw.POST_TITLE,
-      post_user_id: raw.MEMBER_ID, // ← 改這裡
+      post_user_id: raw.MEMBER_ID,
       nickname: raw.MEMBER_NICKNAME,
       content: raw.POST_CONTENT,
       image: fullImageUrl,
@@ -333,10 +337,13 @@ function DeleteCheck() {
       const status = err?.response?.status;
       const msg =
         err?.response?.data?.error ||
-        (status === 401 ? "請先登入會員"
-        : status === 403 ? "沒有刪除權限"
-        : status === 404 ? "找不到文章"
-        : "刪除失敗，請稍後再試");
+        (status === 401
+          ? "請先登入會員"
+          : status === 403
+          ? "沒有刪除權限"
+          : status === 404
+          ? "找不到文章"
+          : "刪除失敗，請稍後再試");
 
       await Swal.fire({ icon: "error", title: "刪除失敗", text: msg });
     }

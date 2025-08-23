@@ -75,6 +75,17 @@ const props = defineProps({
     required: true,
     default: () => [], // 提供一個預設的空陣列，增加程式碼的穩健性
   },
+  currentUser: {
+    // ← 加這個
+    type: Object,
+    required: true,
+    default: () => ({
+      member_id: null,
+      author: "",
+      avatar: "",
+      replies: [],
+    }),
+  },
 });
 //偵錯
 // watch(
@@ -114,13 +125,13 @@ function postComment() {
     .post(
       `${VITE_API_BASE}/comments/post-create.php`,
       {
-        post_no: postid,
-        // member_id: currentUser.value.member_id,
+        post_no: Number(postid),
+        // member_id: props.currentUser.member_id,
         comment_content: newComment.value,
         parent_no: null,
       },
       {
-        withCredentials: true,
+        withCredentials: true, // ← 一定要加
       }
     )
     .then((res) => {
