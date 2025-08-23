@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import InteractiveSun from "@/components/InteractiveSun.vue";
 import logoSvg from "@/assets/img/welcome/logo.svg?url";
 import pointDown from "@/assets/img/welcome/point-down.svg?url"; // 使用?url強制將svg轉換為url字串
 
@@ -99,6 +100,9 @@ const communityCardInfo = ref([
   },
 ]);
 
+// 捲動提示區域
+const showHintBlock = ref(true);
+
 // 骰子轉動狀態
 const showHint = ref(true);
 const isRolling = ref(false);
@@ -164,6 +168,7 @@ onMounted(() => {
     start: "0% top",
     end: "60% top",
     onUpdate: (self) => {
+      showHintBlock.value = false;
       const progress = self.progress;
       const shouldTriggerCount = Math.floor(progress * 7);
 
@@ -375,7 +380,7 @@ onMounted(() => {
 
       function onScroll() {
         const scrollY = window.scrollY + window.innerHeight; // 視窗底部位置
-        if (scrollY >= sectionBottom + sectionHeight * 0.7) {
+        if (scrollY >= sectionBottom + sectionHeight * 0.6) {
           strartCountDown();
 
           // 避免重複觸發
@@ -394,6 +399,8 @@ onMounted(() => {
   }
 
   function strartCountDown() {
+    if (countdownTimer) return; // 避免重複啟動
+
     // 倒數 3 秒
     let countdown = 3;
     countdownText.value = `${countdown} 秒後進入首頁`;
@@ -497,6 +504,16 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- === 捲動提示 === -->
+  <section class="hint-text-wrapper">
+    <div class="interactive-sun">
+      <InteractiveSun />
+    </div>
+    <div class="hint-text-scroll-wrapper">
+      <div class="start-hint-text">往下捲動</div>
+    </div>
+  </section>
+
   <!-- === 文字漂浮區域 === -->
   <section class="floating-text-wrapper">
     <div class="floating-text-scroll-wrapper">
@@ -628,6 +645,56 @@ onUnmounted(() => {
   font-size: $font-size-h1;
   text-align: center;
   margin-bottom: 100px;
+}
+
+// === 捲動提示區域 ===
+.hint-text-wrapper {
+  height: 50vw; // 100vh = 62.5vw with screen ratio 16:10
+
+  .interactive-sun {
+    height: 37.5vw; // 60vh = 37.5vw (100vh = 62.5vw with screen ratio 16:10)
+    position: sticky;
+    top: 0;
+    left: 0;
+
+    // 重設小太陽大小，並隱藏提示文字
+    :deep(.sun-wrapper) {
+      transform: scale(0.5);
+      height: 100%;
+
+      p {
+        display: none;
+      }
+    }
+  }
+  .hint-text-scroll-wrapper {
+    position: sticky;
+    top: 0;
+    left: 0;
+
+    .start-hint-text {
+      font-size: clamp(24px, 3.333vw, 64px);
+      font-weight: normal;
+      font-family: "MyFont", sans-serif;
+      color: $blue;
+      text-align: center;
+      opacity: 1;
+      animation: text-blinking 3s infinite;
+    }
+  }
+}
+
+@include desktop() {
+  .hint-text-wrapper {
+    .interactive-sun {
+      height: 37.5vw; // 60vh = 37.5vw (100vh = 62.5vw with screen ratio 16:10)
+
+      // 重設小太陽大小，並隱藏提示文字
+      :deep(.sun-wrapper) {
+        transform: scale(0.7);
+      }
+    }
+  }
 }
 
 // === 文字漂浮區域 ===
