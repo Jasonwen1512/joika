@@ -1,222 +1,156 @@
 <script setup>
-    /* -----------------------------
-    * Imports
-    * ----------------------------- */
-    import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
-    import { useRouter } from "vue-router";
-    import StarRating from "@/components/StarRating.vue";
-    import Button from "@/components/Button.vue";
-    import EditIcon from "@/assets/img/icon/edit.svg";
-    import NotifyIcon from "@/assets/img/icon/notification.svg";
-    import FullCalendar from "@/components/member/member-content/FullCalendar.vue";
-    import MemberActivityCard from "@/components/member/member-activity-card.vue";
-    import memberarticle from "@/components/member/member-post.vue";
-    import membercomment from "@/components/member/member-comment.vue";
-    import { logout } from "@/assets/data/authState";
+import StarRating from "@/components/StarRating.vue";
+import Button from "@/components/Button.vue";
+import EditIcon from "@/assets/img/icon/edit.svg";
+import NotifyIcon from "@/assets/img/icon/notification.svg";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
+import { useRouter } from 'vue-router'
+import FullCalendar from "@/components/member/member-content/FullCalendar.vue";
+import { articleList } from "@/assets/data/fake-article"; //引入文章假資料
+import MemberActivityCard from "@/components/member/member-activity-card.vue";
+import { FakeActivity } from "@/assets/data/fake-activity";
+import memberarticle from "@/components/member/member-post.vue";
+import membercomment from "@/components/member/member-comment.vue";
+import { authState, isAuthenticated, logout } from '@/assets/data/authState';
 
-    /* -----------------------------
-    * Constants / Maps
-    * ----------------------------- */
-    const API_BASE = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
-    const subtabToType = {
-        "my-activity": "hosted",
-        "my-follow-activity": "joined",
-        "my-activity-collection": "favorite", // 尚未實作 → 不打 API
-    };
-    const eventColorMap = {
-        登山: "#6DE1D2",
-        水上活動: "#77BEF0",
-        運動: "#FFD63A",
-        露營: "#FF8C86",
-        唱歌: "#FFA955",
-        展覽: "#6DE1D2",
-        聚餐: "#77BEF0",
-        桌遊: "#FFD63A",
-        電影: "#FF8C86",
-        手作: "#FFA955",
-        文化體驗: "#6DE1D2",
-        演出表演: "#77BEF0",
-        其他: "#969696",
-    };
-    const interestTags = ["水上活動", "露營", "登山"];
+//登入的會員資料
+const member = ref(null)   // 會員資料
+const pageLoading = ref(true) // 載入中
+const error = ref("")      // 錯誤訊息
+const router = useRouter()
 
-/* -----------------------------
- * State
- * ----------------------------- */
-// 路由 / 會員
-const router = useRouter();
-const member = ref(null);
-const pageLoading = ref(true);
-const error = ref("");
+async function loadMember() {
+    pageLoading.value = true
+    error.value = ""
 
-// 活動列表
-const activities = ref([]);         // 正規化後的活動陣列
-const activitiesLoading = ref(false);
-const activitiesError = ref("");
-const limit = ref(100);
-const offset = ref(0);
-const currentSubTab = ref("my-activity");
+    try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/profile-get.php`, {
+        method: "GET",
+        credentials: "include"
+        })
 
-// UI
-const currentTab = ref("group");
-const selectedStatus = ref("");
-const isFilterVisible = ref(false);
-const visibleCount = ref(2);
+        if (res.status === 401) {
+            router.replace("/auth/login")
+            return
+        }
 
-/* -----------------------------
- * Utilities / Helpers
- * ----------------------------- */
-function GetEventColor(eventName) {
-  return eventColorMap[eventName] || "#adb5bd";
-}
+        if (!res.ok) {
+            throw new Error("伺服器錯誤")
+        }
 
-function normalizeActivity(raw) {
-  const img = raw?.ACTIVITY_IMG || "";
+        const data = await res.json()
+        // 若你的 profile-get.php 回傳 { code, msg, data }，要記得取 data
+        member.value = data.data ?? data
 
-  // 支援：1) /upload 開頭的相對路徑 2) 只有檔名
-    const activity_img = (() => {
-        if (!img) return ""; // 可改成你的預設圖
-        if (img.startsWith("/upload")) return `${API_BASE}${img}`;
-        return `${API_BASE}/upload/activities-img/${encodeURIComponent(img)}`;
-    })();
-
-    return {
-        activity_no: raw.ACTIVITY_NO,
-        activity_name: raw.ACTIVITY_NAME,
-        activity_description: raw.ACTIVITY_DESCRIPTION,
-        activity_status: raw.ACTIVITY_STATUS,
-        activity_day: raw.ACTIVITY_START_DATE,
-        activity_img,
-        role: raw.role || raw.ROLE || null,
-    };
+    } catch (err) {
+        error.value = err.message   
+    } finally {
+        pageLoading.value = false   
+    }
 }
 
 const avatarUrl = computed(() => {
-  const avatar = member.value?.MEMBER_AVATAR;
-  if (!avatar) return "";
-  return `${API_BASE}/upload/member/${encodeURIComponent(avatar)}`;
-});
+    const base = import.meta.env.VITE_API_BASE  // e.g. http://localhost:8888/JOIKA_PHP
+    const avatar = member.value?.MEMBER_AVATAR
 
-/* -----------------------------
- * Core Actions
- * ----------------------------- */
-async function loadMember() {
-  pageLoading.value = true;
-  error.value = "";
-  try {
-    const res = await fetch(`${API_BASE}/users/profile-get.php`, {
-      method: "GET",
-      credentials: "include",
-    });
-    if (res.status === 401) {
-      router.replace("/auth/login");
-      return;
-    }
-    if (!res.ok) throw new Error("伺服器錯誤");
-    const data = await res.json();
-    member.value = data.data ?? data;
-  } catch (err) {
-    error.value = err.message || "載入會員資料失敗";
-  } finally {
-    pageLoading.value = false;
-  }
-}
+    if (!avatar) return "" // 沒有上傳 → 空字串
 
-async function loadActivities() {
-  const type = subtabToType[currentSubTab.value];
+    // 只給檔名時，固定拼上 /upload/avatars/
+    return `${base.replace(/\/$/, '')}/upload/member/${encodeURIComponent(avatar)}`
+})
 
-  if (type === "favorite") {
-    activities.value = [];
-    activitiesError.value = "收藏功能尚未開放";
-    return;
-  }
-
-  const qs = new URLSearchParams({
-    type,
-    limit: String(limit.value),
-    offset: String(offset.value),
-  });
-
-  activitiesLoading.value = true;
-  activitiesError.value = "";
-
-  try {
-    const res = await fetch(`${API_BASE}/users/activity-get.php?${qs.toString()}`, {
-      credentials: "include",
-    });
-    if (res.status === 401) {
-      router.replace("/auth/login");
-      return;
-    }
-    if (!res.ok) throw new Error("活動清單載入失敗");
-
-    const json = await res.json();
-    const items = json?.data?.items ?? [];
-    activities.value = items.map(normalizeActivity);
-  } catch (e) {
-    console.error(e);
-    activitiesError.value = e.message || "無法取得活動清單";
-    activities.value = [];
-  } finally {
-    activitiesLoading.value = false;
-  }
-}
-
-const logoutLoading = ref(false);
-async function handleLogout() {
-  if (logoutLoading.value) return;
-  logoutLoading.value = true;
-  try {
-    await logout();
-    router.replace("/auth/login");
-  } catch (e) {
-    console.error(e);
-    alert("登出失敗，稍後再試");
-  } finally {
-    logoutLoading.value = false;
-  }
-}
-
-/* -----------------------------
- * Computed
- * ----------------------------- */
-const filteredActivities = computed(() => {
-  if (!selectedStatus.value) return activities.value;
-  return activities.value.filter((a) => a.activity_status === selectedStatus.value);
-});
-
-const openActivities = computed(() => {
-  return activities.value.filter((a) => a.activity_status === "開團中");
-});
-
-const visibleActivities = computed(() => {
-  return openActivities.value.slice(0, visibleCount.value);
-});
-
-/* -----------------------------
- * Lifecycle / Watchers
- * ----------------------------- */
-function handleResize() {
-  visibleCount.value = window.innerWidth < 768 ? 1 : 2;
-}
+/** ✅ 圖片載入失敗時換預設圖 */
+// function onAvatarError(e) {
+//   e.target.src = '/images/default-avatar.png' // 放你專案的預設頭像路徑
+// }
 
 onMounted(() => {
-  handleResize();
-  window.addEventListener("resize", handleResize);
-  loadMember();
-  loadActivities();
-});
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    loadMember()
+})
 
-watch(currentSubTab, () => {
-  offset.value = 0; // 切換頁籤回第一頁
-  loadActivities();
-});
+//靜態資料 活動類別與標籤顏色
+const activities = ["水上活動", "露營", "登山"];
+
+const eventColorMap = {
+    //分類顏色
+
+    登山: "#6DE1D2",
+    水上活動: "#77BEF0",
+    運動: "#FFD63A",
+    露營: "#FF8C86",
+    唱歌: "#FFA955",
+    展覽: "#6DE1D2",
+    聚餐: "#77BEF0",
+    桌遊: "#FFD63A",
+    電影: "#FF8C86",
+    手作: "#FFA955",
+    文化體驗: "#6DE1D2",
+    演出表演: "#77BEF0",
+    其他: "#969696",
+};
+
+
+const visibleCount = ref(2); // 預設電腦是 2 張
+
+//抓顏色
+const GetEventColor = (eventName) => {
+    return eventColorMap[eventName] || "#adb5bd";
+};
+const currentTab = ref("group");
+
+const handleResize = () => {
+    visibleCount.value = window.innerWidth < 768 ? 1 : 2;
+};
 
 onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
+    window.removeEventListener("resize", handleResize);
 });
-</script>
 
+
+const visibleActivities = computed(() => {
+    return openActivities.value.slice(0, visibleCount.value);
+});
+const currentSubTab = ref("my-activity");
+//揪團狀態
+const selectedStatus = ref('');
+const isFilterVisible = ref(false); // 預設為 false，所以選單是隱藏的
+const filteredActivities = computed(() => {
+    let activitiesToDisplay = [];
+    activitiesToDisplay = FakeActivity;
+ // 根據下拉選單的選擇，對上面的列表進行二次篩選
+ //這邊目前是抓假資料裡面全部的揪團資訊，之後應該要多加一條篩選成會員ID有在該團才顯示
+    if (selectedStatus.value) { // 如果 selectedStatus 有值 (不是空字串)
+        return activitiesToDisplay.filter(activity => 
+            activity.activity_status === selectedStatus.value
+        );
+    }
+    
+    // 如果沒有選擇任何狀態，回傳完整的活動列表
+    return activitiesToDisplay;
+});
+//行事曆
+const openActivities = computed(() => {
+    return FakeActivity.filter((a) => a.activity_status === "開團中");
+});
+
+//登出
+const logoutLoading = ref(false)
+const handleLogout = async () => {
+    if (logoutLoading.value) return
+    logoutLoading.value = true
+    try {
+        await logout() // 仍呼叫你的 /users/logout.php
+        router.replace('/auth/login')
+    } catch (e) {
+        console.error(e)
+        alert('登出失敗，稍後再試')
+    } finally {
+        logoutLoading.value = false
+    }
+}
+</script>
 
 <template>
     <div class="member-content">
@@ -227,8 +161,8 @@ onBeforeUnmount(() => {
                 <div class="member-details">
                     <div class="member-image">
                         <img
-                            :src="avatarUrl"
-                            :alt="member?.MEMBER_NICKNAME || 'avatar'"  
+                            :src= avatarUrl
+                            :alt= "member.MEMBER_NICKNAME"
                         />
                     </div>
                     <div class="member-info">
@@ -258,7 +192,7 @@ onBeforeUnmount(() => {
                         </p>
                         <div class="tags">
                             <div
-                                v-for="(activity, index) in interestTags"
+                                v-for="(activity, index) in activities"
                                 :key="index"
                                 class="tag"
                                 :style="{
@@ -271,8 +205,8 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
                 <div class="button-group">
-                    <RouterLink to="/member-notify">
-                        <Button
+                    <RouterLink :to="`member-notify`"
+                        ><Button
                             :prefixIcon="NotifyIcon"
                             size="lg"
                             theme="primary"
@@ -389,12 +323,7 @@ onBeforeUnmount(() => {
                                 </div>
                             </ul>
                             <div class="member-activity-card-section">
-                                <div v-if="activitiesLoading">活動載入中…</div>
-                                <div v-else-if="activitiesError">{{ activitiesError }}</div>
-                                <div v-else-if="filteredActivities.length === 0">目前沒有符合條件的活動。</div>
-
                                 <MemberActivityCard
-                                    v-else
                                     v-for="activity in filteredActivities"
                                     :key="activity.activity_no"
                                     :item="activity"
@@ -408,7 +337,7 @@ onBeforeUnmount(() => {
                             <div class="activity-card-list">
                                 <MemberActivityCard
                                     v-for="activity in visibleActivities"
-                                    :key="activity.activity_no"
+                                    :key="activity.id"
                                     :item="activity"
                                 />
                                 <div v-if="filteredActivities.length === 0">
