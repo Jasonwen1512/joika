@@ -9,17 +9,33 @@ import axios from "axios"; // <-- 新增 axio
 // const route = useRoute();
 const articleList = ref([]); // 加在最上面
 // const currentUserId = route.params.userid;
-const currentUserId = "1";
+const currentUserId = ref(null);
+// 取得當前會員資料
+async function fetchCurrentUser() {
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_BASE}/users/me.php`,
+      {
+        withCredentials: true,
+      }
+    );
+    if (res.data.authenticated && res.data.user) {
+      currentUserId.value = res.data.user.id;
+    }
+  } catch (err) {
+    console.error("取得登入者資料失敗", err);
+  }
+}
 const GetEventColor = (eventName) => {
   const eventColorMap = {
     登山: "#6DE1D2",
-    水上活動: "#77BEF0",
+    桌遊: "#FFD63A",
     運動: "#FFD63A",
     露營: "#FF8C86",
     唱歌: "#FFA955",
     展覽: "#6DE1D2",
+    水上活動: "#77BEF0",
     聚餐: "#77BEF0",
-    桌遊: "#FFD63A",
     電影: "#FF8C86",
     手作: "#FFA955",
     文化體驗: "#6DE1D2",
@@ -32,13 +48,13 @@ const GetEventColor = (eventName) => {
 function getCategoryName(categoryNo) {
   const map = {
     1: "登山",
-    2: "水上活動",
+    2: "桌遊",
     3: "運動",
     4: "露營",
     5: "唱歌",
     6: "展覽",
-    7: "聚餐",
-    8: "桌遊",
+    7: "水上活動",
+    8: "聚餐",
     9: "電影",
     10: "手作",
     11: "文化體驗",
