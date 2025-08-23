@@ -1,5 +1,4 @@
 <script setup>
-
 // 1. 引入我們準備好的、獨立的留言板元件
 import commentSection from "@/components/activity/activity-detail/comment-section.vue";
 // import CommentComponent from "@/components/article/comment.vue"; // <-- 改用我的component
@@ -21,7 +20,7 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import {normalizeActivity} from "@/assets/utils/normalize"
+import { normalizeActivity } from "@/assets/utils/normalize";
 // --- End Swiper ---
 
 // 環境變數
@@ -37,24 +36,27 @@ const activitiesData = ref([]);
 onMounted(async () => {
   try {
     const response = await axios.get(`${VITE_API_BASE}/activities/list.php`);
-    activitiesData.value =  (Array.isArray(response.data) ? response.data : [])
-      .map(r => normalizeActivity(r, VITE_API_BASE));
+    activitiesData.value = (
+      Array.isArray(response.data) ? response.data : []
+    ).map((r) => normalizeActivity(r, VITE_API_BASE));
     // console.log(activitiesData.value);
   } catch (error) {
     console.error(`抓取list-all資料失敗${error}`);
   }
 });
 
-const isCancelled = computed(() => activity.value?.ACTIVITY_STATUS === '已取消')
-const rawRouteId = computed(() => String(route.params.activity_id || ''));
+const isCancelled = computed(
+  () => activity.value?.ACTIVITY_STATUS === "已取消"
+);
+const rawRouteId = computed(() => String(route.params.activity_id || ""));
 const routeIdNumeric = computed(() => {
-  const n = Number(rawRouteId.value.replace(/\D/g, ''));
+  const n = Number(rawRouteId.value.replace(/\D/g, ""));
   return Number.isFinite(n) ? n : null;
 });
 const activity = computed(() => {
   return (
-    activitiesData.value.find(a => a.id === routeIdNumeric.value) ||
-    activitiesData.value.find(a => a.activity_no === rawRouteId.value)
+    activitiesData.value.find((a) => a.id === routeIdNumeric.value) ||
+    activitiesData.value.find((a) => a.activity_no === rawRouteId.value)
   );
 });
 
@@ -64,15 +66,14 @@ const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
 
-
 const router = useRouter();
 const gotoSignup = (id) => {
   if (isCancelled.value) {
-    alert('此活動已取消，無法報名')
-    return
+    alert("此活動已取消，無法報名");
+    return;
   }
-  router.push(`/group/group-signup/${id}`)
-}
+  router.push(`/group/group-signup/${id}`);
+};
 
 // === 第三步：在 aloha 函式的正下方，貼上所有「新的邏輯」 ===
 
@@ -113,7 +114,7 @@ const submitRatings = (ratingsData) => {
 
 // === 新增：取消彈窗相關邏輯 ===
 const isCancelModalVisible = ref(false); // 取消彈窗的「開關」
-const modalResetKey = ref(0)
+const modalResetKey = ref(0);
 
 const openCancelModal = () => {
   isCancelModalVisible.value = true; // 打開取消彈窗
@@ -123,60 +124,60 @@ const closeCancelModal = () => {
   isCancelModalVisible.value = false; // 關閉取消彈窗
 };
 
-
-const currentUserId = ref(null)
-const meLoading = ref(true)
+const currentUserId = ref(null);
+const meLoading = ref(true);
 async function fetchMe() {
   try {
-    const { data } = await axios.get(`${VITE_API_BASE}/users/me.php`)
-    //  console.log('me =', data) 
-      currentUserId.value = data?.user?.id ?? null
+    const { data } = await axios.get(`${VITE_API_BASE}/users/me.php`);
+    //  console.log('me =', data)
+    currentUserId.value = data?.user?.id ?? null;
   } catch (e) {
-    currentUserId.value = null
+    currentUserId.value = null;
   } finally {
-    meLoading.value = false
+    meLoading.value = false;
   }
 }
-onMounted(fetchMe)
-
+onMounted(fetchMe);
 
 const isHost = computed(() => {
-  const hostId = activity.value?.HOST_MEMBER_ID ?? activity.value?.host_member_id
-  return !!(hostId && currentUserId.value) && Number(hostId) === Number(currentUserId.value)
-})
+  const hostId =
+    activity.value?.HOST_MEMBER_ID ?? activity.value?.host_member_id;
+  return (
+    !!(hostId && currentUserId.value) &&
+    Number(hostId) === Number(currentUserId.value)
+  );
+});
 
-const isJoiner = computed(() => false)
-
+const isJoiner = computed(() => false);
 
 //主揪取消活動API
 async function handleCancelSubmit(payload) {
   try {
-    const actNo = activity.value?.activity_no
+    const actNo = activity.value?.activity_no;
 
     const { data, status } = await axios.patch(
-       `${VITE_API_BASE}/activities/cancel-hoster.php?id=${actNo}`,
+      `${VITE_API_BASE}/activities/cancel-hoster.php?id=${actNo}`,
       payload,
       {
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
 
     if (status >= 200 && status < 300 && !data.error) {
-     
-      isCancelModalVisible.value = false
-      modalResetKey.value++
-      activitiesData.value = activitiesData.value.map(statusChange =>
+      isCancelModalVisible.value = false;
+      modalResetKey.value++;
+      activitiesData.value = activitiesData.value.map((statusChange) =>
         String(statusChange.activity_no) === String(actNo)
-          ? { ...statusChange, activity_status: '已取消' }
+          ? { ...statusChange, activity_status: "已取消" }
           : statusChange
-      )
-       alert("取消成功")
-       router.push("/home") 
+      );
+      alert("取消成功");
+      router.push("/home");
     } else {
-      alert(data.error || "取消失敗")
+      alert(data.error || "取消失敗");
     }
   } catch (err) {
-    alert("取消失敗：" + err.message)
+    alert("取消失敗：" + err.message);
   }
 }
 
@@ -185,9 +186,9 @@ const formDate = (dateStr) => {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
-  return `${year.toString().padStart(2, "0")}/${month.toString().padStart(2, "0")}/${day
+  return `${year.toString().padStart(2, "0")}/${month
     .toString()
-    .padStart(2, "0")}`;
+    .padStart(2, "0")}/${day.toString().padStart(2, "0")}`;
 };
 
 // watch(activity, a => {
@@ -445,7 +446,20 @@ const swiperModules = [Pagination];
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
     <div class="activity-button-wrap">
       <!-- 狀態一：尚未跟團 -->
+<<<<<<< HEAD
      
+=======
+      <template v-if="!isGroupJoined">
+        <Button
+          @click.stop.prevent="gotoSignup(activity?.ACTIVITY_NO)"
+          theme="primary"
+          size="md"
+        >
+          我要跟團!
+        </Button>
+        <LikeButton :activity-no="activityNo"></LikeButton>
+      </template>
+>>>>>>> ff5e95503cdb807ed0c79b23defdf5f7a3ee4f02
 
       <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
       <template v-if="!meLoading && (isHost || isJoiner)">
@@ -460,7 +474,7 @@ const swiperModules = [Pagination];
         <Button @click="openRatingModal" theme="primary" size="md">評價</Button>
       </template>
 
-       <template v-else>
+      <template v-else>
         <Button
           @click.stop.prevent="gotoSignup(activity?.activity_no)"
           theme="primary"

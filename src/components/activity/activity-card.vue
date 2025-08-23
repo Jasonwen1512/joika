@@ -37,7 +37,6 @@ const titleDate = computed(() => {
   const start = formDate(props.item.activity_start_date);
   const end = formDate(props.item.activity_end_date);
 
-
   // console.log(
   //   `start:${start}  end:${end} 活動名稱：${props.item.ACTIVITY_NAME}`
   // );
@@ -63,7 +62,7 @@ const titleDate = computed(() => {
         {{ titleDate }}
       </h4></RouterLink
     >
-    <RouterLink :to="`/activity/${props.item.activity_no}` " class="desc-link"
+    <RouterLink :to="`/activity/${props.item.activity_no}`" class="desc-link"
       ><p class="activity-description">
         {{ props.item.activity_description }}
       </p></RouterLink
@@ -76,11 +75,7 @@ const titleDate = computed(() => {
         size="md"
         >我要跟團!</Button
       >
-      <LikeButton
-        :isActive="likeMap[props.item.activity_no]"
-        @click.stop.prevent="toggleLike(item.activity_no)"
-        :data-no="item.activity_no"
-      ></LikeButton>
+      <LikeButton :activity-no="item.ACTIVITY_NO"></LikeButton>
     </div>
   </div>
 </template>
@@ -144,15 +139,15 @@ const titleDate = computed(() => {
   padding: 10px 0 0;
   line-height: 1.7;
   max-width: 264px;
-  flex:1;
+  flex: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
 }
-.desc-link{
+.desc-link {
   display: flex;
-  flex:1;
+  flex: 1;
 }
 
 .button-group {
