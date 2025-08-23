@@ -283,8 +283,10 @@ async function submitArticle() {
   router.push("/article/article");
 }
 
-//刪除
+//刪除文章功能
 function DeleteCheck() {
+  if (!article.value) return; // 保險
+
   Swal.fire({
     title: "確定要刪除嗎？",
     text: "文章刪除後將無法復原！",
@@ -295,45 +297,52 @@ function DeleteCheck() {
     cancelButtonText: "取消",
     confirmButtonText: "是的，刪除它！",
     reverseButtons: true,
-
     buttonsStyling: false,
-
     customClass: {
       confirmButton: "my-swal-confirm-button",
       cancelButton: "my-swal-cancel-button",
     },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      Swal.fire({
-        title: "已刪除！",
-        text: "您的文章已經被刪除。",
-        icon: "success",
-        buttonsStyling: false,
-        customClass: {
-          confirmButton: "my-swal-check-button",
-        },
-        // 在此處串接後端刪除 API
-        // 以下為使用 fetch API 的範例
-        /*
-      fetch('YOUR_API_ENDPOINT/posts/YOUR_POST_ID', { // 將 YOUR_API_ENDPOINT/posts/YOUR_POST_ID 替換為你的 API 端點和文章 ID
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          // 如果需要，可以在這裡加入授權 token
-          // 'Authorization': 'Bearer YOUR_TOKEN'
-        }
-      })*/
-      }).then((result) => {
-        if (result.isConfirmed) {
-          router.push("/article/article");
-        }
-      });
-    } else if (result.isDismissed) {
-      // 如果使用者點擊了「取消」、按了 Esc 鍵或點擊視窗外部
-      console.log("使用者取消了刪除操作。");
+  }).then(async (result) => {
+    if (!result.isConfirmed) return;
+
+    try {
+      // 真正呼叫後端刪除 API（POST: post_no）
+      const params = new URLSearchParams();
+      params.append("post_no", String(article.value.postid));
+      // params.append("hard", "1"); // 若要從資料庫完全刪除才打開
+
+      const res = await axios.post(
+        `${VITE_API_BASE}/posts/delete.php`,
+        params,
+        { withCredentials: true } // 帶 cookie（PHPSESSID）
+      );
+
+      if (res.data?.ok) {
+        await Swal.fire({
+          title: "已刪除！",
+          text: "您的文章已經被刪除。",
+          icon: "success",
+          buttonsStyling: false,
+          customClass: { confirmButton: "my-swal-check-button" },
+        });
+        router.push("/article/article");
+      } else {
+        throw new Error(res.data?.error || "刪除失敗");
+      }
+    } catch (err) {
+      const status = err?.response?.status;
+      const msg =
+        err?.response?.data?.error ||
+        (status === 401 ? "請先登入會員"
+        : status === 403 ? "沒有刪除權限"
+        : status === 404 ? "找不到文章"
+        : "刪除失敗，請稍後再試");
+
+      await Swal.fire({ icon: "error", title: "刪除失敗", text: msg });
     }
   });
 }
+
 //文章檢舉功能
 function openReportModal() {
   const container = document.createElement("div");
