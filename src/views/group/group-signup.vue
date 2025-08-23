@@ -3,6 +3,7 @@ import axios from "axios";
 import { ref, onMounted, onUnmounted } from "vue";
 // import { FakeActivity } from "@/assets/data/fake-activity";
 import { useRouter } from "vue-router";
+import { authState } from "@/assets/data/authState.js";
 
 const isMobile = ref(window.innerWidth < 768);
 
@@ -32,6 +33,14 @@ const data = ref([]);
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
+const memberData = ref({
+  MEMBER_NAME: "",
+  MEMBER_GENDER: "M",
+  MEMBER_NICKNAME: "",
+  MEMBER_PHONE: "",
+  MEMBER_EMAIL: "",
+});
+
 onMounted(async () => {
   window.addEventListener("resize", checkMobile);
   try {
@@ -57,6 +66,25 @@ onMounted(async () => {
   } catch (error) {
     console.error("串接list.php失敗，或是target給值失敗", error);
   }
+  // console.log(authState.user.id);
+  try {
+    const res = await axios.get(
+      `${VITE_API_BASE}/admin/members/list-search.php`,
+      {
+        params: { MEMBER_ID: authState.user.id },
+      }
+    );
+    memberData.value = {
+      MEMBER_NAME: res.data.MEMBER_NAME,
+      MEMBER_GENDER: res.data.MEMBER_GENDER,
+      MEMBER_NICKNAME: res.data.MEMBER_NICKNAME,
+      MEMBER_PHONE: res.data.MEMBER_PHONE,
+      MEMBER_EMAIL: res.data.MEMBER_EMAIL,
+    };
+    console.log(memberData.value);
+  } catch (error) {
+    console.error("API抓取會員資料出錯", error);
+  }
 });
 
 onUnmounted(() => {
@@ -64,6 +92,13 @@ onUnmounted(() => {
 });
 
 const router = useRouter();
+
+const goBack = () => {
+  router.back();
+};
+
+// 送出跟團表單 API 放置處
+const handle = () => {};
 </script>
 
 <template>
@@ -89,42 +124,90 @@ const router = useRouter();
 
     <form class="form-area">
       <fieldset>
-        <legend>個人資料</legend>
+        <legend>基本資料</legend>
 
         <label for="name">姓名</label>
-        <input type="text" id="name" name="name" />
+        <input
+          type="text"
+          id="name"
+          name="name"
+          class="readonly-input"
+          v-model="memberData.MEMBER_NAME"
+          readonly
+        />
+
+        <label for="sname">暱稱</label>
+        <input
+          type="text"
+          id="sname"
+          name="sname"
+          class="readonly-input"
+          v-model="memberData.MEMBER_NICKNAME"
+          readonly
+        />
 
         <label>性別</label>
         <div class="gender-group">
-          <label><input type="radio" name="gender" value="male" /> 男</label>
-          <label><input type="radio" name="gender" value="female" /> 女</label>
-          <label><input type="radio" name="gender" value="other" /> 其他</label>
+          <label>
+            <input
+              type="radio"
+              name="gender"
+              value="male"
+              :checked="memberData.MEMBER_GENDER === 'M'"
+              disabled
+            />
+            男
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="gender"
+              value="female"
+              :checked="memberData.MEMBER_GENDER === 'F'"
+              disabled
+            />
+            女
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="gender"
+              value="other"
+              :checked="memberData.MEMBER_GENDER === 'other'"
+              disabled
+            />
+            其他
+          </label>
         </div>
 
-        <label for="age">年齡</label>
-        <input type="text" id="age" name="age" />
-
-        <label for="contact">聯絡方式</label>
-        <input type="text" id="contact" name="contact" />
+        <label for="contact">電話號碼</label>
+        <input
+          type="text"
+          id="contact"
+          name="contact"
+          class="readonly-input"
+          v-model="memberData.MEMBER_PHONE"
+          readonly
+        />
 
         <label for="email">電子信箱</label>
-        <input type="email" id="email" name="email" />
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="readonly-input"
+          v-model="memberData.MEMBER_EMAIL"
+          readonly
+        />
 
         <label class="checkbox">
-          <input type="checkbox" id="autoFill" name="autoFill" checked />
-          自動代入會員資料
+          ※ 此為自動代入的會員資料，不可在此編輯 ※
         </label>
-
-        <label for="intro">介紹</label>
-        <textarea
-          id="intro"
-          name="intro"
-          placeholder="想跟主揪說什麼？多多介紹自己可以增加揪團成功率喔！"
-        ></textarea>
+        <label style="margin-top: 4px"> ※ 僅供檢查資料用 ※ </label>
       </fieldset>
       <div class="button-area">
-        <button class="cancel">取消</button>
-        <button class="submit">送出</button>
+        <button type="button" class="cancel" @click="goBack">取消</button>
+        <button type="button" class="submit" @click="handle">送出</button>
       </div>
     </form>
   </div>
@@ -212,15 +295,20 @@ fieldset {
     width: 100%;
     padding: 8px;
     font-size: 1rem;
-    border: 1px solid #000;
-    background-color: #fff;
+    border: 1px solid #ced4da;
+    color: #495057;
+    background-color: #e9ecef;
     border-radius: 4px;
     box-sizing: border-box;
     margin-top: 5px;
+    cursor: not-allowed;
+    pointer-events: none;
   }
   input[type="radio"],
   input[type="checkbox"] {
     accent-color: #000;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 }
 legend {
