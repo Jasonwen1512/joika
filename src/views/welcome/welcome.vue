@@ -4,7 +4,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import logoSvg from "@/assets/img/welcome/logo.svg?url";
 import pointDown from "@/assets/img/welcome/point-down.svg?url"; // 使用?url強制將svg轉換為url字串
-import { rectangle } from "leaflet";
 
 // 背景色塊
 const backgroundDecoration = ref({
@@ -116,6 +115,8 @@ const resultTextClass = computed(() => {
 
 // 控制 "頁面跳轉緩衝區域" 顯示及倒數
 const showLearnMore = ref(false);
+const showCountDown = ref(false);
+const showScrollHint = ref(true);
 const countdownText = ref("");
 let countdownTimer = null;
 
@@ -131,6 +132,9 @@ onMounted(() => {
   // 解除 overflow 限制，避免 positoin: sticky 失效
   document.documentElement.style.overflowX = "visible";
   document.body.style.overflowX = "visible";
+
+  // 處理 Sub-pixel 渲染問題 (避免超出視窗寬度，出現橫向捲軸)
+  document.body.style.width = "calc(100% - 1px)";
 
   // === 文字漂浮區域 ===
   const floatingTexts = gsap.utils.toArray(".floating-text");
@@ -189,7 +193,6 @@ onMounted(() => {
       scrub: true,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        const currentScroll = self.scroll(); // 目前 scroll 位置 (垂直)
         const logoBox = logo.value.getBoundingClientRect();
 
         letterEls.forEach((el, index) => {
@@ -280,18 +283,18 @@ onMounted(() => {
   const diceState = {
     // 全部活動分類
     activityCategories: {
-      1: { category: "登山", image: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href, color: "#90DA81", link: "/cjd101/g2/front/activity?category=CA001" },
-      2: { category: "桌遊", image: new URL("@/assets/img/index-img/board-games.png", import.meta.url).href, color: "#F315BB", link: "/cjd101/g2/front/activity?category=CA002" },
-      3: { category: "運動", image: new URL("@/assets/img/index-img/sports.png", import.meta.url).href, color: "#FADA7A", link: "/cjd101/g2/front/activity?category=CA003" },
-      4: { category: "露營", image: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href, color: "#A281DA", link: "/cjd101/g2/front/activity?category=CA004" },
-      5: { category: "唱歌", image: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href, color: "#2AA9FF", link: "/cjd101/g2/front/activity?category=CA005" },
-      6: { category: "展覽", image: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href, color: "#FFFCE2", link: "/cjd101/g2/front/activity?category=CA006" },
-      7: { category: "水上活動", image: new URL("@/assets/img/index-img/diving.png", import.meta.url).href, color: "#4F8DA8", link: "/cjd101/g2/front/activity?category=CA007" },
-      8: { category: "聚餐", image: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href, color: "#FB900C", link: "/cjd101/g2/front/activity?category=CA008" },
-      9: { category: "電影", image: new URL("@/assets/img/index-img/movie.png", import.meta.url).href, color: "#FFA68D", link: "/cjd101/g2/front/activity?category=CA009" },
-      10: { category: "手作", image: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href, color: "#81BFDA", link: "/cjd101/g2/front/activity?category=CA010" },
-      11: { category: "文化體驗", image: new URL("@/assets/img/index-img/cultural-experience.png", import.meta.url).href, color: "#1FB92C", link: "/cjd101/g2/front/activity?category=CA011" },
-      12: { category: "演出表演", image: new URL("@/assets/img/index-img/concert.png", import.meta.url).href, color: "#FFE100", link: "/cjd101/g2/front/activity?category=CA012" },
+      1: { category: "登山", image: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href, color: "#90DA81", link: "/cjd101/g2/front/activity?category=1" },
+      2: { category: "桌遊", image: new URL("@/assets/img/index-img/board-games.png", import.meta.url).href, color: "#F315BB", link: "/cjd101/g2/front/activity?category=2" },
+      3: { category: "運動", image: new URL("@/assets/img/index-img/sports.png", import.meta.url).href, color: "#FADA7A", link: "/cjd101/g2/front/activity?category=3" },
+      4: { category: "露營", image: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href, color: "#A281DA", link: "/cjd101/g2/front/activity?category=4" },
+      5: { category: "唱歌", image: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href, color: "#2AA9FF", link: "/cjd101/g2/front/activity?category=5" },
+      6: { category: "展覽", image: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href, color: "#FFFCE2", link: "/cjd101/g2/front/activity?category=6" },
+      7: { category: "水上活動", image: new URL("@/assets/img/index-img/diving.png", import.meta.url).href, color: "#4F8DA8", link: "/cjd101/g2/front/activity?category=7" },
+      8: { category: "聚餐", image: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href, color: "#FB900C", link: "/cjd101/g2/front/activity?category=8" },
+      9: { category: "電影", image: new URL("@/assets/img/index-img/movie.png", import.meta.url).href, color: "#FFA68D", link: "/cjd101/g2/front/activity?category=9" },
+      10: { category: "手作", image: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href, color: "#81BFDA", link: "/cjd101/g2/front/activity?category=10" },
+      11: { category: "文化體驗", image: new URL("@/assets/img/index-img/cultural-experience.png", import.meta.url).href, color: "#1FB92C", link: "/cjd101/g2/front/activity?category=11" },
+      12: { category: "演出表演", image: new URL("@/assets/img/index-img/concert.png", import.meta.url).href, color: "#FFE100", link: "/cjd101/g2/front/activity?category=12" },
     },
 
     // 12 類中選 6 類，以 Array 記錄被選出的 key (1 ~ 12)
@@ -354,32 +357,56 @@ onMounted(() => {
   let currentX = 0;
   let currentY = 0;
 
-  // 骰子投擲結果顯示後，自動捲動至最下方，3秒後再跳轉至JOIKA首頁
+  // 骰子投擲結果顯示後，自動捲動至 learn-more 區域的最下方
   function triggerAutoScroll() {
     showHint.value = false;
     showLearnMore.value = true; // 顯示 "頁面跳轉緩衝區域"
 
-    // 延遲一段時間後捲動
+    // 延遲一段時間後自動捲動
     setTimeout(() => {
       const learnMoreSection = document.querySelector(".learn-more");
+      const rect = learnMoreSection.getBoundingClientRect();
+      const sectionBottom = rect.bottom + window.scrollY;
+      const sectionHeight = rect.height;
       learnMoreSection.scrollIntoView({
         behavior: "smooth",
         block: "end",
       });
-      // // 倒數 3 秒
-      // let countdown = 3;
-      // countdownText.value = `${countdown} 秒後進入首頁`;
 
-      // countdownTimer = setInterval(() => {
-      //   countdown--;
-      //   if (countdown > 0) {
-      //     countdownText.value = `${countdown} 秒後進入首頁`;
-      //   } else {
-      //     countdownText.value = "Let's Go!!!";
-      //     clearInterval(countdownTimer);
-      //     window.location.href = "/cjd101/g2/front/home";
-      //   }
-      // }, 1000);
+      function onScroll() {
+        const scrollY = window.scrollY + window.innerHeight; // 視窗底部位置
+        if (scrollY >= sectionBottom + sectionHeight * 0.7) {
+          strartCountDown();
+
+          // 避免重複觸發
+          learnMoreSection.removeEventListener("wheel", onScroll);
+          learnMoreSection.removeEventListener("touchmove", onScroll);
+        } else {
+          showScrollHint.value = false;
+          countdownText.value = "往下捲動";
+        }
+      }
+
+      learnMoreSection.addEventListener("wheel", onScroll);
+      learnMoreSection.addEventListener("touchmove", onScroll);
+    }, 1000);
+    showCountDown.value = true; // 顯示 "進入首頁倒數區域"
+  }
+
+  function strartCountDown() {
+    // 倒數 3 秒
+    let countdown = 3;
+    countdownText.value = `${countdown} 秒後進入首頁`;
+
+    countdownTimer = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        countdownText.value = `${countdown} 秒後進入首頁`;
+      } else {
+        countdownText.value = "Let's Go!!!";
+        clearInterval(countdownTimer);
+        window.location.href = "/cjd101/g2/front/home";
+      }
     }, 1000);
   }
 
@@ -420,11 +447,22 @@ onMounted(() => {
       dice.style.transform = `rotateX(${currentAngleX}deg) rotateY(${currentAngleY}deg)`;
 
       // 中間動畫過程顯示亂數
-      if (t < 1) {
+      if (t < 0.8) {
+        showHint.value = true;
+        const randomArrayIndex = Math.floor(Math.random() * 6); // 隨機取 Array 索引值 (0 ~ 5)
+        const randomActivityKey = diceState.selectedActivityKeys[randomArrayIndex]; // 取出 "selectedActivityKeys" 中的 key
+        currentResultText.value = diceState.selectedActivityCategories[randomActivityKey].category; // 使用 key 取出物件中的活動類別
+        frame++;
+        requestAnimationFrame(animate);
+      } else if (t >= 0.8 && t < 1) {
+        // 最後 20% 顯示最終結果
+        const activityKey = diceState.selectedActivityKeys[targetFace - 1];
+        currentResultText.value = diceState.selectedActivityCategories[activityKey].category;
         frame++;
         requestAnimationFrame(animate);
       } else {
         // 最終設定與顯示
+        showHint.value = false;
         const activityKey = diceState.selectedActivityKeys[targetFace - 1];
         currentX = faceX;
         currentY = faceY;
@@ -554,11 +592,7 @@ onUnmounted(() => {
     <!-- 3D骰子 -->
     <div class="scene">
       <p class="hint-text" v-show="showHint">請點擊骰子</p>
-      <p class="hint-text" :class="{ blinking: isBlinking }" v-show="!showHint">
-        請點擊 " {{ currentResultText }} "，前往專區
-        <br />
-        或往下捲動，前往首頁
-      </p>
+      <p class="hint-text" :class="{ blinking: isBlinking }" v-show="!showHint">請點擊 " {{ currentResultText }} "，前往專區</p>
       <div class="dice" :class="{ rolling: isRolling }">
         <div class="dice-face point1"></div>
         <div class="dice-face point2"></div>
@@ -576,6 +610,11 @@ onUnmounted(() => {
       還等什麼？裡面更好玩
       <img id="point-down" :src="pointDown" alt="了解更多" />
     </h2>
+    <p class="scroll-hint-text" v-show="showScrollHint">往下捲動，進入首頁</p>
+  </section>
+
+  <!-- === 倒數區域 === -->
+  <section class="countdown" v-show="showCountDown">
     <p class="countdown-text">{{ countdownText }}</p>
   </section>
 </template>
@@ -1071,20 +1110,21 @@ onUnmounted(() => {
 
 // === 頁面跳轉緩衝區 ===
 .learn-more {
-  height: 18.75vw; // 容器顯示長度 (30vh = 18.75vw) (100vh = 62.5vw with screen ratio 16:10)
+  height: 25vw; // 容器顯示長度 (40vh = 25vw) (100vh = 62.5vw with screen ratio 16:10)
 
   #point-down {
     vertical-align: middle;
     height: $font-size-h1;
     aspect-ratio: 1 / 1;
   }
-  .countdown-text {
+  .scroll-hint-text {
+    width: 100%;
+    margin-top: -90px;
+    color: $red;
+    font-size: clamp(16px, 1.563vw, 30px);
     text-align: center;
-    margin-top: 20px;
-    font-size: clamp(32px, 2.5vw, 48px);
-    color: $blue;
-    font-weight: 700;
-    animation: pulse 1s ease-in-out infinite;
+    opacity: 1;
+    animation: text-blinking 3s infinite;
   }
 
   @keyframes pulse {
@@ -1095,6 +1135,19 @@ onUnmounted(() => {
     50% {
       opacity: 1;
     }
+  }
+}
+
+// 倒數區域
+.countdown {
+  margin-bottom: 25vw; // 容器顯示長度 (40vh = 25vw) (100vh = 62.5vw with screen ratio 16:10)
+  .countdown-text {
+    text-align: center;
+    margin-top: -10vw;
+    font-size: clamp(32px, 2.5vw, 48px);
+    color: $blue;
+    font-weight: 700;
+    animation: pulse 1s ease-in-out infinite;
   }
 }
 </style>
