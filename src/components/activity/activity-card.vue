@@ -3,7 +3,11 @@ import { RouterLink, useRouter } from "vue-router";
 import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
 import { ref, computed } from "vue";
-const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+import { imageUrl } from "@/assets/utils/normalize";
+
+const imgSrc = computed(() =>
+  imageUrl(props.item?.ACTIVITY_IMG ?? props.item?.activity_img ?? '')
+);
 const props = defineProps({
   item: Object,
 });
@@ -14,10 +18,7 @@ const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
 
-const imageUrl = computed(() => {
-  const src = props.item?.activity_img || "";
-  return /^https?:\/\//i.test(src) ? src : `${VITE_API_BASE}${src}`;
-});
+
 const router = useRouter();
 const gotoSignup = (id) => {
   router.push(`/group/group-signup/${id}`);
@@ -34,17 +35,17 @@ const formDate = (dateStr) => {
 
 const titleDate = computed(() => {
   if (!props.item) return "";
-  const start = formDate(props.item.activity_start_date);
-  const end = formDate(props.item.activity_end_date);
+  const start = formDate(props.item.ACTIVITY_START_DATE);
+  const end = formDate(props.item.ACTIVITY_END_DATE);
 
   // console.log(
   //   `start:${start}  end:${end} 活動名稱：${props.item.ACTIVITY_NAME}`
   // );
 
   if (start === end) {
-    return `${start} ${props.item.activity_name}`;
+    return `${start} ${props.item.ACTIVITY_NAME}`;
   } else {
-    return `${start}-${end} ${props.item.activity_name}`;
+    return `${start}-${end} ${props.item.ACTIVITY_NAME}`;
   }
 });
 </script>
@@ -52,25 +53,25 @@ const titleDate = computed(() => {
 <template>
   <div class="activity-card" v-if="props.item">
     <RouterLink
-      :to="`/activity/${props.item.activity_no}`"
+      :to="`/activity/${props.item.ACTIVITY_NO}`"
       class="activity-img"
     >
-      <img :src="imageUrl" :alt="props.item.activity_name" />
+      <img :src="imgSrc" :alt="props.item.ACTIVITY_NAME" />
     </RouterLink>
-    <RouterLink :to="`/activity/${props.item.activity_no}`"
+    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
       ><h4 class="activity-name">
         {{ titleDate }}
       </h4></RouterLink
     >
-    <RouterLink :to="`/activity/${props.item.activity_no}`" class="desc-link"
+    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`" class="desc-link"
       ><p class="activity-description">
-        {{ props.item.activity_description }}
+        {{ props.item.ACTIVITY_DESCRIPTION }}
       </p></RouterLink
     >
 
     <div class="button-group" @click.stop.prevent>
       <Button
-        @click.stop.prevent="gotoSignup(item.activity_no)"
+        @click.stop.prevent="gotoSignup(item.ACTIVITY_NO)"
         theme="primary"
         size="md"
         >我要跟團!</Button

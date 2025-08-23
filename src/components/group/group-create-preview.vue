@@ -15,8 +15,12 @@ const props = defineProps({
   image: {
     type: Object,
     default: () => ({ previewUrl: "", filename: "", mime: "" }),
+    
   },
+  item:{type:Object}
 });
+
+
 const previewUrl = computed(() => store.image?.previewUrl || "");
 const previewData = computed(() => store.formData);
 
@@ -119,7 +123,10 @@ async function onSubmit() {
       text: `活動編號：${data.id}`,
       confirmButtonText: "確定",
     });
-    router.push(`/activity/:activity_no`);
+   const actNo = data.activity_no ?? data.ACTIVITY_NO ?? data.id;
+    if (actNo) {
+      router.push(`/home`);
+    }
     if (store.image?.previewUrl) URL.revokeObjectURL(store.image.previewUrl);
     store.resetForm();
   } catch (err) {

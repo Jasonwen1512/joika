@@ -6,7 +6,6 @@ import commentSection from "@/components/activity/activity-detail/comment-sectio
 import { useRoute, useRouter } from "vue-router";
 // === 第一步：在 import ref 的地方，加入 onMounted 和 onUnmounted ===
 import { computed, ref, onMounted, onUnmounted, watch } from "vue";
-import { FakeActivity } from "@/assets/data/fake-activity";
 import Button from "@/components/Button.vue";
 import LikeButton from "@/components/activity/like-button.vue";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -20,8 +19,8 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import { normalizeActivity } from "@/assets/utils/normalize";
-// --- End Swiper ---
+import { imageUrl } from "@/assets/utils/normalize";
+
 
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
@@ -29,6 +28,10 @@ axios.defaults.withCredentials = true;
 
 const route = useRoute();
 const activityNo = route.params.activity_id;
+
+const imgSrc = computed(() =>
+  imageUrl(activity.value?.ACTIVITY_IMG ?? activity.value?.activity_img ?? '')
+)
 
 const currentActivityId = computed(() => route.params.activity_id);
 
@@ -38,7 +41,7 @@ onMounted(async () => {
     const response = await axios.get(`${VITE_API_BASE}/activities/list.php`);
     activitiesData.value = (
       Array.isArray(response.data) ? response.data : []
-    ).map((r) => normalizeActivity(r, VITE_API_BASE));
+    ).map((r) => r, VITE_API_BASE);
     // console.log(activitiesData.value);
   } catch (error) {
     console.error(`抓取list-all資料失敗${error}`);
@@ -56,7 +59,7 @@ const routeIdNumeric = computed(() => {
 const activity = computed(() => {
   return (
     activitiesData.value.find((a) => a.id === routeIdNumeric.value) ||
-    activitiesData.value.find((a) => a.activity_no === rawRouteId.value)
+    activitiesData.value.find((a) => a.ACTIVITY_NO === rawRouteId.value)
   );
 });
 
@@ -75,7 +78,6 @@ const gotoSignup = (id) => {
   router.push(`/group/group-signup/${id}`);
 };
 
-// === 第三步：在 aloha 函式的正下方，貼上所有「新的邏輯」 ===
 
 // --- 按鈕切換 & 鍵盤監聽 ---
 const isGroupJoined = ref(false); // 用於切換按鈕
@@ -153,33 +155,50 @@ const isJoiner = computed(() => false);
 //主揪取消活動API
 async function handleCancelSubmit(payload) {
   try {
-    const actNo = activity.value?.activity_no;
+   const actNo = Number(activity.value?.ACTIVITY_NO);
+if (!Number.isFinite(actNo) || actNo <= 0) {
+  alert("找不到有效的活動編號");
+  return;
+}
+  const body = {
+      reason_no: Number(payload?.reason_no ?? payload?.reasonNo ?? 0),
+      reason_detail: payload?.reason_detail ?? payload?.reasonDetail ?? null,
+    };
+    if (!Number.isFinite(body.reason_no) || body.reason_no <= 0) {
+      alert("請選擇取消原因");
+      return;
+    }
 
-    const { data, status } = await axios.patch(
+    const res = await axios.patch(
       `${VITE_API_BASE}/activities/cancel-hoster.php?id=${actNo}`,
-      payload,
+      body,
       {
         headers: { "Content-Type": "application/json" },
+        withCredentials: true,
       }
     );
-
-    if (status >= 200 && status < 300 && !data.error) {
-      isCancelModalVisible.value = false;
-      modalResetKey.value++;
-      activitiesData.value = activitiesData.value.map((statusChange) =>
-        String(statusChange.activity_no) === String(actNo)
-          ? { ...statusChange, activity_status: "已取消" }
-          : statusChange
-      );
-      alert("取消成功");
-      router.push("/home");
-    } else {
+    const data = res.data || {};
+    if (data.error) {
       alert(data.error || "取消失敗");
+      return;
     }
-  } catch (err) {
-    alert("取消失敗：" + err.message);
+    isCancelModalVisible.value = false;
+    modalResetKey.value++;
+    alert("取消成功");
+    router.push("/home");
+ } catch (err) {
+    // 6) 顯示後端錯誤（才看得到 401/409/500 的細節）
+    const msg =
+      err?.response?.data?.error ||
+      err?.message ||
+      "取消失敗（未知錯誤）";
+    alert("取消失敗：" + msg);
+
+    // 也可以在 console 詳細看
+    console.error("cancel error:", err?.response || err);
   }
 }
+
 
 const formDate = (dateStr) => {
   const date = new Date(dateStr);
@@ -431,16 +450,16 @@ const swiperModules = [Pagination];
   <div class="activity-detail-page">
     <!-- 藍色背景 -->
     <div class="activity-hero-bg">
-      <div class="hint">揪團探索/揪團列表/{{ activity?.category_name }}</div>
+      <div class="hint">揪團探索/揪團列表/{{ activity?.CATEGORY_NAME }}</div>
     </div>
     <!-- 圖片 -->
     <div class="activity-image">
-      <img :src="activity?.activity_img" :alt="activity?.activity_name" />
+      <img  :src="imgSrc" :alt="activity?.ACTIVITY_NAME" />
     </div>
 
     <!-- 標題 -->
     <div class="activity-title-wrap">
-      <h2>{{ activity?.activity_name }}</h2>
+      <h2>{{ activity?.ACTIVITY_NAME }}</h2>
     </div>
 
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
@@ -463,15 +482,14 @@ const swiperModules = [Pagination];
 
       <template v-else>
         <Button
-          @click.stop.prevent="gotoSignup(activity?.activity_no)"
+          @click.stop.prevent="gotoSignup(activity?.ACTIVITY_NO)"
           theme="primary"
           size="md"
         >
           我要跟團!
         </Button>
         <LikeButton
-          :isActive="likeMap[activity?.activity_no]"
-          @click.stop.prevent="toggleLike(activity?.activity_no)"
+          :activity-no="activityNo"
         ></LikeButton>
       </template>
     </div>
@@ -495,20 +513,20 @@ const swiperModules = [Pagination];
           <div class="info-row">
             <strong>日期與時間</strong>
             <span
-              >{{ activity?.activity_start_date }} ~ <br />{{
-                activity?.activity_end_date
+              >{{ activity?.ACTIVITY_START_DATE }} ~ <br />{{
+                activity?.ACTIVITY_END_DATE
               }}</span
             >
           </div>
           <div class="info-row">
             <strong>地點</strong>
-            <span>{{ activity?.location }}</span>
+            <span>{{ activity?.LOCATION }}</span>
           </div>
           <div class="info-row">
             <strong>揪團人數</strong>
             <span
-              >{{ activity?.current_participant }}/{{
-                activity?.max_participant
+              >{{ activity?.CURRENT_PARTICIPANT }}/{{
+                activity?.MAX_PARTICIPANT
               }}人</span
             >
           </div>
@@ -518,15 +536,15 @@ const swiperModules = [Pagination];
         <div class="info-col">
           <div class="info-row">
             <strong>預估費用</strong>
-            <span>{{ activity?.fee_notes }}</span>
+            <span>{{ activity?.FEE_NOTES }}</span>
           </div>
           <div class="info-row">
             <strong>揪團截止日</strong>
-            <span>{{ formDate(activity?.registration_deadline) }}</span>
+            <span>{{ formDate(activity?.REGISTRATION_DEADLINE) }}</span>
           </div>
           <div class="info-row">
             <strong>跟團限制</strong>
-            <span>{{ activity?.participant_limitation }}</span>
+            <span>{{ activity?.PARTICIPANT_LIMITATION }}</span>
           </div>
         </div>
       </div>
@@ -572,7 +590,7 @@ const swiperModules = [Pagination];
     <!-- 活動詳情 -->
     <section class="activity-description">
       <div class="description-title">詳細</div>
-      <p class="description-content">{{ activity?.activity_description }}</p>
+      <p class="description-content">{{ activity?.ACTIVITY_DESCRIPTION }}</p>
     </section>
 
     <!-- 目前團員 -->

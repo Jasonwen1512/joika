@@ -9,10 +9,11 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import SearchIcon from "@/assets/img/icon/search1.svg";
 import CategoryTag from "@/components/activity/category-tag.vue";
 import axios from "axios";
-import {normalizeActivity} from "@/assets/utils/normalize"
+
 
 const route = useRoute();
 const router = useRouter();
+const errorMsg = ref("");  
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 const setDefaultCategory = () => {
   const categoryFromQuery = route.query.category;
@@ -76,14 +77,14 @@ const activeCategory = ref("0");
 const loading = ref(false);
 async function fetchActivities(){
   loading.value=true;
+  errorMsg.value = "";
   try{
     const{ data } = await axios.get(`${VITE_API_BASE}/activities/list.php`);
     activities.value = (Array.isArray(data) ? data : [] )
-    .map(normalizeActivity)
     .sort(
       (a, b)=>
-      new Date(a.activity_start_date).getTime() -
-      new Date(b.activity_start_date).getTime()
+      new Date(a.ACTIVITY_START_DATE).getTime() -
+      new Date(b.ACTIVITY_START_DATE).getTime()
     );
     searchTrigger.value++
     currentPage.value = 1;
@@ -115,7 +116,7 @@ const filterActivities = computed(() => {
     // 關鍵字搜尋
     const keyword = confirmedSearch.value.keyword;
     const matchKeyword =
-      !keyword || act.activity_name.toLowerCase().includes(keyword);
+      !keyword || act.ACTIVITY_NAME.toLowerCase().includes(keyword);
 
     // 日期搜尋
     let matchDate = true;
@@ -131,8 +132,8 @@ const filterActivities = computed(() => {
     if (safeDateRange.length === 2) {
       const [selectStart, selectEnd] = safeDateRange;
 
-      const activityStart = new Date(act.activity_start_date);
-      const activityEnd = new Date(act.activity_end_date);
+      const activityStart = new Date(act.ACTIVITY_START_DATE);
+      const activityEnd = new Date(act.ACTIVITY_END_DATE);
 
       // 檢查交集（包含單日）
       matchDate =
@@ -142,7 +143,7 @@ const filterActivities = computed(() => {
 
     // 分類搜尋
     const matchCategory =
-      activeCategory.value === "0" || act.category_no === activeCategory.value;
+      activeCategory.value === "0" || act.CATEGORY_NO === activeCategory.value;
 
     return matchKeyword && matchDate && matchCategory;
   });
@@ -255,7 +256,7 @@ onMounted(() => {
         <ActivityCard
           :item="item"
           v-for="item in paginatedActivities"
-          :key="item.activity_no"
+          :key="item.ACTIVITY_NO"
         >
           </ActivityCard
         >

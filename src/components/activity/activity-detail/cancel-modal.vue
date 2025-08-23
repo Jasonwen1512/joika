@@ -91,11 +91,11 @@ watch(() => props.show, (newVal) => {
 
       <div class="modal-body">
         <h2 class="title">確定要取消參加這個揪團嗎？</h2>
-        <h3 class="activity-name">{{ activity?.activity_name }}</h3>
+        <h3 class="activity-name">{{ activity?.ACTIVITY_NAME }}</h3>
 
         <div class="activity-info">
-          <span>活動日期：{{ activity?.activity_start_date }}</span>
-          <span>參團人數：{{ activity?.current_participant }}/{{ activity?.max_participant }}</span>
+          <span>活動日期：{{ activity?.ACTIVITY_START_DATE }}</span>
+          <span>參團人數：{{ activity?.CURRENT_PARTICIPANT }}/{{ activity?.MAX_PARTICIPANT }}</span>
         </div>
 
         <div class="form-group">
