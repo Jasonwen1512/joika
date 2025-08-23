@@ -13,8 +13,8 @@ import AirPlane from "@/assets/img/article/airplane.png";
 import "tinymce/skins/ui/oxide/skin.css";
 import "tinymce/themes/silver";
 import "tinymce/icons/default";
-import "tinymce/plugins/emoticons";
-import "tinymce/plugins/emoticons/js/emojis.js";
+// import "tinymce/plugins/emoticons";
+// import "tinymce/plugins/emoticons/js/emojis.js";
 import "tinymce/plugins/table";
 import "tinymce/plugins/quickbars";
 import "tinymce/plugins/autoresize";
@@ -316,13 +316,13 @@ onBeforeUnmount(() => {
 
 const categories = [
   "登山",
-  "水上活動",
+  "桌遊",
   "運動",
   "露營",
   "唱歌",
   "展覽",
+  "水上活動",
   "聚餐",
-  "桌遊",
   "電影",
   "手作",
   "文化體驗",
@@ -364,8 +364,8 @@ function selectType(typeName) {
       placeholder="請輸入文章標題"
       v-model="form.title"
     />
-    <div class="category-btn-list">
-      <!-- 建議修正 props 寫法 -->
+    <!-- <div class="category-btn-list">
+      建議修正 props 寫法
       <label>文章類型：</label>
       <Button
         @click="selectType('揪團心得')"
@@ -385,7 +385,7 @@ function selectType(typeName) {
         size="sm"
         >分享</Button
       >
-    </div>
+    </div> -->
     <div class="topic-category">
       <label for="topic-category">文章分類：</label>
       <select id="topic-category" name="category" v-model="form.event">
