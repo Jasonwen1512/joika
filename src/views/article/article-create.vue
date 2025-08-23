@@ -46,7 +46,7 @@ const props = defineProps({
   modelValue: { type: String, default: "" },
   plugins: {
     type: [String, Array],
-    default: "quickbars emoticons table autoresize image",
+    default: "quickbars  table autoresize image",
   },
   toolbar: {
     type: [String, Array],
@@ -130,7 +130,10 @@ onMounted(() => {
 function previewArticle() {
   Object.assign(previewStore.previewData, form);
   previewStore.isPreview = true;
-  router.push({ name: "ArticlePreview" });
+  router.push({
+    name: "ArticlePreview",
+    query: { mode: props.mode }, // 用 query 傳遞
+  });
   // 當點擊預覽時，將整個 form 物件透過 history.state 傳遞
   // router.push({
   //   name: "ArticlePreview",
@@ -156,51 +159,86 @@ watch(
   }
 );
 async function submitArticle() {
+  const categoryIndex = categories.indexOf(form.event);
+  const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
+
+  if (!categoryNo) {
+    alert("請選擇有效的分類");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("category_no", categoryNo);
+  formData.append("post_title", form.title);
+  formData.append("post_content", form.content);
+  if (coverFile.value) {
+    formData.append("post_img", coverFile.value);
+  }
+  // 這裡可以根據 mode 決定要呼叫哪個 API
+  let apiUrl = "";
+
   if (props.mode === "edit") {
     // --- 未來串接 API 的位置 (更新/PUT) ---
-    // await updateArticleAPI(form.postid, form);
+    formData.append("post_no", form.postid); // 編輯時要加文章編號
+    apiUrl = `${VITE_API_BASE}/posts/update.php`;
     console.log("正在【更新】文章:", form);
     alert("文章更新成功！");
   } else {
-    // --- 未來串接 API 的位置 (新增/POST) ---
-    try {
-      const categoryIndex = categories.indexOf(form.event);
-      const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
+    // --- 未來串接 API 的位置 (新增/POST)
+    apiUrl = `${VITE_API_BASE}/posts/create.php`;
 
-      if (categoryIndex === -1) {
-        alert("請選擇有效的分類");
-        return;
-      }
-      const formData = new FormData();
-      formData.append("category_no", categoryNo);
-      formData.append("post_title", form.title);
-      formData.append("post_content", form.content);
+    // 因為蠻多重複共用的程式 先寫在一起 ---
+    // try {
+    //   const categoryIndex = categories.indexOf(form.event);
+    //   const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
 
-      // === 新增：若有選首圖，夾帶 POST_IMG 給後端 ===
-      if (coverFile.value) {
-        formData.append("post_img", coverFile.value); // 後端 create.php 會存成封面
-      }
-      // === 新增結束 ===
+    //   if (categoryIndex === -1) {
+    //     alert("請選擇有效的分類");
+    //     return;
+    //   }
+    //   const formData = new FormData();
+    //   formData.append("category_no", categoryNo);
+    //   formData.append("post_title", form.title);
+    //   formData.append("post_content", form.content);
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE}/posts/create.php`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
-      router.push("/article/article");
-      // const newArticle = await createArticleAPI(form);
-      console.log("正在【新增】文章:", form);
-      alert("文章發表成功！");
-    } catch (err) {
-      console.error("發表失敗:", err);
-      alert("文章發表失敗，請稍後再試！");
-      return;
-    }
+    //   // === 新增：若有選首圖，夾帶 POST_IMG 給後端 ===
+    //   if (coverFile.value) {
+    //     formData.append("post_img", coverFile.value); // 後端 create.php 會存成封面
+    //   }
+    //   // === 新增結束 ===
+
+    //   const res = await axios.post(
+    //     `${import.meta.env.VITE_API_BASE}/posts/create.php`,
+    //     formData,
+    //     {
+    //       headers: { "Content-Type": "multipart/form-data" },
+    //       withCredentials: true,
+    //     }
+    //   );
+    //   router.push("/article/article");
+    //   // const newArticle = await createArticleAPI(form);
+    //   console.log("正在【新增】文章:", form);
+    //   alert("文章發表成功！");
+    // } catch (err) {
+    //   console.error("發表失敗:", err);
+    //   alert("文章發表失敗，請稍後再試！");
+    //   return;
+    // }
     // 成功後跳轉回列表頁
     //router.push("/article/article");
+  }
+  try {
+    const res = await axios.post(apiUrl, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      withCredentials: true,
+    });
+    if (res.data.ok) {
+      alert(props.mode === "edit" ? "文章更新成功！" : "文章發表成功！");
+      router.push("/article/article");
+    } else {
+      throw new Error(res.data.error || "送出失敗");
+    }
+  } catch (err) {
+    alert("送出失敗：" + (err?.message || "請稍後再試"));
   }
 }
 // --- 圖片上傳處理邏輯 (保持不變) ---

@@ -32,15 +32,15 @@ const previewStore = usePreviewStore();
 const route = useRoute();
 const router = useRouter();
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
-
-// ...existing code...
+const coverFile = ref(null);
 const currentUser = ref({
   member_id: null,
   author: "",
   avatar: "",
   replies: [],
 });
-
+//抓是預覽模式是從編輯還是發文送出
+const mode = computed(() => route.query.mode || "create");
 async function fetchCurrentUser() {
   try {
     const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
@@ -272,21 +272,70 @@ function EditArticle() {
   });
 }
 
-//預覽模式的送出
 async function submitArticle() {
-  if (props.mode === "edit") {
-    // --- 未來串接 API 的位置 (更新/PUT) ---
-    // await updateArticleAPI(form.postid, form);
-    alert("文章更新成功！");
-  } else {
-    // --- 未來串接 API 的位置 (新增/POST) ---
-    // const newArticle = await createArticleAPI(form);
-    alert("文章發表成功！");
-  }
-  // 成功後跳轉回列表頁
-  router.push("/article/article");
-}
+  // 取得預覽資料
+  const previewData = previewStore.previewData;
 
+  // 取得分類編號
+  const categories = [
+    "登山",
+    "桌遊",
+    "運動",
+    "露營",
+    "唱歌",
+    "展覽",
+    "水上活動",
+    "聚餐",
+    "電影",
+    "手作",
+    "文化體驗",
+    "演出表演",
+    "其他",
+  ];
+  const categoryIndex = categories.indexOf(previewData.event);
+  const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
+
+  // if (!categoryNo) {
+  //   alert("請選擇有效的分類");
+  //   return;
+  // }
+
+  const formData = new FormData();
+  formData.append("category_no", categoryNo);
+  formData.append("post_title", previewData.title);
+  formData.append("post_content", previewData.content);
+
+  // 編輯模式要加 post_no
+  if (mode.value === "edit") {
+    formData.append("post_no", previewData.postid);
+  }
+  // 圖片檔案來源
+  const previewCoverFile = previewData.coverFile || coverFile.value;
+  if (previewCoverFile) {
+    formData.append("post_img", previewCoverFile);
+  }
+
+  // 判斷 API 路徑
+  const apiUrl =
+    mode.value === "edit"
+      ? `${VITE_API_BASE}/posts/update.php`
+      : `${VITE_API_BASE}/posts/create.php`;
+
+  try {
+    const res = await axios.post(apiUrl, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      withCredentials: true,
+    });
+    if (res.data.ok) {
+      alert(mode.value === "edit" ? "文章更新成功！" : "文章發表成功！");
+      router.push("/article/article");
+    } else {
+      throw new Error(res.data.error || "送出失敗");
+    }
+  } catch (err) {
+    alert("送出失敗：" + (err?.message || "請稍後再試"));
+  }
+}
 //刪除文章功能
 function DeleteCheck() {
   if (!article.value) return; // 保險
@@ -545,9 +594,19 @@ onUnmounted(() => {
         <div class="article-head">
           <span
             class="event-label"
-            :style="{ borderColor: GetEventColor(categoryMap[article.event]) }"
+            :style="{
+              borderColor: GetEventColor(
+                typeof article.event === 'number'
+                  ? categoryMap[article.event]
+                  : article.event
+              ),
+            }"
           >
-            {{ categoryMap[article.event] }}
+            {{
+              typeof article.event === "number"
+                ? categoryMap[article.event]
+                : article.event
+            }}
           </span>
           <p>{{ article.date }}</p>
         </div>
