@@ -1,50 +1,67 @@
 <script setup>
-import { ref } from 'vue'
-// 當前頁籤
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+axios.defaults.withCredentials = true
+const API = import.meta.env.VITE_API_BASE
+
 const activeTab = ref('system')
+const systemNotifications = ref([])
+const generalNotifications = ref([])
 
-// 系統通知資料
-const systemNotifications = ref([
-  {
-    id: 1,
-    title: '7/4 新手友善 陽明山登山團 報名成功通知',
-    content: '此為系統通知，無需做回覆\n您在剛剛成功參與了 7/4 新手友善 陽明山登山團\n針對活動如有任何疑問可在活動頁面留言',
-    expanded: false,
+async function fetchNotifications() {
+  // 系統通知
+  const sys = await axios.get(`${API}/notifications/list.php`, {
+    params: { type: 'system', status: 'all', limit: 50, offset: 0 }
+  })
+  systemNotifications.value = (sys.data?.data || []).map(n => ({
+    id: Number(n.notification_no),
+    title: n.title,
+    content: n.content ?? '',
+    status: n.status,                 // '未讀' | '已讀'
+    type: n.type,                     // '系統通知'
+    created_at: n.created_at,
+    expanded: false
+  }))
+
+  // 互動通知
+  const gen = await axios.get(`${API}/notifications/list.php`, {
+    params: { type: 'interact', status: 'all', limit: 50, offset: 0 }
+  })
+  generalNotifications.value = (gen.data?.data || []).map(n => ({
+  id: Number(n.notification_no),
+  title: n.title,
+  content: n.content ?? '',
+  status: n.status,
+  type: n.type,
+  created_at: n.created_at
+  }))
+}
+
+onMounted(fetchNotifications)
+
+// 標記已讀（支援多筆）
+async function markRead(ids = []) {
+  if (!ids.length) return
+  try {
+    await axios.post(`${API}/notifications/mark-read.php`, { ids })
+  } catch (e) {
+    console.error('mark-read failed', e)
   }
-])
+}
 
-// 一般通知資料
-const generalNotifications = ref([
-  {
-    id: 2,
-    title: '你的文章有新留言',
-    content:'12/31 合歡山跨年看日出',
-    expanded: false
-  },
-  {
-    id: 3,
-    title: '有人回覆你的留言',
-    content:'這次的爬山活動真的很不錯，天氣也很剛好.....',
-    expanded: false
-  },
-  {
-    id: 4,
-    title: '有人回覆你的留言',
-    content:'這次的桌遊活動真的很好玩，認識很多新朋友.....',
-    expanded: false
-  },
-  {
-    id: 5,
-    title: '你的文章有新留言',
-    content:'7/6 墾丁初學潛水團',
-    expanded: false
-  },
-])
-
-// 展開/收合
+// 展開/收合 + 首次展開即標已讀
 function toggleAccordion(list, item) {
   list.forEach(n => {
-    n.expanded = (n.id === item.id) ? !n.expanded : false
+    if (n.id === item.id) {
+      const willExpand = !n.expanded
+      n.expanded = willExpand
+      if (willExpand && n.status === '未讀') {
+        n.status = '已讀'         // 立即回饋
+        markRead([n.id])          // 後端同步
+      }
+    } else {
+      n.expanded = false
+    }
   })
 }
 </script>
@@ -52,10 +69,22 @@ function toggleAccordion(list, item) {
 <template>
   <div class="notify-tabs">
     <ul class="tab-header">
-      <li><button :class="{ active: activeTab === 'system' }"
-        @click="activeTab = 'system'">系統通知</button></li>
-      <li><button :class="{ active: activeTab === 'general' }"
-        @click="activeTab = 'general'">一般通知</button></li>
+      <li>
+    <button :class="{ active: activeTab === 'system' }" @click="activeTab = 'system'">
+      系統通知
+      <span v-if="systemNotifications.some(n=>n.status==='未讀')" class="badge">
+        {{ systemNotifications.filter(n=>n.status==='未讀').length }}
+      </span>
+    </button>
+  </li>
+  <li>
+    <button :class="{ active: activeTab === 'general' }" @click="activeTab = 'general'">
+      一般通知
+      <span v-if="generalNotifications.some(n=>n.status==='未讀')" class="badge">
+        {{ generalNotifications.filter(n=>n.status==='未讀').length }}
+      </span>
+    </button>
+  </li>
     </ul>
     
     <div class="notify-body">
@@ -67,7 +96,10 @@ function toggleAccordion(list, item) {
         class="notify-item"
       >
         <div class="notify-title system" @click="toggleAccordion(systemNotifications, item)">
-          {{ item.title }}
+          <div class="title-wrap">
+            <span v-if="item.status === '未讀'" class="unread-dot"></span>
+            <span :class="{'unread-text': item.status === '未讀'}">{{ item.title }}</span>
+      </div>
           <span class="icon-wrapper" :class="{ rotated: item.expanded }">
             <svg
             class="icon"
@@ -97,10 +129,17 @@ function toggleAccordion(list, item) {
           :key="item.id" 
           class="notify-item"
         >
-          <h4 class="notify-title">{{ item.title }}</h4>
+          <h4 class="notify-title">
+            <span class="title-wrap">
+              <span v-if="item.status === '未讀'" class="unread-dot"></span>
+              <span :class="{'unread-text': item.status === '未讀'}">{{ item.title }}</span>
+            </span>
+          </h4>
           <p class="notify-detail">{{ item.content }}</p>
         </div>
       </div>
+
+
     </div>
   </div>
 </template>
@@ -204,6 +243,32 @@ function toggleAccordion(list, item) {
   background: linear-gradient(180deg, #81BFDA, #4F8DA8);
   border-radius: 8px;
 }
+//已讀未讀
+.title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5a5a;
+  display: inline-block;
+}
+.unread-text {
+  font-weight: 700;
+}
+.badge { 
+  margin-left:6px; 
+  padding:0 6px; 
+  border-radius:10px; 
+  font-size:12px; 
+  background:#ff5a5a; 
+  color:#fff; 
+}
+
+
 //桌機版
 @include desktop{
   .notify-tabs{

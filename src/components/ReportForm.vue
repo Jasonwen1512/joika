@@ -7,7 +7,7 @@ const props = defineProps({
     onSubmit: Function
 })
 
-    const reason = ref('')
+    const reason = ref(null)
     const detail = ref('')
     const reasons = ref([])
 
@@ -27,8 +27,8 @@ const props = defineProps({
         return
     }
     props.onSubmit({ 
-        reason: reason.value, 
-        detail: detail.value })
+        reason: Number(reason.value), 
+        detail: (detail.value || '').trim() })
     }
     // 取消
     function cancelForm() {
@@ -47,7 +47,7 @@ const props = defineProps({
                 <option 
                     v-for="r in reasons" 
                     :key="r.REASON_NO" 
-                    :value="r.REASON_NO"
+                    :value="Number(r.REASON_NO)"
                 >
                     {{ r.REASON }}
                 </option>

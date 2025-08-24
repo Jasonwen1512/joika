@@ -346,48 +346,56 @@ function DeleteCheck() {
 //文章檢舉功能
 function openReportModal() {
   const container = document.createElement("div");
+
   render(
     h(ReportForm, {
       onSubmit: async (data) => {
         const baseURL = import.meta.env.VITE_API_BASE;
-        const reporterId = currentUser.value.userid;
         const postNo = article.value?.postid;
 
         if (!postNo) {
           Swal.fire("錯誤", "找不到文章編號", "error");
           return;
         }
-        console.log({
-          reporter_id: reporterId,
-          post_no: postNo,
+
+        // 後端用 Session 取 member_id，不再傳 reporter_id
+        const payload = {
+          post_no: Number(postNo),
           report_reason_no: Number(data.reason),
-          report_description: data.detail,
-        });
+          report_description: (data.detail || "").trim(),
+        };
+        // console.log('report payload:', payload);
 
         try {
-          const res = await axios.post(`${baseURL}/reports/post-report.php`, {
-            reporter_id: reporterId,
-            post_no: postNo,
-            report_reason_no: Number(data.reason),
-            report_description: data.detail,
-          });
+          
+          const { data: resp } = await axios.post(
+            `${baseURL}/reports/post-report.php`,
+            payload,
+            { headers: { "Content-Type": "application/json" },
+              withCredentials: true,
+            }
+          );
 
-          if (res.data.success) {
+          if (resp?.ok) {
             Swal.close();
             Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
           } else {
-            Swal.fire("送出失敗", res.data.error || "請稍後再試", "error");
+            Swal.fire("送出失敗", resp?.error || "請稍後再試", "error");
           }
         } catch (error) {
           console.error("檢舉 API 錯誤：", error);
-          Swal.fire("錯誤", "發送失敗，請稍後再試", "error");
+          const msg =
+            error?.response?.data?.error || error.message || "發送失敗，請稍後再試";
+          Swal.fire("錯誤", msg, "error");
         }
       },
     }),
     container
   );
+
+  // 
   Swal.fire({
-    title: "檢舉留言",
+    title: "檢舉文章",
     html: container,
     showCancelButton: false,
     showConfirmButton: false,
