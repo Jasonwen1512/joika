@@ -29,20 +29,9 @@ const emit = defineEmits(["comment-added"]);
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
-// // 下方留言區
-// // 假的自己 展示用
-// const currentUser = {
-//   member_id: authState.user.id, // 假設這是當前使用者的 ID
-//   author: authState.user.nickname, // 您的名字
-//   avatar: `https://i.pravatar.cc/150?u=${user.id}`, // 一個代表您自己的頭像
-//   replies: [],
-// };
-// console.log({ currentUser });
-
-// //
-
 onMounted(() => {
   fetchCurrentUser();
+  autoHideReportedComments();
 });
 
 const currentUser = ref({
@@ -68,6 +57,30 @@ async function fetchCurrentUser() {
     console.error("取得登入者資料失敗", err);
   }
 }
+//先檢查所有留言的狀態有無被檢舉通過且未隱藏的
+async function autoHideReportedComments() {
+  for (const comment of props.comments) {
+    // 只檢查未隱藏的留言
+    if (comment.status !== "隱藏") {
+      try {
+        const res = await axios.post(
+          `${VITE_API_BASE}/comments/post-delete.php`,
+          {
+            type: "post",
+            comment_no: comment.id,
+          },
+          { withCredentials: true }
+        );
+        // 若 API 回傳 success，通知父層刷新留言
+        if (res.data.success) emit("comment-added");
+      } catch (err) {
+        // 可選：錯誤處理
+        console.error("自動隱藏留言失敗", err);
+      }
+    }
+  }
+}
+
 // 使用 defineProps 來接收從父元件傳入的留言資料
 const props = defineProps({
   comments: {
