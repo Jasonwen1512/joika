@@ -369,12 +369,7 @@ function ReportIt(commentId) {
 
       onSubmit: async (data) => {
         const reporterId = currentUser.value.member_id;
-        // 壞掉中 先註解掉
-        // if (!reporterId) {
-        //   Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
-        //   return;
-        // }
-        // const reporterId = currentUser.value.member_id;
+
         const payload = {
           reporter_id: reporterId,
           post_comment_no: commentId, // ← 直接用外層 commentId

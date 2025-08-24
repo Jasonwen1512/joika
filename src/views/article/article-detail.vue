@@ -421,14 +421,20 @@ function openReportModal() {
         });
 
         try {
-          const res = await axios.post(`${baseURL}/reports/post-report.php`, {
-            reporter_id: reporterId,
-            post_no: postNo,
-            report_reason_no: Number(data.reason),
-            report_description: data.detail,
-          });
+          const res = await axios.post(
+            `${baseURL}/reports/post-report.php`,
+            {
+              reporter_id: reporterId,
+              post_no: postNo,
+              report_reason_no: Number(data.reason),
+              report_description: data.detail,
+            },
+            {
+              withCredentials: true, // 這個一定要加
+            }
+          );
 
-          if (res.data.success) {
+          if (res.data.ok) {
             Swal.close();
             Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
           } else {
@@ -443,7 +449,7 @@ function openReportModal() {
     container
   );
   Swal.fire({
-    title: "檢舉留言",
+    title: "檢舉文章",
     html: container,
     showCancelButton: false,
     showConfirmButton: false,
