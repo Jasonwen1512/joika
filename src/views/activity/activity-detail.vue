@@ -21,46 +21,83 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { imageUrl } from "@/assets/utils/normalize";
 
-
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 axios.defaults.withCredentials = true;
 
 const route = useRoute();
 const activityNo = route.params.activity_id;
-
-const imgSrc = computed(() =>
-  imageUrl(activity.value?.ACTIVITY_IMG ?? activity.value?.activity_img ?? '')
-)
-
 const currentActivityId = computed(() => route.params.activity_id);
 
-const activitiesData = ref([]);
-onMounted(async () => {
+const detail = ref(null);
+const loading = ref(true);
+const err = ref(null);
+onMounted(loadDetail);
+watch(() => route.params.activity_id, loadDetail);
+async function loadDetail() {
+  loading.value = true;
+  err.value = null;
   try {
-    const response = await axios.get(`${VITE_API_BASE}/activities/list.php`);
-    activitiesData.value = (
-      Array.isArray(response.data) ? response.data : []
-    ).map((r) => r, VITE_API_BASE);
-    // console.log(activitiesData.value);
-  } catch (error) {
-    console.error(`抓取list-all資料失敗${error}`);
+    const id = route.params.activity_id;
+    const { data } = await axios.get(
+      `${VITE_API_BASE}/activities/detail.php?id=${id}`,
+      { withCredentials: true }
+    );
+    console.log("detail:", data);
+    detail.value = data;
+  } catch (e) {
+    console.error(e);
+    err.value = e?.response?.data?.error || "讀取詳情失敗";
+  } finally {
+    loading.value = false;
   }
-});
+}
+const activity = computed(() => detail.value?.activity ?? null);
+const hoster = computed(() => detail.value?.hoster ?? null);
+const flags = computed(() => detail.value?.flags ?? {});
 
-const isCancelled = computed(
-  () => activity.value?.ACTIVITY_STATUS === "已取消"
+const isHost = computed(() => !!flags.value.isHost);
+const isJoiner = computed(() => !!flags.value.isJoiner);
+const canCancel = computed(() => !!flags.value.canCancel);
+const canRate = computed(() => !!flags.value.canRate);
+
+const participantsPreview = computed(
+  () => detail.value?.participants?.preview ?? []
+);
+const participantsCount = computed(
+  () => detail.value?.participants?.count ?? 0
+);
+
+const ratingsSummary = computed(
+  () => detail.value?.ratings ?? { avg: 0, count: 0, mine: null }
+);
+const participantsForModal = computed(() => {
+  const arr =
+    detail.value?.participants?.list ??
+    detail.value?.participants?.preview ??
+    [];
+
+  return arr.map((p) => {
+    const id = Number(p.MEMBER_ID ?? p.id ?? 0);
+    return {
+      id,
+      name: p.NICKNAME ?? p.name ?? `會員 #${id}`,
+      avatar: p.AVATAR ?? p.avatar ?? `https://i.pravatar.cc/150?u=${id}`,
+      city: p.CITY_NAME ?? p.city ?? "—",
+      age: p.AGE ?? p.age ?? null,
+      role: p.OCCUPATION ?? p.role ?? "—",
+      rating: Number(p.RATING ?? p.rating ?? 0),
+      reviews: Number(p.REVIEWS ?? p.reviews ?? 0),
+    };
+  });
+});
+const imgSrc = computed(() =>
+  imageUrl(activity.value?.ACTIVITY_IMG || activity.value?.activity_img || "")
 );
 const rawRouteId = computed(() => String(route.params.activity_id || ""));
 const routeIdNumeric = computed(() => {
   const n = Number(rawRouteId.value.replace(/\D/g, ""));
   return Number.isFinite(n) ? n : null;
-});
-const activity = computed(() => {
-  return (
-    activitiesData.value.find((a) => a.id === routeIdNumeric.value) ||
-    activitiesData.value.find((a) => a.ACTIVITY_NO === rawRouteId.value)
-  );
 });
 
 const likeMap = ref({});
@@ -77,7 +114,6 @@ const gotoSignup = (id) => {
   }
   router.push(`/group/group-signup/${id}`);
 };
-
 
 // --- 按鈕切換 & 鍵盤監聽 ---
 const isGroupJoined = ref(false); // 用於切換按鈕
@@ -98,6 +134,7 @@ onUnmounted(() => {
 });
 
 // --- 評價彈窗控制 ---
+
 const isRatingModalVisible = ref(false); // 評價彈窗的「開關」
 
 const openRatingModal = () => {
@@ -108,11 +145,59 @@ const closeRatingModal = () => {
   isRatingModalVisible.value = false; // 關閉評價彈窗
 };
 
-const submitRatings = (ratingsData) => {
-  console.log("從彈窗收到的評分資料:", ratingsData);
-  alert("評分已送出！感謝你的評價");
-  closeRatingModal(); // 提交後關閉彈窗
-};
+async function submitRatings(payload) {
+  try {
+    // 允許「沒選任何人就關閉」
+    if (!payload || !Array.isArray(payload.items) || payload.items.length === 0) {
+      closeRatingModal();
+      return;
+    }
+
+    const body = {
+      activity_no: Number(payload.activity_no || activity.value?.ACTIVITY_NO),
+      items: payload.items
+        .map(x => ({
+          ratee_id: Number(x.ratee_id),
+          ratee_role: x.ratee_role,                 // '主揪' 或 '參與者'
+          rating_score: Number(x.rating_score),
+        }))
+        .filter(x =>
+          Number.isFinite(x.ratee_id) &&
+          (x.ratee_role === '主揪' || x.ratee_role === '參與者') &&
+          x.rating_score >= 1 && x.rating_score <= 5
+        ),
+    };
+
+    if (!body.activity_no || body.items.length === 0) {
+      closeRatingModal();
+      return;
+    }
+
+    console.log('rate payload:', body);
+
+    const { data } = await axios.post(
+      `${VITE_API_BASE}/activities/rate.php`,
+      body,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true, // 一定要帶，才能拿到 session
+      }
+    );
+
+    console.log('rate response:', data);
+    alert(data?.message || `評分完成（${data?.inserted ?? body.items.length} 筆）`);
+    closeRatingModal();
+    await loadDetail();
+  } catch (err) {
+    // 把完整錯誤印出來，方便你在 console 看
+    console.error('rate error full:', err);
+    if (err?.response) {
+      console.error('rate error response:', err.response.status, err.response.data);
+    }
+    const msg = err?.response?.data?.error || err?.message || '評分失敗';
+    alert(msg);
+  }
+}
 
 // === 新增：取消彈窗相關邏輯 ===
 const isCancelModalVisible = ref(false); // 取消彈窗的「開關」
@@ -141,26 +226,15 @@ async function fetchMe() {
 }
 onMounted(fetchMe);
 
-const isHost = computed(() => {
-  const hostId =
-    activity.value?.HOST_MEMBER_ID ?? activity.value?.host_member_id;
-  return (
-    !!(hostId && currentUserId.value) &&
-    Number(hostId) === Number(currentUserId.value)
-  );
-});
-
-const isJoiner = computed(() => false);
-
 //主揪取消活動API
 async function handleCancelSubmit(payload) {
   try {
-   const actNo = Number(activity.value?.ACTIVITY_NO);
-if (!Number.isFinite(actNo) || actNo <= 0) {
-  alert("找不到有效的活動編號");
-  return;
-}
-  const body = {
+    const actNo = Number(activity.value?.ACTIVITY_NO);
+    if (!Number.isFinite(actNo) || actNo <= 0) {
+      alert("找不到有效的活動編號");
+      return;
+    }
+    const body = {
       reason_no: Number(payload?.reason_no ?? payload?.reasonNo ?? 0),
       reason_detail: payload?.reason_detail ?? payload?.reasonDetail ?? null,
     };
@@ -168,37 +242,33 @@ if (!Number.isFinite(actNo) || actNo <= 0) {
       alert("請選擇取消原因");
       return;
     }
+    const url = isHost.value
+      ? `${VITE_API_BASE}/activities/cancel-hoster.php?id=${actNo}`
+      : `${VITE_API_BASE}/activities/cancel-joiner.php?id=${actNo}`;
 
-    const res = await axios.patch(
-      `${VITE_API_BASE}/activities/cancel-hoster.php?id=${actNo}`,
-      body,
-      {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      }
-    );
-    const data = res.data || {};
-    if (data.error) {
-      alert(data.error || "取消失敗");
-      return;
+    const { data } = await axios.patch(url, body, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
+
+    if (!data || data.error) {
+      throw new Error(data?.message || data?.error || "取消失敗");
     }
+
     isCancelModalVisible.value = false;
     modalResetKey.value++;
-    alert("取消成功");
-    router.push("/home");
- } catch (err) {
-    // 6) 顯示後端錯誤（才看得到 401/409/500 的細節）
+    alert(data?.message || "取消成功");
+    await loadDetail(); // ← 這步很重要
+  } catch (err) {
     const msg =
+      err?.response?.data?.message ||
       err?.response?.data?.error ||
       err?.message ||
       "取消失敗（未知錯誤）";
-    alert("取消失敗：" + msg);
-
-    // 也可以在 console 詳細看
+    alert(msg);
     console.error("cancel error:", err?.response || err);
   }
 }
-
 
 const formDate = (dateStr) => {
   const date = new Date(dateStr);
@@ -210,80 +280,77 @@ const formDate = (dateStr) => {
     .padStart(2, "0")}/${day.toString().padStart(2, "0")}`;
 };
 
-// watch(activity, a => {
-//   // console.log('HOST_MEMBER_ID from activity =', a?.HOST_MEMBER_ID)
-// })
 // === End 新增 ===
 
 // 團員假資料
-const participants = ref([
-  {
-    id: 1,
-    name: "小黃",
-    avatar:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1887&auto=format&fit=crop",
-    rating: 5,
-    reviews: 3,
-    city: "新北市",
-    age: 22,
-    role: "大學生",
-  },
-  {
-    id: 2,
-    name: "阿強",
-    avatar:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1887&auto=format&fit=crop",
-    rating: 4,
-    reviews: 5,
-    city: "台北市",
-    age: 28,
-    role: "工程師",
-  },
-  {
-    id: 3,
-    name: "艾蜜莉",
-    avatar:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop",
-    rating: 5,
-    reviews: 8,
-    city: "高雄市",
-    age: 25,
-    role: "設計師",
-  },
-  {
-    id: 4,
-    name: "大衛",
-    avatar:
-      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1887&auto=format&fit=crop",
-    rating: 4,
-    reviews: 2,
-    city: "台中市",
-    age: 31,
-    role: "行銷企劃",
-  },
-  {
-    id: 5,
-    name: "潔西卡",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1887&auto=format&fit=crop",
-    rating: 5,
-    reviews: 10,
-    city: "台南市",
-    age: 27,
-    role: "自由工作者",
-  },
-  {
-    id: 6,
-    name: "布萊恩",
-    avatar:
-      "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=1170&auto=format&fit=crop",
-    rating: 3,
-    reviews: 1,
-    city: "新竹市",
-    age: 35,
-    role: "軟體開發",
-  },
-]);
+// const participants = ref([
+//   {
+//     id: 1,
+//     name: "小黃",
+//     avatar:
+//       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1887&auto=format&fit=crop",
+//     rating: 5,
+//     reviews: 3,
+//     city: "新北市",
+//     age: 22,
+//     role: "大學生",
+//   },
+//   {
+//     id: 2,
+//     name: "阿強",
+//     avatar:
+//       "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1887&auto=format&fit=crop",
+//     rating: 4,
+//     reviews: 5,
+//     city: "台北市",
+//     age: 28,
+//     role: "工程師",
+//   },
+//   {
+//     id: 3,
+//     name: "艾蜜莉",
+//     avatar:
+//       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop",
+//     rating: 5,
+//     reviews: 8,
+//     city: "高雄市",
+//     age: 25,
+//     role: "設計師",
+//   },
+//   {
+//     id: 4,
+//     name: "大衛",
+//     avatar:
+//       "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1887&auto=format&fit=crop",
+//     rating: 4,
+//     reviews: 2,
+//     city: "台中市",
+//     age: 31,
+//     role: "行銷企劃",
+//   },
+//   {
+//     id: 5,
+//     name: "潔西卡",
+//     avatar:
+//       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1887&auto=format&fit=crop",
+//     rating: 5,
+//     reviews: 10,
+//     city: "台南市",
+//     age: 27,
+//     role: "自由工作者",
+//   },
+//   {
+//     id: 6,
+//     name: "布萊恩",
+//     avatar:
+//       "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=1170&auto=format&fit=crop",
+//     rating: 3,
+//     reviews: 1,
+//     city: "新竹市",
+//     age: 35,
+//     role: "軟體開發",
+//   },
+// ]);
 // //偵錯用
 // console.log("路由參數 activity_id:", currentActivityId.value);
 // console.log("FakeActivity 所有 id:", FakeActivity.map(a => a.activity_id));
@@ -454,7 +521,7 @@ const swiperModules = [Pagination];
     </div>
     <!-- 圖片 -->
     <div class="activity-image">
-      <img  :src="imgSrc" :alt="activity?.ACTIVITY_NAME" />
+      <img :src="imgSrc" :alt="activity?.ACTIVITY_NAME" />
     </div>
 
     <!-- 標題 -->
@@ -464,33 +531,40 @@ const swiperModules = [Pagination];
 
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
     <div class="activity-button-wrap">
-      <!-- 狀態一：尚未跟團 -->
-     
-
       <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
       <template v-if="!meLoading && (isHost || isJoiner)">
         <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
         <Button
+        type="button"
           @click="openCancelModal"
           theme="cancel"
-          :is-outline="true"
+          isOutlined
           size="md"
+          :isDisabled="!canCancel"
+          :title="!canCancel ? '開始前一天起或狀態不允許取消' : ''"
           >取消</Button
         >
-        <Button @click="openRatingModal" theme="primary" size="md">評價</Button>
+        <Button
+        type="button"
+          @click="openRatingModal"
+          theme="primary"
+          size="md"
+          :isDisabled="!canRate"
+          :title="!canRate ? '活動未完成，暫不可評分' : ''"
+          >評價</Button
+        >
       </template>
 
       <template v-else>
         <Button
+        type="button"
           @click.stop.prevent="gotoSignup(activity?.ACTIVITY_NO)"
           theme="primary"
           size="md"
         >
           我要跟團!
         </Button>
-        <LikeButton
-          :activity-no="activityNo"
-        ></LikeButton>
+        <LikeButton :activity-no="activityNo"></LikeButton>
       </template>
     </div>
 
@@ -603,24 +677,24 @@ const swiperModules = [Pagination];
           :space-between="20"
         >
           <swiper-slide
-            v-for="participant in participants"
-            :key="participant.id"
+            v-for="participant in participantsPreview"
+            :key="participant.MEMBER_ID"
           >
             <div class="participant-card">
               <img
-                :src="participant.avatar"
+                :src="participant.AVATAR"
                 alt=""
                 class="participant-avatar"
               />
               <div class="participant-details">
-                <div class="participant-name">{{ participant.name }}</div>
+                <div class="participant-name">{{ participant.NICKNAME }}</div>
                 <div class="rating-line">
                   <div class="stars stars-blue">
                     <i
                       v-for="n in 5"
                       :key="n"
                       :class="
-                        n <= participant.rating
+                        n <= Math.round(Number(participant.RATING || 0))
                           ? 'fa-solid fa-star'
                           : 'fa-regular fa-star'
                       "
@@ -632,6 +706,11 @@ const swiperModules = [Pagination];
                     }})</span
                   >
                 </div>
+                <span
+                  >{{ Number(participant.RATING || 0).toFixed(1) }} ({{
+                    participant.reviews || 0
+                  }})</span
+                >
                 <div class="participant-bio">
                   {{ participant.city }} | {{ participant.age }}歲 |
                   {{ participant.role }}
@@ -666,7 +745,11 @@ const swiperModules = [Pagination];
       v-if="activity"
       :show="isRatingModalVisible"
       :activity="activity"
-      :participants="participants"
+      :participants="participantsForModal"
+      :hoster="hoster"
+      :current-user-id="currentUserId"
+      :is-host="isHost"
+      :is-joiner="isJoiner"
       @close="closeRatingModal"
       @submit="submitRatings"
     />
