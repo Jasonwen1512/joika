@@ -10,7 +10,7 @@ const props = defineProps({
 
 const titleDate = computed(() => {
     if (!props.item) return "";
-    const no = props.item.activity_day ?? "";
+    const no = props.item.activity_start_txt ?? "";
     const name = props.item.activity_name ?? "";
   return `${no} ${name}`; // 可讀性更好
 });
