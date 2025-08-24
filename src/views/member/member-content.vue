@@ -271,7 +271,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
                 <div class="button-group">
-                    <RouterLink to="/member-notify">
+                    <RouterLink to="/member/member-notify">
                         <Button
                             :prefixIcon="NotifyIcon"
                             size="lg"
