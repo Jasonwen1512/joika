@@ -1,12 +1,23 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from "vue";
 
 // 1. 導入您的主要插圖
-import articleimg from '@/assets/img/article/article-img.png?url';
+import articleimg from "@/assets/img/article/article-img.png?url";
 
 // 2. 定義動畫所需的狀態 (已簡化)
-const iconOptions = ['🎨', '⛰️', '🎬', '🍽️', '🎶', '✍️','⛺','🏖️','🔥','🌅'];
-const lightbulbIcon = '💡';
+const iconOptions = [
+  "🎨",
+  "⛰️",
+  "🎬",
+  "🍽️",
+  "🎶",
+  "✍️",
+  "⛺",
+  "🏖️",
+  "🔥",
+  "🌅",
+];
+const lightbulbIcon = "💡";
 
 // 當前在雲朵中顯示的圖示
 const currentCloudIcon = ref(iconOptions[0]);
@@ -59,9 +70,8 @@ onBeforeUnmount(() => {
     主容器，現在只綁定點擊事件
   -->
   <div class="illustration-container" @click="handleIllustrationClick">
-    
     <!-- 您的主要插圖 -->
-    <img class="main-illustration" :src="articleimg" alt="插圖">
+    <img class="main-illustration" :src="articleimg" alt="插圖" />
 
     <!-- 雲朵中的圖示 -->
     <div v-if="isIdeaActive" :key="'idea'" class="cloud-icon">
@@ -80,7 +90,6 @@ onBeforeUnmount(() => {
       <div class="idea-line line-2"></div>
       <div class="idea-line line-3"></div>
     </div>
-
   </div>
 </template>
 
@@ -88,11 +97,11 @@ onBeforeUnmount(() => {
 /* 主容器 (不變) */
 .illustration-container {
   position: absolute;
-  bottom: -100px;
+  /* bottom: -100px; */
   z-index: -999;
   position: relative;
-  width: 400px;
-  height: 400px;
+  width: 300px;
+  height: 300px;
   cursor: pointer;
 }
 
@@ -105,9 +114,9 @@ onBeforeUnmount(() => {
 /* 雲朵中的小圖示 (不變) */
 .cloud-icon {
   position: absolute;
-  top: 18%; 
+  top: 18%;
   left: 30%;
-  font-size: 45px;
+  font-size: 30px;
   transform: translate(-50%, -50%);
   animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -120,8 +129,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-      transform: rotate(-45deg); 
-
+  transform: rotate(-45deg);
 }
 
 /* [修改] 單條紅線的通用樣式，移除了 animation 屬性，改為在下方單獨定義 */
@@ -131,14 +139,13 @@ onBeforeUnmount(() => {
   border-radius: 6px;
   margin-bottom: 20px;
   transform-origin: left; /* 確保從左邊開始旋轉和縮放 */
-
 }
 
 /* [修改] 為每條線設定不同的寬度、旋轉角度和對應的動畫 */
 .idea-line.line-1 {
   width: 60px;
   /* 向上旋轉 15 度 */
-  transform: rotate(-15deg); 
+  transform: rotate(-15deg);
   animation: draw-line-1 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 

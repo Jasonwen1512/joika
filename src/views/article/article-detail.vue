@@ -740,15 +740,15 @@ main {
 }
 .preview {
   // position: absolute;
-  background-color: $tp;
-  color: #f00;
+  background-color: #fff;
+  color: #000000;
   right: 0;
   font-size: $font-size-p;
   font-family: "MyFont", sans-serif;
   padding: 10px 14px;
   text-align: center;
   vertical-align: middle;
-  border: 2px dotted #f00;
+  border: 2px solid rgb(0, 0, 0);
   border-radius: 3px;
   @include tablet() {
     border-radius: 6px;
