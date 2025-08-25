@@ -1,5 +1,6 @@
 <script setup>
 import Logo from "@/components/logo.vue";
+import router from "@/router";
 
 import { ref, onMounted, onBeforeUnmount } from "vue";
 const isMobile = ref(true);
@@ -93,17 +94,25 @@ onBeforeUnmount(() => {
       <div class="member-services">
         <span>會員服務</span>
         <div class="member-services-contents">
-          <router-link to="">會員制度</router-link>
-          <router-link to="">會員中心</router-link>
+          <router-link to="" style="pointer-events: none">會員制度</router-link>
+          <router-link to="/member/member-content">會員中心</router-link>
         </div>
       </div>
       <div class="norm">
         <span>平台規範</span>
         <div class="norm-contents">
-          <router-link to="">活動發起規範</router-link>
-          <router-link to="">活動參與規範</router-link>
-          <router-link to="">平台服務條款</router-link>
-          <router-link to="">隱私權政策</router-link>
+          <router-link to="" style="pointer-events: none"
+            >活動發起規範</router-link
+          >
+          <router-link to="" style="pointer-events: none"
+            >活動參與規範</router-link
+          >
+          <router-link to="" style="pointer-events: none"
+            >平台服務條款</router-link
+          >
+          <router-link to="" style="pointer-events: none"
+            >隱私權政策</router-link
+          >
         </div>
       </div>
       <div class="follow-me">
