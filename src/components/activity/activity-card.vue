@@ -2,15 +2,18 @@
 import { RouterLink, useRouter } from "vue-router";
 import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
-import { ref, computed } from "vue";
+import { ref, computed, toRefs } from "vue";
 import { imageUrl } from "@/assets/utils/normalize";
+import { useParticipationStore } from "@/stores/participation-store.js";
 
-const imgSrc = computed(() =>
-  imageUrl(props.item?.ACTIVITY_IMG ?? props.item?.activity_img ?? '')
-);
 const props = defineProps({
   item: Object,
 });
+const { item } = toRefs(props);
+
+const imgSrc = computed(() =>
+  imageUrl(item.value?.ACTIVITY_IMG ?? item.value?.activity_img ?? "")
+);
 
 const likeMap = ref({});
 
@@ -18,23 +21,17 @@ const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
 
-
+const participationStore = useParticipationStore();
 const router = useRouter();
+
 const gotoSignup = (id) => {
-  // 新增一：呼叫 Store 的總指揮函式
   participationStore.handleJoinProcess(id);
-  // 結束備註
-  // router.push(`/group/group-signup/${id}`);
 };
 
-// === 在這裡，也就是 gotoSignup 的正下方，貼上新函式 ===
 const handleButtonClick = (id) => {
-  // 檢查是否已參團
   if (participationStore.isJoined(id)) {
-    // 如果是，就跳轉到活動詳情頁
     router.push(`/activity/${id}`);
   } else {
-    // 如果不是，就執行原本的報名流程
     gotoSignup(id);
   }
 };
@@ -53,20 +50,12 @@ const titleDate = computed(() => {
   const start = formDate(props.item.ACTIVITY_START_DATE);
   const end = formDate(props.item.ACTIVITY_END_DATE);
 
-  // console.log(
-  //   `start:${start}  end:${end} 活動名稱：${props.item.ACTIVITY_NAME}`
-  // );
-
   if (start === end) {
     return `${start} ${props.item.ACTIVITY_NAME}`;
   } else {
     return `${start}-${end} ${props.item.ACTIVITY_NAME}`;
   }
 });
-
-// 新增：呼叫 useParticipationStore() 函式，
-// 這樣下面的 template 區塊才能用 participationStore 這個變數
-const participationStore = useParticipationStore(); 
 </script>
 
 <template>
@@ -77,24 +66,18 @@ const participationStore = useParticipationStore();
     >
       <img :src="imgSrc" :alt="props.item.ACTIVITY_NAME" />
     </RouterLink>
-    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
-      ><h4 class="activity-name">
+    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`">
+      <h4 class="activity-name">
         {{ titleDate }}
-      </h4></RouterLink
-    >
-    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`" class="desc-link"
-      ><p class="activity-description">
+      </h4>
+    </RouterLink>
+    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`" class="desc-link">
+      <p class="activity-description">
         {{ props.item.ACTIVITY_DESCRIPTION }}
-      </p></RouterLink
-    >
+      </p>
+    </RouterLink>
 
     <div class="button-group" @click.stop.prevent>
-      <!-- <Button
-        @click.stop.prevent="gotoSignup(item.ACTIVITY_NO)"
-        theme="primary"
-        size="md"
-        >我要跟團!</Button> -->
-
       <Button
         @click.stop.prevent="handleButtonClick(item.ACTIVITY_NO)"
         :theme="'primary'"
@@ -102,10 +85,12 @@ const participationStore = useParticipationStore();
         :disabled="participationStore.isLoading"
       >
         <span v-if="participationStore.isLoading">載入中...</span>
-        <span v-else>{{ participationStore.isJoined(item.ACTIVITY_NO) ? '已參團' : '我要跟團！' }}</span>
+        <span v-else>
+          {{ participationStore.isJoined(item.ACTIVITY_NO) ? "已參團" : "我要跟團！" }}
+        </span>
       </Button>
 
-      <LikeButton :activity-no="item.ACTIVITY_NO"></LikeButton>
+      <LikeButton :activity-no="item.ACTIVITY_NO" />
     </div>
   </div>
 </template>
@@ -145,10 +130,6 @@ const participationStore = useParticipationStore();
   @include desktop() {
   }
 }
-
-// .activity-img:hover {
-//   transform: rotate(-5deg);
-// }
 
 .activity-name {
   color: $black;
