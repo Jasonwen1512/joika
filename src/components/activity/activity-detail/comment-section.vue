@@ -128,7 +128,7 @@ function postComment() {
 
   const postData = {
     activity_no: activityNoNumeric,
-    member_id: user.value?.member_id,
+    member_id: currentUser.value.member_id,
     comment_content: newComment.value,
     parent_no: null,
   };
@@ -306,13 +306,15 @@ const likeIt = async (comment) => {
 
     console.log("點讚狀態更新成功:", response.data);
   } catch (error) {
-    // 步驟 6: 如果 API 呼叫失敗，將畫面回復到操作前的狀態
-    console.error("點讚失敗:", error);
+    // 更詳細的錯誤資訊
+    console.error("點讚失敗:", error, error.response?.data);
     comment.liked = originalLiked;
     comment.likenum = originalLikeNum;
-
-    // (可選) 跳出錯誤提示
-    Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
+    Swal.fire(
+      "錯誤",
+      error.response?.data?.error || "點讚失敗，請稍後再試。",
+      "error"
+    );
   }
 };
 /**
@@ -344,21 +346,23 @@ function ReportIt(commentId) {
 
         const payload = {
           reporter_id: reporterId,
-          post_comment_no: commentId, // ← 直接用外層 commentId
+          activity_comment_no: commentId, // ← 直接用外層 commentId
           report_reason_no: mapReasonToNumber(data.reason),
           report_description: data.detail,
         };
 
         try {
           const { data: result } = await axios.post(
-            `${import.meta.env.VITE_API_BASE}/reports/comment-report.php`,
+            `${
+              import.meta.env.VITE_API_BASE
+            }/reports/actvities-comment-report.php`,
             payload,
             {
               headers: { "Content-Type": "application/json" },
             }
           );
 
-          if (result.success) {
+          if (result.ok) {
             Swal.close();
             Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
           } else {
@@ -436,7 +440,7 @@ function ReportIt(commentId) {
                   {{ comment.replies.length }}
                 </span>
               </div>
-              <div class="action-icon" @click="ReportIt">
+              <div class="action-icon" @click="ReportIt(comment.id)">
                 <img :src="reprot" />
               </div>
             </div>
