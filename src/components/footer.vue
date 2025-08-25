@@ -95,7 +95,6 @@ onBeforeUnmount(() => {
         <div class="member-services-contents">
           <router-link to="">會員制度</router-link>
           <router-link to="">會員中心</router-link>
-          <router-link to="">點數中心</router-link>
         </div>
       </div>
       <div class="norm">
