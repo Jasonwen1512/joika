@@ -1,59 +1,151 @@
 <script setup>
-import { ref, watch } from 'vue';
-import Button from '@/components/Button.vue';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import { ref, watch, computed } from "vue";
+import Button from "@/components/Button.vue";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 // === Props & Emits: 定義這個元件如何與外部溝通 ===
 const props = defineProps({
   show: {
     type: Boolean,
-    default: false
+    default: false,
   },
   activity: {
     type: Object,
-    required: true
+    required: true,
+    default: () => [],
   },
   participants: {
     type: Array,
-    required: true
-  }
+    required: true,
+  },
+  currentUserId: { type: [Number, String, null], default: null },
+  hoster: { type: Object, default: null },
+  isHost: Boolean,
+  isJoiner: Boolean,
 });
 
-const emit = defineEmits(['close', 'submit']);
+const emit = defineEmits(["close", "submit"]);
 
 // === Component State: 元件內部的狀態管理 ===
 const ratings = ref({});
 const hoverRating = ref({});
+const ratingHost = ref(0);
+const hoverHost = ref(0);
+
+const activityName = computed(
+  () => props.activity?.ACTIVITY_NAME ?? props.activity?.activity_name ?? ""
+);
+const activityStart = computed(
+  () =>
+    props.activity?.ACTIVITY_START_DATE ??
+    props.activity?.activity_start_date ??
+    ""
+);
+const currentParticipant = computed(
+  () =>
+    props.activity?.CURRENT_PARTICIPANT ??
+    props.activity?.current_participant ??
+    0
+);
+const maxParticipant = computed(
+  () => props.activity?.MAX_PARTICIPANT ?? props.activity?.max_participant ?? 0
+);
+const activityNo = computed(() =>
+  Number(props.activity?.ACTIVITY_NO ?? props.activity?.activity_no ?? 0)
+);
+
+const host = computed(() => {
+  if (!props.isJoiner) return null;
+  const hoster = props.hoster || {};
+  const id = Number(
+    hoster.MEMBER_ID ?? hoster.id ?? props.activity?.HOST_MEMBER_ID ?? 0
+  );
+  const me = Number(props.currentUserId ?? 0) || null;
+  if (!id || (me && id === me)) return null;
+  return {
+    id,
+    name:
+      hoster.MEMBER_NICKNAME ?? hoster.NICKNAME ?? hoster.name ?? `會員 #${id}`,
+    avatar:
+      hoster.MEMBER_AVATAR ??
+      hoster.AVATAR ??
+      hoster.avatar ??
+      `https://i.pravatar.cc/150?u=${id}`,
+    city: hoster.CITY_NAME ?? hoster.city ?? "—",
+    age: hoster.AGE ?? hoster.age ?? null,
+    occupation: hoster.OCCUPATION ?? hoster.occupation ?? "—",
+  };
+});
+
+const list = computed(() => {
+  const me = Number(props.currentUserId ?? 0) || null;
+  return (props.participants || [])
+    .filter((p) => Number(p.id) && (!me || Number(p.id) !== me))
+    .map((participant) => ({
+      id: Number(participant.id),
+      name: participant.name,
+      avatar: participant.avatar,
+      city: participant.city,
+      age: participant.age,
+      occupation: participant.role ?? "—",
+    }));
+});
 
 // === Methods: 元件的行為函式 ===
-const setRating = (participantId, score) => {
-  ratings.value[participantId] = score;
+const setHost = (n) => {
+  ratingHost.value = n;
+};
+const setHostHover = (n) => {
+  hoverHost.value = n;
 };
 
-const setHoverRating = (participantId, score) => {
-  hoverRating.value[participantId] = score;
+const setRating = (id, n) => {
+  ratings.value[id] = n;
+};
+const setHover = (id, n) => {
+  hoverRating.value[id] = n;
+};
+const clearHover = (id) => {
+  delete hoverRating.value[id];
 };
 
-const clearHoverRating = (participantId) => {
-  delete hoverRating.value[participantId];
-};
+const submit = () => {
+  const items = [];
 
-const submitRatings = () => {
-  emit('submit', ratings.value);
-};
-
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    document.body.classList.add('modal-open');
-  } else {
-    document.body.classList.remove('modal-open');
+  if (host.value && Number(ratingHost.value) > 0) {
+    items.push({
+      ratee_id: host.value.id,
+      ratee_role: "主揪", 
+      rating_score: Number(ratingHost.value),
+    });
   }
-  
-  if (!newVal) {
-    ratings.value = {};
-    hoverRating.value = {};
+
+  for (const [id, score] of Object.entries(ratings.value)) {
+    if (Number(score) > 0) {
+      items.push({
+        ratee_id: Number(id),
+        ratee_role: "參與者", 
+        rating_score: Number(score),
+      });
+    }
   }
-});
+
+  emit("submit", { activity_no: activityNo.value, items });
+};
+
+/* 開關時處理 body 捲動 & 重置 */
+watch(
+  () => props.show,
+  (show) => {
+    document.body.classList.toggle("modal-open", !!show);
+    if (!show) {
+      ratingHost.value = 0;
+      hoverHost.value = 0;
+      ratings.value = {};
+      hoverRating.value = {};
+    }
+  }
+);
 </script>
 
 <template>
@@ -61,46 +153,87 @@ watch(() => props.show, (newVal) => {
     <div class="modal-content" @click.stop>
       <header class="modal-header">
         <div class="header-content">
-          <h2 class="activity-title">{{ activity?.activity_name }}</h2>
+          <h2 class="activity-title">{{ activityName }}</h2>
           <div class="activity-meta">
-            <span>活動日期: {{ activity?.activity_start_date }}</span>
-            <span>參團人數: {{ activity?.current_participant }}/{{ activity?.max_participant }}</span>
+            <span>活動日期: {{ activityStart }}</span>
+            <span>參團人數: {{ currentParticipant }}/{{ maxParticipant }}</span>
           </div>
         </div>
         <button class="close-button" @click="emit('close')">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </header>
+
       <main class="modal-body">
+
+         <h3 class="list-title" v-if="host">主揪</h3>
+        <div class="host-block" v-if="host">
+          <div class="hoster-item">
+            <img :src="host.avatar" :alt="host.name" class="participant-avatar" />
+            <div class="participant-details">
+              <div class="participant-info">
+                <span class="participant-name">{{ host.name }}</span>
+                <span class="participant-bio">
+                  {{ host.city }} | {{ host.age }}歲 | {{ host.occupation }}
+                </span>
+              </div>
+
+              <p class="rating-prompt">評價主揪</p>
+
+              <div class="stars" @mouseleave="setHostHover(0)">
+                <i
+                  v-for="n in 5"
+                  :key="'host-'+n"
+                  class="fa-star"
+                  :class="{
+                    'fa-solid': (hoverHost || ratingHost) >= n,
+                    'fa-regular': (hoverHost || ratingHost) < n
+                  }"
+                  @mouseover="setHostHover(n)"
+                  @click="setHost(n)"
+                ></i>
+              </div>
+            </div>
+          </div>
+      
+        </div>
         <h3 class="list-title">團員列表</h3>
         <div class="participant-list">
           <div
-            v-for="participant in participants"
+            v-for="participant in list"
             :key="participant.id"
             class="participant-item"
           >
-            <img :src="participant.avatar" :alt="participant.name" class="participant-avatar" />
+            <img
+              :src="participant.avatar"
+              :alt="participant.name"
+              class="participant-avatar"
+            />
             <div class="participant-details">
               <div class="participant-info">
                 <span class="participant-name">{{ participant.name }}</span>
                 <span class="participant-bio">
-                  {{ participant.city }} | {{ participant.age }}歲 | {{ participant.role }}
+                  {{ participant.city }} | {{ participant.age }}歲 |
+                  {{ participant.occupation }}
                 </span>
               </div>
               <p class="rating-prompt">評價此團員</p>
-              <div
-                class="stars"
-                @mouseleave="clearHoverRating(participant.id)"
-              >
+              <div class="stars" @mouseleave="clearHover(participant.id)">
                 <i
                   v-for="n in 5"
                   :key="n"
                   class="fa-star"
                   :class="{
-                    'fa-solid': (hoverRating[participant.id] || ratings[participant.id] || 0) >= n,
-                    'fa-regular': (hoverRating[participant.id] || ratings[participant.id] || 0) < n
+                    'fa-solid':
+                      (hoverRating[participant.id] ||
+                        ratings[participant.id] ||
+                        0) >= n,
+                    'fa-regular':
+                      (hoverRating[participant.id] ||
+                        ratings[participant.id] ||
+                        0) < n,
                   }"
-                  @mouseover="setHoverRating(participant.id, n)"
+                  @mouseover="setHover(participant.id, n)"
                   @click="setRating(participant.id, n)"
                 ></i>
               </div>
@@ -109,7 +242,7 @@ watch(() => props.show, (newVal) => {
         </div>
       </main>
       <footer class="modal-footer">
-        <Button @click="submitRatings" theme="primary" size="md">送出</Button>
+        <Button @click="submit" theme="primary" size="md">送出</Button>
       </footer>
     </div>
   </div>
@@ -233,12 +366,24 @@ $z-index-modal: 1000;
   }
 }
 
+.hoster-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+
+  @include mobile() {
+    margin: 10px;
+    min-width: 300px;
+  }
+}
+
 .participant-avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-
 }
 
 .participant-details {
@@ -272,8 +417,8 @@ $z-index-modal: 1000;
   font-size: 16px;
   color: $color-text-dark;
   margin-bottom: 10px;
-  
-  @include mobile(){
+
+  @include mobile() {
     margin-top: 10px;
   }
 }
@@ -284,8 +429,8 @@ $z-index-modal: 1000;
   font-size: 28px;
   color: $color-secondary;
   cursor: pointer;
-  
-  @include mobile(){
+
+  @include mobile() {
     margin-top: 10px;
   }
 }
@@ -309,6 +454,14 @@ $z-index-modal: 1000;
     grid-template-rows: auto auto auto;
     gap: 8px 12px; // row-gap, column-gap
     align-items: center; // 垂直置中第一行的頭像和資訊
+  }
+
+  .hoster-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 8px 12px; 
+    align-items: center; 
   }
 
   .participant-details {
@@ -369,13 +522,23 @@ $z-index-modal: 1000;
       border-radius: 20px;
     }
   }
+.participant-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 20px;
 
-  .participant-item {
-    flex-direction: row;
-    align-items: center;
-    padding: 16px 0;
-    justify-content: center;
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: $color-primary;
+      border-radius: 20px;
+    }
   }
+  
 
   .participant-avatar {
     width: 120px;
@@ -406,4 +569,5 @@ $z-index-modal: 1000;
     gap: 8px;
   }
 }
+
 </style>

@@ -1,13 +1,15 @@
 <script setup>
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import LikeButton from "./like-button.vue";
 import Button from "@/components/Button.vue";
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { componentSizeMap } from "element-plus";
+import { imageUrl } from "@/assets/utils/normalize";
 
 import { useParticipationStore } from '@/stores/participation-store.js'; // 新增：引入我們剛剛建立的 Pinia Store
 
+const imgSrc = computed(() =>
+  imageUrl(props.item?.ACTIVITY_IMG ?? props.item?.activity_img ?? '')
+);
 const props = defineProps({
   item: Object,
 });
@@ -17,6 +19,7 @@ const likeMap = ref({});
 const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
+
 
 const router = useRouter();
 const gotoSignup = (id) => {
@@ -74,14 +77,14 @@ const participationStore = useParticipationStore();
       :to="`/activity/${props.item.ACTIVITY_NO}`"
       class="activity-img"
     >
-      <img :src="props.item.ACTIVITY_IMG" :alt="props.ACTIVITY_NAME" />
+      <img :src="imgSrc" :alt="props.item.ACTIVITY_NAME" />
     </RouterLink>
     <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
       ><h4 class="activity-name">
         {{ titleDate }}
       </h4></RouterLink
     >
-    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`"
+    <RouterLink :to="`/activity/${props.item.ACTIVITY_NO}`" class="desc-link"
       ><p class="activity-description">
         {{ props.item.ACTIVITY_DESCRIPTION }}
       </p></RouterLink
@@ -168,10 +171,15 @@ const participationStore = useParticipationStore();
   padding: 10px 0 0;
   line-height: 1.7;
   max-width: 264px;
+  flex: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
+}
+.desc-link {
+  display: flex;
+  flex: 1;
 }
 
 .button-group {

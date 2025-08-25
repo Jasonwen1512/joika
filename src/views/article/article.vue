@@ -5,7 +5,7 @@ import Button from "@/components/Button.vue";
 import { ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-
+import defaultImg from "@/assets/img/article/nopicture.jpg"; // 預設圖片
 import konanImage from "@/assets/img/article/movie_konan.jpg";
 import ArticleDetail from "./article-detail.vue";
 import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
@@ -75,31 +75,29 @@ const activities = [...BaseActivities, ...BaseActivities, ...BaseActivities];
 const categories = [
   "全部",
   "登山",
-  "水上活動",
+  "桌遊",
   "運動",
   "露營",
   "唱歌",
   "展覽",
+  "水上活動",
   "聚餐",
-  "桌遊",
   "電影",
   "手作",
   "文化體驗",
   "演出表演",
-  "其他",
 ];
-//靜態資料-文章內容
 
 //分類顏色
 const EventColorMap = {
   登山: "#6DE1D2",
-  水上活動: "#77BEF0",
+  桌遊: "#FFD63A",
   運動: "#FFD63A",
   露營: "#FF8C86",
   唱歌: "#FFA955",
   展覽: "#6DE1D2",
+  水上活動: "#77BEF0",
   聚餐: "#77BEF0",
-  桌遊: "#FFD63A",
   電影: "#FF8C86",
   手作: "#FFA955",
   文化體驗: "#6DE1D2",
@@ -110,19 +108,20 @@ const EventColorMap = {
 // 將後端 API 的分類 ID (數字) 轉換為中文名稱的對照表
 const categoryMap = {
   1: "登山",
-  2: "水上活動",
+  2: "桌遊",
   3: "運動",
   4: "露營",
   5: "唱歌",
   6: "展覽",
-  7: "聚餐",
-  8: "桌遊",
+  7: "水上活動",
+  8: "聚餐",
   9: "電影",
   10: "手作",
   11: "文化體驗",
   12: "演出表演",
   13: "其他",
 };
+// ...existing code...
 const router = useRouter();
 const readarticle = (postId) => {
   router.push(`/article/${postId}`);
@@ -222,10 +221,13 @@ onMounted(async () => {
     if (Array.isArray(dataFromApi)) {
       articleList.value = dataFromApi.map((post) => {
         // --- 處理圖片路徑 ---
-        const backendImagePath = post.POST_IMG; // e.g., "../img/..."
-        const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
-        // console.log("清理後的圖片路徑:", cleanedPath); // 偵錯用
-        const fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+        const backendImagePath = post.POST_IMG;
+        let fullImageUrl = defaultImg; // 1. 先假設最終結果是預設圖片
+        if (backendImagePath) {
+          // 3. 如果存在，才進行路徑處理，並覆蓋掉預設值
+          const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
+          fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+        }
 
         return {
           postid: post.POST_NO,
@@ -341,7 +343,7 @@ watch(ActiveCategory, () => {
           class="article-text-link"
         >
           <div class="article-img">
-            <img :src="article.image" :alt="article.title" />
+            <img :src="article.image || defaultImg" :alt="article.title" />
           </div>
 
           <div class="article-text">

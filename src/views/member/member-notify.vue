@@ -1,50 +1,67 @@
 <script setup>
-import { ref } from 'vue'
-// 當前頁籤
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+axios.defaults.withCredentials = true
+const API = import.meta.env.VITE_API_BASE
+
 const activeTab = ref('system')
+const systemNotifications = ref([])
+const generalNotifications = ref([])
 
-// 系統通知資料
-const systemNotifications = ref([
-  {
-    id: 1,
-    title: '7/4 新手友善 陽明山登山團 報名成功通知',
-    content: '此為系統通知，無需做回覆\n您在剛剛成功參與了 7/4 新手友善 陽明山登山團\n針對活動如有任何疑問可在活動頁面留言',
-    expanded: false,
+async function fetchNotifications() {
+  // 系統通知
+  const sys = await axios.get(`${API}/notifications/list.php`, {
+    params: { type: 'system', status: 'all', limit: 50, offset: 0 }
+  })
+  systemNotifications.value = (sys.data?.data || []).map(n => ({
+    id: Number(n.notification_no),
+    title: n.title,
+    content: n.content ?? '',
+    status: n.status,                 // '未讀' | '已讀'
+    type: n.type,                     // '系統通知'
+    created_at: n.created_at,
+    expanded: false
+  }))
+
+  // 互動通知
+  const gen = await axios.get(`${API}/notifications/list.php`, {
+    params: { type: 'interact', status: 'all', limit: 50, offset: 0 }
+  })
+  generalNotifications.value = (gen.data?.data || []).map(n => ({
+  id: Number(n.notification_no),
+  title: n.title,
+  content: n.content ?? '',
+  status: n.status,
+  type: n.type,
+  created_at: n.created_at
+  }))
+}
+
+onMounted(fetchNotifications)
+
+// 標記已讀（支援多筆）
+async function markRead(ids = []) {
+  if (!ids.length) return
+  try {
+    await axios.post(`${API}/notifications/mark-read.php`, { ids })
+  } catch (e) {
+    console.error('mark-read failed', e)
   }
-])
+}
 
-// 一般通知資料
-const generalNotifications = ref([
-  {
-    id: 2,
-    title: '你的文章有新留言',
-    content:'12/31 合歡山跨年看日出',
-    expanded: false
-  },
-  {
-    id: 3,
-    title: '有人回覆你的留言',
-    content:'這次的爬山活動真的很不錯，天氣也很剛好.....',
-    expanded: false
-  },
-  {
-    id: 4,
-    title: '有人回覆你的留言',
-    content:'這次的桌遊活動真的很好玩，認識很多新朋友.....',
-    expanded: false
-  },
-  {
-    id: 5,
-    title: '你的文章有新留言',
-    content:'7/6 墾丁初學潛水團',
-    expanded: false
-  },
-])
-
-// 展開/收合
+// 展開/收合 + 首次展開即標已讀
 function toggleAccordion(list, item) {
   list.forEach(n => {
-    n.expanded = (n.id === item.id) ? !n.expanded : false
+    if (n.id === item.id) {
+      const willExpand = !n.expanded
+      n.expanded = willExpand
+      if (willExpand && n.status === '未讀') {
+        n.status = '已讀'         // 立即回饋
+        markRead([n.id])          // 後端同步
+      }
+    } else {
+      n.expanded = false
+    }
   })
 }
 </script>
@@ -52,55 +69,85 @@ function toggleAccordion(list, item) {
 <template>
   <div class="notify-tabs">
     <ul class="tab-header">
-      <li><button :class="{ active: activeTab === 'system' }"
-        @click="activeTab = 'system'">系統通知</button></li>
-      <li><button :class="{ active: activeTab === 'general' }"
-        @click="activeTab = 'general'">一般通知</button></li>
+      <li>
+    <button :class="{ active: activeTab === 'system' }" @click="activeTab = 'system'">
+      系統通知
+      <span v-if="systemNotifications.some(n=>n.status==='未讀')" class="badge">
+        {{ systemNotifications.filter(n=>n.status==='未讀').length }}
+      </span>
+    </button>
+  </li>
+  <li>
+    <button :class="{ active: activeTab === 'general' }" @click="activeTab = 'general'">
+      一般通知
+      <span v-if="generalNotifications.some(n=>n.status==='未讀')" class="badge">
+        {{ generalNotifications.filter(n=>n.status==='未讀').length }}
+      </span>
+    </button>
+  </li>
     </ul>
     
     <div class="notify-body">
     <!-- 系統通知內容 -->
-    <div v-show="activeTab === 'system'" class="tab-content">
-      <div 
-        v-for="item in systemNotifications" 
-        :key="item.id" 
-        class="notify-item"
-      >
-        <div class="notify-title system" @click="toggleAccordion(systemNotifications, item)">
-          {{ item.title }}
-          <span class="icon-wrapper" :class="{ rotated: item.expanded }">
-            <svg
-            class="icon"
-            viewBox="0 0 36 36"
-            width="26"
-            height="26"
-            stroke="black"
-            stroke-width="3"
-          >
-            <line class="line1" x1="8" y1="18" x2="28" y2="18" />
-            <line class="line2" x1="18" y1="8" x2="18" y2="28" />
-          </svg>
-          </span>
+      <div v-show="activeTab === 'system'" class="tab-content">
+        <!-- 空狀態 -->
+        <div v-if="systemNotifications.length === 0" class="empty-state">
+          目前尚無任何通知
         </div>
-        <transition name="accordion">
-          <div v-if="item.expanded" class="notify-detail">
-            <p v-for="line in item.content.split('\n')" :key="line">{{ line }}</p>
+        <!-- 列表 -->
+        <template v-else>
+          <div 
+            v-for="item in systemNotifications" 
+            :key="item.id" 
+            class="notify-item"
+          >
+            <div class="notify-title system" @click="toggleAccordion(systemNotifications, item)">
+              <div class="title-wrap">
+                <span v-if="item.status === '未讀'" class="unread-dot"></span>
+                <span :class="{'unread-text': item.status === '未讀'}">{{ item.title }}</span>
+              </div>
+              <span class="icon-wrapper" :class="{ rotated: item.expanded }">
+                <svg class="icon" viewBox="0 0 36 36" width="26" height="26" stroke="black" stroke-width="3">
+                  <line class="line1" x1="8" y1="18" x2="28" y2="18" />
+                  <line class="line2" x1="18" y1="8" x2="18" y2="28" />
+                </svg>
+              </span>
+            </div>
+            <transition name="accordion">
+              <div v-if="item.expanded" class="notify-detail">
+                <p v-for="line in item.content.split('\n')" :key="line">{{ line }}</p>
+              </div>
+            </transition>
           </div>
-        </transition>
+        </template>
       </div>
-    </div>
 
       <!-- 一般通知內容 -->
       <div v-show="activeTab === 'general'" class="tab-content">
-        <div 
-          v-for="item in generalNotifications" 
-          :key="item.id" 
-          class="notify-item"
-        >
-          <h4 class="notify-title">{{ item.title }}</h4>
-          <p class="notify-detail">{{ item.content }}</p>
+        <!-- 空狀態 -->
+        <div v-if="generalNotifications.length === 0" class="empty-state">
+          目前尚無任何通知
         </div>
-      </div>
+        <!-- 列表 -->
+        <template v-else>
+          <div 
+            v-for="item in generalNotifications" 
+            :key="item.id" 
+            class="notify-item"
+          >
+            <h4 class="notify-title">
+              <span class="title-wrap">
+                <span v-if="item.status === '未讀'" class="unread-dot"></span>
+                <span :class="{'unread-text': item.status === '未讀'}">{{ item.title }}</span>
+              </span>
+            </h4>
+            <p class="notify-detail">{{ item.content }}</p>
+          </div>
+        </template>
+</div>
+
+
+
     </div>
   </div>
 </template>
@@ -108,6 +155,17 @@ function toggleAccordion(list, item) {
 <style scoped lang="scss">
 @use "@/assets/scss/mixin" as *; 
 @import "@/assets/scss/_color.scss";
+@font-face {
+  font-family: "Baloo 2";
+  src: url("@/assets/fonts/Baloo2-Regular.woff2") format("woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Baloo 2";
+  src: url("@/assets/fonts/Baloo2-Bold.woff2") format("woff2");
+  font-weight: 700;
+}
 .notify-tabs{
   width: 100%;
   padding: 20px;
@@ -204,6 +262,51 @@ function toggleAccordion(list, item) {
   background: linear-gradient(180deg, #81BFDA, #4F8DA8);
   border-radius: 8px;
 }
+//已讀未讀
+.title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5a5a;
+  display: inline-block;
+}
+.unread-text {
+  font-weight: 700;
+}
+.badge { 
+  margin-left:6px; 
+  padding:0 6px; 
+  border-radius:10px; 
+  font-size:12px; 
+  background:#ff5a5a; 
+  color:#fff; 
+}
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+
+  
+  font-family: "Baloo 2", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  text-align: center;
+
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
 //桌機版
 @include desktop{
   .notify-tabs{

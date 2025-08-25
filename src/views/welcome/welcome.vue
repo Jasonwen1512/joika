@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import InteractiveSun from "@/components/InteractiveSun.vue";
 import logoSvg from "@/assets/img/welcome/logo.svg?url";
 import pointDown from "@/assets/img/welcome/point-down.svg?url"; // 使用?url強制將svg轉換為url字串
 
@@ -99,11 +100,18 @@ const communityCardInfo = ref([
   },
 ]);
 
+// 捲動提示區域
+const showHintBlock = ref(true);
+
 // 骰子轉動狀態
+const showHint = ref(true);
 const isRolling = ref(false);
 
 // 骰子投擲結果文字區域
 const currentResultText = ref("？");
+const showResult = ref(false);
+const currentResultLink = ref("#");
+const isBlinking = ref(false);
 const resultTextClass = computed(() => {
   const textLength = currentResultText.value.length;
   return textLength <= 2 ? "result-text-two-words" : "result-text-four-words";
@@ -111,6 +119,8 @@ const resultTextClass = computed(() => {
 
 // 控制 "頁面跳轉緩衝區域" 顯示及倒數
 const showLearnMore = ref(false);
+const showCountDown = ref(false);
+const showScrollHint = ref(true);
 const countdownText = ref("");
 let countdownTimer = null;
 
@@ -127,11 +137,22 @@ onMounted(() => {
   document.documentElement.style.overflowX = "visible";
   document.body.style.overflowX = "visible";
 
+  // 處理 Sub-pixel 渲染問題 (避免超出視窗寬度，出現橫向捲軸)
+  document.body.style.width = "calc(100% - 1px)";
+
   // === 文字漂浮區域 ===
   const floatingTexts = gsap.utils.toArray(".floating-text");
+  const floatingTextbgs = gsap.utils.toArray(".floating-text-bg");
 
-  // 初始化，隱藏所有文字
+  // 初始化，隱藏所有元素
   floatingTexts.forEach((el) => {
+    gsap.set(el, {
+      opacity: 0,
+      y: 30,
+    });
+  });
+
+  floatingTextbgs.forEach((el) => {
     gsap.set(el, {
       opacity: 0,
       y: 30,
@@ -147,6 +168,7 @@ onMounted(() => {
     start: "0% top",
     end: "60% top",
     onUpdate: (self) => {
+      showHintBlock.value = false;
       const progress = self.progress;
       const shouldTriggerCount = Math.floor(progress * 7);
 
@@ -156,6 +178,10 @@ onMounted(() => {
           y: 0,
           duration: 1,
         });
+
+        if (triggerCount === 0) gsap.to(floatingTextbgs[0], { opacity: 1, y: 0, duration: 1 });
+        if (triggerCount === 4) gsap.to(floatingTextbgs[1], { opacity: 1, y: 0, duration: 1 });
+
         triggerCount++;
       }
     },
@@ -172,7 +198,6 @@ onMounted(() => {
       scrub: true,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        const currentScroll = self.scroll(); // 目前 scroll 位置 (垂直)
         const logoBox = logo.value.getBoundingClientRect();
 
         letterEls.forEach((el, index) => {
@@ -263,18 +288,18 @@ onMounted(() => {
   const diceState = {
     // 全部活動分類
     activityCategories: {
-      1: { category: "水上活動", image: new URL("@/assets/img/index-img/diving.png", import.meta.url).href, color: "#4F8DA8" },
-      2: { category: "電影", image: new URL("@/assets/img/index-img/movie.png", import.meta.url).href, color: "#FFA68D" },
-      3: { category: "運動", image: new URL("@/assets/img/index-img/sports.png", import.meta.url).href, color: "#FADA7A" },
-      4: { category: "登山", image: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href, color: "#90DA81" },
-      5: { category: "露營", image: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href, color: "#A281DA" },
-      6: { category: "桌遊", image: new URL("@/assets/img/index-img/board-games.png", import.meta.url).href, color: "#F315BB" },
-      7: { category: "展覽", image: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href, color: "#FFFCE2" },
-      8: { category: "聚餐", image: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href, color: "#FB900C" },
-      9: { category: "手作", image: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href, color: "#81BFDA" },
-      10: { category: "文化體驗", image: new URL("@/assets/img/index-img/cultural-experience.png", import.meta.url).href, color: "#1FB92C" },
-      11: { category: "演出表演", image: new URL("@/assets/img/index-img/concert.png", import.meta.url).href, color: "#FFE100" },
-      12: { category: "唱歌", image: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href, color: "#2AA9FF" },
+      1: { category: "登山", image: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href, color: "#90DA81", link: "/cjd101/g2/front/activity?category=1" },
+      2: { category: "桌遊", image: new URL("@/assets/img/index-img/board-games.png", import.meta.url).href, color: "#F315BB", link: "/cjd101/g2/front/activity?category=2" },
+      3: { category: "運動", image: new URL("@/assets/img/index-img/sports.png", import.meta.url).href, color: "#FADA7A", link: "/cjd101/g2/front/activity?category=3" },
+      4: { category: "露營", image: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href, color: "#A281DA", link: "/cjd101/g2/front/activity?category=4" },
+      5: { category: "唱歌", image: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href, color: "#2AA9FF", link: "/cjd101/g2/front/activity?category=5" },
+      6: { category: "展覽", image: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href, color: "#FFFCE2", link: "/cjd101/g2/front/activity?category=6" },
+      7: { category: "水上活動", image: new URL("@/assets/img/index-img/diving.png", import.meta.url).href, color: "#4F8DA8", link: "/cjd101/g2/front/activity?category=7" },
+      8: { category: "聚餐", image: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href, color: "#FB900C", link: "/cjd101/g2/front/activity?category=8" },
+      9: { category: "電影", image: new URL("@/assets/img/index-img/movie.png", import.meta.url).href, color: "#FFA68D", link: "/cjd101/g2/front/activity?category=9" },
+      10: { category: "手作", image: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href, color: "#81BFDA", link: "/cjd101/g2/front/activity?category=10" },
+      11: { category: "文化體驗", image: new URL("@/assets/img/index-img/cultural-experience.png", import.meta.url).href, color: "#1FB92C", link: "/cjd101/g2/front/activity?category=11" },
+      12: { category: "演出表演", image: new URL("@/assets/img/index-img/concert.png", import.meta.url).href, color: "#FFE100", link: "/cjd101/g2/front/activity?category=12" },
     },
 
     // 12 類中選 6 類，以 Array 記錄被選出的 key (1 ~ 12)
@@ -337,32 +362,58 @@ onMounted(() => {
   let currentX = 0;
   let currentY = 0;
 
-  // 骰子投擲結果顯示後，自動捲動至最下方，3秒後再跳轉至JOIKA首頁
+  // 骰子投擲結果顯示後，自動捲動至 learn-more 區域的最下方
   function triggerAutoScroll() {
-    // 顯示 "頁面跳轉緩衝區域"
-    showLearnMore.value = true;
+    showHint.value = false;
+    showLearnMore.value = true; // 顯示 "頁面跳轉緩衝區域"
 
-    // 延遲一段時間後捲動
+    // 延遲一段時間後自動捲動
     setTimeout(() => {
       const learnMoreSection = document.querySelector(".learn-more");
+      const rect = learnMoreSection.getBoundingClientRect();
+      const sectionBottom = rect.bottom + window.scrollY;
+      const sectionHeight = rect.height;
       learnMoreSection.scrollIntoView({
         behavior: "smooth",
         block: "end",
       });
-      // 倒數 3 秒
-      let countdown = 3;
-      countdownText.value = `${countdown} 秒後進入首頁`;
 
-      countdownTimer = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-          countdownText.value = `${countdown} 秒後進入首頁`;
+      function onScroll() {
+        const scrollY = window.scrollY + window.innerHeight; // 視窗底部位置
+        if (scrollY >= sectionBottom + sectionHeight * 0.6) {
+          strartCountDown();
+
+          // 避免重複觸發
+          learnMoreSection.removeEventListener("wheel", onScroll);
+          learnMoreSection.removeEventListener("touchmove", onScroll);
         } else {
-          countdownText.value = "Let's Go!!!";
-          clearInterval(countdownTimer);
-          window.location.href = "/cjd101/g2/front/home";
+          showScrollHint.value = false;
+          countdownText.value = "往下捲動";
         }
-      }, 1000);
+      }
+
+      learnMoreSection.addEventListener("wheel", onScroll);
+      learnMoreSection.addEventListener("touchmove", onScroll);
+    }, 1000);
+    showCountDown.value = true; // 顯示 "進入首頁倒數區域"
+  }
+
+  function strartCountDown() {
+    if (countdownTimer) return; // 避免重複啟動
+
+    // 倒數 3 秒
+    let countdown = 3;
+    countdownText.value = `${countdown} 秒後進入首頁`;
+
+    countdownTimer = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        countdownText.value = `${countdown} 秒後進入首頁`;
+      } else {
+        countdownText.value = "Let's Go!!!";
+        clearInterval(countdownTimer);
+        window.location.href = "/cjd101/g2/front/home";
+      }
     }, 1000);
   }
 
@@ -404,6 +455,7 @@ onMounted(() => {
 
       // 中間動畫過程顯示亂數
       if (t < 0.8) {
+        showHint.value = true;
         const randomArrayIndex = Math.floor(Math.random() * 6); // 隨機取 Array 索引值 (0 ~ 5)
         const randomActivityKey = diceState.selectedActivityKeys[randomArrayIndex]; // 取出 "selectedActivityKeys" 中的 key
         currentResultText.value = diceState.selectedActivityCategories[randomActivityKey].category; // 使用 key 取出物件中的活動類別
@@ -417,11 +469,15 @@ onMounted(() => {
         requestAnimationFrame(animate);
       } else {
         // 最終設定與顯示
+        showHint.value = false;
         const activityKey = diceState.selectedActivityKeys[targetFace - 1];
         currentX = faceX;
         currentY = faceY;
         dice.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
         currentResultText.value = diceState.selectedActivityCategories[activityKey].category;
+        currentResultLink.value = diceState.selectedActivityCategories[activityKey].link;
+        showResult.value = true;
+        isBlinking.value = true;
         triggerAutoScroll();
       }
     }
@@ -448,6 +504,16 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- === 捲動提示 === -->
+  <section class="hint-text-wrapper">
+    <div class="interactive-sun">
+      <InteractiveSun />
+    </div>
+    <div class="hint-text-scroll-wrapper">
+      <div class="start-hint-text">往下捲動</div>
+    </div>
+  </section>
+
   <!-- === 文字漂浮區域 === -->
   <section class="floating-text-wrapper">
     <div class="floating-text-scroll-wrapper">
@@ -457,8 +523,8 @@ onUnmounted(() => {
       <h3 class="floating-text" id="floating-text-4">沒人一起露營</h3>
       <h3 class="floating-text" id="floating-text-5">說走就走怎麼那麼難</h3>
       <h3 class="floating-text" id="floating-text-6">永遠差一咖</h3>
-      <img id="bg-skyblue1" :src="backgroundDecoration.bgSkyblue1" alt="背景色塊 skyblue" />
-      <img id="bg-green" :src="backgroundDecoration.bgGreen" alt="背景色塊 green" />
+      <img class="floating-text-bg" id="bg-skyblue1" :src="backgroundDecoration.bgSkyblue1" alt="背景色塊 skyblue" />
+      <img class="floating-text-bg" id="bg-green" :src="backgroundDecoration.bgGreen" alt="背景色塊 green" />
     </div>
   </section>
 
@@ -531,15 +597,19 @@ onUnmounted(() => {
   <section class="dice-wrapper">
     <h2 class="entrance-slogan">不知道揪什麼？</h2>
     <img id="bg-skyblue2" :src="backgroundDecoration.bgSkyblue2" alt="背景色塊 skyblue" />
-    <img id="bg-yellow2" :src="backgroundDecoration.bgYellow2" alt="背景色塊 yellow" />
-    <div class="text-content-group">
+    <img id="bg-yellow2" v-show="showResult" :src="backgroundDecoration.bgYellow2" alt="背景色塊 yellow" />
+    <div class="text-content-group" v-show="showResult">
       <h3 class="text-content">來揪點</h3>
       <h3 class="text-content">前往專區</h3>
-      <h3 :class="resultTextClass" id="result-text">{{ currentResultText }}</h3>
+      <a :class="resultTextClass" :href="currentResultLink">
+        <p id="result-text">{{ currentResultText }}</p>
+      </a>
     </div>
 
     <!-- 3D骰子 -->
     <div class="scene">
+      <p class="hint-text" v-show="showHint">請點擊骰子</p>
+      <p class="hint-text" :class="{ blinking: isBlinking }" v-show="!showHint">請點擊 " {{ currentResultText }} "，前往專區</p>
       <div class="dice" :class="{ rolling: isRolling }">
         <div class="dice-face point1"></div>
         <div class="dice-face point2"></div>
@@ -557,6 +627,11 @@ onUnmounted(() => {
       還等什麼？裡面更好玩
       <img id="point-down" :src="pointDown" alt="了解更多" />
     </h2>
+    <p class="scroll-hint-text" v-show="showScrollHint">往下捲動，進入首頁</p>
+  </section>
+
+  <!-- === 倒數區域 === -->
+  <section class="countdown" v-show="showCountDown">
     <p class="countdown-text">{{ countdownText }}</p>
   </section>
 </template>
@@ -572,9 +647,59 @@ onUnmounted(() => {
   margin-bottom: 100px;
 }
 
+// === 捲動提示區域 ===
+.hint-text-wrapper {
+  height: 50vw; // 100vh = 62.5vw with screen ratio 16:10
+
+  .interactive-sun {
+    height: 37.5vw; // 60vh = 37.5vw (100vh = 62.5vw with screen ratio 16:10)
+    position: sticky;
+    top: 0;
+    left: 0;
+
+    // 重設小太陽大小，並隱藏提示文字
+    :deep(.sun-wrapper) {
+      transform: scale(0.5);
+      height: 100%;
+
+      p {
+        display: none;
+      }
+    }
+  }
+  .hint-text-scroll-wrapper {
+    position: sticky;
+    top: 0;
+    left: 0;
+
+    .start-hint-text {
+      font-size: clamp(24px, 3.333vw, 64px);
+      font-weight: normal;
+      font-family: "MyFont", sans-serif;
+      color: $blue;
+      text-align: center;
+      opacity: 1;
+      animation: text-blinking 3s infinite;
+    }
+  }
+}
+
+@include desktop() {
+  .hint-text-wrapper {
+    .interactive-sun {
+      height: 37.5vw; // 60vh = 37.5vw (100vh = 62.5vw with screen ratio 16:10)
+
+      // 重設小太陽大小，並隱藏提示文字
+      :deep(.sun-wrapper) {
+        transform: scale(0.7);
+      }
+    }
+  }
+}
+
 // === 文字漂浮區域 ===
 .floating-text-wrapper {
-  height: 197.5vh; // 容器捲動總長度 (300vh = 197.5vh) (100vh = 62.5vw with screen ratio 16:10)
+  height: 312.5vw; // 容器捲動總長度 (500vh = 312.5vw) (100vh = 62.5vw with screen ratio 16:10)
 
   .floating-text-scroll-wrapper {
     height: 43.75vw; // 容器顯示長度 (70vh = 43.75vw) (100vh = 62.5vw with screen ratio 16:10)
@@ -902,13 +1027,18 @@ onUnmounted(() => {
       top: 26.823vw;
       right: 20.313vw;
     }
+    #result-text {
+      font-family: "MyFont", sans-serif;
+      font-size: clamp(32px, 3.333vw, 64px);
+      animation: text-shifting 1.5s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+    }
     .result-text-two-words {
       color: $blue;
       font-size: clamp(32px, 3.333vw, 64px);
       width: 6.666vw;
       text-align: center;
       position: absolute;
-      top: 20.625vw;
+      top: 20vw;
       right: 16.042vw;
     }
     .result-text-four-words {
@@ -917,7 +1047,7 @@ onUnmounted(() => {
       width: 13.333vw;
       text-align: center;
       position: absolute;
-      top: 20.625vw;
+      top: 20vw;
       right: 9.376vw;
     }
   }
@@ -927,6 +1057,23 @@ onUnmounted(() => {
     top: 10vw;
     left: 30vw;
 
+    .hint-text {
+      width: 100%;
+      position: absolute;
+      color: $red;
+      font-size: clamp(16px, 1.563vw, 30px);
+      opacity: 1;
+      animation: text-blinking 3s infinite;
+    }
+    .hint-text:nth-child(1) {
+      text-align: center;
+      top: -4vw;
+      left: 0;
+    }
+    .hint-text:nth-child(2) {
+      top: 5vw;
+      left: 37.5vw;
+    }
     .dice {
       margin: 5vw;
       width: 16vw;
@@ -969,10 +1116,48 @@ onUnmounted(() => {
       }
     }
 
+    @keyframes text-blinking {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+    }
+    @keyframes text-shifting {
+      0% {
+        transform: translateY(0);
+      }
+      10% {
+        transform: translateY(-1px);
+      }
+      25% {
+        transform: translateY(-2px);
+      }
+      40% {
+        transform: translateY(-1px);
+      }
+      50% {
+        transform: translateY(0);
+      }
+      60% {
+        transform: translateY(1px);
+      }
+      75% {
+        transform: translateY(2px);
+      }
+      90% {
+        transform: translateY(1px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
     @keyframes dice-float {
       0%,
       100% {
-        transform: rotateX(-15deg) rotateY(-15deg) translateY(0) scale3d(1, 1, 1);
+        transform: rotateX(-15deg) rotateY(-15deg) translateY(0) scale3d(1.1, 1.1, 1.1);
       }
       50% {
         transform: rotateX(-15deg) rotateY(-15deg) translateY(-10px) scale3d(0.9, 0.9, 0.9);
@@ -992,20 +1177,21 @@ onUnmounted(() => {
 
 // === 頁面跳轉緩衝區 ===
 .learn-more {
-  height: 18.75vw; // 容器顯示長度 (30vh = 18.75vw) (100vh = 62.5vw with screen ratio 16:10)
+  height: 25vw; // 容器顯示長度 (40vh = 25vw) (100vh = 62.5vw with screen ratio 16:10)
 
   #point-down {
     vertical-align: middle;
     height: $font-size-h1;
     aspect-ratio: 1 / 1;
   }
-  .countdown-text {
+  .scroll-hint-text {
+    width: 100%;
+    margin-top: -90px;
+    color: $red;
+    font-size: clamp(16px, 1.563vw, 30px);
     text-align: center;
-    margin-top: 20px;
-    font-size: clamp(32px, 2.5vw, 48px);
-    color: $blue;
-    font-weight: 700;
-    animation: pulse 1s ease-in-out infinite;
+    opacity: 1;
+    animation: text-blinking 3s infinite;
   }
 
   @keyframes pulse {
@@ -1016,6 +1202,19 @@ onUnmounted(() => {
     50% {
       opacity: 1;
     }
+  }
+}
+
+// 倒數區域
+.countdown {
+  margin-bottom: 25vw; // 容器顯示長度 (40vh = 25vw) (100vh = 62.5vw with screen ratio 16:10)
+  .countdown-text {
+    text-align: center;
+    margin-top: -10vw;
+    font-size: clamp(32px, 2.5vw, 48px);
+    color: $blue;
+    font-weight: 700;
+    animation: pulse 1s ease-in-out infinite;
   }
 }
 </style>

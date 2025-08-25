@@ -1,5 +1,14 @@
 <script setup>
-import { ref, defineProps, computed, h, render, watch, defineEmits } from "vue";
+import {
+  ref,
+  defineProps,
+  computed,
+  h,
+  render,
+  watch,
+  defineEmits,
+  onMounted,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { articleList } from "@/assets/data/fake-article";
 import axios from "axios";
@@ -19,16 +28,7 @@ const activityNoNumeric = String(activityid).replace(/\D/g, ""); //先把活動I
 
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
-//下方留言區
-//假的自己 展示用
-const currentUser = {
-  member_id: "1", // 假設這是當前使用者的 ID
-  author: "展示用", // 您的名字
-  avatar: "https://i.pravatar.cc/150?u=me", // 一個代表您自己的頭像
-  replies: [],
-};
 
-//
 // 使用 defineProps 來接收從父元件傳入的留言資料
 const props = defineProps({
   comments: {
@@ -36,18 +36,76 @@ const props = defineProps({
     required: true,
     default: () => [], // 提供一個預設的空陣列，增加程式碼的穩健性
   },
+  currentUser: {
+    type: Object,
+    required: false,
+    default: () => null,
+  },
 });
+// 會員資料自動取得
+onMounted(() => {
+  fetchCurrentUser();
+});
+
+const currentUser = ref({
+  member_id: null,
+  author: "",
+  avatar: "",
+  replies: [],
+});
+
+async function fetchCurrentUser() {
+  try {
+    const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
+      withCredentials: true, // 若有跨域 session
+    });
+    if (res.data.authenticated && res.data.user) {
+      currentUser.value.member_id = res.data.user.id;
+      currentUser.value.author = res.data.user.nickname;
+      currentUser.value.avatar =
+        res.data.user.avatar ||
+        `https://i.pravatar.cc/150?u=${res.data.user.id}`;
+    }
+  } catch (err) {
+    console.error("取得登入者資料失敗", err);
+  }
+}
+console.log("comments length:", props.comments.length);
+async function autoHideReportedComments() {
+  for (const comment of props.comments) {
+    console.log("autoHideReportedComments:", comment.id, comment.status);
+
+    // 只檢查未隱藏的留言
+    if (comment.status !== "隱藏") {
+      try {
+        const res = await axios.post(
+          `${VITE_API_BASE}/comments/post-delete.php`,
+          {
+            type: "activity",
+            comment_no: comment.id,
+          },
+          { withCredentials: true }
+        );
+        // 若 API 回傳 success，通知父層刷新留言
+        if (res.data.success) emit("comment-added");
+      } catch (err) {
+        // 可選：錯誤處理
+        console.error("自動隱藏留言失敗", err);
+      }
+    }
+  }
+}
 //偵錯
 watch(
   () => props.comments,
   (newComments) => {
-    //   console.log('【子元件】: comments prop 偵測到變化！');
-    //   console.log('【子元件】: 收到的新資料長度為:', newComments.length);
+    console.log("comments length (watch):", newComments.length);
+
     if (newComments.length > 0) {
-      // console.log('【子元件】: 收到的第一筆資料:', JSON.stringify(newComments[0]));
+      autoHideReportedComments();
     }
   },
-  { deep: true }
+  { deep: true, immediate: true }
 ); // 使用 deep: true 確保能偵測到陣列內部的變化
 // ^^^^^^ 【請加入這一段】 ^^^^^^
 
@@ -70,7 +128,7 @@ function postComment() {
 
   const postData = {
     activity_no: activityNoNumeric,
-    member_id: currentUser.member_id,
+    member_id: currentUser.value.member_id,
     comment_content: newComment.value,
     parent_no: null,
   };
@@ -79,14 +137,8 @@ function postComment() {
   console.log("準備發送到後端的資料:", postData);
   //
   axios
-    .post(`${VITE_API_BASE}/comments/activities-create.php`, postData) // <--- 使用上面建立的物件
-    // {
-    //         activity_no: activityNoNumeric,
-    //         member_id: currentUser.member_id,
-    //         comment_content: newComment.value,
-    //         parent_no: null,
-    //       }
-    //     )
+    .post(`${VITE_API_BASE}/comments/activities-create.php`, postData)
+
     .then((res) => {
       console.log("新增成功：", res.data);
       // 通知父層重新抓留言
@@ -174,41 +226,32 @@ function toggleReplyBox(commentId) {
  * @param {object} parentComment - 要在哪一則父留言底下新增回覆
  */
 function postReply(parentComment) {
-  // 防呆：不讓使用者送出空的回覆
   if (!newReplyText.value.trim()) {
     alert("請輸入留言");
     return;
   }
   isReplyAnimating.value = true;
-
   setTimeout(() => {
     isReplyAnimating.value = false;
   }, 300);
-  // 建立一個新的「回覆物件」
+
   const replyPayload = {
     activity_no: activityNoNumeric,
-    member_id: currentUser.member_id,
+    member_id: user.value?.member_id,
     comment_content: newReplyText.value.trim(),
     parent_no: parentComment.id,
   };
-  // / 使用 axios 發送 POST 請求
   axios
     .post(`${VITE_API_BASE}/comments/activities-create.php`, replyPayload)
     .then((res) => {
-      console.log("新增回覆成功：", res.data);
-
-      // 成功後，一樣通知父元件重新抓取所有留言，以確保資料同步
       emit("comment-added");
-
-      // 清空回覆輸入框
       newReplyText.value = "";
-      //   activeReplyId.value = null; // 可以選擇性地在成功後關閉回覆框
     })
     .catch((err) => {
       console.error("新增回覆錯誤：", err);
-      // 可以在這裡加入錯誤提示，例如 Swal.fire(...)
     });
 }
+
 //切換子留言的展開/收合
 function toggleReplies(comment) {
   comment.isRepliesExpanded = !comment.isRepliesExpanded;
@@ -219,7 +262,7 @@ function toggleReplies(comment) {
 const likeIt = async (comment) => {
   // 假設您的 currentUser 物件存在且有 member_id
   // 如果您是從 localStorage 拿，也可以用 const user = JSON.parse(localStorage.getItem("user"));
-  if (!currentUser || !currentUser.member_id) {
+  if (!user.value || !user.value.member_id) {
     Swal.fire("請先登入", "登入後才能對留言按讚喔！", "warning");
     return;
   }
@@ -245,8 +288,8 @@ const likeIt = async (comment) => {
   try {
     // 步驟 3: 準備要發送到後端的資料
     const payload = {
-      comment_no: comment.id, // 注意：前端的 comment.id 對應到後端的 comment_no
-      member_id: currentUser.member_id, // 前端的 member_id 對應到後端的 member_id
+      comment_no: comment.id,
+      member_id: user.value.member_id,
     };
 
     // 步驟 4: 呼叫您的 PHP API
@@ -263,24 +306,75 @@ const likeIt = async (comment) => {
 
     console.log("點讚狀態更新成功:", response.data);
   } catch (error) {
-    // 步驟 6: 如果 API 呼叫失敗，將畫面回復到操作前的狀態
-    console.error("點讚失敗:", error);
+    // 更詳細的錯誤資訊
+    console.error("點讚失敗:", error, error.response?.data);
     comment.liked = originalLiked;
     comment.likenum = originalLikeNum;
-
-    // (可選) 跳出錯誤提示
-    Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
+    Swal.fire(
+      "錯誤",
+      error.response?.data?.error || "點讚失敗，請稍後再試。",
+      "error"
+    );
   }
 };
-//檢舉
-function ReportIt() {
+/**
+ * 檢舉理由字串對應編號
+ * @param {string} reason
+ * @returns {number}
+ */
+function mapReasonToNumber(reason) {
+  const reasonMap = {
+    垃圾訊息: 1,
+    "辱罵/騷擾": 2,
+    "廣告/推銷內容": 3,
+    散佈不實消息: 4,
+    洩漏他人個資: 5,
+    其他: 6,
+  };
+  return reasonMap[reason] || 6;
+}
+// 檢舉觸發函式
+function ReportIt(commentId) {
   const container = document.createElement("div");
+
   render(
     h(ReportForm, {
-      onSubmit: (data) => {
-        console.log("檢舉資料：", data);
-        Swal.close();
-        Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+      commentId, // ← 傳給 ReportForm
+
+      onSubmit: async (data) => {
+        const reporterId = currentUser.value.member_id;
+
+        const payload = {
+          reporter_id: reporterId,
+          activity_comment_no: commentId, // ← 直接用外層 commentId
+          report_reason_no: mapReasonToNumber(data.reason),
+          report_description: data.detail,
+        };
+
+        try {
+          const { data: result } = await axios.post(
+            `${
+              import.meta.env.VITE_API_BASE
+            }/reports/actvities-comment-report.php`,
+            payload,
+            {
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+
+          if (result.ok) {
+            Swal.close();
+            Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
+          } else {
+            Swal.fire("發生錯誤", result.error || "請稍後再試", "error");
+          }
+        } catch (error) {
+          console.error(
+            "檢舉 API 錯誤：",
+            error.response?.data || error.message
+          );
+          Swal.fire("錯誤", "無法連線至伺服器", "error");
+        }
       },
     }),
     container
@@ -346,7 +440,7 @@ function ReportIt() {
                   {{ comment.replies.length }}
                 </span>
               </div>
-              <div class="action-icon" @click="ReportIt">
+              <div class="action-icon" @click="ReportIt(comment.id)">
                 <img :src="reprot" />
               </div>
             </div>

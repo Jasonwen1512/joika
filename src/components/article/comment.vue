@@ -1,5 +1,14 @@
 <script setup>
-import { ref, defineProps, computed, h, render, watch, defineEmits } from "vue";
+import {
+  ref,
+  defineProps,
+  computed,
+  h,
+  render,
+  watch,
+  defineEmits,
+  onMounted,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { articleList } from "@/assets/data/fake-article";
 import axios from "axios";
@@ -10,6 +19,7 @@ import Swal from "sweetalert2";
 import ReportForm from "@/components/ReportForm.vue";
 import PreIcon from "@/assets/img/icon/pre-arrow.svg?url";
 import NextIcon from "@/assets/img/icon/next-arrow.svg?url";
+import { authState } from "@/assets/data/authState";
 const route = useRoute();
 const router = useRouter();
 const postid = route.params.postid;
@@ -19,22 +29,75 @@ const emit = defineEmits(["comment-added"]);
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
-// 下方留言區
-// 假的自己 展示用
-const currentUser = {
-  member_id: "1", // 假設這是當前使用者的 ID
-  author: "展示用", // 您的名字
-  avatar: "https://i.pravatar.cc/150?u=me", // 一個代表您自己的頭像
-  replies: [],
-};
+onMounted(() => {
+  fetchCurrentUser();
+  autoHideReportedComments();
+});
 
-//
+const currentUser = ref({
+  member_id: null,
+  author: "",
+  avatar: "",
+  replies: [],
+});
+
+async function fetchCurrentUser() {
+  try {
+    const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
+      withCredentials: true, // 若有跨域 session
+    });
+    if (res.data.authenticated && res.data.user) {
+      currentUser.value.member_id = res.data.user.id;
+      currentUser.value.author = res.data.user.nickname;
+      currentUser.value.avatar =
+        res.data.user.avatar ||
+        `https://i.pravatar.cc/150?u=${res.data.user.id}`;
+    }
+  } catch (err) {
+    console.error("取得登入者資料失敗", err);
+  }
+}
+//先檢查所有留言的狀態有無被檢舉通過且未隱藏的
+async function autoHideReportedComments() {
+  for (const comment of props.comments) {
+    // 只檢查未隱藏的留言
+    if (comment.status !== "隱藏") {
+      try {
+        const res = await axios.post(
+          `${VITE_API_BASE}/comments/post-delete.php`,
+          {
+            type: "post",
+            comment_no: comment.id,
+          },
+          { withCredentials: true }
+        );
+        // 若 API 回傳 success，通知父層刷新留言
+        if (res.data.success) emit("comment-added");
+      } catch (err) {
+        // 可選：錯誤處理
+        console.error("自動隱藏留言失敗", err);
+      }
+    }
+  }
+}
+
 // 使用 defineProps 來接收從父元件傳入的留言資料
 const props = defineProps({
   comments: {
     type: Array,
     required: true,
     default: () => [], // 提供一個預設的空陣列，增加程式碼的穩健性
+  },
+  currentUser: {
+    // ← 加這個
+    type: Object,
+    required: true,
+    default: () => ({
+      member_id: null,
+      author: "",
+      avatar: "",
+      replies: [],
+    }),
   },
 });
 //偵錯
@@ -72,12 +135,18 @@ function postComment() {
   //這邊改用API
 
   axios
-    .post(`${VITE_API_BASE}/comments/post-create.php`, {
-      post_no: postid,
-      member_id: currentUser.member_id,
-      comment_content: newComment.value,
-      parent_no: null,
-    })
+    .post(
+      `${VITE_API_BASE}/comments/post-create.php`,
+      {
+        post_no: Number(postid),
+        // member_id: props.currentUser.member_id,
+        comment_content: newComment.value,
+        parent_no: null,
+      },
+      {
+        withCredentials: true, // ← 一定要加
+      }
+    )
     .then((res) => {
       console.log("新增成功：", res.data);
       // 通知父層重新抓留言
@@ -166,40 +235,46 @@ function toggleReplyBox(commentId) {
  * @param {object} parentComment - 要在哪一則父留言底下新增回覆
  */
 function postReply(parentComment) {
-  // 防呆：不讓使用者送出空的回覆
   if (!newReplyText.value.trim()) {
     alert("請輸入留言");
     return;
   }
+  // 檢查 parentComment.id 是否有值
+  if (!parentComment.id) {
+    alert("回覆目標留言 id 不存在");
+    return;
+  }
+  // 檢查使用者是否有登入 壞掉中先註解掉
+  // if (!currentUser.value.member_id) {
+  //   alert("請先登入");
+  //   return;
+  // }
   isReplyAnimating.value = true;
-
   setTimeout(() => {
     isReplyAnimating.value = false;
   }, 300);
-  // 建立一個新的「回覆物件」
+
+  // 修正型別
   const replyPayload = {
-    post_no: postid,
-    member_id: currentUser.member_id,
+    post_no: Number(postid),
+    member_id: Number(currentUser.value.member_id),
     comment_content: newReplyText.value,
-    parent_no: parentComment.id,
+    parent_no: Number(parentComment.id),
   };
 
-  // / 使用 axios 發送 POST 請求
+  console.log("送出 replyPayload:", replyPayload); // 偵錯用
+
   axios
-    .post(`${VITE_API_BASE}/comments/post-create.php`, replyPayload)
+    .post(`${VITE_API_BASE}/comments/post-create.php`, replyPayload, {
+      withCredentials: true,
+    })
     .then((res) => {
       console.log("新增回覆成功：", res.data);
-
-      // 成功後，一樣通知父元件重新抓取所有留言，以確保資料同步
       emit("comment-added");
-
-      // 清空回覆輸入框
       newReplyText.value = "";
-      //   activeReplyId.value = null; // 可以選擇性地在成功後關閉回覆框
     })
     .catch((err) => {
       console.error("新增回覆錯誤：", err);
-      // 可以在這裡加入錯誤提示，例如 Swal.fire(...)
     });
 }
 //切換子留言的展開/收合
@@ -210,12 +285,11 @@ function toggleReplies(comment) {
 // 喜歡
 
 const likeIt = async (comment) => {
-  // 假設您的 currentUser 物件存在且有 member_id
-  // 如果您是從 localStorage 拿，也可以用 const user = JSON.parse(localStorage.getItem("user"));
-  if (!currentUser || !currentUser.member_id) {
-    Swal.fire("請先登入", "登入後才能對留言按讚喔！", "warning");
-    return;
-  }
+  // 壞掉中 先註解掉
+  // if (!currentUser.value.member_id) {
+  //   Swal.fire("請先登入", "登入後才能對留言按讚喔！", "warning");
+  //   return;
+  // }
 
   // 步驟 1: 立即觸發動畫，提供即時的視覺回饋
   comment.animateLike = true;
@@ -245,7 +319,10 @@ const likeIt = async (comment) => {
     // 步驟 4: 呼叫您的 PHP API
     const response = await axios.post(
       `${VITE_API_BASE}/comments/post-like-toggle.php`,
-      payload
+      payload,
+      {
+        withCredentials: true,
+      }
     );
 
     // 步驟 5: 【最重要】用後端回傳的「真實」資料來同步前端畫面
@@ -265,49 +342,46 @@ const likeIt = async (comment) => {
     Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
   }
 };
-// 檢舉觸發函式
-function ReportIt() {
+
+function ReportIt(commentId) {
   const container = document.createElement("div");
 
   render(
     h(ReportForm, {
       onSubmit: async (data) => {
-        const user = JSON.parse(localStorage.getItem("user"));
-        const reporterId = user?.id;
-
-        if (!reporterId) {
-          Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
+        // ReportForm 已保證 reason 是數字；這邊再保險一次
+        const reasonNo = Number(data.reason);
+        if (!Number.isInteger(reasonNo) || reasonNo <= 0) {
+          Swal.fire("錯誤", "請選擇檢舉原因", "error");
           return;
         }
 
         const payload = {
-          reporter_id: reporterId,
-          post_no: postid,
-          report_reason_no: mapReasonToNumber(data.reason),
-          report_description: data.detail,
+          // 後端用 session 取 member_id，不要再傳 reporter_id 了
+          post_comment_no: Number(commentId),
+          report_reason_no: reasonNo,
+          report_description: (data.detail || "").trim(),
         };
 
         try {
           const { data: result } = await axios.post(
-            `${import.meta.env.VITE_API_BASE}/reports/post-report.php`,
+            `${VITE_API_BASE}/reports/comment-report.php`,
             payload,
             {
-              headers: { "Content-Type": "application/json" },
+              withCredentials: true, // 🔸一定要帶，PHP 才抓得到登入 session
             }
           );
 
-          if (result.success) {
+          if (result?.ok || result?.success) {
             Swal.close();
             Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
           } else {
-            Swal.fire("發生錯誤", result.error || "請稍後再試", "error");
+            Swal.fire("發生錯誤", result?.error || "請稍後再試", "error");
           }
         } catch (error) {
-          console.error(
-            "檢舉 API 錯誤：",
-            error.response?.data || error.message
-          );
-          Swal.fire("錯誤", "無法連線至伺服器", "error");
+          console.error("檢舉 API 錯誤：", error.response?.data || error.message);
+          const msg = error?.response?.data?.error || error.message || "無法連線至伺服器";
+          Swal.fire("錯誤", msg, "error");
         }
       },
     }),
@@ -319,11 +393,24 @@ function ReportIt() {
     html: container,
     showCancelButton: false,
     showConfirmButton: false,
-    willClose: () => render(null, container),
+    willClose: () => {
+      render(null, container);
+      document.body.style.paddingRight = "";
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+    },
     zIndex: 20000,
   });
 }
+
 </script>
+<!-- <script>
+export default {
+  mounted() {
+    window["that"] = this; // 這裡的 this 才是元件實例
+  },
+};
+</script> -->
 <template>
   <!-- ================================== -->
   <!--           留言系統區塊             -->
@@ -374,7 +461,7 @@ function ReportIt() {
                   {{ comment.replies.length }}
                 </span>
               </div>
-              <div class="action-icon" @click="ReportIt">
+              <div class="action-icon" @click="ReportIt(comment.id)">
                 <img :src="reprot" />
               </div>
             </div>

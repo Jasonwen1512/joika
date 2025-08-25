@@ -1,4 +1,5 @@
 <script setup>
+import axios from "axios";
 import { reactive, ref, watch, toRefs, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router"; // 引入 useRoute
 import { articleList } from "@/assets/data/fake-article";
@@ -12,12 +13,13 @@ import AirPlane from "@/assets/img/article/airplane.png";
 import "tinymce/skins/ui/oxide/skin.css";
 import "tinymce/themes/silver";
 import "tinymce/icons/default";
-import "tinymce/plugins/emoticons";
-import "tinymce/plugins/emoticons/js/emojis.js";
+// import "tinymce/plugins/emoticons";
+// import "tinymce/plugins/emoticons/js/emojis.js";
 import "tinymce/plugins/table";
 import "tinymce/plugins/quickbars";
 import "tinymce/plugins/autoresize";
 import "tinymce/plugins/image"; // 確保 image 外掛已引入
+
 // 語言包
 import "tinymce-i18n/langs5/zh_TW.js";
 
@@ -26,6 +28,8 @@ import Editor from "@tinymce/tinymce-vue";
 import { usePreviewStore } from "@/stores/preview";
 
 const previewStore = usePreviewStore();
+// 環境變數
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
 // --- Props (保持不變) ---
 const title = ref(null);
@@ -42,7 +46,7 @@ const props = defineProps({
   modelValue: { type: String, default: "" },
   plugins: {
     type: [String, Array],
-    default: "quickbars emoticons table autoresize image",
+    default: "quickbars  table autoresize image",
   },
   toolbar: {
     type: [String, Array],
@@ -65,32 +69,60 @@ const form = reactive({
   image: "", // 預設圖片
 });
 
+// === 新增：首圖上傳（檔案與預覽） ===
+const coverFile = ref(null);
+const coverPreview = ref(""); // Object URL for preview
+function onCoverChange(e) {
+  const file = e.target.files?.[0];
+  if (!file) {
+    coverFile.value = null;
+    coverPreview.value = "";
+    return;
+  }
+  coverFile.value = file;
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value);
+  coverPreview.value = URL.createObjectURL(file);
+}
+// 清理預覽 URL（避免記憶體洩漏）
+onBeforeUnmount(() => {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value);
+});
+// === 新增結束 ===
+
 // 3.【關鍵】當處於「編輯模式」時，載入舊資料
 onMounted(() => {
-  // 1. 監聽視窗大小變化
   window.addEventListener("resize", handleResize);
-
-  // 2. 觸發標題動畫
   isVisible.value = true;
 
-  // 3. 根據模式決定行為
   if (props.mode === "edit" && props.postid) {
-    // 編輯模式
     titleText.value = "編輯你的故事";
-    const articleToEdit = articleList.find(
-      (item) => item.postid === props.postid
-    );
-    if (articleToEdit) {
-      // 將找到的舊資料填入 form 物件
-      Object.assign(form, articleToEdit);
-      // // 手動觸發 emit，確保 TinyMCE 元件接收到初始內容
-      // emit('update:modelValue', form.content);
-    } else {
-      console.error("找不到要編輯的文章！");
-      router.push("/article/article");
-    }
+    // 串接資料庫 API 抓文章
+    axios
+      .get(`${VITE_API_BASE}/posts/detail.php?id=${props.postid}`)
+      .then((response) => {
+        const raw = response.data;
+        // 處理圖片路徑（依你的資料庫欄位調整）
+        const backendImagePath = raw.POST_IMG || "";
+        const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
+        const fullImageUrl = `${VITE_API_BASE}/${cleanedPath}`;
+
+        // 填入表單
+        Object.assign(form, {
+          postid: raw.POST_NO,
+          userid: raw.MEMBER_ID,
+          title: raw.POST_TITLE,
+          content: raw.POST_CONTENT,
+          event: raw.CATEGORY_NO,
+          type: "揪團心得", // 可依你的資料庫欄位調整
+          date: raw.CREATED_AT,
+          image: fullImageUrl,
+        });
+      })
+      .catch((err) => {
+        console.error("找不到要編輯的文章！", err);
+        router.push("/article/article");
+      });
   } else {
-    // 新增模式
     titleText.value = "今天想說點什麼？";
   }
 });
@@ -98,7 +130,10 @@ onMounted(() => {
 function previewArticle() {
   Object.assign(previewStore.previewData, form);
   previewStore.isPreview = true;
-  router.push({ name: "ArticlePreview" });
+  router.push({
+    name: "ArticlePreview",
+    query: { mode: props.mode }, // 用 query 傳遞
+  });
   // 當點擊預覽時，將整個 form 物件透過 history.state 傳遞
   // router.push({
   //   name: "ArticlePreview",
@@ -124,49 +159,126 @@ watch(
   }
 );
 async function submitArticle() {
+  const categoryIndex = categories.indexOf(form.event);
+  const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
+
+  if (!categoryNo) {
+    alert("請選擇有效的分類");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("category_no", categoryNo);
+  formData.append("post_title", form.title);
+  formData.append("post_content", form.content);
+  if (coverFile.value) {
+    formData.append("post_img", coverFile.value);
+  }
+  // 這裡可以根據 mode 決定要呼叫哪個 API
+  let apiUrl = "";
+
   if (props.mode === "edit") {
     // --- 未來串接 API 的位置 (更新/PUT) ---
-    // await updateArticleAPI(form.postid, form);
+    formData.append("post_no", form.postid); // 編輯時要加文章編號
+    apiUrl = `${VITE_API_BASE}/posts/update.php`;
     console.log("正在【更新】文章:", form);
     alert("文章更新成功！");
   } else {
-    // --- 未來串接 API 的位置 (新增/POST) ---
-    // const newArticle = await createArticleAPI(form);
-    console.log("正在【新增】文章:", form);
-    alert("文章發表成功！");
-  }
-  // 成功後跳轉回列表頁
-  router.push("/article/article");
-}
+    // --- 未來串接 API 的位置 (新增/POST)
+    apiUrl = `${VITE_API_BASE}/posts/create.php`;
 
+    // 因為蠻多重複共用的程式 先寫在一起 ---
+    // try {
+    //   const categoryIndex = categories.indexOf(form.event);
+    //   const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
+
+    //   if (categoryIndex === -1) {
+    //     alert("請選擇有效的分類");
+    //     return;
+    //   }
+    //   const formData = new FormData();
+    //   formData.append("category_no", categoryNo);
+    //   formData.append("post_title", form.title);
+    //   formData.append("post_content", form.content);
+
+    //   // === 新增：若有選首圖，夾帶 POST_IMG 給後端 ===
+    //   if (coverFile.value) {
+    //     formData.append("post_img", coverFile.value); // 後端 create.php 會存成封面
+    //   }
+    //   // === 新增結束 ===
+
+    //   const res = await axios.post(
+    //     `${import.meta.env.VITE_API_BASE}/posts/create.php`,
+    //     formData,
+    //     {
+    //       headers: { "Content-Type": "multipart/form-data" },
+    //       withCredentials: true,
+    //     }
+    //   );
+    //   router.push("/article/article");
+    //   // const newArticle = await createArticleAPI(form);
+    //   console.log("正在【新增】文章:", form);
+    //   alert("文章發表成功！");
+    // } catch (err) {
+    //   console.error("發表失敗:", err);
+    //   alert("文章發表失敗，請稍後再試！");
+    //   return;
+    // }
+    // 成功後跳轉回列表頁
+    //router.push("/article/article");
+  }
+  try {
+    const res = await axios.post(apiUrl, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      withCredentials: true,
+    });
+    if (res.data.ok) {
+      alert(props.mode === "edit" ? "文章更新成功！" : "文章發表成功！");
+      router.push("/article/article");
+    } else {
+      throw new Error(res.data.error || "送出失敗");
+    }
+  } catch (err) {
+    alert("送出失敗：" + (err?.message || "請稍後再試"));
+  }
+}
 // --- 圖片上傳處理邏輯 (保持不變) ---
+
 const uploadImageAndGetUrl = (blobInfo) =>
   new Promise((resolve, reject) => {
+    console.log(blobInfo, 666);
     const formData = new FormData();
-    formData.append("file", blobInfo.blob(), blobInfo.filename());
-
-    // 請將 '/api/upload-image' 換成您真實的後端上傳 API 位址
-    fetch("/api/upload-image", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
+    formData.append("activity_img", blobInfo.blob(), blobInfo.filename());
+    console.log(formData);
+    // // 請將 '/api/upload-image' 換成您真實的後端上傳 API 位址
+    // fetch(`${VITE_API_BASE}/posts/upload-image.php`, {
+    //   method: "POST",
+    //   body: formData,
+    // })
+    //   .then((response) => {
+    //     if (!response.ok)
+    //       throw new Error(`HTTP error! status: ${response.status}`);
+    //     return response.json();
+    //   })
+    //   .then((json) => {
+    //     if (!json || typeof json.location !== "string") {
+    //       throw new Error("無效的 JSON 格式: " + JSON.stringify(json));
+    //     }
+    //     resolve(json.location); // 成功，回傳圖片 URL
+    //   })
+    //   .catch((error) => {
+    //     reject("圖片上傳失敗: " + error.message);
+    //   });
+    axios
+      .post(`${VITE_API_BASE}/posts/upload-image.php`, formData)
+      .then((res) => {
+        console.log("新增成功：", res.data);
       })
-      .then((json) => {
-        if (!json || typeof json.location !== "string") {
-          throw new Error("無效的 JSON 格式: " + JSON.stringify(json));
-        }
-        resolve(json.location); // 成功，回傳圖片 URL
-      })
-      .catch((error) => {
-        reject("圖片上傳失敗: " + error.message);
+      .catch((err) => {
+        console.error("錯誤：", err);
       });
   });
 
-// [關鍵修正] 新增 file_picker_callback 函式
+// 新增 file_picker_callback 函式
 const handleFilePicker = (callback, value, meta) => {
   // 只針對圖片類型的檔案選擇器生效
   if (meta.filetype === "image") {
@@ -188,20 +300,7 @@ const handleFilePicker = (callback, value, meta) => {
         const blobInfo = blobCache.create(id, file, base64);
         blobCache.add(blobInfo);
 
-        // 上傳圖片並取得 URL
-        uploadImageAndGetUrl(blobInfo)
-          .then((url) => {
-            // 將 URL 回傳給 TinyMCE 對話框
-            callback(url, { title: file.name });
-          })
-          .catch((error) => {
-            console.error(error);
-            // 可以在這裡加入錯誤提示
-            tinymce.activeEditor.notificationManager.open({
-              text: "圖片上傳失敗",
-              type: "error",
-            });
-          });
+        callback(blobInfo.blobUri(), { title: file.name });
       };
       reader.readAsDataURL(file);
     };
@@ -234,6 +333,8 @@ const init = reactive({
   // [建議] 允許直接貼上圖片並觸發上傳
   paste_data_images: true,
 });
+window["tinymce"] = tinymce;
+window["Editor"] = Editor;
 
 // --- 其他 Vue 生命週期與邏輯 (保持不變) ---
 const { modelValue } = toRefs(props);
@@ -253,13 +354,13 @@ onBeforeUnmount(() => {
 
 const categories = [
   "登山",
-  "水上活動",
+  "桌遊",
   "運動",
   "露營",
   "唱歌",
   "展覽",
+  "水上活動",
   "聚餐",
-  "桌遊",
   "電影",
   "手作",
   "文化體驗",
@@ -301,8 +402,8 @@ function selectType(typeName) {
       placeholder="請輸入文章標題"
       v-model="form.title"
     />
-    <div class="category-btn-list">
-      <!-- 建議修正 props 寫法 -->
+    <!-- <div class="category-btn-list">
+      建議修正 props 寫法
       <label>文章類型：</label>
       <Button
         @click="selectType('揪團心得')"
@@ -322,7 +423,7 @@ function selectType(typeName) {
         size="sm"
         >分享</Button
       >
-    </div>
+    </div> -->
     <div class="topic-category">
       <label for="topic-category">文章分類：</label>
       <select id="topic-category" name="category" v-model="form.event">
@@ -336,6 +437,26 @@ function selectType(typeName) {
         </option>
       </select>
     </div>
+
+    <!-- === 新增：首圖上傳區塊（預覽 + 檔案 input） === -->
+    <div class="cover-upload">
+      <label class="cover-label">首圖（選填）：</label>
+      <div class="cover-uploader">
+        <input
+          class="cover-input"
+          type="file"
+          accept="image/*"
+          @change="onCoverChange"
+        />
+        <div v-if="coverPreview" class="cover-preview">
+          <img :src="coverPreview" alt="首圖預覽" />
+        </div>
+        <div v-else class="cover-placeholder">未選擇圖片</div>
+      </div>
+      <small class="cover-hint">建議比例 16:9、JPG/PNG，小於 5MB</small>
+    </div>
+    <!-- === 新增結束 === -->
+
     <div class="text-editor">
       <editor v-model="editorContent" :init="init" @onInit="handleEditorInit" />
       <p class="notice">
@@ -415,7 +536,7 @@ function selectType(typeName) {
   gap: 25px;
   padding: 0 15px;
   box-sizing: border-box;
-  /* [關鍵修正] 明確定義 Grid 欄位 */
+  /* 明確定義 Grid 欄位 */
   grid-template-columns: 1fr;
   z-index: 5;
 }
@@ -463,7 +584,7 @@ select {
 }
 .text-editor {
   width: 100%;
-  /* [關鍵修正] 覆蓋 Grid/Flex item 的預設最小寬度 */
+  /* 覆蓋 Grid/Flex item 的預設最小寬度 */
   min-width: 0;
 }
 
@@ -522,4 +643,42 @@ select {
 .create {
   gap: 15px;
 }
+
+/* === 首圖上傳樣式 === */
+.cover-upload {
+  display: grid;
+  gap: 8px;
+}
+.cover-label {
+  font-weight: 600;
+}
+.cover-uploader {
+  display: grid;
+  gap: 10px;
+  align-items: start;
+}
+.cover-input {
+  display: block;
+  width: 200px;
+}
+.cover-preview {
+  max-width: 100%;
+  border: 1px dashed #ccc;
+  padding: 8px;
+  border-radius: 6px;
+  background: #fff;
+}
+.cover-preview img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.cover-placeholder {
+  font-size: 14px;
+  color: #888;
+}
+.cover-hint {
+  color: #999;
+}
+/* === 新增結束 === */
 </style>

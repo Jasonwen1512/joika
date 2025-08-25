@@ -1,11 +1,10 @@
 <script setup>
-//整理一下//
-
 import { ref, computed, h, render, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios"; // <-- 新增 axio
 import { useRoute, useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import { usePreviewStore } from "@/stores/preview";
+import { authState } from "@/assets/data/authState";
 
 //引入元件
 // import { articleList } from "@/assets/data/fake-article"; 假資料已再不使用
@@ -16,18 +15,50 @@ import ReportForm from "@/components/ReportForm.vue";
 import DeleteIcon from "@/assets/img/icon/delete.svg";
 import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from "@/assets/img/article/movie_konan.jpg";
+import defaultImg from "@/assets/img/article/nopicture.jpg";
 
 // 這裡先用假的登入者資料
-const currentUser = ref({
-  // userid: Number(localStorage.getItem("member_id")) || 0,
-  userid: 1,
-});
+// 假的自己 展示用
+// const currentUser = {
+//   member_id: authState.user.id, // 假設這是當前使用者的 ID
+//   author: authState.user.nickname, // 您的名字
+//   avatar: "https://i.pravatar.cc/150?u=me", // 一個代表您自己的頭像
+//   replies: [],
+// };
+// console.log({ currentUser });
 
 // 環境變數與初始設定
 const previewStore = usePreviewStore();
 const route = useRoute();
 const router = useRouter();
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+const coverFile = ref(null);
+const currentUser = ref({
+  member_id: null,
+  author: "",
+  avatar: "",
+  replies: [],
+});
+//抓是預覽模式是從編輯還是發文送出
+const mode = computed(() => route.query.mode || "create");
+async function fetchCurrentUser() {
+  try {
+    const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
+      withCredentials: true, // 若有跨域 session
+    });
+    if (res.data.authenticated && res.data.user) {
+      currentUser.value.member_id = res.data.user.id;
+      currentUser.value.author = res.data.user.nickname;
+      currentUser.value.avatar =
+        res.data.user.avatar ||
+        `https://i.pravatar.cc/150?u=${res.data.user.id}`;
+      console.log("取得登入者資料：", res.data);
+      console.log("currentUser:", currentUser.value);
+    }
+  } catch (err) {
+    console.error("取得登入者資料失敗", err);
+  }
+}
 // ===================================================================
 // Props 定義 (Single Source of Truth)
 // 【重要】我們需要 'mode' prop 來讓 'submitArticle' 函式正常運作
@@ -46,13 +77,13 @@ const props = defineProps({
 //分類顏色
 const EventColorMap = {
   登山: "#6DE1D2",
-  水上活動: "#77BEF0",
+  桌遊: "#FFD63A",
   運動: "#FFD63A",
   露營: "#FF8C86",
   唱歌: "#FFA955",
   展覽: "#6DE1D2",
+  水上活動: "#77BEF0",
   聚餐: "#77BEF0",
-  桌遊: "#FFD63A",
   電影: "#FF8C86",
   手作: "#FFA955",
   文化體驗: "#6DE1D2",
@@ -66,13 +97,13 @@ const GetEventColor = (eventName) => {
 // 將後端 API 的分類 ID (數字) 轉換為中文名稱的對照表
 const categoryMap = {
   1: "登山",
-  2: "水上活動",
+  2: "桌遊",
   3: "運動",
   4: "露營",
   5: "唱歌",
   6: "展覽",
-  7: "聚餐",
-  8: "桌遊",
+  7: "水上活動",
+  8: "聚餐",
   9: "電影",
   10: "手作",
   11: "文化體驗",
@@ -144,12 +175,13 @@ const article = computed(() => {
 // computed 屬性：判斷是否為文章擁有者
 const isOwner = computed(() => {
   return (
-    article.value && currentUser.value.userid === article.value.post_user_id
+    article.value && currentUser.value.member_id === article.value.post_user_id
   ); // 請確認資料庫欄位名稱是否為 POST_USER_ID
 });
 
 // 生命週期鉤子：在元件掛載時獲取資料
 onMounted(() => {
+  fetchCurrentUser();
   fetchArticle();
   fetchComments();
 });
@@ -194,14 +226,17 @@ async function fetchArticle() {
     // 資料欄位轉換
     const raw = response.data;
     // --- 處理圖片路徑 ---
-    const backendImagePath = raw.POST_IMG; // ← 用 raw
-    const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
-    const fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+    const backendImagePath = raw.POST_IMG;
+    let fullImageUrl = defaultImg; // 先設定為預設圖片
 
+    if (backendImagePath && typeof backendImagePath === "string") {
+      const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
+      fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+    }
     apiArticleData.value = {
       postid: raw.POST_NO,
       title: raw.POST_TITLE,
-      post_user_id: raw.MEMBER_ID, // ← 改這裡
+      post_user_id: raw.MEMBER_ID,
       nickname: raw.MEMBER_NICKNAME,
       content: raw.POST_CONTENT,
       image: fullImageUrl,
@@ -237,23 +272,74 @@ function EditArticle() {
   });
 }
 
-//預覽模式的送出
 async function submitArticle() {
-  if (props.mode === "edit") {
-    // --- 未來串接 API 的位置 (更新/PUT) ---
-    // await updateArticleAPI(form.postid, form);
-    alert("文章更新成功！");
-  } else {
-    // --- 未來串接 API 的位置 (新增/POST) ---
-    // const newArticle = await createArticleAPI(form);
-    alert("文章發表成功！");
-  }
-  // 成功後跳轉回列表頁
-  router.push("/article/article");
-}
+  // 取得預覽資料
+  const previewData = previewStore.previewData;
 
-//刪除
+  // 取得分類編號
+  const categories = [
+    "登山",
+    "桌遊",
+    "運動",
+    "露營",
+    "唱歌",
+    "展覽",
+    "水上活動",
+    "聚餐",
+    "電影",
+    "手作",
+    "文化體驗",
+    "演出表演",
+    "其他",
+  ];
+  const categoryIndex = categories.indexOf(previewData.event);
+  const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
+
+  // if (!categoryNo) {
+  //   alert("請選擇有效的分類");
+  //   return;
+  // }
+
+  const formData = new FormData();
+  formData.append("category_no", categoryNo);
+  formData.append("post_title", previewData.title);
+  formData.append("post_content", previewData.content);
+
+  // 編輯模式要加 post_no
+  if (mode.value === "edit") {
+    formData.append("post_no", previewData.postid);
+  }
+  // 圖片檔案來源
+  const previewCoverFile = previewData.coverFile || coverFile.value;
+  if (previewCoverFile) {
+    formData.append("post_img", previewCoverFile);
+  }
+
+  // 判斷 API 路徑
+  const apiUrl =
+    mode.value === "edit"
+      ? `${VITE_API_BASE}/posts/update.php`
+      : `${VITE_API_BASE}/posts/create.php`;
+
+  try {
+    const res = await axios.post(apiUrl, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      withCredentials: true,
+    });
+    if (res.data.ok) {
+      alert(mode.value === "edit" ? "文章更新成功！" : "文章發表成功！");
+      router.push("/article/article");
+    } else {
+      throw new Error(res.data.error || "送出失敗");
+    }
+  } catch (err) {
+    alert("送出失敗：" + (err?.message || "請稍後再試"));
+  }
+}
+//刪除文章功能
 function DeleteCheck() {
+  if (!article.value) return; // 保險
+
   Swal.fire({
     title: "確定要刪除嗎？",
     text: "文章刪除後將無法復原！",
@@ -264,90 +350,112 @@ function DeleteCheck() {
     cancelButtonText: "取消",
     confirmButtonText: "是的，刪除它！",
     reverseButtons: true,
-
     buttonsStyling: false,
-
     customClass: {
       confirmButton: "my-swal-confirm-button",
       cancelButton: "my-swal-cancel-button",
     },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      Swal.fire({
-        title: "已刪除！",
-        text: "您的文章已經被刪除。",
-        icon: "success",
-        buttonsStyling: false,
-        customClass: {
-          confirmButton: "my-swal-check-button",
-        },
-        // 在此處串接後端刪除 API
-        // 以下為使用 fetch API 的範例
-        /*
-      fetch('YOUR_API_ENDPOINT/posts/YOUR_POST_ID', { // 將 YOUR_API_ENDPOINT/posts/YOUR_POST_ID 替換為你的 API 端點和文章 ID
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          // 如果需要，可以在這裡加入授權 token
-          // 'Authorization': 'Bearer YOUR_TOKEN'
-        }
-      })*/
-      }).then((result) => {
-        if (result.isConfirmed) {
-          router.push("/article/article");
-        }
-      });
-    } else if (result.isDismissed) {
-      // 如果使用者點擊了「取消」、按了 Esc 鍵或點擊視窗外部
-      console.log("使用者取消了刪除操作。");
+  }).then(async (result) => {
+    if (!result.isConfirmed) return;
+
+    try {
+      // 真正呼叫後端刪除 API（POST: post_no）
+      const params = new URLSearchParams();
+      params.append("post_no", String(article.value.postid));
+      // params.append("hard", "1"); // 若要從資料庫完全刪除才打開
+
+      const res = await axios.post(
+        `${VITE_API_BASE}/posts/delete.php`,
+        params,
+        { withCredentials: true } // 帶 cookie（PHPSESSID）
+      );
+
+      if (res.data?.ok) {
+        await Swal.fire({
+          title: "已刪除！",
+          text: "您的文章已經被刪除。",
+          icon: "success",
+          buttonsStyling: false,
+          customClass: { confirmButton: "my-swal-check-button" },
+        });
+        router.push("/article/article");
+      } else {
+        throw new Error(res.data?.error || "刪除失敗");
+      }
+    } catch (err) {
+      const status = err?.response?.status;
+      const msg =
+        err?.response?.data?.error ||
+        (status === 401
+          ? "請先登入會員"
+          : status === 403
+          ? "沒有刪除權限"
+          : status === 404
+          ? "找不到文章"
+          : "刪除失敗，請稍後再試");
+
+      await Swal.fire({ icon: "error", title: "刪除失敗", text: msg });
     }
   });
 }
+
 //文章檢舉功能
 function openReportModal() {
   const container = document.createElement("div");
+
   render(
     h(ReportForm, {
       onSubmit: async (data) => {
         const baseURL = import.meta.env.VITE_API_BASE;
-        const reporterId = currentUser.value.userid;
         const postNo = article.value?.postid;
 
         if (!postNo) {
           Swal.fire("錯誤", "找不到文章編號", "error");
           return;
         }
-        console.log({
-          reporter_id: reporterId,
-          post_no: postNo,
+
+        // 後端用 Session 取 member_id，不再傳 reporter_id
+        const payload = {
+          post_no: Number(postNo),
           report_reason_no: Number(data.reason),
-          report_description: data.detail,
-        });
+          report_description: (data.detail || "").trim(),
+        };
+        // console.log('report payload:', payload);
 
         try {
-          const res = await axios.post(`${baseURL}/reports/post-report.php`, {
-            reporter_id: reporterId,
-            post_no: postNo,
-            report_reason_no: Number(data.reason),
-            report_description: data.detail,
-          });
+          const res = await axios.post(
+            `${baseURL}/reports/post-report.php`,
+            {
+              reporter_id: reporterId,
+              post_no: postNo,
+              report_reason_no: Number(data.reason),
+              report_description: data.detail,
+            },
+            {
+              withCredentials: true, // 這個一定要加
+            }
+          );
 
-          if (res.data.success) {
+          if (res.data.ok) {
             Swal.close();
             Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
           } else {
-            Swal.fire("送出失敗", res.data.error || "請稍後再試", "error");
+            Swal.fire("送出失敗", resp?.error || "請稍後再試", "error");
           }
         } catch (error) {
           console.error("檢舉 API 錯誤：", error);
-          Swal.fire("錯誤", "發送失敗，請稍後再試", "error");
+          const msg =
+            error?.response?.data?.error || error.message || "發送失敗，請稍後再試";
+          Swal.fire("錯誤", msg, "error");
         }
       },
     }),
     container
   );
+
+  // 
   Swal.fire({
-    title: "檢舉留言",
+    title: "檢舉文章",
     html: container,
     showCancelButton: false,
     showConfirmButton: false,
@@ -398,7 +506,7 @@ async function fetchComments() {
             c.MEMBER_AVATAR || `https://i.pravatar.cc/150?u=${c.MEMBER_ID}`,
           timestamp: c.CREATED_AT,
           content: c.COMMENT_CONTENT,
-          likenum: Number(c.LIKE_NUM || 0),
+          likenum: Number(c.LIKE_COUNT || 0),
           liked: false,
           parentId: c.PARENT_NO, // 父留言 ID
           replies: [],
@@ -498,9 +606,19 @@ onUnmounted(() => {
         <div class="article-head">
           <span
             class="event-label"
-            :style="{ borderColor: GetEventColor(categoryMap[article.event]) }"
+            :style="{
+              borderColor: GetEventColor(
+                typeof article.event === 'number'
+                  ? categoryMap[article.event]
+                  : article.event
+              ),
+            }"
           >
-            {{ categoryMap[article.event] }}
+            {{
+              typeof article.event === "number"
+                ? categoryMap[article.event]
+                : article.event
+            }}
           </span>
           <p>{{ article.date }}</p>
         </div>
@@ -532,6 +650,7 @@ onUnmounted(() => {
       <CommentComponent
         v-if="comments"
         :comments="comments"
+        :current-user="currentUser"
         @comment-added="fetchComments"
       />
     </div>
