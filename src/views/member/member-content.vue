@@ -268,7 +268,9 @@ if (!hasData) await fetchActivities(type);
                         <Button :prefixIcon="NotifyIcon" :size="buttonSize" theme="primary">通知訊息</Button>
                     </RouterLink>
 
-                    <Button :prefixIcon="EditIcon" :size="buttonSize" theme="info">編輯檔案</Button>
+                    <RouterLink :to="{ name: 'profileUpdate' }">
+                        <Button :prefixIcon="EditIcon" :size="buttonSize" theme="info">編輯檔案</Button>
+                    </RouterLink>
 
                     <Button isOutline theme="secondary" :size="buttonSize" @click="handleLogout">
                         {{ logoutLoading ? '登出中…' : '登出' }}
