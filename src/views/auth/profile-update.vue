@@ -4,7 +4,7 @@ import Button from "@/components/Button.vue";
 import InputField from "@/components/auth/Inputfield.vue";
 import InterestSelector from "@/components/auth/Interestselector.vue";
 
-const currentStep = ref(1);
+const currentStep = ref(2);
 const avatarUrl = ref("");
 const genderOptions = [
   { label: "男性", value: "M" },
@@ -15,14 +15,8 @@ const genderOptions = [
 const cityOptions = ref([]); // 縣市
 const occupationOptions = ref([]); // 職業
 const interestOptions = ref([]); // 興趣
-const tmpId = ref(""); // step 1 暫存資料 id
 
 const form = ref({
-  email: "",
-  phone: "",
-  password: "",
-  confirmPassword: "",
-  agreed: false,
   name: "",
   nickname: "",
   gender: "",
@@ -33,11 +27,6 @@ const form = ref({
 });
 
 const errors = ref({
-  email: "",
-  phone: "",
-  password: "",
-  confirmPassword: "",
-  agreed: "",
   name: "",
   nickname: "",
   gender: "",
@@ -76,81 +65,6 @@ function setupAutoClearError(dataRef, errorRef) {
     );
   });
 }
-
-// step1 驗證
-const validateStepOne = async () => {
-  // 清除錯誤
-  Object.keys(errors.value).forEach((key) => (errors.value[key] = ""));
-
-  const { email, phone, password, confirmPassword, agreed } = form.value;
-  let hasError = false;
-
-  if (!email) {
-    errors.value.email = "請輸入信箱";
-    hasError = true;
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.value.email = "信箱格式錯誤";
-    hasError = true;
-  }
-
-  if (!phone) {
-    errors.value.phone = "請輸入手機";
-    hasError = true;
-  } else if (!/^09\d{8}$/.test(phone)) {
-    errors.value.phone = "手機格式錯誤";
-    hasError = true;
-  }
-
-  if (!password) {
-    errors.value.password = "請輸入密碼";
-    hasError = true;
-  } else if (password.length < 6 || password.length > 12) {
-    errors.value.password = "密碼長度需介於 6 ~ 12 字元";
-    hasError = true;
-  }
-
-  if (!confirmPassword) {
-    errors.value.confirmPassword = "請確認密碼";
-    hasError = true;
-  } else if (password !== confirmPassword) {
-    errors.value.confirmPassword = "密碼不一致";
-    hasError = true;
-  }
-
-  if (!form.value.agreed) {
-    errors.value.agreed = "請勾選會員條款";
-    hasError = true;
-  }
-
-  if (!hasError) {
-    // step1 送到後端暫存
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/register.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          step: 1,
-          email: email,
-          phone: phone,
-          password: password,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        tmpId.value = data.tmp_id;
-        currentStep.value = 2; // 前進 Step2
-      } else if (data.errors) {
-        // 後端檢查錯誤回填
-        Object.assign(errors.value, data.errors);
-      }
-    } catch (err) {
-      console.error("Step1 暫存失敗", err);
-    }
-  }
-};
 
 // step2
 async function handleStepTwoSubmit() {
@@ -268,84 +182,18 @@ const getStepState = (step) => {
   <div class="signup-page">
     <div class="signup-container">
       <div class="registration-header">
-        <h1>註冊</h1>
+        <h1>會員資料</h1>
         <ul class="progress-bar" id="progress-bar">
-          <li :class="['progress-step', getStepState(1)]" data-step="1">
-            <div class="step-label">帳號申請</div>
-            <div class="step-circle"></div>
-          </li>
           <li :class="['progress-step', getStepState(2)]">
             <div class="step-label">基本資料</div>
             <div class="step-circle"></div>
           </li>
           <li :class="['progress-step', getStepState(3)]">
-            <div class="step-label">註冊完成</div>
+            <div class="step-label">編輯完成</div>
             <div class="step-circle"></div>
           </li>
         </ul>
       </div>
-
-      <!--步驟1-->
-      <section v-show="currentStep === 1" class="form-step">
-        <form @submit.prevent="validateStepOne">
-          <InputField
-            id="email"
-            label="信箱"
-            type="email"
-            v-model="form.email"
-            :error="errors.email"
-            @blur="
-              () => {
-                errors.email = '';
-              }
-            " />
-
-          <InputField
-            id="phone"
-            label="手機"
-            type="tel"
-            v-model="form.phone"
-            :error="errors.phone"
-            @blur="
-              () => {
-                errors.phone = '';
-              }
-            " />
-
-          <InputField
-            id="password"
-            label="密碼"
-            type="password"
-            v-model="form.password"
-            :error="errors.password"
-            @blur="
-              () => {
-                errors.password = '';
-              }
-            " />
-
-          <InputField
-            id="confirm-password"
-            label="確認密碼"
-            type="password"
-            v-model="form.confirmPassword"
-            :error="errors.confirmPassword"
-            @blur="
-              () => {
-                errors.confirmPassword = '';
-              }
-            " />
-          <div class="tos-group">
-            <input type="checkbox" id="tos" v-model="form.agreed" />
-            <label for="tos">我已閱讀並同意 JOIKA 會員條款</label>
-          </div>
-          <p v-if="errors.agreed" class="error-text">{{ errors.agreed }}</p>
-
-          <div class="button-group">
-            <Button size="md" theme="primary">送出</Button>
-          </div>
-        </form>
-      </section>
 
       <!-- 步驟 2-->
       <section v-show="currentStep === 2" class="form-step">
@@ -367,7 +215,6 @@ const getStepState = (step) => {
 
           <InputField id="gender" label="性別" type="select" :options="genderOptions" v-model="form.gender" :error="errors.gender" />
 
-          <!-- <InputField id="birthdate" label="生日" type="date" v-model="form.birthdate" :error="errors.birthdate" /> -->
           <div class="form-group">
             <label class="form-label" for="birthdate">生日</label>
             <el-date-picker id="birthdate" v-model="form.birthdate" type="date" value-format="YYYY-MM-DD" placeholder="請選擇出生年月日" class="custom-date" />
@@ -386,11 +233,9 @@ const getStepState = (step) => {
         </form>
       </section>
 
-      <!-- 步驟 3: 註冊完成 -->
+      <!-- 步驟 3: 編輯完成 -->
       <section v-show="currentStep === 3" class="form-step">
-        <p class="subtitle">註冊成功</p>
-        <p class="subtitle">就差一點點就能一起出發啦！</p>
-        <p class="info">我們正在確認您的資料，審核通過後就可以開始揪團玩樂囉</p>
+        <p class="subtitle">編輯成功</p>
       </section>
     </div>
   </div>
@@ -501,7 +346,7 @@ const getStepState = (step) => {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 420px;
+    max-width: 250px;
     align-items: center;
     list-style: none;
     margin: 0 auto 35px;
