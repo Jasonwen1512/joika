@@ -10,7 +10,7 @@ import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import { FreeMode, Pagination } from "swiper/modules";
 import axios from "axios";
-import {normalizeActivity} from "@/assets/utils/normalize"
+
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -19,9 +19,9 @@ const listLatest = ref([]);
 
 onMounted(async () => {
   const res1 = await axios.get(`${VITE_API_BASE}/activities/list-limited.php`);
-  listLimited.value = (Array.isArray(res1.data) ? res1.data : []).map(normalizeActivity)
+  listLimited.value = Array.isArray(res1.data) ? res1.data : [];
   const res2 = await axios.get(`${VITE_API_BASE}/activities/list-latest.php`);
-  listLatest.value = (Array.isArray(res2.data) ? res2.data : []).map(normalizeActivity)
+  listLatest.value = Array.isArray(res2.data) ? res2.data : []
 });
 
 
