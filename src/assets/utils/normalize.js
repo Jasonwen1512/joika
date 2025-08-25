@@ -7,4 +7,11 @@ function imageUrl(img) {
   return `${VITE_API_BASE}/upload/activities-img/${img}`;
 }
 
-export { imageUrl};
+function userImg(img) {
+  if (!img) return "";
+  if (/^https?:\/\//i.test(img)) return img;
+  if (img.startsWith("/upload")) return `${VITE_API_BASE}${img}`;
+  return `${VITE_API_BASE}/upload/member/${img}`;
+}
+
+export { imageUrl, userImg};
