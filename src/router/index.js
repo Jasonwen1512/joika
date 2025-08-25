@@ -48,6 +48,10 @@ const routes = [
     name: "signup", 
     component: () => import("@/views/auth/signup.vue"),
     meta: { guestOnly: true }},
+  { path: "/auth/profile-update",
+    name: "profileUpdate", 
+    component: () => import("@/views/auth/profile-update.vue"),
+    meta: { requiresAuth: true }},
 
   {
     path: "/article/article",
