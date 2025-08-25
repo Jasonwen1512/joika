@@ -166,7 +166,19 @@ const postIsLoading = ref(true);
 const article = computed(() => {
   // 【關鍵修改】統一使用 props.isPreview 進行判斷
   if (props.isPreview) {
-    return previewStore.previewData; // 預覽模式，從 Store 取資料
+    const preview = previewStore.previewData;
+
+    // 如果有本地預覽檔案，產生預覽網址
+    let imageUrl = defaultImg;
+    if (preview.coverFile) {
+      imageUrl = URL.createObjectURL(preview.coverFile);
+    } else if (preview.image) {
+      imageUrl = preview.image;
+    }
+    return {
+      ...preview,
+      image: imageUrl, // ← 關鍵：覆蓋 image 欄位
+    };
   } else {
     return apiArticleData.value; // 一般模式，從 API 取資料
   }

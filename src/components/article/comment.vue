@@ -313,7 +313,7 @@ const likeIt = async (comment) => {
     // 步驟 3: 準備要發送到後端的資料
     const payload = {
       comment_no: comment.id, // 注意：前端的 comment.id 對應到後端的 comment_no
-      member_id: currentUser.member_id, // 前端的 member_id 對應到後端的 member_id
+      member_id: currentUser.value.member_id, // 前端的 member_id 對應到後端的 member_id
     };
 
     // 步驟 4: 呼叫您的 PHP API
@@ -379,8 +379,12 @@ function ReportIt(commentId) {
             Swal.fire("發生錯誤", result?.error || "請稍後再試", "error");
           }
         } catch (error) {
-          console.error("檢舉 API 錯誤：", error.response?.data || error.message);
-          const msg = error?.response?.data?.error || error.message || "無法連線至伺服器";
+          console.error(
+            "檢舉 API 錯誤：",
+            error.response?.data || error.message
+          );
+          const msg =
+            error?.response?.data?.error || error.message || "無法連線至伺服器";
           Swal.fire("錯誤", msg, "error");
         }
       },
@@ -402,7 +406,6 @@ function ReportIt(commentId) {
     zIndex: 20000,
   });
 }
-
 </script>
 <!-- <script>
 export default {
