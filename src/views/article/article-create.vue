@@ -129,6 +129,8 @@ onMounted(() => {
 // 4.【函式區】處理使用者操作
 function previewArticle() {
   Object.assign(previewStore.previewData, form);
+  previewStore.previewData.coverFile = coverFile.value; // ← 關鍵補這行  預覽模式也要帶首圖
+
   previewStore.isPreview = true;
   router.push({
     name: "ArticlePreview",
