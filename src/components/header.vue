@@ -22,6 +22,15 @@ onMounted(() => {
   fetchMe();
 });
 
+const avatarUrl = (a) => {
+  const base = import.meta.env.VITE_API_BASE;
+  const avatar = a;
+  if (!avatar) return "";
+  return `${base.replace(/\/$/, "")}/upload/member/${encodeURIComponent(
+    avatar
+  )}`;
+};
+
 watch(
   () => authState.user,
   (newVal, oldVal) => {
@@ -31,6 +40,7 @@ watch(
     } else if (newVal) {
       loginStatus.value = newVal;
       console.log("使用者已登入:", loginStatus);
+      loginStatus.value.avatar = avatarUrl(loginStatus.value.avatar);
     } else {
       loginStatus.value = null;
       console.log("使用者登出或未登入");
@@ -411,7 +421,8 @@ nav {
   }
   img {
     width: 100%;
-    vertical-align: middle;
+    border-radius: 50%;
+    vertical-align: bottom;
   }
   .notify {
     width: 24px;
