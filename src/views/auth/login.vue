@@ -85,6 +85,29 @@ const goToRegister = () => {
   router.push("/auth/signup");
 };
 
+  //忘記密碼
+const openForgot = async () => {
+  const { value: email } = await Swal.fire({
+    title: '密碼重設驗證信',
+    input: 'email',
+    inputLabel: '請輸入註冊時的信箱',
+    inputPlaceholder: 'you@example.com',
+    confirmButtonText: '送出',
+    showCancelButton: true,
+    cancelButtonText: '取消',
+    customClass: {
+      title: 'my-swal-title',
+      input: 'my-swal-input',
+      confirmButton: 'my-swal-confirm',
+      cancelButton: 'my-swal-cancel',
+      popup: 'my-swal-popup'
+    },
+    buttonsStyling: false ,
+    inputValidator: (v) => !v ? '信箱不能空白' : null,
+  })
+    if (!email) return
+}
+
 
 </script>
 
@@ -144,11 +167,11 @@ const goToRegister = () => {
           <p class="error-msg" v-if="error.verifyCode">{{ error.verifyCode }}</p>
         </div>
 
-  <a href="#" class="forgot-password">忘記密碼</a>
+  <a href="#" class="forgot-password" @click.prevent="openForgot()">忘記密碼</a>
 
   <div class="button-group">
-    <Button size="md" theme="info" type="button" @click="goToRegister" :disabled="loading">註冊</Button>
-    <Button size="md" theme="primary" type="submit" :disabled="loading">
+    <Button size="lg" theme="info" type="button" @click="goToRegister" :disabled="loading">註冊</Button>
+    <Button size="lg" theme="primary" type="submit" :disabled="loading">
       {{ loading ? '登入中…' : '登入' }}
     </Button>
   </div>
