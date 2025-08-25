@@ -4,6 +4,11 @@ import commentSection from "@/components/activity/activity-detail/comment-sectio
 // import CommentComponent from "@/components/article/comment.vue"; // <-- 改用我的component
 
 import { useRoute, useRouter } from "vue-router";
+
+// === 新增 #1：在這裡引入 Pinia Store ===
+import { useParticipationStore } from '@/stores/participation-store.js';
+//
+
 // === 第一步：在 import ref 的地方，加入 onMounted 和 onUnmounted ===
 import { computed, ref, onMounted, onUnmounted, watch } from "vue";
 import { FakeActivity } from "@/assets/data/fake-activity";
@@ -54,19 +59,24 @@ const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
 
+
 const aloha = () => {
   alert("我要跟團！");
 };
 
 const router = useRouter();
 const gotoSignup = (id) => {
-  router.push(`/group/group-signup/${id}`);
+  // 新增一：呼叫 Store 的總指揮函式
+  participationStore.handleJoinProcess(id);
+  // 結束備註
+  // router.push(`/group/group-signup/${id}`);
 };
+
 
 // === 第三步：在 aloha 函式的正下方，貼上所有「新的邏輯」 ===
 
 // --- 按鈕切換 & 鍵盤監聽 ---
-const isGroupJoined = ref(false); // 用於切換按鈕
+// const isGroupJoined = ref(false); // 用於切換按鈕
 
 const handleKeydown = (event) => {
   if (event.ctrlKey && event.key === "m") {
@@ -258,6 +268,19 @@ const participants = ref([
 //   author: "我本人",
 //   avatar: "https://i.pravatar.cc/150?u=me",
 // });
+
+
+// === 新增 #2：在檔案底部，currentUserForBoard 的上方或下方，加入這段程式碼 ===
+
+// 獲取 participation store 的實例
+const participationStore = useParticipationStore();
+
+// 建立一個 computed 屬性，專門用來判斷「當前頁面」的活動是否已參加
+// 它會自動根據 Pinia 狀態的變化而更新
+const isGroupJoined = computed(() => {
+  // activityNo 來自您檔案頂部的 const activityNo = route.params.activity_id;
+  return participationStore.isJoined(activityNo);
+});
 
 //留言API
 

@@ -6,6 +6,8 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { componentSizeMap } from "element-plus";
 
+import { useParticipationStore } from '@/stores/participation-store.js'; // 新增：引入我們剛剛建立的 Pinia Store
+
 const props = defineProps({
   item: Object,
 });
@@ -18,7 +20,22 @@ const toggleLike = (id) => {
 
 const router = useRouter();
 const gotoSignup = (id) => {
-  router.push(`/group/group-signup/${id}`);
+  // 新增一：呼叫 Store 的總指揮函式
+  participationStore.handleJoinProcess(id);
+  // 結束備註
+  // router.push(`/group/group-signup/${id}`);
+};
+
+// === 在這裡，也就是 gotoSignup 的正下方，貼上新函式 ===
+const handleButtonClick = (id) => {
+  // 檢查是否已參團
+  if (participationStore.isJoined(id)) {
+    // 如果是，就跳轉到活動詳情頁
+    router.push(`/activity/${id}`);
+  } else {
+    // 如果不是，就執行原本的報名流程
+    gotoSignup(id);
+  }
 };
 
 const formDate = (dateStr) => {
@@ -45,6 +62,10 @@ const titleDate = computed(() => {
     return `${start}-${end} ${props.item.ACTIVITY_NAME}`;
   }
 });
+
+// 新增：呼叫 useParticipationStore() 函式，
+// 這樣下面的 template 區塊才能用 participationStore 這個變數
+const participationStore = useParticipationStore(); 
 </script>
 
 <template>
@@ -67,12 +88,22 @@ const titleDate = computed(() => {
     >
 
     <div class="button-group" @click.stop.prevent>
-      <Button
+      <!-- <Button
         @click.stop.prevent="gotoSignup(item.ACTIVITY_NO)"
         theme="primary"
         size="md"
-        >我要跟團!</Button
+        >我要跟團!</Button> -->
+
+      <Button
+        @click.stop.prevent="handleButtonClick(item.ACTIVITY_NO)"
+        :theme="'primary'"
+        size="md"
+        :disabled="participationStore.isLoading"
       >
+        <span v-if="participationStore.isLoading">載入中...</span>
+        <span v-else>{{ participationStore.isJoined(item.ACTIVITY_NO) ? '已參團' : '我要跟團！' }}</span>
+      </Button>
+
       <LikeButton :activity-no="item.ACTIVITY_NO"></LikeButton>
     </div>
   </div>

@@ -5,6 +5,8 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { authState } from "@/assets/data/authState.js";
 
+import { useParticipationStore } from '@/stores/participation-store.js';
+
 const isMobile = ref(window.innerWidth < 768);
 
 const checkMobile = () => {
@@ -81,7 +83,7 @@ onMounted(async () => {
       MEMBER_PHONE: res.data.MEMBER_PHONE,
       MEMBER_EMAIL: res.data.MEMBER_EMAIL,
     };
-    console.log(memberData.value);
+    // console.log(memberData.value);
   } catch (error) {
     console.error("API抓取會員資料出錯", error);
   }
@@ -98,7 +100,47 @@ const goBack = () => {
 };
 
 // 送出跟團表單 API 放置處
-const handle = () => {};
+const handle = async () => {
+  const participationStore = useParticipationStore();
+
+  const payload = {
+    activityNo: target.value.no,
+    memberId: authState.user.id,
+  };
+
+  try {
+    const response = await axios.post(
+      `${VITE_API_BASE}/activities/group-signup-create.php`,
+      payload
+    );
+
+    // === 關鍵修正：在這裡統一處理所有來自後端的回應 ===
+    
+    // 檢查後端回傳的 JSON 中，success 欄位是否為 true
+    if (response.data.success) {
+      // --- 成功的流程 ---
+      participationStore.addJoinedActivity(target.value.no);
+      alert("報名成功！");
+      router.back();
+    } else {
+      // --- 失敗的流程 ---
+      // 如果 success 不為 true，就顯示後端傳來的 error 訊息
+      // 如果後端沒有提供 error 訊息，就顯示一個通用的預設訊息
+      alert(response.data.error || "報名失敗，原因未知。");
+    }
+
+  } catch (error) {
+    // catch 區塊現在主要處理網路錯誤，或伺服器回傳非 2xx 狀態碼的情況
+    console.error("報名 API 請求失敗", error);
+    
+    // 嘗試從 error 物件中讀取更詳細的後端錯誤訊息
+    if (error.response && error.response.data && error.response.data.error) {
+      alert(error.response.data.error);
+    } else {
+      alert("報名過程中發生網路或伺服器錯誤。");
+    }
+  }
+};
 </script>
 
 <template>
