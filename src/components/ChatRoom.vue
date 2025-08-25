@@ -11,8 +11,9 @@ axios.defaults.withCredentials = true
 // 會員資料
 const currentUserId = ref('')
 const userProfile = ref({})
-const userAvatarUrl = ref(defaultAvatar)
+const userAvatarUrl = ref('')
 const isUserReady = ref(false)
+
 
 // 對話資料與輸入
 const inputText = ref('')
@@ -74,7 +75,7 @@ onMounted(async () => {
         userProfile.value = data
 
         if (data.MEMBER_AVATAR_URL) {
-            userAvatarUrl.value = data.MEMBER_AVATAR_URL
+            userAvatarUrl.value = data.MEMBER_AVATAR_URL || defaultAvatar
         }
 
         isUserReady.value = true
@@ -103,7 +104,9 @@ onMounted(async () => {
                 >
                     <div class="avatar-section">
                         <div class="avatar">
-                            <img :src="msg.senderAvatar || defaultAvatar" alt="使用者大頭貼" />
+                            <img :src="msg.senderAvatar || defaultAvatar"
+                                @error="e => e.target.src = defaultAvatar"
+                                alt="使用者大頭貼" />
                         </div>
                         <span class="name">
                             {{ msg.senderId === currentUserId ? '你' : (msg.senderName || msg.senderId) }}

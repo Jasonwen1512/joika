@@ -17,7 +17,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/diving.png",
       import.meta.url
     ).href,
-    category: "CA007",
+    category: "7",
   },
   {
     cardBase: new URL(
@@ -32,7 +32,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/movie.png",
       import.meta.url
     ).href,
-    category: "CA009",
+    category: "9",
   },
   {
     cardBase: new URL(
@@ -47,7 +47,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/sports.png",
       import.meta.url
     ).href,
-    category: "CA003",
+    category: "3",
   },
   {
     cardBase: new URL(
@@ -62,7 +62,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/hiking-buddy.png",
       import.meta.url
     ).href,
-    category: "CA001",
+    category: "1",
   },
   {
     cardBase: new URL(
@@ -77,7 +77,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/camping.png",
       import.meta.url
     ).href,
-    category: "CA004",
+    category: "4",
   },
   {
     cardBase: new URL(
@@ -92,7 +92,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/board-game-champ.png",
       import.meta.url
     ).href,
-    category: "CA002",
+    category: "2",
   },
   {
     cardBase: new URL(
@@ -107,7 +107,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/exhibition-visitor.png",
       import.meta.url
     ).href,
-    category: "CA006",
+    category: "6",
   },
   {
     cardBase: new URL(
@@ -122,7 +122,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/jack.png",
       import.meta.url
     ).href,
-    category: "CA008",
+    category: "8",
   },
   {
     cardBase: new URL(
@@ -137,7 +137,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/art-sharing-moment.png",
       import.meta.url
     ).href,
-    category: "CA010",
+    category: "10",
   },
   {
     cardBase: new URL(
@@ -152,7 +152,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/annie.png",
       import.meta.url
     ).href,
-    category: "CA011",
+    category: "11",
   },
   {
     cardBase: new URL(
@@ -167,7 +167,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/lee.png",
       import.meta.url
     ).href,
-    category: "CA012",
+    category: "12",
   },
   {
     cardBase: new URL(
@@ -182,7 +182,7 @@ const slideData = ref([
       "@/assets/img/index-img/carousel/sam.png",
       import.meta.url
     ).href,
-    category: "CA005",
+    category: "5",
   },
 ]);
 

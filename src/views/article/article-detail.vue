@@ -426,7 +426,7 @@ function openReportModal() {
           const res = await axios.post(
             `${baseURL}/reports/post-report.php`,
             {
-              reporter_id: reporterId,
+              reporter_id: currentUser.value.member_id,
               post_no: postNo,
               report_reason_no: Number(data.reason),
               report_description: data.detail,
@@ -445,7 +445,9 @@ function openReportModal() {
         } catch (error) {
           console.error("檢舉 API 錯誤：", error);
           const msg =
-            error?.response?.data?.error || error.message || "發送失敗，請稍後再試";
+            error?.response?.data?.error ||
+            error.message ||
+            "發送失敗，請稍後再試";
           Swal.fire("錯誤", msg, "error");
         }
       },
@@ -453,7 +455,7 @@ function openReportModal() {
     container
   );
 
-  // 
+  //
   Swal.fire({
     title: "檢舉文章",
     html: container,

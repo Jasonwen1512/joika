@@ -76,6 +76,7 @@ const participantsCount = computed(
 const ratingsSummary = computed(
   () => detail.value?.ratings ?? { avg: 0, count: 0, mine: null }
 );
+const hasRated = computed(() => ratingsSummary.value?.mine != null)
 const participantsForModal = computed(() => {
   const arr =
     detail.value?.participants?.list ??
@@ -96,6 +97,28 @@ const participantsForModal = computed(() => {
     };
   });
 });
+
+const hosterInfo = computed(() => {
+  const host = hoster.value
+  if (!host) return null
+
+  const id = Number(host.MEMBER_ID ?? host.id ?? 0)
+
+  return {
+    id,
+    name:    host.NICKNAME ?? host.name ?? `會員 #${id}`,
+    avatar:  imageUrl(host.AVATAR ?? host.avatar ?? `https://i.pravatar.cc/150?u=${id}`),
+    city:    host.CITY_NAME ?? host.city ?? '—',
+    age:     host.AGE ?? host.age ?? null,
+    role:    host.OCCUPATION ?? host.role ?? '—',
+
+    // 視你的後端欄位而定，這裡做多種鍵名容錯
+    ratingAsHost:   Number(host.RATING_HOST ?? host.rating_host ?? host.RATING ?? host.rating ?? 0),
+    reviewsAsHost:  Number(host.REVIEWS_HOST ?? host.reviews_host ?? host.REVIEWS ?? host.reviews ?? 0),
+    ratingAsJoiner: Number(host.RATING_JOINER ?? host.rating_joiner ?? 0),
+    reviewsAsJoiner:Number(host.REVIEWS_JOINER ?? host.reviews_joiner ?? 0),
+  }
+})
 const imgSrc = computed(() =>
   imageUrl(activity.value?.ACTIVITY_IMG || activity.value?.activity_img || "")
 );
@@ -111,15 +134,33 @@ const toggleLike = (id) => {
   likeMap.value[id] = !likeMap.value[id];
 };
 
-const router = useRouter();
-const gotoSignup = (id) => {
-  if (isCancelled.value) {
-    alert("此活動已取消，無法報名");
-    return;
-  }
-  router.push(`/group/group-signup/${id}`);
-};
+// const aloha = () => {
+//   alert("我要跟團！");
+// };
 
+const router = useRouter();
+const gotoSignup = () => {
+  const a = activity.value
+  if (!a) return
+
+  const status = a.ACTIVITY_STATUS ?? a.activity_status ?? ''
+  const isCancelled = status === '已取消'
+  const isFinished  = status === '已完成'
+  const ddl = a.REGISTRATION_DEADLINE ?? a.registration_deadline
+  const isDeadlinePassed = ddl ? new Date() > new Date(ddl) : false
+
+  if (isCancelled || isFinished || isDeadlinePassed) {
+    alert('此活動目前不可報名')
+    return
+  }
+
+  const actNo = a.ACTIVITY_NO ?? a.activity_no
+  // 依你的路由設定擇一：
+  router.push(`/group/group-signup/${actNo}`)
+  // 或 router.push({ name: 'activity-signup', params: { activity_id: actNo } })
+}
+
+// === 第三步：在 aloha 函式的正下方，貼上所有「新的邏輯」 ===
 // --- 按鈕切換 & 鍵盤監聽 ---
 // const isGroupJoined = ref(false); // 用於切換按鈕
 
@@ -143,7 +184,8 @@ onUnmounted(() => {
 const isRatingModalVisible = ref(false); // 評價彈窗的「開關」
 
 const openRatingModal = () => {
-  isRatingModalVisible.value = true; // 打開評價彈窗
+  if (!canRate.value || hasRated.value) return
+  isRatingModalVisible.value = true
 };
 
 const closeRatingModal = () => {
@@ -185,13 +227,20 @@ async function submitRatings(payload) {
       body,
       {
         headers: { 'Content-Type': 'application/json' },
-        withCredentials: true, // 一定要帶，才能拿到 session
+        withCredentials: true, 
       }
     );
 
     console.log('rate response:', data);
-    alert(data?.message || `評分完成（${data?.inserted ?? body.items.length} 筆）`);
+    alert(data?.message || `評分完成`);
     closeRatingModal();
+    detail.value = {
+      ...detail.value,
+      ratings: {
+        ...(detail.value?.ratings ?? {}),
+        mine: { score: 5, at: new Date().toISOString() } // 真實內容可用 data 回傳覆蓋
+      }
+    }
     await loadDetail();
   } catch (err) {
     // 把完整錯誤印出來，方便你在 console 看
@@ -556,7 +605,7 @@ const swiperModules = [Pagination];
         type="button"
           @click="openCancelModal"
           theme="cancel"
-          isOutlined
+          isOutline
           size="md"
           :isDisabled="!canCancel"
           :title="!canCancel ? '開始前一天起或狀態不允許取消' : ''"
@@ -569,14 +618,14 @@ const swiperModules = [Pagination];
           size="md"
           :isDisabled="!canRate"
           :title="!canRate ? '活動未完成，暫不可評分' : ''"
-          >評價</Button
+          >{{ hasRated ? '已評價' : '評價' }}</Button
         >
       </template>
 
       <template v-else>
         <Button
         type="button"
-          @click.stop.prevent="gotoSignup(activity?.ACTIVITY_NO)"
+          @click.stop.prevent="gotoSignup()"
           theme="primary"
           size="md"
         >
@@ -642,39 +691,35 @@ const swiperModules = [Pagination];
       </div>
     </section>
 
-    <!-- 主揪 (寫死版本) -->
-    <section class="host-info">
+    
+    <section class="host-info" v-if="hosterInfo">
       <div class="host-title">主揪</div>
       <div class="host-content">
-        <!-- 這裡的路徑可以換成您專案中的圖片 -->
+       
         <img
-          src="@/assets/img/activity/activity-detail/dan.png"
+          :src="hosterInfo.avatar"
           alt=""
           class="host-avatar"
         />
         <div class="host-details">
-          <div class="host-name">小單</div>
-          <div class="rating-line">
-            <div class="stars stars-yellow">
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-            </div>
-            <span>5.0(3)</span>
-          </div>
-          <div class="rating-line">
-            <div class="stars stars-blue">
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-regular fa-star"></i>
-            </div>
-            <span>4.0(1)</span>
-          </div>
-          <div class="host-bio">台中市 | 30歲 | 健身教練</div>
+          <div class="host-name">{{hosterInfo.name}}</div>
+         <div class="rating-line">
+        <div class="stars stars-yellow">
+          <i v-for="n in 5" :key="'h'+n"
+             :class="n <= Math.round(hosterInfo.ratingAsHost) ? 'fa-solid fa-star' : 'fa-regular fa-star'"/>
+        </div>
+        <span>{{ Number(hosterInfo.ratingAsHost ?? 0).toFixed(1) }} ({{ hosterInfo.reviewsAsHost ?? 0 }})</span>
+      </div>
+
+      <div class="rating-line" v-if="hosterInfo.reviewsAsJoiner > 0">
+        <div class="stars stars-blue">
+          <i v-for="n in 5" :key="'j'+n"
+             :class="n <= Math.round(hosterInfo.ratingAsJoiner) ? 'fa-solid fa-star' : 'fa-regular fa-star'"/>
+        </div>
+        <span>{{ hosterInfo.ratingAsJoiner.toFixed(1) }}({{ hosterInfo.reviewsAsJoiner }})</span>
+      </div>
+
+          <div class="host-bio">{{ hosterInfo.city }} | {{ hosterInfo.age ?? '—' }}歲 | {{ hosterInfo.role }}</div>
         </div>
       </div>
     </section>
@@ -712,7 +757,7 @@ const swiperModules = [Pagination];
                       v-for="n in 5"
                       :key="n"
                       :class="
-                        n <= Math.round(Number(participant.RATING || 0))
+                        n <= Math.round(Number(participant.rating || 0))
                           ? 'fa-solid fa-star'
                           : 'fa-regular fa-star'
                       "
@@ -725,7 +770,7 @@ const swiperModules = [Pagination];
                   >
                 </div>
                 <span
-                  >{{ Number(participant.RATING || 0).toFixed(1) }} ({{
+                  >{{ Number(participant.rating || 0).toFixed(1) }} ({{
                     participant.reviews || 0
                   }})</span
                 >
