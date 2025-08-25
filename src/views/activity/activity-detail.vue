@@ -6,7 +6,7 @@ import commentSection from "@/components/activity/activity-detail/comment-sectio
 import { useRoute, useRouter } from "vue-router";
 
 // === 新增 #1：在這裡引入 Pinia Store ===
-import { useParticipationStore } from '@/stores/participation-store.js';
+import { useParticipationStore } from "@/stores/participation-store.js";
 //
 
 // === 第一步：在 import ref 的地方，加入 onMounted 和 onUnmounted ===
@@ -25,6 +25,7 @@ import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { imageUrl } from "@/assets/utils/normalize";
+import { userImg } from "@/assets/utils/normalize";
 
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
@@ -88,7 +89,7 @@ const participantsForModal = computed(() => {
     return {
       id,
       name: p.NICKNAME ?? p.name ?? `會員 #${id}`,
-      avatar: p.AVATAR ?? p.avatar ?? `https://i.pravatar.cc/150?u=${id}`,
+      avatar: userImg(p.AVATAR ?? p.avatar ?? `https://i.pravatar.cc/150?u=${id}`),
       city: p.CITY_NAME ?? p.city ?? "—",
       age: p.AGE ?? p.age ?? null,
       role: p.OCCUPATION ?? p.role ?? "—",
@@ -107,7 +108,7 @@ const hosterInfo = computed(() => {
   return {
     id,
     name:    host.NICKNAME ?? host.name ?? `會員 #${id}`,
-    avatar:  imageUrl(host.AVATAR ?? host.avatar ?? `https://i.pravatar.cc/150?u=${id}`),
+    avatar:  userImg(host.AVATAR ?? host.avatar ?? `https://i.pravatar.cc/150?u=${id}`),
     city:    host.CITY_NAME ?? host.city ?? '—',
     age:     host.AGE ?? host.age ?? null,
     role:    host.OCCUPATION ?? host.role ?? '—',
@@ -333,150 +334,6 @@ const formDate = (dateStr) => {
     .toString()
     .padStart(2, "0")}/${day.toString().padStart(2, "0")}`;
 };
-
-// === End 新增 ===
-
-// 團員假資料
-// const participants = ref([
-//   {
-//     id: 1,
-//     name: "小黃",
-//     avatar:
-//       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1887&auto=format&fit=crop",
-//     rating: 5,
-//     reviews: 3,
-//     city: "新北市",
-//     age: 22,
-//     role: "大學生",
-//   },
-//   {
-//     id: 2,
-//     name: "阿強",
-//     avatar:
-//       "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1887&auto=format&fit=crop",
-//     rating: 4,
-//     reviews: 5,
-//     city: "台北市",
-//     age: 28,
-//     role: "工程師",
-//   },
-//   {
-//     id: 3,
-//     name: "艾蜜莉",
-//     avatar:
-//       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop",
-//     rating: 5,
-//     reviews: 8,
-//     city: "高雄市",
-//     age: 25,
-//     role: "設計師",
-//   },
-//   {
-//     id: 4,
-//     name: "大衛",
-//     avatar:
-//       "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1887&auto=format&fit=crop",
-//     rating: 4,
-//     reviews: 2,
-//     city: "台中市",
-//     age: 31,
-//     role: "行銷企劃",
-//   },
-//   {
-//     id: 5,
-//     name: "潔西卡",
-//     avatar:
-//       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1887&auto=format&fit=crop",
-//     rating: 5,
-//     reviews: 10,
-//     city: "台南市",
-//     age: 27,
-//     role: "自由工作者",
-//   },
-//   {
-//     id: 6,
-//     name: "布萊恩",
-//     avatar:
-//       "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=1170&auto=format&fit=crop",
-//     rating: 3,
-//     reviews: 1,
-//     city: "新竹市",
-//     age: 35,
-//     role: "軟體開發",
-//   },
-// ]);
-// //偵錯用
-// console.log("路由參數 activity_id:", currentActivityId.value);
-// console.log("FakeActivity 所有 id:", FakeActivity.map(a => a.activity_id));
-
-//=======留言區改用API串接==========
-// 2. 準備要傳遞給留言板的「留言列表」資料
-//    (我們先借用您頁面上現有的團員資料來展示，並用 map 整理成留言板要的格式)
-
-// const fakeComments = [
-//   "這活動真的太棒了，完全超出我的預期！下次還要再來！👍",
-//   "主揪人超好，把所有事情都安排得妥妥當當，給個大大的讚！",
-//   "哇，原來這裡這麼美！感謝分享，不然我都不知道這個好地方。",
-//   "我是第一次參加，本來有點緊張，但大家都好親切，很開心認識大家！😊",
-//   "有人知道主揪用的那款藍色背包是什麼牌子的嗎？好好看！",
-//   "雖然那天有點小下雨，但完全不影響興致，反而有種特別的氛圍。",
-//   "推！這是我今年參加過最棒的活動，沒有之一！",
-//   "照片拍得真好！可以分享原圖給我嗎？謝謝你！",
-//   "哈哈，我就是照片裡笑得最傻的那個！那天真的玩瘋了！🤣",
-//   "可惜這次沒跟到，看你們玩得這麼開心，下次有團一定要通知我！",
-// ];
-
-// const commentsForBoard = ref(
-//   participants.value.map((p) => {
-//     // === 魔法在這裡發生！===
-//     // 1. 從我們的「台詞本」中，隨機選一個位置 (index)
-//     const randomIndex = Math.floor(Math.random() * fakeComments.length);
-
-//     // 2. 根據這個隨機位置，抽出對應的台詞
-//     const randomComment = fakeComments[randomIndex];
-
-//     // 3. 回傳組合好的、擁有獨一無二留言的資料
-//     //    (注意：只有 content 欄位被修改了)
-//     return {
-//       id: p.id,
-//       author: p.name,
-//       avatar: p.avatar,
-//       content: randomComment, // <-- 使用我們隨機抽出的台- 詞，取代掉原本固定的文字！
-//       timestamp: new Date().toLocaleDateString(),
-//       likenum: p.reviews,
-//       replies: [],
-//     };
-//   })
-// );
-
-// // 監聽員一：負責處理「新增主留言」的請求
-// function handleAddNewComment(newCommentData) {
-//   commentsForBoard.value.push(newCommentData);
-// }
-
-// // 監聽員二：負責處理「新增回覆」的請求
-// function handleAddNewReply({ parentId, reply }) {
-//   // 1. 先從我們的留言黑板上，找到那則被回覆的父留言
-//   const parentComment = commentsForBoard.value.find((c) => c.id === parentId);
-
-//   // 2. 如果找到了，就把新的回覆加到它的 replies 背包裡
-//   if (parentComment) {
-//     if (!parentComment.replies) {
-//       parentComment.replies = [];
-//     }
-//     parentComment.replies.push(reply);
-//   }
-// }
-
-// // 3. 準備要傳遞給留言板的「當前使用者」資料
-// const currentUserForBoard = ref({
-//   userid: "M-MYSELF",
-//   author: "我本人",
-//   avatar: "https://i.pravatar.cc/150?u=me",
-// });
-
-
-// === 新增 #2：在檔案底部，currentUserForBoard 的上方或下方，加入這段程式碼 ===
 
 // 獲取 participation store 的實例
 const participationStore = useParticipationStore();
@@ -745,7 +602,7 @@ const swiperModules = [Pagination];
           >
             <div class="participant-card">
               <img
-                :src="participant.AVATAR"
+                :src="userImg(participant.AVATAR)"
                 alt=""
                 class="participant-avatar"
               />
