@@ -31,6 +31,7 @@ import {
   computed,
   nextTick,
 } from "vue";
+import { imageUrl } from "@/assets/utils/normalize";
 
 const FakeActivity = ref([]);
 
@@ -57,7 +58,7 @@ const fetchAndCategorize = async () => {
           northData.value.push({
             no: item.ACTIVITY_NO,
             title: item.ACTIVITY_NAME,
-            image: item.ACTIVITY_IMG,
+            image: imageUrl(item.ACTIVITY_IMG ?? item.activity_img ?? ""),
             date: targetDate,
           });
           break;
@@ -65,7 +66,7 @@ const fetchAndCategorize = async () => {
           westData.value.push({
             no: item.ACTIVITY_NO,
             title: item.ACTIVITY_NAME,
-            image: item.ACTIVITY_IMG,
+            image: imageUrl(item.ACTIVITY_IMG ?? item.activity_img ?? ""),
             date: targetDate,
           });
           break;
@@ -73,7 +74,7 @@ const fetchAndCategorize = async () => {
           southData.value.push({
             no: item.ACTIVITY_NO,
             title: item.ACTIVITY_NAME,
-            image: item.ACTIVITY_IMG,
+            image: imageUrl(item.ACTIVITY_IMG ?? item.activity_img ?? ""),
             date: targetDate,
           });
           break;
@@ -81,7 +82,7 @@ const fetchAndCategorize = async () => {
           eastData.value.push({
             no: item.ACTIVITY_NO,
             title: item.ACTIVITY_NAME,
-            image: item.ACTIVITY_IMG,
+            image: imageUrl(item.ACTIVITY_IMG ?? item.activity_img ?? ""),
             date: targetDate,
           });
           break;
