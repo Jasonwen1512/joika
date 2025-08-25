@@ -237,7 +237,7 @@ function postReply(parentComment) {
 
   const replyPayload = {
     activity_no: activityNoNumeric,
-    member_id: user.value?.member_id,
+    member_id: currentUser.value.member_id,
     comment_content: newReplyText.value.trim(),
     parent_no: parentComment.id,
   };
@@ -262,7 +262,7 @@ function toggleReplies(comment) {
 const likeIt = async (comment) => {
   // 假設您的 currentUser 物件存在且有 member_id
   // 如果您是從 localStorage 拿，也可以用 const user = JSON.parse(localStorage.getItem("user"));
-  if (!user.value || !user.value.member_id) {
+  if (!currentUser.value || !currentUser.value.member_id) {
     Swal.fire("請先登入", "登入後才能對留言按讚喔！", "warning");
     return;
   }
@@ -289,7 +289,7 @@ const likeIt = async (comment) => {
     // 步驟 3: 準備要發送到後端的資料
     const payload = {
       comment_no: comment.id,
-      member_id: user.value.member_id,
+      member_id: currentUser.value.member_id,
     };
 
     // 步驟 4: 呼叫您的 PHP API
