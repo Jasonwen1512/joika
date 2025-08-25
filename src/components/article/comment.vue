@@ -342,62 +342,46 @@ const likeIt = async (comment) => {
     Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
   }
 };
-/**
- * 檢舉理由字串對應編號
- * @param {string} reason
- * @returns {number}
- */
-function mapReasonToNumber(reason) {
-  const reasonMap = {
-    垃圾訊息: 1,
-    "辱罵/騷擾": 2,
-    "廣告/推銷內容": 3,
-    散佈不實消息: 4,
-    洩漏他人個資: 5,
-    其他: 6,
-  };
-  return reasonMap[reason] || 6;
-}
 
-// 檢舉觸發函式
 function ReportIt(commentId) {
   const container = document.createElement("div");
 
   render(
     h(ReportForm, {
-      commentId, // ← 傳給 ReportForm
-
       onSubmit: async (data) => {
-        const reporterId = currentUser.value.member_id;
+        // ReportForm 已保證 reason 是數字；這邊再保險一次
+        const reasonNo = Number(data.reason);
+        if (!Number.isInteger(reasonNo) || reasonNo <= 0) {
+          Swal.fire("錯誤", "請選擇檢舉原因", "error");
+          return;
+        }
 
         const payload = {
-          reporter_id: reporterId,
-          post_comment_no: commentId, // ← 直接用外層 commentId
-          report_reason_no: mapReasonToNumber(data.reason),
-          report_description: data.detail,
+          // 後端用 session 取 member_id，不要再傳 reporter_id 了
+          post_comment_no: Number(commentId),
+          report_reason_no: reasonNo,
+          report_description: (data.detail || "").trim(),
         };
 
         try {
           const { data: result } = await axios.post(
-            `${import.meta.env.VITE_API_BASE}/reports/comment-report.php`,
+            `${VITE_API_BASE}/reports/comment-report.php`,
             payload,
             {
-              headers: { "Content-Type": "application/json" },
+              withCredentials: true, // 🔸一定要帶，PHP 才抓得到登入 session
             }
           );
 
-          if (result.success) {
+          if (result?.ok || result?.success) {
             Swal.close();
             Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
           } else {
-            Swal.fire("發生錯誤", result.error || "請稍後再試", "error");
+            Swal.fire("發生錯誤", result?.error || "請稍後再試", "error");
           }
         } catch (error) {
-          console.error(
-            "檢舉 API 錯誤：",
-            error.response?.data || error.message
-          );
-          Swal.fire("錯誤", "無法連線至伺服器", "error");
+          console.error("檢舉 API 錯誤：", error.response?.data || error.message);
+          const msg = error?.response?.data?.error || error.message || "無法連線至伺服器";
+          Swal.fire("錯誤", msg, "error");
         }
       },
     }),
@@ -409,10 +393,16 @@ function ReportIt(commentId) {
     html: container,
     showCancelButton: false,
     showConfirmButton: false,
-    willClose: () => render(null, container),
+    willClose: () => {
+      render(null, container);
+      document.body.style.paddingRight = "";
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+    },
     zIndex: 20000,
   });
 }
+
 </script>
 <!-- <script>
 export default {
