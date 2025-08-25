@@ -448,8 +448,8 @@ nav {
     }
     @include flex-center();
     @include tablet() {
-      width: 30px;
-      height: 30px;
+      width: 35px;
+      height: 35px;
     }
   }
   @include desktop() {
