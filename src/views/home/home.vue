@@ -206,56 +206,56 @@ const items = [
     name: "水上活動",
     img: new URL("@/assets/img/index-img/diving.png", import.meta.url).href,
     color: "#4F8DA8",
-    category: "CA007",
+    category: "7",
   },
   {
     name: "電影",
     img: new URL("@/assets/img/index-img/movie.png", import.meta.url).href,
     color: "#FFA68D",
-    category: "CA009",
+    category: "9",
   },
   {
     name: "運動",
     img: new URL("@/assets/img/index-img/sports.png", import.meta.url).href,
     color: "#FADA7A",
-    category: "CA003",
+    category: "3",
   },
   {
     name: "登山",
     img: new URL("@/assets/img/index-img/hiking3.png", import.meta.url).href,
     color: "#90DA81",
-    category: "CA001",
+    category: "1",
   },
   {
     name: "露營",
     img: new URL("@/assets/img/index-img/camping3.png", import.meta.url).href,
     color: "#A281DA",
-    category: "CA004",
+    category: "4",
   },
   {
     name: "桌遊",
     img: new URL("@/assets/img/index-img/board-games.png", import.meta.url)
       .href,
     color: "#F315BB",
-    category: "CA002",
+    category: "2",
   },
   {
     name: "展覽",
     img: new URL("@/assets/img/index-img/exhibition.png", import.meta.url).href,
     color: "#FFFCE2",
-    category: "CA006",
+    category: "6",
   },
   {
     name: "聚餐",
     img: new URL("@/assets/img/index-img/gathering.png", import.meta.url).href,
     color: "#FB900C",
-    category: "CA008",
+    category: "8",
   },
   {
     name: "手作",
     img: new URL("@/assets/img/index-img/DIY.png", import.meta.url).href,
     color: "#81BFDA",
-    category: "CA010",
+    category: "10",
   },
   {
     name: "文化體驗",
@@ -264,19 +264,19 @@ const items = [
       import.meta.url
     ).href,
     color: "#1FB92C",
-    category: "CA011",
+    category: "11",
   },
   {
     name: "演出表演",
     img: new URL("@/assets/img/index-img/concert.png", import.meta.url).href,
     color: "#FFE100",
-    category: "CA012",
+    category: "12",
   },
   {
     name: "唱歌",
     img: new URL("@/assets/img/index-img/ktv.png", import.meta.url).href,
     color: "#2AA9FF",
-    category: "CA005",
+    category: "5",
   },
 ];
 
