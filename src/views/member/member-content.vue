@@ -10,6 +10,7 @@
     import memberarticle from "@/components/member/member-post.vue";
     import membercomment from "@/components/member/member-comment.vue";
     import { logout } from "@/assets/data/authState";
+    import MemberInterestTag from "@/components/member/member-interest-tag.vue";
 
     // ------------ 會員基本資料 ------------
     const member = ref(null);
@@ -54,28 +55,11 @@
 
     // ------------ RWD 卡片顯示張數 ------------
     const visibleCount = ref(2); // 桌機 2、手機 1
+    const buttonSize = ref("lg");
     const handleResize = () => {
         visibleCount.value = window.innerWidth < 768 ? 1 : 2;
+        buttonSize.value = window.innerWidth < 768 ? "sm" : "lg";
     };
-
-    // ------------ 分類標籤顏色（你原本的） ------------
-    const activities = ["水上活動", "露營", "登山"];
-    const eventColorMap = {
-        登山: "#6DE1D2",
-        水上活動: "#77BEF0",
-        運動: "#FFD63A",
-        露營: "#FF8C86",
-        唱歌: "#FFA955",
-        展覽: "#6DE1D2",
-        聚餐: "#77BEF0",
-        桌遊: "#FFD63A",
-        電影: "#FF8C86",
-        手作: "#FFA955",
-        文化體驗: "#6DE1D2",
-        演出表演: "#77BEF0",
-        其他: "#969696",
-    };
-    const GetEventColor = (eventName) => eventColorMap[eventName] || "#adb5bd";
 
     // ------------ Tabs 狀態 ------------
     const currentTab = ref("group");
@@ -200,12 +184,12 @@
 
     // ------------ 生命週期 ------------
     onMounted(async () => {
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    await loadMember();
-    // 預設載入「我開的揪團」
-        await fetchActivities("hosted");
-        await fetchActivities("all");
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        await loadMember();
+        // 預設載入「我開的揪團」
+            await fetchActivities("hosted");
+            await fetchActivities("all");
 
     });
 
@@ -226,212 +210,74 @@
     </script>
 
 
-    <template>
-        <div class="member-content">
-            <div v-if="pageLoading">載入中…</div>
-            <div v-else-if="error">{{ error }}</div>
-
-            <template v-else>
-            <div class="member-header">
-                <div class="member-details">
-                <div class="member-image">
-                    <img
-                    :src="avatarUrl"
-                    :alt="member?.MEMBER_NICKNAME || 'avatar'"
-                    />
-                </div>
-
-                <div class="member-info">
-                    <p class="user-name">{{ member?.MEMBER_NICKNAME }}</p>
-
-                    <div class="rate">
-                    <p>主揪評價:</p>
-                    <StarRating
-                        :score="member.hostAvg"
-                        :count="member.HOST_COUNT_TOTAL"
-                        color="yellow"
-                        showScore
-                        class="score"
-                    />
-                    </div>
-
-                    <div class="rate">
-                    <p>參團評價:</p>
-                    <StarRating
-                        :score="member.joinerAvg"
-                        :count="member.JOINER_COUNT_TOTAL"
-                        color="blue"
-                        showScore
-                        class="score"
-                    />
-                    </div>
-
-                    <p v-if="member" class="user-demographics">
-                    {{ member.MEMBER_CITY_NAME }} | {{ member.age }}歲 | {{ member.MEMBER_OCCUPATION_NAME }}
-                    </p>
-
-                    <div class="tags">
-                    <div
-                        v-for="(activity, index) in activities"
-                        :key="index"
-                        class="tag"
-                        :style="{ backgroundColor: GetEventColor(activity) }"
-                    >
-                        {{ activity }}
-                    </div>
-                    </div>
-                </div>
-                <div class="button-group">
-                    <RouterLink to="/member/member-notify">
-                        <Button
-                            :prefixIcon="NotifyIcon"
-                            size="lg"
-                            theme="primary"
-                            >通知訊息</Button
-                        ></RouterLink
-                    >
-                    <Button
-                        :prefixIcon="EditIcon"
-                        size="lg"
-                        theme="info"
-                        >編輯檔案</Button
-                    >
-
-                <div class="button-group">
-                <RouterLink :to="`member-notify`">
-                    <Button :prefixIcon="NotifyIcon" size="lg" theme="primary">通知訊息</Button>
-                </RouterLink>
-
-                <Button :prefixIcon="EditIcon" size="lg" theme="info">編輯檔案</Button>
-
-                <Button isOutline theme="secondary" size="lg" @click="handleLogout">
-                    {{ logoutLoading ? '登出中…' : '登出' }}
-                </Button>
-                </div>
+<template>
+    <div class="login-page">
+      <div class="login-container">
+        <form @submit.prevent="handleLogin">
+          <h1>登入</h1>
+  
+          <div class="form-group">
+            <label for="mobile">手機</label>
+            <input
+              type="tel"
+              id="mobile"                 
+              v-model="form.mobile"
+              autocomplete="username" 
+              :disabled="loading"
+            />
+            <p class="error-msg" v-if="error.mobile">{{ error.mobile }}</p>
+          </div>
+  
+          <div class="form-group">
+            <label for="password">密碼</label>
+            <input
+              type="password"
+              id="password"               
+              v-model="form.password"
+              autocomplete="current-password" 
+              :disabled="loading"
+            />
+            <p class="error-msg" v-if="error.password">{{ error.password }}</p>
+          </div>
+  
+          <div class="form-group">
+            <label for="verify-code">驗證碼</label>
+            <div class="captcha-input-wrapper">
+              <input
+                type="text"
+                id="verify-code"
+                v-model="form.verifyCode"
+                :disabled="loading"
+              />
+              <div class="captcha-overlay">
+                <CaptchaBox
+                  @updateIdentifyCode="onCaptchaUpdate"
+                  ref="captchaRef"
+                />
+              </div>
+              <div class="captcha-icon-wrapper">
+                <font-awesome-icon
+                  :icon="['fas', 'arrow-rotate-right']"
+                  class="captcha-refresh"
+                  @click="captchaRef?.refreshCode()"
+                />
+              </div>
             </div>
-
-            <div class="member-body">
-                <div class="tab-bar">
-                <button :class="{ active: currentTab === 'group' }" @click="currentTab = 'group'">揪團</button>
-                <button :class="{ active: currentTab === 'calendar' }" @click="currentTab = 'calendar'">行事曆</button>
-                <button :class="{ active: currentTab === 'post' }" @click="currentTab = 'post'">貼文</button>
-                <button :class="{ active: currentTab === 'comment' }" @click="currentTab = 'comment'">評論</button>
-                </div>
-
-                <div class="tab-content">
-                <!-- 揪團 -->
-                <div v-if="currentTab === 'group'">
-                    <div class="member-activity-section">
-                    <ul class="member-activity-btns">
-                        <div class="activity-items">
-                        <li>
-                            <button
-                            :class="{ active: currentSubTab === 'my-activity' }"
-                            @click="currentSubTab = 'my-activity'"
-                            >
-                            我開的揪團
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                            :class="{ active: currentSubTab === 'my-follow-activity' }"
-                            @click="currentSubTab = 'my-follow-activity'"
-                            >
-                            參與的揪團
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                            :class="{ active: currentSubTab === 'my-activity-collection' }"
-                            @click="currentSubTab = 'my-activity-collection'"
-                            >
-                            我的收藏
-                            </button>
-                        </li>
-                        </div>
-
-                        <div class="filter-item">
-                        <li>
-                            <button class="select-btn" @click="isFilterVisible = !isFilterVisible">篩選</button>
-                        </li>
-
-                        <li v-if="isFilterVisible">
-                            <select
-                            id="status-filter"
-                            v-model="selectedStatus"
-                            style="padding: 10px; border: 1px solid black;"
-                            >
-                            <option value="">全部狀態</option>
-                            <option value="開團中">開團中</option>
-                            <option value="審核中">審核中</option>
-                            <option value="已完成">已完成</option>
-                            <option value="已取消">已取消</option>
-                            </select>
-                        </li>
-
-                        <li>
-                            <button class="select-btn">排序</button>
-                        </li>
-                        </div>
-                    </ul>
-
-                    <!-- 載入/錯誤/空狀態 -->
-                    <div v-if="activitiesLoading">活動載入中…</div>
-                    <div v-else-if="activitiesError" style="color:#d33">{{ activitiesError }}</div>
-                    <div v-else-if="filteredActivities.length === 0">目前沒有符合條件的活動。</div>
-
-                    <!-- 活動卡片 -->
-                    <div v-else class="member-activity-card-section">
-                        <MemberActivityCard
-                        v-for="activity in filteredActivities"
-                        :key="activity.activity_no"
-                        :item="activity"
-                        />
-                    </div>
-                    </div>
-                </div>
-
-                <!-- 行事曆 -->
-                <div v-else-if="currentTab === 'calendar'">
-                    <div class="activity-card-groups">
-                    <p class="section-title">下一個揪團</p>
-
-                    <!-- 這裡也顯示載入 / 錯誤 / 空 -->
-                    <div v-if="activitiesLoading">活動載入中…</div>
-                    <div v-else-if="activitiesError" style="color:#d33">{{ activitiesError }}</div>
-
-                    <div class="activity-card-list" v-else>
-                        <MemberActivityCard
-                        v-for="activity in visibleActivities"
-                        :key="activity.activity_no"
-                        :item="activity"
-                        />
-                        <div v-if="visibleActivities.length === 0">
-                        <p>目前沒有符合條件的活動。</p>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div class="calerdar">
-                    <FullCalendar />
-                    </div>
-                </div>
-
-                <!-- 貼文 -->
-                <div v-else-if="currentTab === 'post'">
-                    <memberarticle />
-                </div>
-
-                <!-- 評論 -->
-                <div v-else-if="currentTab === 'comment'">
-                    <!-- 這邊資料串接有問題 因為留言資料裡面沒有對應的文章ID 無法抓取 ，之後要做修正 -->
-                    <membercomment />
-                </div>
-                </div>
-            </div>
-            </template>
-        </div>
-    </template>
+            <p class="error-msg" v-if="error.verifyCode">{{ error.verifyCode }}</p>
+          </div>
+  
+    <a href="#" class="forgot-password" @click.prevent="openForgot()">忘記密碼</a>
+  
+    <div class="button-group">
+      <Button size="lg" theme="info" type="button" @click="goToRegister" :disabled="loading">註冊</Button>
+      <Button size="lg" theme="primary" type="submit" :disabled="loading">
+        {{ loading ? '登入中…' : '登入' }}
+      </Button>
+    </div>
+  </form>
+      </div>
+    </div>
+  </template>
 
 
     <style scoped lang="scss">
@@ -477,22 +323,6 @@
         .user-demographics {
             font-size: $font-size-h3;
             margin-bottom: 10px;
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 10px;
-
-            .tag {
-                text-align: center;
-                padding: 5px;
-                color: $black;
-                border: 1px solid $black;
-                border-radius: 3px;
-                width: 80px;
-            }
         }
 
         .button-group {
