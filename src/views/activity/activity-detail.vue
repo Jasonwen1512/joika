@@ -539,15 +539,14 @@ const swiperModules = [Pagination];
         />
         <div class="host-details">
           <div class="host-name">{{hosterInfo.name}}</div>
-         <div class="rating-line" v-if="hosterInfo.reviewsAsHost > 0">
+         <div class="rating-line">
         <div class="stars stars-yellow">
           <i v-for="n in 5" :key="'h'+n"
              :class="n <= Math.round(hosterInfo.ratingAsHost) ? 'fa-solid fa-star' : 'fa-regular fa-star'"/>
         </div>
-        <span>{{ hosterInfo.ratingAsHost.toFixed(1) }}({{ hosterInfo.reviewsAsHost }})</span>
+        <span>{{ Number(hosterInfo.ratingAsHost ?? 0).toFixed(1) }} ({{ hosterInfo.reviewsAsHost ?? 0 }})</span>
       </div>
 
-      <!-- 作為參與者的評分（藍色星星），如果後端沒有這組就不顯示 -->
       <div class="rating-line" v-if="hosterInfo.reviewsAsJoiner > 0">
         <div class="stars stars-blue">
           <i v-for="n in 5" :key="'j'+n"
