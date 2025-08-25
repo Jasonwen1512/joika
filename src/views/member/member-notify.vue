@@ -89,55 +89,63 @@ function toggleAccordion(list, item) {
     
     <div class="notify-body">
     <!-- 系統通知內容 -->
-    <div v-show="activeTab === 'system'" class="tab-content">
-      <div 
-        v-for="item in systemNotifications" 
-        :key="item.id" 
-        class="notify-item"
-      >
-        <div class="notify-title system" @click="toggleAccordion(systemNotifications, item)">
-          <div class="title-wrap">
-            <span v-if="item.status === '未讀'" class="unread-dot"></span>
-            <span :class="{'unread-text': item.status === '未讀'}">{{ item.title }}</span>
-      </div>
-          <span class="icon-wrapper" :class="{ rotated: item.expanded }">
-            <svg
-            class="icon"
-            viewBox="0 0 36 36"
-            width="26"
-            height="26"
-            stroke="black"
-            stroke-width="3"
-          >
-            <line class="line1" x1="8" y1="18" x2="28" y2="18" />
-            <line class="line2" x1="18" y1="8" x2="18" y2="28" />
-          </svg>
-          </span>
+      <div v-show="activeTab === 'system'" class="tab-content">
+        <!-- 空狀態 -->
+        <div v-if="systemNotifications.length === 0" class="empty-state">
+          目前尚無任何通知
         </div>
-        <transition name="accordion">
-          <div v-if="item.expanded" class="notify-detail">
-            <p v-for="line in item.content.split('\n')" :key="line">{{ line }}</p>
+        <!-- 列表 -->
+        <template v-else>
+          <div 
+            v-for="item in systemNotifications" 
+            :key="item.id" 
+            class="notify-item"
+          >
+            <div class="notify-title system" @click="toggleAccordion(systemNotifications, item)">
+              <div class="title-wrap">
+                <span v-if="item.status === '未讀'" class="unread-dot"></span>
+                <span :class="{'unread-text': item.status === '未讀'}">{{ item.title }}</span>
+              </div>
+              <span class="icon-wrapper" :class="{ rotated: item.expanded }">
+                <svg class="icon" viewBox="0 0 36 36" width="26" height="26" stroke="black" stroke-width="3">
+                  <line class="line1" x1="8" y1="18" x2="28" y2="18" />
+                  <line class="line2" x1="18" y1="8" x2="18" y2="28" />
+                </svg>
+              </span>
+            </div>
+            <transition name="accordion">
+              <div v-if="item.expanded" class="notify-detail">
+                <p v-for="line in item.content.split('\n')" :key="line">{{ line }}</p>
+              </div>
+            </transition>
           </div>
-        </transition>
+        </template>
       </div>
-    </div>
 
       <!-- 一般通知內容 -->
       <div v-show="activeTab === 'general'" class="tab-content">
-        <div 
-          v-for="item in generalNotifications" 
-          :key="item.id" 
-          class="notify-item"
-        >
-          <h4 class="notify-title">
-            <span class="title-wrap">
-              <span v-if="item.status === '未讀'" class="unread-dot"></span>
-              <span :class="{'unread-text': item.status === '未讀'}">{{ item.title }}</span>
-            </span>
-          </h4>
-          <p class="notify-detail">{{ item.content }}</p>
+        <!-- 空狀態 -->
+        <div v-if="generalNotifications.length === 0" class="empty-state">
+          目前尚無任何通知
         </div>
-      </div>
+        <!-- 列表 -->
+        <template v-else>
+          <div 
+            v-for="item in generalNotifications" 
+            :key="item.id" 
+            class="notify-item"
+          >
+            <h4 class="notify-title">
+              <span class="title-wrap">
+                <span v-if="item.status === '未讀'" class="unread-dot"></span>
+                <span :class="{'unread-text': item.status === '未讀'}">{{ item.title }}</span>
+              </span>
+            </h4>
+            <p class="notify-detail">{{ item.content }}</p>
+          </div>
+        </template>
+</div>
+
 
 
     </div>
@@ -147,6 +155,17 @@ function toggleAccordion(list, item) {
 <style scoped lang="scss">
 @use "@/assets/scss/mixin" as *; 
 @import "@/assets/scss/_color.scss";
+@font-face {
+  font-family: "Baloo 2";
+  src: url("@/assets/fonts/Baloo2-Regular.woff2") format("woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Baloo 2";
+  src: url("@/assets/fonts/Baloo2-Bold.woff2") format("woff2");
+  font-weight: 700;
+}
 .notify-tabs{
   width: 100%;
   padding: 20px;
@@ -266,6 +285,25 @@ function toggleAccordion(list, item) {
   font-size:12px; 
   background:#ff5a5a; 
   color:#fff; 
+}
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+
+  
+  font-family: "Baloo 2", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  text-align: center;
+
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 
