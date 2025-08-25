@@ -178,10 +178,11 @@ const visibleCount = ref(2); // 預設電腦是 2 張
   max-width: 285px;
   max-height: 190px;
 }
-// .article-img img{
-//   width: 100%;
-
-// }
+.article-img img {
+  max-width: 270px;
+  height: auto;
+  padding: 10px;
+}
 //文章只顯示2行
 .article-body p {
   overflow: hidden;
