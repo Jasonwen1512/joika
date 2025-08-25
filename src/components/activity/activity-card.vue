@@ -5,14 +5,9 @@ import Button from "@/components/Button.vue";
 import { ref, computed } from "vue";
 import { imageUrl } from "@/assets/utils/normalize";
 
-<<<<<<< HEAD
 const imgSrc = computed(() =>
   imageUrl(props.item?.ACTIVITY_IMG ?? props.item?.activity_img ?? '')
 );
-=======
-import { useParticipationStore } from '@/stores/participation-store.js'; // 新增：引入我們剛剛建立的 Pinia Store
-
->>>>>>> f532a34df18ed8197b9f441c7283c5d0d1469808
 const props = defineProps({
   item: Object,
 });
