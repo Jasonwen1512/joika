@@ -4,13 +4,35 @@ import { ref, watch, onMounted } from "vue";
 import contactbg from "@/assets/img/bg-contact.svg?url";
 import AirPlane from "@/assets/img/article/airplane.png";
 import PostBox from "@/assets/img/article/postbox.png";
+import Swal from "sweetalert2";
+import axios from "axios";
+
 // 標題字
 const titleText = ref("聯絡我們");
 const isVisible = ref(false);
 
-onMounted(() => {
-  // 元件掛載後，直接將 isVisible 設為 true
-  isVisible.value = true;
+// 會員檢查
+onMounted(async () => {
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_BASE}/users/me.php`,
+      { withCredentials: true }
+    );
+    if (res.data.authenticated && res.data.user) {
+      isVisible.value = true;
+      name.value = res.data.user.nickname || res.data.user.name || "";
+      phone.value = res.data.user.phone || "";
+      email.value = res.data.user.email || "";
+      memberId.value = res.data.user.id || "";
+    } else {
+      throw new Error("未登入");
+    }
+  } catch (err) {
+    console.error("會員驗證失敗", err);
+    Swal.fire("未登入", "請先登入會員才能使用聯絡表單", "warning").then(() => {
+      window.location.href = `${import.meta.env.BASE_URL}auth/login`;
+    });
+  }
 });
 
 // --- 新增部分 ---
@@ -20,22 +42,34 @@ const phone = ref("");
 const email = ref("");
 const subject = ref("");
 const content = ref("");
+const memberId = ref(""); // 新增會員ID
 
 // const isModalVisible = ref(false);
 // const submittedData = ref({});
 
-// --- 修改後的 Submit 函式 ---
-const Submit = () => {
-  // 組合所有輸入框的資訊
-  const formData = `
-    姓名：${name.value}
-    手機：${phone.value}
-    E-mail：${email.value}
-    問題標題：${subject.value}
-    內容：${content.value}
-  `;
-  // 使用 alert 顯示資訊
-  alert(formData);
+const Submit = async () => {
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_BASE}/contact/submit.php`,
+      {
+        member_id: memberId.value,
+        member_phone: phone.value,
+        member_email: email.value,
+        form_title: subject.value,
+        form_content: content.value,
+      },
+      { withCredentials: true }
+    );
+    if (res.data.success) {
+      Swal.fire("送出成功", "我們已收到您的聯絡事項", "success");
+      subject.value = "";
+      content.value = "";
+    } else {
+      Swal.fire("送出失敗", res.data.message || "請稍後再試", "error");
+    }
+  } catch (err) {
+    Swal.fire("錯誤", err.message || "伺服器錯誤", "error");
+  }
 };
 </script>
 

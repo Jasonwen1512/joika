@@ -29,19 +29,11 @@ const emit = defineEmits(["comment-added"]);
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 
-// // 下方留言區
-// // 假的自己 展示用
-// const currentUser = {
-//   member_id: authState.user.id, // 假設這是當前使用者的 ID
-//   author: authState.user.nickname, // 您的名字
-//   avatar: `https://i.pravatar.cc/150?u=${user.id}`, // 一個代表您自己的頭像
-//   replies: [],
-// };
-// console.log({ currentUser });
+onMounted(() => {
+  fetchCurrentUser();
+  autoHideReportedComments();
+});
 
-// //
-
-// ...existing code...
 const currentUser = ref({
   member_id: null,
   author: "",
@@ -51,7 +43,7 @@ const currentUser = ref({
 
 async function fetchCurrentUser() {
   try {
-    const res = await axios.get(`${VITE_API_BASE}/me.php`, {
+    const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
       withCredentials: true, // 若有跨域 session
     });
     if (res.data.authenticated && res.data.user) {
@@ -65,12 +57,47 @@ async function fetchCurrentUser() {
     console.error("取得登入者資料失敗", err);
   }
 }
+//先檢查所有留言的狀態有無被檢舉通過且未隱藏的
+async function autoHideReportedComments() {
+  for (const comment of props.comments) {
+    // 只檢查未隱藏的留言
+    if (comment.status !== "隱藏") {
+      try {
+        const res = await axios.post(
+          `${VITE_API_BASE}/comments/post-delete.php`,
+          {
+            type: "post",
+            comment_no: comment.id,
+          },
+          { withCredentials: true }
+        );
+        // 若 API 回傳 success，通知父層刷新留言
+        if (res.data.success) emit("comment-added");
+      } catch (err) {
+        // 可選：錯誤處理
+        console.error("自動隱藏留言失敗", err);
+      }
+    }
+  }
+}
+
 // 使用 defineProps 來接收從父元件傳入的留言資料
 const props = defineProps({
   comments: {
     type: Array,
     required: true,
     default: () => [], // 提供一個預設的空陣列，增加程式碼的穩健性
+  },
+  currentUser: {
+    // ← 加這個
+    type: Object,
+    required: true,
+    default: () => ({
+      member_id: null,
+      author: "",
+      avatar: "",
+      replies: [],
+    }),
   },
 });
 //偵錯
@@ -108,12 +135,18 @@ function postComment() {
   //這邊改用API
 
   axios
-    .post(`${VITE_API_BASE}/comments/post-create.php`, {
-      post_no: postid,
-      member_id: props.currentUser.member_id,
-      comment_content: newComment.value,
-      parent_no: null,
-    })
+    .post(
+      `${VITE_API_BASE}/comments/post-create.php`,
+      {
+        post_no: Number(postid),
+        // member_id: props.currentUser.member_id,
+        comment_content: newComment.value,
+        parent_no: null,
+      },
+      {
+        withCredentials: true, // ← 一定要加
+      }
+    )
     .then((res) => {
       console.log("新增成功：", res.data);
       // 通知父層重新抓留言
@@ -309,30 +342,44 @@ const likeIt = async (comment) => {
     Swal.fire("錯誤", "點讚失敗，請稍後再試。", "error");
   }
 };
+/**
+ * 檢舉理由字串對應編號
+ * @param {string} reason
+ * @returns {number}
+ */
+function mapReasonToNumber(reason) {
+  const reasonMap = {
+    垃圾訊息: 1,
+    "辱罵/騷擾": 2,
+    "廣告/推銷內容": 3,
+    散佈不實消息: 4,
+    洩漏他人個資: 5,
+    其他: 6,
+  };
+  return reasonMap[reason] || 6;
+}
+
 // 檢舉觸發函式
-function ReportIt() {
+function ReportIt(commentId) {
   const container = document.createElement("div");
 
   render(
     h(ReportForm, {
+      commentId, // ← 傳給 ReportForm
+
       onSubmit: async (data) => {
         const reporterId = currentUser.value.member_id;
-        // 壞掉中 先註解掉
-        // if (!reporterId) {
-        //   Swal.fire("未登入", "請先登入才能檢舉留言", "warning");
-        //   return;
-        // }
 
         const payload = {
           reporter_id: reporterId,
-          post_no: postid,
+          post_comment_no: commentId, // ← 直接用外層 commentId
           report_reason_no: mapReasonToNumber(data.reason),
           report_description: data.detail,
         };
 
         try {
           const { data: result } = await axios.post(
-            `${import.meta.env.VITE_API_BASE}/reports/post-report.php`,
+            `${import.meta.env.VITE_API_BASE}/reports/comment-report.php`,
             payload,
             {
               headers: { "Content-Type": "application/json" },
@@ -424,7 +471,7 @@ export default {
                   {{ comment.replies.length }}
                 </span>
               </div>
-              <div class="action-icon" @click="ReportIt">
+              <div class="action-icon" @click="ReportIt(comment.id)">
                 <img :src="reprot" />
               </div>
             </div>

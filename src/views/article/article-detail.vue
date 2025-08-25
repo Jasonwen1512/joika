@@ -15,6 +15,7 @@ import ReportForm from "@/components/ReportForm.vue";
 import DeleteIcon from "@/assets/img/icon/delete.svg";
 import SmEditIcon from "@/assets/img/icon/sm-edit.svg";
 import konanImage from "@/assets/img/article/movie_konan.jpg";
+import defaultImg from "@/assets/img/article/nopicture.jpg";
 
 // 這裡先用假的登入者資料
 // 假的自己 展示用
@@ -31,15 +32,15 @@ const previewStore = usePreviewStore();
 const route = useRoute();
 const router = useRouter();
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
-
-// ...existing code...
+const coverFile = ref(null);
 const currentUser = ref({
   member_id: null,
   author: "",
   avatar: "",
   replies: [],
 });
-
+//抓是預覽模式是從編輯還是發文送出
+const mode = computed(() => route.query.mode || "create");
 async function fetchCurrentUser() {
   try {
     const res = await axios.get(`${VITE_API_BASE}/users/me.php`, {
@@ -76,13 +77,13 @@ const props = defineProps({
 //分類顏色
 const EventColorMap = {
   登山: "#6DE1D2",
-  水上活動: "#77BEF0",
+  桌遊: "#FFD63A",
   運動: "#FFD63A",
   露營: "#FF8C86",
   唱歌: "#FFA955",
   展覽: "#6DE1D2",
+  水上活動: "#77BEF0",
   聚餐: "#77BEF0",
-  桌遊: "#FFD63A",
   電影: "#FF8C86",
   手作: "#FFA955",
   文化體驗: "#6DE1D2",
@@ -96,13 +97,13 @@ const GetEventColor = (eventName) => {
 // 將後端 API 的分類 ID (數字) 轉換為中文名稱的對照表
 const categoryMap = {
   1: "登山",
-  2: "水上活動",
+  2: "桌遊",
   3: "運動",
   4: "露營",
   5: "唱歌",
   6: "展覽",
-  7: "聚餐",
-  8: "桌遊",
+  7: "水上活動",
+  8: "聚餐",
   9: "電影",
   10: "手作",
   11: "文化體驗",
@@ -225,14 +226,17 @@ async function fetchArticle() {
     // 資料欄位轉換
     const raw = response.data;
     // --- 處理圖片路徑 ---
-    const backendImagePath = raw.POST_IMG; // ← 用 raw
-    const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
-    const fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+    const backendImagePath = raw.POST_IMG;
+    let fullImageUrl = defaultImg; // 先設定為預設圖片
 
+    if (backendImagePath && typeof backendImagePath === "string") {
+      const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
+      fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
+    }
     apiArticleData.value = {
       postid: raw.POST_NO,
       title: raw.POST_TITLE,
-      post_user_id: raw.MEMBER_ID, // ← 改這裡
+      post_user_id: raw.MEMBER_ID,
       nickname: raw.MEMBER_NICKNAME,
       content: raw.POST_CONTENT,
       image: fullImageUrl,
@@ -268,21 +272,70 @@ function EditArticle() {
   });
 }
 
-//預覽模式的送出
 async function submitArticle() {
-  if (props.mode === "edit") {
-    // --- 未來串接 API 的位置 (更新/PUT) ---
-    // await updateArticleAPI(form.postid, form);
-    alert("文章更新成功！");
-  } else {
-    // --- 未來串接 API 的位置 (新增/POST) ---
-    // const newArticle = await createArticleAPI(form);
-    alert("文章發表成功！");
-  }
-  // 成功後跳轉回列表頁
-  router.push("/article/article");
-}
+  // 取得預覽資料
+  const previewData = previewStore.previewData;
 
+  // 取得分類編號
+  const categories = [
+    "登山",
+    "桌遊",
+    "運動",
+    "露營",
+    "唱歌",
+    "展覽",
+    "水上活動",
+    "聚餐",
+    "電影",
+    "手作",
+    "文化體驗",
+    "演出表演",
+    "其他",
+  ];
+  const categoryIndex = categories.indexOf(previewData.event);
+  const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
+
+  // if (!categoryNo) {
+  //   alert("請選擇有效的分類");
+  //   return;
+  // }
+
+  const formData = new FormData();
+  formData.append("category_no", categoryNo);
+  formData.append("post_title", previewData.title);
+  formData.append("post_content", previewData.content);
+
+  // 編輯模式要加 post_no
+  if (mode.value === "edit") {
+    formData.append("post_no", previewData.postid);
+  }
+  // 圖片檔案來源
+  const previewCoverFile = previewData.coverFile || coverFile.value;
+  if (previewCoverFile) {
+    formData.append("post_img", previewCoverFile);
+  }
+
+  // 判斷 API 路徑
+  const apiUrl =
+    mode.value === "edit"
+      ? `${VITE_API_BASE}/posts/update.php`
+      : `${VITE_API_BASE}/posts/create.php`;
+
+  try {
+    const res = await axios.post(apiUrl, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      withCredentials: true,
+    });
+    if (res.data.ok) {
+      alert(mode.value === "edit" ? "文章更新成功！" : "文章發表成功！");
+      router.push("/article/article");
+    } else {
+      throw new Error(res.data.error || "送出失敗");
+    }
+  } catch (err) {
+    alert("送出失敗：" + (err?.message || "請稍後再試"));
+  }
+}
 //刪除文章功能
 function DeleteCheck() {
   if (!article.value) return; // 保險
@@ -333,10 +386,13 @@ function DeleteCheck() {
       const status = err?.response?.status;
       const msg =
         err?.response?.data?.error ||
-        (status === 401 ? "請先登入會員"
-        : status === 403 ? "沒有刪除權限"
-        : status === 404 ? "找不到文章"
-        : "刪除失敗，請稍後再試");
+        (status === 401
+          ? "請先登入會員"
+          : status === 403
+          ? "沒有刪除權限"
+          : status === 404
+          ? "找不到文章"
+          : "刪除失敗，請稍後再試");
 
       await Swal.fire({ icon: "error", title: "刪除失敗", text: msg });
     }
@@ -367,16 +423,20 @@ function openReportModal() {
         // console.log('report payload:', payload);
 
         try {
-          
-          const { data: resp } = await axios.post(
+          const res = await axios.post(
             `${baseURL}/reports/post-report.php`,
-            payload,
-            { headers: { "Content-Type": "application/json" },
-              withCredentials: true,
+            {
+              reporter_id: reporterId,
+              post_no: postNo,
+              report_reason_no: Number(data.reason),
+              report_description: data.detail,
+            },
+            {
+              withCredentials: true, // 這個一定要加
             }
           );
 
-          if (resp?.ok) {
+          if (res.data.ok) {
             Swal.close();
             Swal.fire("已送出", "感謝您的檢舉，我們會盡快處理", "success");
           } else {
@@ -546,9 +606,19 @@ onUnmounted(() => {
         <div class="article-head">
           <span
             class="event-label"
-            :style="{ borderColor: GetEventColor(categoryMap[article.event]) }"
+            :style="{
+              borderColor: GetEventColor(
+                typeof article.event === 'number'
+                  ? categoryMap[article.event]
+                  : article.event
+              ),
+            }"
           >
-            {{ categoryMap[article.event] }}
+            {{
+              typeof article.event === "number"
+                ? categoryMap[article.event]
+                : article.event
+            }}
           </span>
           <p>{{ article.date }}</p>
         </div>
