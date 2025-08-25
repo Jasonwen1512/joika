@@ -1,11 +1,11 @@
 <script setup>
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, createApp} from "vue";
 import Button from "@/components/Button.vue";
 import CaptchaBox from "@/components/auth/CaptchaBox.vue";
 import Swal from "sweetalert2"
 import { useRouter, useRoute } from "vue-router";
 import { loginByPhonePassword,fetchMe } from "@/assets/data/authState";
-;
+import ForgotPasswordModal from "@/components/member/member-content/ForgotPasswordModal.vue";
 
 const realCaptcha = ref(""); // 接住 emit 的驗證碼
 
@@ -79,35 +79,60 @@ const handleLogin = async () => {
     loading.value = false; // ✅ 無論哪個 return 都會執行
   }
 };
-
-
 const goToRegister = () => {
   router.push("/auth/signup");
 };
 
-  //忘記密碼
 const openForgot = async () => {
-  const { value: email } = await Swal.fire({
-    title: '密碼重設驗證信',
-    input: 'email',
-    inputLabel: '請輸入註冊時的信箱',
-    inputPlaceholder: 'you@example.com',
-    confirmButtonText: '送出',
-    showCancelButton: true,
-    cancelButtonText: '取消',
+  let app; // 保存 Vue app 實例，關閉時卸載
+  await Swal.fire({
+    // 1) 放一個掛載點
+    html: '<div id="fp-root"></div>',
+    // 2) 交給我們自己的元件處理按鈕，所以關掉 Swal 內建按鈕
+    showConfirmButton: false,
+    showCancelButton: false,
+    // 3) 自訂彈窗外觀（可選）
     customClass: {
-      title: 'my-swal-title',
-      input: 'my-swal-input',
-      confirmButton: 'my-swal-confirm',
-      cancelButton: 'my-swal-cancel',
-      popup: 'my-swal-popup'
+      popup: 'swal-reset-popup'
     },
-    buttonsStyling: false ,
-    inputValidator: (v) => !v ? '信箱不能空白' : null,
-  })
-    if (!email) return
-}
-
+    // 4) 掛元件
+    didOpen: () => {
+      const el = document.getElementById('fp-root');
+      app = createApp(ForgotPasswordModal, {
+        // 傳入函式 props：元件內會 await 這個 Promise
+        async onSubmit(email) {
+          // ===== 這裡做「寄出重設信」的 API 呼叫 =====
+          try {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE}/auth/forgot-password.php`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            // 關掉內層彈窗，再開結果彈窗（避免「彈窗疊彈窗」不好關）
+            Swal.close();
+            if (res.ok && data?.code === '0000') {
+              await Swal.fire({ icon: 'success', title: '已寄出', text: '若信箱存在，將收到重設連結' });
+            } else {
+              await Swal.fire({ icon: 'error', title: '送出失敗', text: data?.msg || '請稍後再試' });
+            }
+          } catch (e) {
+            Swal.close();
+            await Swal.fire({ icon: 'error', title: '連線異常', text: '請稍後再試' });
+          }
+        },
+        onCancel() {
+          Swal.close();
+        }
+      });
+      app.mount(el);
+    },
+    willClose: () => {
+      if (app) app.unmount();
+    }
+  });
+};
 
 </script>
 
@@ -167,7 +192,7 @@ const openForgot = async () => {
           <p class="error-msg" v-if="error.verifyCode">{{ error.verifyCode }}</p>
         </div>
 
-  <a href="#" class="forgot-password" @click.prevent="openForgot()">忘記密碼</a>
+  <a href="#" class="forgot-password" @click.prevent="openForgot">忘記密碼</a>
 
   <div class="button-group">
     <Button size="lg" theme="info" type="button" @click="goToRegister" :disabled="loading">註冊</Button>
@@ -343,4 +368,5 @@ const openForgot = async () => {
     width: 200px;
   }
 }
+
 </style>
