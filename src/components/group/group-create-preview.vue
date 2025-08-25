@@ -113,7 +113,11 @@ async function onSubmit() {
 
     const { data } = await axios.post(
       `${import.meta.env.VITE_API_BASE}/activities/create.php`,
-      fd
+      fd,
+      {
+    withCredentials: true,
+    headers: { 'Content-Type': 'multipart/form-data' }, 
+  }
     );
 
     // ✅ 成功彈窗
