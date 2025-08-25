@@ -1,7 +1,7 @@
 export const memberInterest = [
   {
-    memberId: "M0001",
-    interests: ["CA013", "CA007"],
+    memberId: "1",
+    interests: ["2","3", "7"],
   },
   {
     memberId: "M0002",

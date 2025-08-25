@@ -257,7 +257,7 @@
                             <div class="tags">
                             <MemberInterestTag
                                 v-if="member && (member.MEMBER_ID ?? member.member_id)"
-                                :member-id="String(member.MEMBER_ID ?? member.member_id)"
+                                :member-id="member.MEMBER_ID ?? member.member_id" 
                             />
                             </div>
                         </div>
@@ -333,10 +333,6 @@
                                             <option value="已完成">已完成</option>
                                             <option value="已取消">已取消</option>
                                             </select>
-                                        </li>
-
-                                        <li>
-                                            <button class="select-btn">排序</button>
                                         </li>
                                     </div>
                                 </div>

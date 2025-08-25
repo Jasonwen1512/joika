@@ -1,37 +1,53 @@
 <script setup>
-import { computed } from "vue";
-import { memberInterest } from "@/assets/data/fake-member-interests";
-import { ActivityCategories } from "@/assets/data/fake-activity-category.js";
+import { ref, onMounted, watch } from "vue";
+
 const props = defineProps({
   memberId: {
-    type: String,
+    type: [String, Number],
     required: true,
   },
 });
 
-// 到時候從資料庫抓會員ID,會員興趣, 興趣分類顏色
-// 在要用的地方import 這個元件 抓memberId就會帶入會員的興趣 <MemberInterest :memberId="currentMemberId"></MemberInterest>
-const memberTags = computed(() => {
-  const member = memberInterest.find((m) => m.memberId === props.memberId);
-  if (!member) return [];
+const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "";
 
-  return member.interests
-    .map((interestId) => {
-      const category = ActivityCategories.find(
-        (cat) => cat.id === interestId && cat.id !== null
-      );
-      if (!category) return null;
-      return {
-        id: interestId,
-        name: category.name,
-        color: category.color,
-      };
-    })
-});
+const memberTags = ref([]);   // [{ id, name, color }]
+const loading    = ref(false);
+const errorMsg   = ref("");
+
+async function fetchMemberTags() {
+  if (!props.memberId) return;
+  loading.value = true;
+  errorMsg.value = "";
+  try {
+    const u = new URL(`${API_BASE}/users/interests-list.php`);
+    // 建議明確帶 member_id，避免只靠 session
+    u.searchParams.set("member_id", String(props.memberId));
+
+    const res  = await fetch(u.toString(), { credentials: "include" });
+    const json = await res.json();
+
+    if (json.code !== "0000") throw new Error(json.msg || "取得興趣失敗");
+
+    // 後端已經只回 id/name/color，直接用
+    memberTags.value = json.data || [];
+  } catch (err) {
+    errorMsg.value = err.message || String(err);
+    memberTags.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(fetchMemberTags);
+watch(() => props.memberId, fetchMemberTags);
 </script>
+
 <template>
   <div class="member-tags">
-    <div v-if="memberTags.length" class="tags">
+    <div v-if="loading">載入中…</div>
+    <div v-else-if="errorMsg">{{ errorMsg }}</div>
+
+    <div v-else-if="memberTags.length" class="tags">
       <span
         v-for="tag in memberTags"
         :key="tag.id"
@@ -41,6 +57,8 @@ const memberTags = computed(() => {
         {{ tag.name }}
       </span>
     </div>
+
+    <div v-else>尚未設定興趣</div>
   </div>
 </template>
 
