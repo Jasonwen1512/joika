@@ -337,10 +337,6 @@ if (!hasData) await fetchActivities(type);
                                         <option value="已取消">已取消</option>
                                         </select>
                                     </li>
-
-                                    <li>
-                                        <button class="select-btn">排序</button>
-                                    </li>
                                 </div>
                             </div>
 
@@ -537,9 +533,8 @@ flex-wrap: wrap;
 
 }
 .activity-items {
-    display: flex
-;
-    gap: 30px;
+    display: flex;
+    gap:15px;
 }
 //篩選
 
@@ -562,8 +557,6 @@ flex-wrap: wrap;
 @media (min-width: 768px) {
     .member-header {
         width: 100%;
-        max-width: 1200px;
-        border-radius: 6px;
         margin: 0 auto 100px;
         flex-direction: row;
         justify-content: space-between;
@@ -632,14 +625,23 @@ flex-wrap: wrap;
 
     .member-activity-card-section {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 40px;
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .rate{
         display: flex;
         justify-content: center;
         gap: 10px;
+    }
+
+    .activity-items {
+    display: flex;
+    gap: 30px;
+}
+}
+@media (min-width: 1000px) {
+        .member-activity-card-section {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 </style>
