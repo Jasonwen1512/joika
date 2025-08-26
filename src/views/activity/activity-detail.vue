@@ -585,7 +585,7 @@ const swiperModules = [Pagination];
             />
           </div>
 
-          <div class="rating-line" v-if="hosterInfo.reviewsAsJoiner > 0">
+          <div class="rating-line">
             <StarRating
               :score="Number(hosterInfo?.ratingAsJoiner ?? 0)"
               :count="Number(hosterInfo?.reviewsAsJoiner ?? 0)"
