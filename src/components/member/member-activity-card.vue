@@ -34,7 +34,7 @@ const titleDate = computed(() => {
         <RouterLink :to="`/activity/${item.activity_no}`">
         <h3 class="activity-name">{{ titleDate }}</h3>
         </RouterLink>
-        <RouterLink :to="`/activity/${item.activity_no}`">
+        <RouterLink :to="`/activity/${item.activity_no}`" class="desc-link">
         <p class="activity-description">{{ item.activity_description }}</p>
         </RouterLink>
 
@@ -63,8 +63,9 @@ a {
     width: 284px;
     height: 390px;
     justify-self: center;
-    gap: 25px;
     margin: 20px;
+    display: flex;         
+  flex-direction: column;
 }
 .img {
     height: 200px;
@@ -97,6 +98,7 @@ a {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     overflow: hidden;
+    flex-grow: 1;
 }
 
 .button-group {
@@ -113,5 +115,9 @@ button.disabled {
   color: #666;             // 字也變淡
   cursor: not-allowed;     // 滑鼠移過去顯示禁止符號
   pointer-events: none;    // 確保不能被點擊
+}
+.desc-link {
+  display: block;
+    flex: 1;  
 }
 </style>
