@@ -274,7 +274,7 @@ const uploadImageAndGetUrl = (blobInfo) =>
     axios
       .post(`${VITE_API_BASE}/posts/upload-image.php`, formData)
       .then((res) => {
-        console.log("新增成功：", res.data);
+        // console.log("新增成功：", res.data);
       })
       .catch((err) => {
         console.error("錯誤：", err);

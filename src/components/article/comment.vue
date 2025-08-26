@@ -148,7 +148,7 @@ function postComment() {
       }
     )
     .then((res) => {
-      console.log("新增成功：", res.data);
+      // console.log("新增成功：", res.data);
       // 通知父層重新抓留言
       emit("comment-added");
       newComment.value = "";
@@ -262,14 +262,14 @@ function postReply(parentComment) {
     parent_no: Number(parentComment.id),
   };
 
-  console.log("送出 replyPayload:", replyPayload); // 偵錯用
+  // console.log("送出 replyPayload:", replyPayload); // 偵錯用
 
   axios
     .post(`${VITE_API_BASE}/comments/post-create.php`, replyPayload, {
       withCredentials: true,
     })
     .then((res) => {
-      console.log("新增回覆成功：", res.data);
+      // console.log("新增回覆成功：", res.data);
       emit("comment-added");
       newReplyText.value = "";
     })
@@ -331,7 +331,7 @@ const likeIt = async (comment) => {
     comment.liked = liked;
     comment.likenum = like_count;
 
-    console.log("點讚狀態更新成功:", response.data);
+    // console.log("點讚狀態更新成功:", response.data);
   } catch (error) {
     // 步驟 6: 如果 API 呼叫失敗，將畫面回復到操作前的狀態
     console.error("點讚失敗:", error);

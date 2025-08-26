@@ -70,10 +70,10 @@ async function fetchCurrentUser() {
     console.error("取得登入者資料失敗", err);
   }
 }
-console.log("comments length:", props.comments.length);
+// console.log("comments length:", props.comments.length);
 async function autoHideReportedComments() {
   for (const comment of props.comments) {
-    console.log("autoHideReportedComments:", comment.id, comment.status);
+    // console.log("autoHideReportedComments:", comment.id, comment.status);
 
     // 只檢查未隱藏的留言
     if (comment.status !== "隱藏") {
@@ -134,13 +134,13 @@ function postComment() {
   };
 
   // 在發送前，把這個物件印出來檢查！
-  console.log("準備發送到後端的資料:", postData);
+  // console.log("準備發送到後端的資料:", postData);
   //
   axios
     .post(`${VITE_API_BASE}/comments/activities-create.php`, postData)
 
     .then((res) => {
-      console.log("新增成功：", res.data);
+      // console.log("新增成功：", res.data);
       // 通知父層重新抓留言
       emit("comment-added");
       newComment.value = "";
@@ -304,7 +304,7 @@ const likeIt = async (comment) => {
     comment.liked = liked;
     comment.likenum = like_count;
 
-    console.log("點讚狀態更新成功:", response.data);
+    // console.log("點讚狀態更新成功:", response.data);
   } catch (error) {
     // 更詳細的錯誤資訊
     console.error("點讚失敗:", error, error.response?.data);
