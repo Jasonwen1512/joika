@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import Button from '@/components/Button.vue';
 
 // 1. 定義 props 和 emits
@@ -11,7 +11,8 @@ const props = defineProps({
   activity: {
     type: Object,
     default: () => ({})
-  }
+  },
+  participantsCount: { type: Number, default: null },
 });
 
 const emit = defineEmits(['close', 'submit']);
@@ -55,7 +56,17 @@ const handleSubmit = () => {
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
-
+const displayCount = computed(() => {
+  if (Number.isFinite(props.participantsCount)) return props.participantsCount;
+  const a = props.activity || {};
+  const direct = a.CURRENT_PARTICIPANT ?? a.current_participant ?? null;
+  const fromPreview = Array.isArray(a.participants?.preview) ? a.participants.preview.length : null;
+  return Number(direct ?? fromPreview ?? 0);
+});
+const maxParticipant = computed(() => {
+  const a = props.activity || {};
+  return a.MAX_PARTICIPANT ?? a.max_participant ?? 0;
+});
 
 
 // 處理點擊外部區域關閉選單的邏輯
@@ -95,7 +106,7 @@ watch(() => props.show, (newVal) => {
 
         <div class="activity-info">
           <span>活動日期：{{ activity?.ACTIVITY_START_DATE }}</span>
-          <span>參團人數：{{ activity?.CURRENT_PARTICIPANT }}/{{ activity?.MAX_PARTICIPANT }}</span>
+          <span>參團人數：{{ displayCount }}/{{ maxParticipant }}</span>
         </div>
 
         <div class="form-group">

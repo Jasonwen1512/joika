@@ -3,26 +3,102 @@ import Button from "@/components/Button.vue";
 import smEditIcon from "@/assets/img/icon/edit.svg";
 import { useRouter } from "vue-router";
 import { useGroupFormStore } from "@/stores/group-form";
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { userImg } from "@/assets/utils/normalize";
+import StarRating from "@/components/StarRating.vue";
+
 const store = useGroupFormStore();
 const router = useRouter();
 
-const emit = defineEmits(["back", "confirm"]); // ✅ 宣告事件
+const emit = defineEmits(["back", "confirm"]);
+
 const props = defineProps({
   form: { type: Object, required: true },
   image: {
     type: Object,
     default: () => ({ previewUrl: "", filename: "", mime: "" }),
-    
   },
-  item:{type:Object}
+  item: { type: Object },
 });
-
-
+const dataURLtoFile = (dataURL, filename = 'upload.png') => {
+  const [header, data] = dataURL.split(',')
+  const mime = header.match(/:(.*?);/)[1]
+  const bin  = atob(data)
+  const u8   = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i)
+  return new File([u8], filename, { type: mime })
+}
+const VITE_API_BASE = import.meta.env.VITE_API_BASE;
+axios.defaults.withCredentials = true;
 const previewUrl = computed(() => store.image?.previewUrl || "");
 const previewData = computed(() => store.formData);
+
+const API_GET_ME = `${VITE_API_BASE}/users/profile-get.php`;
+const hoster = ref(null);
+const loadingHoster = ref(true);
+
+const fetchHoster = async () => {
+  loadingHoster.value = true;
+  try {
+    const { data, status } = await axios.get(API_GET_ME);
+
+    if (status === 200 && data?.code === "0003" && data?.data) {
+      const u = data.data;
+      hoster.value = {
+        ...u,
+        avatarUrl: userImg(u.MEMBER_AVATAR),
+        hostAvg: u.hostAvg != null ? clamp05(u.hostAvg) : 0,
+        joinerAvg: u.joinerAvg != null ? clamp05(u.joinerAvg) : 0,
+        hostCount: u.HOST_COUNT_TOTAL ?? 0,
+        joinerCount: u.JOINER_COUNT_TOTAL ?? 0,
+      };
+    } else {
+      throw new Error(data?.msg || "取得會員資料失敗");
+    }
+  } catch (err) {
+    const status = err?.response?.status;
+    const msg = err?.response?.data?.msg || err.message;
+    if (status === 401) {
+      await Swal.fire({
+        icon: "error",
+        title: "需要登入",
+        text: "請先登入再建立活動",
+      });
+      // router.push('/login');
+    } else {
+      await Swal.fire({
+        icon: "error",
+        title: "取得主揪資料失敗",
+        text: msg || "",
+      });
+    }
+  } finally {
+    loadingHoster.value = false;
+  }
+};
+onMounted(fetchHoster);
+const clamp05 = (v) => {
+  const n = Number(v);
+  const safe = Number.isFinite(n) ? n : 0;
+  const clamped = Math.max(0, Math.min(5, safe));
+  return Math.round(clamped * 10) / 10; 
+};
+const safeHoster = computed(
+  () =>
+    hoster.value ?? {
+      avatarUrl: userImg(),
+      MEMBER_NICKNAME: "主揪",
+      MEMBER_CITY_NAME: "",
+      MEMBER_OCCUPATION_NAME: "",
+      age: null,
+      hostAvg: 0,
+      joinerAvg: 0,
+      hostCount: 0,
+      joinerCount: 0,
+    }
+);
 
 const goBackToEdit = () => {
   emit("back");
@@ -61,8 +137,6 @@ const sqlFormatDateTime = (date) => {
 };
 
 const submitting = ref(false);
-const hosterRating = ref(3.8);
-const joinerRating = ref(4.5);
 
 //處理分類編號
 function parseCategoryNo(code) {
@@ -115,9 +189,9 @@ async function onSubmit() {
       `${import.meta.env.VITE_API_BASE}/activities/create.php`,
       fd,
       {
-    withCredentials: true,
-    headers: { 'Content-Type': 'multipart/form-data' }, 
-  }
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
 
     // ✅ 成功彈窗
@@ -127,7 +201,7 @@ async function onSubmit() {
       text: `活動編號：${data.id}`,
       confirmButtonText: "確定",
     });
-   const actNo = data.activity_no ?? data.ACTIVITY_NO ?? data.id;
+    const actNo = data.activity_no ?? data.ACTIVITY_NO ?? data.id;
     if (actNo) {
       router.push(`/home`);
     }
@@ -232,35 +306,33 @@ async function onSubmit() {
           </div>
           <div class="hoster-img">
             <img
-              src="../../assets/img/welcome/community-cards/user-image5.jpg"
-              alt=""
+              :src="safeHoster.avatarUrl"
+              :alt="safeHoster.MEMBER_NICKNAME"
             />
           </div>
           <div class="hoster-profile">
-            <p class="hoster-name">小單</p>
+            <p class="hoster-name">{{ safeHoster.MEMBER_NICKNAME }}</p>
             <div class="ranting">
               <div class="hoster-rating">
-                <el-rate
-                  v-model="hosterRating"
-                  disabled
-                  show-score
-                  text-color="#ff9900"
+                <StarRating
+                  :score="hoster?.hostAvg ?? 0"
+                  :count="hoster?.HOST_COUNT_TOTAL ?? 0"
+                  color="yellow"
                 />
               </div>
               <div class="joiner-rating">
-                <el-rate
-                  v-model="joinerRating"
-                  disabled
-                  show-score
-                  text-color="#ff9900"
+                <StarRating
+                  :score="hoster?.joinerAvg ?? 0"
+                  :count="hoster?.JOINER_COUNT_TOTAL ?? 0"
+                  color="blue"
                 />
               </div>
             </div>
             <div class="info">
               <ul class="hoster-info">
-                <li>台中市</li>
-                <li>30歲</li>
-                <li>健身教練</li>
+                <li>{{ safeHoster.MEMBER_CITY_NAME }}</li>
+                <li>{{ safeHoster.age }}歲</li>
+                <li>{{ safeHoster.MEMBER_OCCUPATION_NAME }}</li>
               </ul>
             </div>
           </div>

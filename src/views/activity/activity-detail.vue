@@ -313,7 +313,7 @@ async function handleCancelSubmit(payload) {
     isCancelModalVisible.value = false;
     modalResetKey.value++;
     alert(data?.message || "取消成功");
-    await loadDetail(); // ← 這步很重要
+    await loadDetail(); 
   } catch (err) {
     const msg =
       err?.response?.data?.message ||
@@ -523,7 +523,7 @@ const swiperModules = [Pagination];
           <div class="info-row">
             <strong>揪團人數</strong>
             <span
-              >{{ activity?.CURRENT_PARTICIPANT }}/{{
+              >{{ participantsCount }}/{{
                 activity?.MAX_PARTICIPANT
               }}人</span
             >
@@ -681,6 +681,7 @@ const swiperModules = [Pagination];
       :key="modalResetKey"
       :show="isCancelModalVisible"
       :activity="activity"
+      :participants-count="participantsCount"
       @close="closeCancelModal"
       @submit="handleCancelSubmit"
     />
