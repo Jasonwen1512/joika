@@ -59,7 +59,12 @@ html {
   overflow-x: hidden;
 }
 body {
-  background-image: url("@/assets/img/bgc.jpg");
+  background: linear-gradient(
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0.5)
+    ),
+    /* 半透明白色 */ url("@/assets/img/bgc.jpg");
+  // background-image: url("@/assets/img/bgc.jpg");
   background-repeat: repeat;
   background-size: auto;
   background-position: top left;

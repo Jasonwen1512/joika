@@ -9,6 +9,7 @@ import bgImgUrl from "@/assets/img/support/bg.svg?url";
 import articleimg from "@/assets/img/article/article-img.png?url";
 import Illustration from "@/components/article/Illustration.vue";
 import AirPlane from "@/assets/img/article/airplane.png";
+import Swal from "sweetalert2";
 // ... (外觀、Icon、其他外掛的 import 省略，請保留您原有的) ...
 import "tinymce/skins/ui/oxide/skin.css";
 import "tinymce/themes/silver";
@@ -311,6 +312,25 @@ const handleFilePicker = (callback, value, meta) => {
     input.click();
   }
 };
+//社群規定
+function showRule() {
+  Swal.fire({
+    title: "社群規定",
+    html: `
+    <div style="text-align:center;">
+      <ul style="display:inline-block; text-align:left;">
+        <li>禁止發表違法、暴力、色情、歧視等內容</li>
+        <li>禁止人身攻擊、謾罵、騷擾他人</li>
+        <li>請尊重他人隱私與著作權</li>
+        <li>違規將依規定處理，嚴重者停權</li>
+      </ul>
+    </div>
+    `,
+    icon: "info",
+    confirmButtonText: "我知道了",
+    customClass: { confirmButton: "my-swal-confirm-button" },
+  });
+}
 
 // --- TinyMCE 初始化設定 ---
 const init = reactive({
@@ -383,6 +403,9 @@ function selectType(typeName) {
   <div class="background">
     <img class="bgimg" :src="bgImgUrl" alt="背景圖三角" />
     <img class="bg-airplane" :src="AirPlane" alt="背景插圖飛機" />
+    <div class="decoration">
+      <Illustration />
+    </div>
   </div>
 
   <main class="create">
@@ -439,12 +462,14 @@ function selectType(typeName) {
         </option>
       </select>
     </div>
-
+</
     <!-- === 新增：首圖上傳區塊（預覽 + 檔案 input） === -->
     <div class="cover-upload">
       <label class="cover-label">首圖（選填）：</label>
       <div class="cover-uploader">
+        <label class="custom-file-label" for="coverInput">選擇圖片</label>
         <input
+          id="coverInput"
           class="cover-input"
           type="file"
           accept="image/*"
@@ -462,7 +487,7 @@ function selectType(typeName) {
     <div class="text-editor">
       <editor v-model="editorContent" :init="init" @onInit="handleEditorInit" />
       <p class="notice">
-        請遵守社群規定，不得發表違規言論或進行違反法律之相關情事，如有違規需自負法律責任
+        請遵守<span class="rule-link" @click="showRule">社群規定</span>，不得發表違規言論或進行違反法律之相關情事，如有違規需自負法律責任
       </p>
     </div>
 
@@ -471,9 +496,6 @@ function selectType(typeName) {
       <Button theme="primary" size="md" @click="submitArticle"> 送出 </Button>
     </div>
   </main>
-  <div class="decoration">
-    <Illustration />
-  </div>
 </template>
 
 <style scoped lang="scss">
@@ -512,9 +534,13 @@ function selectType(typeName) {
     transform: translateY(0);
   }
 }
+
+template {
+  position: relative;
+}
 .decoration {
   position: absolute;
-  bottom: 0px;
+  bottom: -45vh;
   z-index: 1;
   display: none;
 
@@ -529,6 +555,10 @@ function selectType(typeName) {
   .bg-airplane {
     display: none;
   }
+}
+.decoration img {
+  width: 100%;
+  height: auto;
 }
 
 .create {
@@ -660,8 +690,26 @@ select {
   align-items: start;
 }
 .cover-input {
-  display: block;
-  width: 200px;
+  display: none; /* 隱藏原生 input */
+}
+
+.custom-file-label {
+  font-size: 16px;
+  display: inline-block;
+  padding: 8px 20px;
+  max-width: 158px;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  background: #fada7a;
+  cursor: pointer;
+  text-align: center;
+
+  @include desktop() {
+    border-radius: 6px;
+  }
+}
+.custom-file-label:hover {
+  background: #f9ff4d;
 }
 .cover-preview {
   max-width: 100%;
@@ -682,5 +730,36 @@ select {
 .cover-hint {
   color: #999;
 }
-/* === 新增結束 === */
+.rule-link {
+  color: #81BFDA;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.rule-link:hover {
+  color: #FADA7A;
+}
+.swal-center {
+  text-align: center;
+}
+
+:deep(.swal2-styled.swal2-confirm.my-swal-confirm-button) {
+  margin-inline: 10px;
+  font-size: 16px;
+  min-width: 86px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: #000 !important;
+  background-color: #fada7a !important;
+  border: 1px solid #000 !important;
+}
+:deep(.swal2-styled.swal2-confirm.my-swal-confirm-button:hover) {
+  color: #000 !important;
+  background-color: #f9ff4d !important;
+}
+:deep(.swal2-styled.swal2-confirm.my-swal-confirm-button:active) {
+  color: #000000 !important;
+  background-color: #fdc520 !important;
+}
+
 </style>
