@@ -29,7 +29,6 @@ const routes = [
     name: "group-create",
     component: () => import("@/views/group/group-create.vue"),
     props: true,
-    meta: { requiresAuth: true }
   },
 
   {
@@ -90,9 +89,11 @@ const routes = [
     component: () => import("@/views/activity/activity-detail.vue"),
   },
 
-  {
-    path: "/member/member-list",
+  { 
+    path: '/front/member/member-list/:id?',
+    name: 'member-member-list',
     component: () => import("@/views/member/member-list.vue"),
+    props: true,
   },
 
   {

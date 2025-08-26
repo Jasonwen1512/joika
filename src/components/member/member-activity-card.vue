@@ -43,8 +43,8 @@ const titleDate = computed(() => {
                 <Button theme="disabled" size="sm" disabled>團員列表</Button>
             </template>
             <template v-else>
-                <RouterLink :to="'/member/member-list'">
-                <Button theme="info" size="sm">團員列表</Button>
+                <RouterLink :to="{ name: 'member-member-list', params: { id: item.activity_no } }">
+                    <Button theme="info" size="sm">團員列表</Button>
                 </RouterLink>
             </template>
         </div>
