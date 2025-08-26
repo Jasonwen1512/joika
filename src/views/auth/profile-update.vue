@@ -7,6 +7,8 @@ import InterestSelector from "@/components/auth/Interestselector.vue";
 const currentStep = ref(2);
 const avatarUrl = ref("");
 const avatarFile = ref(null);
+const isSubmitting = ref(false);
+
 const genderOptions = [
   { label: "男性", value: "M" },
   { label: "女性", value: "F" },
@@ -87,6 +89,9 @@ onMounted(async () => {
 
 // step2
 async function handleStepTwoSubmit() {
+  // 檢查是否正在提交中，如果是，則直接返回
+  if (isSubmitting.value) return;
+
   // 清空錯誤
   Object.keys(errors.value).forEach((key) => (errors.value[key] = ""));
 
@@ -122,6 +127,9 @@ async function handleStepTwoSubmit() {
   }
 
   if (hasError) return;
+
+  // 開始提交，鎖定狀態
+  isSubmitting.value = true;
 
   // 建立要傳送的 FormData
   const payload = new FormData();
@@ -174,7 +182,10 @@ async function handleStepTwoSubmit() {
       Object.assign(errors.value, data.errors);
     }
   } catch (err) {
-    console.error("Step2 資料更新失敗", err);
+    console.error("資料更新失敗", err);
+  } finally {
+    // 解除鎖定
+    isSubmitting.value = false;
   }
 }
 
@@ -185,14 +196,6 @@ const handleAvatarChange = (e) => {
     avatarFile.value = file; // <--- 新增這一行，儲存檔案本身
   }
 };
-
-// watch(selectedInterestIds, (newValue) => {
-//   if (newValue && newValue.length > 0 && errors.value.interests) {
-//     errors.value.interests = ""; // 如果使用者選擇了興趣，就清除錯誤訊息
-//   }
-// });
-
-// setupAutoClearError(formData, errors);
 
 const getStepState = (step) => {
   if (currentStep.value > step) return "completed";
@@ -251,7 +254,7 @@ const getStepState = (step) => {
           <InterestSelector v-model="selectedInterestIds" :options="allOptions.interests" :error="errors.interests" :max="3" />
 
           <div class="button-group">
-            <Button size="md" theme="primary" @click="handleStepTwoSubmit">下一步</Button>
+            <Button size="md" theme="primary" @click="handleStepTwoSubmit" :disabled="isSubmitting">下一步</Button>
           </div>
         </form>
       </section>
