@@ -27,7 +27,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { imageUrl } from "@/assets/utils/normalize";
 import { userImg } from "@/assets/utils/normalize";
-
+import StarRating from "@/components/StarRating.vue";
 // 環境變數
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
 axios.defaults.withCredentials = true;
@@ -578,41 +578,19 @@ const swiperModules = [Pagination];
         <div class="host-details">
           <div class="host-name">{{ hosterInfo.name }}</div>
           <div class="rating-line">
-            <div class="stars stars-yellow">
-              <i
-                v-for="n in 5"
-                :key="'h' + n"
-                :class="
-                  n <= Math.round(hosterInfo.ratingAsHost)
-                    ? 'fa-solid fa-star'
-                    : 'fa-regular fa-star'
-                "
-              />
-            </div>
-            <span
-              >{{ Number(hosterInfo.ratingAsHost ?? 0).toFixed(1) }} ({{
-                hosterInfo.reviewsAsHost ?? 0
-              }})</span
-            >
+            <StarRating
+              :score="Number(hosterInfo?.ratingAsHost ?? 0)"
+              :count="Number(hosterInfo?.reviewsAsHost ?? 0)"
+              color="yellow"
+            />
           </div>
 
           <div class="rating-line" v-if="hosterInfo.reviewsAsJoiner > 0">
-            <div class="stars stars-blue">
-              <i
-                v-for="n in 5"
-                :key="'j' + n"
-                :class="
-                  n <= Math.round(hosterInfo.ratingAsJoiner)
-                    ? 'fa-solid fa-star'
-                    : 'fa-regular fa-star'
-                "
-              />
-            </div>
-            <span
-              >{{ hosterInfo.ratingAsJoiner.toFixed(1) }}({{
-                hosterInfo.reviewsAsJoiner
-              }})</span
-            >
+            <StarRating
+              :score="Number(hosterInfo?.ratingAsJoiner ?? 0)"
+              :count="Number(hosterInfo?.reviewsAsJoiner ?? 0)"
+              color="blue"
+            />
           </div>
 
           <div class="host-bio">
@@ -651,28 +629,14 @@ const swiperModules = [Pagination];
               <div class="participant-details">
                 <div class="participant-name">{{ participant.NICKNAME }}</div>
                 <div class="rating-line">
-                  <div class="stars stars-blue">
-                    <i
-                      v-for="n in 5"
-                      :key="n"
-                      :class="
-                        n <= Math.round(Number(participant.rating || 0))
-                          ? 'fa-solid fa-star'
-                          : 'fa-regular fa-star'
-                      "
-                    ></i>
-                  </div>
-                  <span
-                    >{{ participant.rating.toFixed(1) }}({{
-                      participant.reviews
-                    }})</span
-                  >
+                 
+                     <StarRating
+              :score="Number(participant?.rating ?? 0)"
+              :count="Number(participant?.reviews ?? 0)"
+              color="blue"
+            />
                 </div>
-                <span
-                  >{{ Number(participant.rating || 0).toFixed(1) }} ({{
-                    participant.reviews || 0
-                  }})</span
-                >
+            
                 <div class="participant-bio">
                   {{ participant.city }} | {{ participant.age }}歲 |
                   {{ participant.role }}
