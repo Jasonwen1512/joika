@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios' 
 import { useChat } from '@/composables/useChat' 
 import Swal from 'sweetalert2'
+import { userImg } from '@/assets/utils/normalize'
 import defaultAvatar from '@/assets/img/chat/avatar-default.jpg'
 
 // 設定 axios 預設傳送 cookie（取得 PHP session）
@@ -53,7 +54,7 @@ function handleSend() {
     send({
         text: trimmed,
         senderId: currentUserId.value,
-        senderName: userProfile.value.MEMBER_NICKNAME,
+        senderName: userProfile.value.nickname,
         senderAvatar: userAvatarUrl.value
     })
 
@@ -67,16 +68,26 @@ onMounted(async () => {
     try {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE}/users/profile-get.php`)
         const data = res.data.data
+        
+
 
         if (!data?.MEMBER_ID) throw new Error('未登入')
 
         currentUserId.value = String(data.MEMBER_ID)
         localStorage.setItem('uid', data.MEMBER_ID)
-        userProfile.value = data
 
-        if (data.MEMBER_AVATAR_URL) {
-            userAvatarUrl.value = data.MEMBER_AVATAR_URL || defaultAvatar
+        userProfile.value = {
+            id: data.MEMBER_ID,
+            nickname: data.MEMBER_NICKNAME,
+            avatar: data.MEMBER_AVATAR
         }
+
+        if (data.MEMBER_AVATAR) {
+        userAvatarUrl.value = userImg(data.MEMBER_AVATAR)
+        } else {
+        userAvatarUrl.value = defaultAvatar
+        }
+
 
         isUserReady.value = true
         
@@ -104,10 +115,9 @@ onMounted(async () => {
                 >
                     <div class="avatar-section">
                         <div class="avatar">
-                            <img :src="msg.senderAvatar || defaultAvatar"
-                                @error="e => e.target.src = defaultAvatar"
-                                alt="使用者大頭貼" />
+                            <img :src="userImg(msg.senderAvatar)" @error="e => e.target.src = defaultAvatar" />
                         </div>
+
                         <span class="name">
                             {{ msg.senderId === currentUserId ? '你' : (msg.senderName || msg.senderId) }}
                         </span>
