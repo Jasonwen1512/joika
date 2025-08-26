@@ -1,101 +1,108 @@
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Button from "@/components/Button.vue";
-// 當前頁籤，預設為 'list' (團員列表)，這樣一進頁面就會顯示團員列表
-const activeTab = ref("list");
-const activityId = "ACT00001"; // 之後會從API抓活動ID，先寫死
+
 const router = useRouter();
+const route = useRoute();
 
-// 團員假資料 之後要串 應該會從活動ID抓
-const memberList = ref([
-    {
-        userid: "M0007",
-        name: "瑄",
-        rating: 5.0,
-        reviews: 5,
-        location: "新北市",
-        age: 23,
-        occupation: "上班族",
-        image: "https://i.pravatar.cc/150?u=g",
-    },
-    {
-        userid: "M0008",
-        name: "温温",
-        rating: 4,
-        reviews: 32,
-        location: "桃園市",
-        age: 29,
-        occupation: "上班族",
-        image: "https://i.pravatar.cc/150?u=wendy",
-    },
-    {
-        userid: "M0009",
-        name: "Alex",
-        rating: 4.0,
-        reviews: 18,
-        location: "新竹市",
-        age: 26,
-        occupation: "工程師",
-        image: "https://i.pravatar.cc/150?u=Alex",
-    },
-]);
-//申請中資料  之後也要串
-const pendingList = ref([
-    {
-        userid: "M00010",
-        name: "Ben",
-        rating: 3,
-        reviews: 5,
-        location: "新北市",
-        age: 24,
-        occupation: "健身教練",
-        image: "https://i.pravatar.cc/150?u=men",
-    },
-    {
-        userid: "M00011",
-        name: "zzJhen",
-        rating: 4,
-        reviews: 5,
-        location: "桃園市",
-        age: 29,
-        occupation: "雞排店老闆",
-        image: "https://i.pravatar.cc/150?u=yum",
-    },
-]);
-//接受
+// 活動 ID：路由參數優先，沒有就先用預設
+const activityId = route.params.id ?? "ACT00001";
 
+// 後端 API base
+const API_BASE = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
+
+// UI 狀態
+const activeTab = ref("list"); // 'list' | 'applying'
+const loading = ref(false);
+const error = ref("");
+
+// 由 API 取得的資料
+const memberList = ref([]);  // 已參加（approved）
+const pendingList = ref([]); // 申請中（pending）
+const pendingLoaded = ref(false); // 是否已載入過申請中
+
+const DEFAULT_AVATAR = "/img/default-avatar.png";
+
+// 後端回傳欄位 → 映射到卡片顯示欄位
+function mapRowToCard(row) {
+    return {
+        userid: String(row.member_id),
+        name: row.MEMBER_NICKNAME || "匿名",
+        image: row.MEMBER_AVATAR || DEFAULT_AVATAR,
+        rating: Number(row.rating ?? 0),       // 後端已算好
+        reviews: Number(row.reviews ?? 0),     // 後端已算好
+        location: row.MEMBER_CITY_NAME || "—",
+        age: row.AGE ?? "—",                   // 後端用 TIMESTAMPDIFF 算好
+        occupation: row.MEMBER_OCCUPATION_NAME || "—",
+    };
+}
+
+// 叫後端 API 取得成員
+async function fetchMembers(status /* 'approved' | 'pending' */) {
+    const u = new URL(`${API_BASE}/users/joind-member.php`);
+    u.searchParams.set("activity_no", activityId);
+    u.searchParams.set("status", status);
+    try {
+        const res = await fetch(u.toString(), {
+        method: "GET",
+        credentials: "include", // ✅ 一定要帶 session cookie
+        });
+        const data = await res.json();
+        if (!res.ok || data.code !== "0000") {
+        throw new Error(data?.msg || `HTTP ${res.status}`);
+        }
+        const rows = Array.isArray(data.data) ? data.data : [];
+        const cards = rows.map(mapRowToCard);
+        if (status === "approved") {
+        memberList.value = cards;
+        } else {
+        pendingList.value = cards;
+        pendingLoaded.value = true;
+        }
+    } catch (e) {
+        console.error(e);
+        error.value = e.message || "載入失敗";
+        if (status === "approved") memberList.value = [];
+        else pendingList.value = [];
+    }
+    }
+
+// 首次載入：先抓「已參加」
+onMounted(async () => {
+    loading.value = true;
+    error.value = "";
+    await fetchMembers("approved");
+    loading.value = false;
+    });
+
+// 切到「申請中」才去抓 pending（只抓一次）
+watch(activeTab, async (tab) => {
+    if (tab === "applying" && !pendingLoaded.value) {
+        loading.value = true;
+        await fetchMembers("pending");
+        loading.value = false;
+    }
+});
+
+// ====== 你原本的接受/拒絕（先保留前端移動；之後再改成呼叫審核 API） ======
 function handleAccept(userId) {
-    const userIndex = pendingList.value.findIndex(
-        (user) => user.userid === userId
-    );
-
-    if (userIndex === -1) return;
-
-    const [acceptedUser] = pendingList.value.splice(userIndex, 1);
-
-    memberList.value.push(acceptedUser);
+    const idx = pendingList.value.findIndex((u) => u.userid === userId);
+    if (idx === -1) return;
+    const [accepted] = pendingList.value.splice(idx, 1);
+    memberList.value.push(accepted);
 }
-
-//拒絕
 function handleReject(userId) {
-    const userIndex = pendingList.value.findIndex(
-        (user) => user.userid === userId
-    );
-    if (userIndex === -1) return;
+    const idx = pendingList.value.findIndex((u) => u.userid === userId);
+    if (idx === -1) return;
+    pendingList.value.splice(idx, 1);
+}
 
-    pendingList.value.splice(userIndex, 1);
-}
-//回去會員
-function backbtn() {
-    router.back();
-}
-//看活動詳細
-function gotoActivity() {
-    router.push(`/activity/${activityId}`);
-}
+function backbtn() { router.back(); }
+function gotoActivity() { router.push(`/activity/${activityId}`); }
 </script>
+
 
 <template>
     <div class="member-tabs">
