@@ -36,7 +36,7 @@ export const useFavoriteStore = defineStore('favorites', () => {
       if (res.data.success && Array.isArray(res.data.data)) {
         const ids = res.data.data.map(fav => String(fav.ACTIVITY_NO));
         favoriteSet.value = new Set(ids);
-        console.log('Favorite Store: 收藏列表同步成功！');
+        // console.log('Favorite Store: 收藏列表同步成功！');
       }
     } catch (error) { // <--- 已修正此處的語法錯誤
       console.error('Favorite Store: 獲取收藏列表失敗', error);

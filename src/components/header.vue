@@ -39,7 +39,7 @@ watch(
       console.log("第一次初始化完成，但尚未登入");
     } else if (newVal) {
       loginStatus.value = newVal;
-      console.log("使用者已登入:", loginStatus);
+      // console.log("使用者已登入:", loginStatus);
       loginStatus.value.avatar = avatarUrl(loginStatus.value.avatar);
     } else {
       loginStatus.value = null;
