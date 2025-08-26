@@ -5,7 +5,7 @@ import commentSection from "@/components/activity/activity-detail/comment-sectio
 
 import { useRoute, useRouter } from "vue-router";
 
-// === 新增 #1：在這裡引入 Pinia Store ===
+// 新增一：從外部倉庫，引入我們的「參團狀態管理員」。
 import { useParticipationStore } from "@/stores/participation-store.js";
 //
 
@@ -335,11 +335,15 @@ const formDate = (dateStr) => {
     .padStart(2, "0")}/${day.toString().padStart(2, "0")}`;
 };
 
-// 獲取 participation store 的實例
+// 新增二：正式聘請管理員，並定義「我要跟團」按鈕專屬的「交通警察」。
 const participationStore = useParticipationStore();
 
-// 建立一個 computed 屬性，專門用來判斷「當前頁面」的活動是否已參加
-// 它會自動根據 Pinia 狀態的變化而更新
+const handleJoinButtonClick = () => {
+  // 交通警察直接把工作交給管理員的「總指揮」去處理。
+  participationStore.handleJoinProcess(activityNo);
+};
+// 結束備註
+
 const isGroupJoined = computed(() => {
   // activityNo 來自您檔案頂部的 const activityNo = route.params.activity_id;
   return participationStore.isJoined(activityNo);
@@ -480,14 +484,25 @@ const swiperModules = [Pagination];
       </template>
 
       <template v-else>
-        <Button
+        <!-- <Button
         type="button"
           @click.stop.prevent="gotoSignup()"
           theme="primary"
           size="md"
         >
           我要跟團!
+        </Button> -->
+        <Button
+          type="button"
+          @click.stop.prevent="handleJoinButtonClick"
+          theme="primary"
+          size="md"
+          :disabled="participationStore.isLoading"
+        >
+          <span v-if="participationStore.isLoading">載入中...</span>
+          <span v-else>我要跟團!</span>
         </Button>
+
         <LikeButton :activity-no="activityNo"></LikeButton>
       </template>
     </div>
@@ -1051,8 +1066,8 @@ const swiperModules = [Pagination];
   max-width: 1200px;
   margin: 0px auto 100px;
   padding: 0 20px;
-  // 錨點：設定為絕對定位的參考基準
   position: relative;
+  z-index: 1;  // === 顯示在下面,不吃到導覽列 ===
 
   .participants-title {
     font-size: 24px;

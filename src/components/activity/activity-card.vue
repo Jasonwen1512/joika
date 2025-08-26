@@ -80,14 +80,12 @@ const titleDate = computed(() => {
     <div class="button-group" @click.stop.prevent>
       <Button
         @click.stop.prevent="handleButtonClick(item.ACTIVITY_NO)"
-        :theme="'primary'"
+        :theme="participationStore.isJoined(item.ACTIVITY_NO) ? 'joined' : 'primary'"
         size="md"
         :disabled="participationStore.isLoading"
       >
         <span v-if="participationStore.isLoading">載入中...</span>
-        <span v-else>
-          {{ participationStore.isJoined(item.ACTIVITY_NO) ? "已參團" : "我要跟團！" }}
-        </span>
+        <span v-else>{{ participationStore.isJoined(item.ACTIVITY_NO) ? '已參團' : '我要跟團！' }}</span>
       </Button>
 
       <LikeButton :activity-no="item.ACTIVITY_NO" />
