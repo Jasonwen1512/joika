@@ -28,8 +28,8 @@ const error = ref("");
 const memberList = ref([]);   // 已參加（approved）
 const pendingList = ref([]);  // 申請中（pending）
 const pendingLoaded = ref(false);
+const canReview = ref(false);
 
-const DEFAULT_AVATAR = "/img/default-avatar.png";
 
 // 後端 → 前端卡片映射
 function mapRowToCard(row) {
@@ -37,7 +37,7 @@ function mapRowToCard(row) {
     return {
         role: row.role,
         userid: String(row.member_id),
-        name: row.MEMBER_NICKNAME || "匿名",
+        name: row.MEMBER_NICKNAME ,
         image: avatar,
         rating: Number(row.rating ?? 0),
         reviews: Number(row.reviews ?? 0),
@@ -45,6 +45,20 @@ function mapRowToCard(row) {
         age: row.AGE ?? "—",
         occupation: row.MEMBER_OCCUPATION_NAME || "—",
     };
+}
+
+// 查權限：只有主揪可審核
+async function checkPermission() {
+    if (!activityId.value) { canReview.value = false; return; }
+    try {
+        const u = new URL(`${API_BASE}/users/activity-permission.php`);
+        u.searchParams.set("activity_no", activityId.value);
+        const res = await fetch(u.toString(), { credentials: "include" });
+        const data = await res.json();
+        canReview.value = data?.code === "0000" && !!data?.is_host;
+    } catch {
+        canReview.value = false;
+    }
 }
 
 // 抓資料（已參加／申請中）
@@ -87,31 +101,32 @@ async function fetchMembers(status /* 'approved' | 'pending' */) {
 onMounted(async () => {
   loading.value = true;
   error.value = "";
+  await checkPermission();
   await fetchMembers("approved");
   loading.value = false;
 });
 
-// 切到「申請中」再抓 pending（只抓一次）
+// 切到「申請中」再抓 pending（且必須是主揪）
 watch(activeTab, async (tab) => {
-  if (tab === "applying" && !pendingLoaded.value) {
-    loading.value = true;
-    await fetchMembers("pending");
-    loading.value = false;
-  }
+    if (tab === "applying" && canReview.value && !pendingLoaded.value) {
+        loading.value = true;
+        await fetchMembers("pending");
+        loading.value = false;
+    }
 });
 
-// 保險：如果同頁面內切到不同活動（例如從卡片跳轉）
+// 切到不同活動時，重查權限與名單
 watch(activityId, async (id, old) => {
-  if (!id || id === old) return;
-  pendingLoaded.value = false;
-  loading.value = true;
-  await fetchMembers("approved");
-  if (activeTab.value === "applying") {
-    await fetchMembers("pending");
-  }
-  loading.value = false;
+    if (!id || id === old) return;
+    pendingLoaded.value = false;
+    loading.value = true;
+    await checkPermission();
+    await fetchMembers("approved");
+    if (activeTab.value === "applying" && canReview.value) {
+        await fetchMembers("pending");
+    }
+    loading.value = false;
 });
-
 async function handleAccept(userId) {
     try {
         const res = await fetch(`${API_BASE}/users/joiner-review.php`, {
@@ -185,7 +200,7 @@ function gotoActivity() { router.push(`/activity/${activityId.value}`); }
                     <h3>團員列表</h3>
                 </button>
             </li>
-            <li>
+            <li v-if="canReview">
                 <button
                     :class="{ active: activeTab === 'applying' }"
                     @click="activeTab = 'applying'"
@@ -265,7 +280,7 @@ function gotoActivity() { router.push(`/activity/${activityId.value}`); }
                                     <StarRating
                                     :score="member.rating"
                                     :count="member.reviews"
-                                    color="yellow"
+                                    color="blue"
                                     showScore
                                     class="score"
                                 />
@@ -277,21 +292,14 @@ function gotoActivity() { router.push(`/activity/${activityId.value}`); }
                             </div>
                         </div>
                         <div class="action-buttons">
-                            <Button
-                                theme="primary"
-                                size="sm"
-                                class="approve-btn"
-                                @click="handleAccept(member.userid)"
-                                >接受</Button
-                            >
-                            <Button
-                                theme="secondary"
-                                isOutline="true"
-                                size="sm"
-                                class="reject-btn"
-                                @click="handleReject(member.userid)"
-                                >拒絕</Button
-                            >
+                            <template v-if="canReview">
+                                <Button 
+                                    theme="primary" size="sm" class="approve-btn" 
+                                    @click="handleAccept(member.userid)">接受
+                                </Button>
+                                <Button 
+                                    theme="secondary" :isOutline="true" size="sm" class="reject-btn" @click="handleReject(member.userid)">拒絕</Button>
+                            </template>
                         </div>
                     </div>
                 </div>
