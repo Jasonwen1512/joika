@@ -80,7 +80,7 @@ const titleDate = computed(() => {
     <div class="button-group" @click.stop.prevent>
       <Button
         @click.stop.prevent="handleButtonClick(item.ACTIVITY_NO)"
-        :theme="participationStore.isJoined(item.ACTIVITY_NO) ? 'joined' : 'primary'"
+        :theme="participationStore.isJoined(item.ACTIVITY_NO) ? 'info' : 'primary'"
         size="md"
         :disabled="participationStore.isLoading"
       >

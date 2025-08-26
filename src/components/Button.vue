@@ -208,45 +208,6 @@ $buttonThemes: (
     icon-outline-hover-color: $color-highlight,
     icon-outline-active-color: $orange,
   ),
-
-  // 新增一：為按鈕新增一個名為 'joined' 的新主題樣式。
-  joined: (
-    // 字體顏色
-    color: $black,
-    hover-color: $black,
-    active-color: $white,
-    // 背景顏色 (使用您指定的奶油黃色)
-    background-color: #F5F0CD,
-    hover-background-color: $yellow, // 滑鼠移上去時，維持相同顏色
-    active-background-color: $orange, // 點擊時可以有一個顏色變化，增加互動感
-    // disabled設定 (維持和其他主題一樣的灰色)
-    disabled-background-color: $gray-disabled,
-    disabled-font-color: $white,
-    // 邊框色
-    border-color: $black,
-    // --- outline 相關的樣式，我們先維持和 primary 一樣 ---
-    outline-border-color: $color-highlight,
-    outline-background-color: $white,
-    outline-color: $color-highlight,
-    outline-hover-color: $yellow,
-    outline-hover-border-color: $yellow,
-    outline-hover-background-color: $white,
-    outline-active-color: $orange,
-    outline-active-border-color: $orange,
-    outline-active-background-color: $white,
-    outline-disabled-background-color: $white,
-    outline-disabled-border-color: $gray-disabled,
-    outline-disabled-color: $gray-disabled,
-    // icon顏色
-    icon-color: $black,
-    icon-hover-color: $black,
-    icon-active-color: $white,
-    icon-disabled-color: $white,
-    icon-outline-color: $color-highlight,
-    icon-outline-hover-color: $yellow,
-    icon-outline-active-color: $orange,
-  ),
-// 結束備註
 );
 
 // sizes
