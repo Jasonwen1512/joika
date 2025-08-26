@@ -31,7 +31,7 @@ export const useParticipationStore = defineStore('participation', () => {
         joinedActivities.value = new Set(ids);
       }
     } catch (error) {
-      console.error("輪詢獲取活動列表失敗", error);
+      console.error("獲取活動列表失敗", error);
     } finally {
       if (isLoading.value) {
         isLoading.value = false;
@@ -43,24 +43,24 @@ export const useParticipationStore = defineStore('participation', () => {
     joinedActivities.value.add(String(activityNo));
   }
 
-  function startPolling() {
-    if (pollingTimer) clearInterval(pollingTimer);
-    pollingTimer = setInterval(() => {
-      fetchJoinedActivities();
-    }, 5000);
-  }
+  // function startPolling() {
+  //   if (pollingTimer) clearInterval(pollingTimer);
+  //   pollingTimer = setInterval(() => {
+  //     fetchJoinedActivities();
+  //   }, 5000);
+  // }
 
-  function stopPolling() {
-    if (pollingTimer) {
-      clearInterval(pollingTimer);
-      pollingTimer = null;
-    }
-  }
+  // function stopPolling() {
+  //   if (pollingTimer) {
+  //     clearInterval(pollingTimer);
+  //     pollingTimer = null;
+  //   }
+  // }
 
   function reset() {
     joinedActivities.value = new Set();
     isLoading.value = false;
-    stopPolling();
+    // stopPolling();
   }
 
   async function handleJoinProcess(activityNo) {
@@ -102,7 +102,7 @@ export const useParticipationStore = defineStore('participation', () => {
       fetchJoinedActivities().then(() => {
         executePostLoginAction();
       });
-      startPolling();
+      // startPolling();
     } else {
       reset();
     }
