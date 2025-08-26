@@ -39,7 +39,9 @@ const errors = ref({
 const selectedInterests = ref([]); // v-model 綁定多選興趣
 
 onMounted(async () => {
+  // 接收 API 回傳的會員資料
   try {
+    // 先載入表單選項
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/get-registration-options.php`);
     const data = await res.json();
     if (data.success) {
@@ -47,8 +49,32 @@ onMounted(async () => {
       occupationOptions.value = data.data.occupations;
       interestOptions.value = data.data.interests;
     }
+
+    // 再載入會員資料
+    const res2 = await fetch(`${import.meta.env.VITE_API_BASE}/users/profile-origin.php`, { credentials: "include" });
+    const formData = await res2.json();
+
+    if (formData.success && formData.data) {
+      const city = cityOptions.value.find((c) => c.value === formData.data.cityNo);
+      const occupation = occupationOptions.value.find((o) => o.value === formData.data.occupationNo);
+
+      form.value = {
+        name: formData.data.name || "",
+        nickname: formData.data.nickname || "",
+        gender: formData.data.gender || "",
+        birthdate: formData.data.birthdate || "",
+        location: city ? String(city.value) : "",
+        occupation: occupation ? String(occupation.value) : "",
+        interests: formData.data.interests || [],
+      };
+    }
+
+    // 帶入 avatar
+    if (formData.data.avatar) {
+      avatarUrl.value = `${import.meta.env.VITE_API_BASE}/upload/member/${encodeURIComponent(formData.data.avatar)}`;
+    }
   } catch (err) {
-    console.error("載入選項失敗", err);
+    console.error("會員資料載入失敗", err);
   }
 });
 
@@ -182,7 +208,7 @@ const getStepState = (step) => {
   <div class="signup-page">
     <div class="signup-container">
       <div class="registration-header">
-        <h1>會員資料</h1>
+        <h1>編輯會員資料</h1>
         <ul class="progress-bar" id="progress-bar">
           <li :class="['progress-step', getStepState(2)]">
             <div class="step-label">基本資料</div>
