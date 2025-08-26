@@ -1,4 +1,5 @@
 <script setup>
+defineOptions({ inheritAttrs: false })
 const props = defineProps({
   isOutline: {
     type: Boolean,
@@ -40,6 +41,8 @@ const props = defineProps({
   <div class="button-wrapper">
     <button
       class="button"
+      :type="$attrs.type || 'button'"
+       v-bind="$attrs"
       :data-theme="theme"
       :data-size="size"
       :disabled="isDisabled"

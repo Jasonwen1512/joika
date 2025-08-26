@@ -173,15 +173,19 @@ const disableDeadline = (date) => {
   const start = ruleForm.dateRange?.[0]
   if (!start) return true             
   const latest = addDays(at00(new Date(start)), -1)
-  return at00(date) > latest         
+  const d = at00(date)
+  return at00(date) > latest || d < today       
 }
 
 watch(() => ruleForm.dateRange?.[0], (start) => {
   if (!start) {ruleForm.registration_deadline = null; return }
   if (!ruleForm.registration_deadline) return
   const latest = addDays(at00(new Date(start)), -1)
-  if (at00(form.registration_deadline) > latest) {
-    ruleForm.registration_deadline = latest        
+  const cur = at00(new Date(ruleForm.registration_deadline))
+   if (cur > latest) {
+    ruleForm.registration_deadline = latest
+  } else if (cur < today) {
+    ruleForm.registration_deadline = today
   }
 })
 
@@ -337,7 +341,7 @@ watch(() => ruleForm.dateRange, (range) => {
     <div class="group-create-bakground" >
       <h3>發起揪團</h3>
     </div>
-    <div class="group-create-wrap"  v-show="!isPreview">
+    <div class="group-create-wrap"  v-if="!isPreview">
     <el-form
       :model="ruleForm"
       label-width="auto"
@@ -439,6 +443,7 @@ watch(() => ruleForm.dateRange, (range) => {
         <el-input
           v-model="ruleForm.activity_description"
           type="textarea"
+          :rows="5"
           placeholder="說明一下活動內容，讓更多人有興趣參與"
         />
       </el-form-item>
@@ -491,7 +496,7 @@ watch(() => ruleForm.dateRange, (range) => {
       </el-form-item>
     </el-form>
   </div>
-  <div v-show="isPreview">
+  <div v-else="isPreview">
  <GroupCreatePreview
     :form="store.formData"
     :image="store.image"
@@ -502,6 +507,10 @@ watch(() => ruleForm.dateRange, (range) => {
 </template>
 
 <style lang="scss" scoped>
+:deep(.el-textarea__inner) {
+  height: 100px;
+  resize: none;
+}
 .group-create-wrap {
   background-image: url(../../assets/img/group/group-explore/form-decoration.svg);
   background-position: bottom;
