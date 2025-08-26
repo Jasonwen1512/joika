@@ -48,6 +48,16 @@ const memberId = ref(""); // 新增會員ID
 // const submittedData = ref({});
 
 const Submit = async () => {
+  if (
+    !name.value.trim() ||
+    !phone.value.trim() ||
+    !email.value.trim() ||
+    !subject.value.trim() ||
+    !content.value.trim()
+  ) {
+    Swal.fire("欄位未填", "所有欄位皆為必填，請完整填寫！", "error");
+    return;
+  }
   console.log("送出資料：", {
     member_id: memberId.value,
     member_phone: phone.value,
@@ -102,30 +112,30 @@ const Submit = async () => {
           </h3>
         </div>
         <form @submit.prevent="Submit">
-          <label>姓名</label>
+          <label>姓名<span class="required">*</span></label>
           <input
             class="inputbox"
             type="text"
             placeholder="請輸入姓名"
             v-model="name"
           />
-          <label>手機</label>
+          <label>手機<span class="required">*</span></label>
           <input
             class="inputbox"
             type="tel"
             placeholder="請輸入手機號碼"
             v-model="phone"
           />
-          <label>E-mail</label>
+          <label>E-mail<span class="required">*</span></label>
           <input
             class="inputbox"
             type="email"
             placeholder="請輸入 E-mail"
             v-model="email"
           />
-          <label>問題標題</label>
+          <label>問題標題<span class="required">*</span></label>
           <input class="inputbox" type="text" v-model="subject" />
-          <label>內容</label>
+          <label>內容<span class="required">*</span></label>
           <textarea class="inputbox-l" type="text" v-model="content" />
 
           <Button class="submitbtn" theme="primary" size="md" type="submit">
@@ -259,6 +269,11 @@ form {
 .button-wrapper {
   display: flex;
   justify-content: center;
+}
+.required {
+  color: red;
+  margin-right: 4px;
+  font-weight: bold;
 }
 // input {
 // }
