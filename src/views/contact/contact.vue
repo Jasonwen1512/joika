@@ -48,6 +48,13 @@ const memberId = ref(""); // 新增會員ID
 // const submittedData = ref({});
 
 const Submit = async () => {
+  console.log("送出資料：", {
+    member_id: memberId.value,
+    member_phone: phone.value,
+    member_email: email.value,
+    form_title: subject.value,
+    form_content: content.value,
+  });
   try {
     const res = await axios.post(
       `${import.meta.env.VITE_API_BASE}/contact/submit.php`,
@@ -121,7 +128,9 @@ const Submit = async () => {
           <label>內容</label>
           <textarea class="inputbox-l" type="text" v-model="content" />
 
-          <Button class="submitbtn" theme="primary" size="md"> 送出</Button>
+          <Button class="submitbtn" theme="primary" size="md" type="submit">
+            送出</Button
+          >
         </form>
       </div>
     </div>
@@ -247,6 +256,10 @@ form {
 .submitbtn {
   margin: auto;
 }
-input {
+.button-wrapper {
+  display: flex;
+  justify-content: center;
 }
+// input {
+// }
 </style>
