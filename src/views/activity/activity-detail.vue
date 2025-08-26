@@ -7,7 +7,8 @@ import { useRoute, useRouter } from "vue-router";
 
 // === 新增 #1：在這裡引入 Pinia Store ===
 import { useParticipationStore } from "@/stores/participation-store.js";
-//
+// === 引入預設頭像 ===
+import defaultImg from "@/assets/img/article/nopicture.jpg";
 
 // === 第一步：在 import ref 的地方，加入 onMounted 和 onUnmounted ===
 import { computed, ref, onMounted, onUnmounted, watch } from "vue";
@@ -77,7 +78,7 @@ const participantsCount = computed(
 const ratingsSummary = computed(
   () => detail.value?.ratings ?? { avg: 0, count: 0, mine: null }
 );
-const hasRated = computed(() => ratingsSummary.value?.mine != null)
+const hasRated = computed(() => ratingsSummary.value?.mine != null);
 const participantsForModal = computed(() => {
   const arr =
     detail.value?.participants?.list ??
@@ -89,7 +90,9 @@ const participantsForModal = computed(() => {
     return {
       id,
       name: p.NICKNAME ?? p.name ?? `會員 #${id}`,
-      avatar: userImg(p.AVATAR ?? p.avatar ?? `https://i.pravatar.cc/150?u=${id}`),
+      avatar: userImg(
+        p.AVATAR ?? p.avatar ?? `https://i.pravatar.cc/150?u=${id}`
+      ),
       city: p.CITY_NAME ?? p.city ?? "—",
       age: p.AGE ?? p.age ?? null,
       role: p.OCCUPATION ?? p.role ?? "—",
@@ -100,26 +103,36 @@ const participantsForModal = computed(() => {
 });
 
 const hosterInfo = computed(() => {
-  const host = hoster.value
-  if (!host) return null
+  const host = hoster.value;
+  if (!host) return null;
 
-  const id = Number(host.MEMBER_ID ?? host.id ?? 0)
+  const id = Number(host.MEMBER_ID ?? host.id ?? 0);
 
   return {
     id,
-    name:    host.NICKNAME ?? host.name ?? `會員 #${id}`,
-    avatar:  userImg(host.AVATAR ?? host.avatar ?? `https://i.pravatar.cc/150?u=${id}`),
-    city:    host.CITY_NAME ?? host.city ?? '—',
-    age:     host.AGE ?? host.age ?? null,
-    role:    host.OCCUPATION ?? host.role ?? '—',
+    name: host.NICKNAME ?? host.name ?? `會員 #${id}`,
+    avatar: userImg(
+      host.AVATAR ?? host.avatar ?? `https://i.pravatar.cc/150?u=${id}`
+    ),
+    city: host.CITY_NAME ?? host.city ?? "—",
+    age: host.AGE ?? host.age ?? null,
+    role: host.OCCUPATION ?? host.role ?? "—",
 
     // 視你的後端欄位而定，這裡做多種鍵名容錯
-    ratingAsHost:   Number(host.RATING_HOST ?? host.rating_host ?? host.RATING ?? host.rating ?? 0),
-    reviewsAsHost:  Number(host.REVIEWS_HOST ?? host.reviews_host ?? host.REVIEWS ?? host.reviews ?? 0),
+    ratingAsHost: Number(
+      host.RATING_HOST ?? host.rating_host ?? host.RATING ?? host.rating ?? 0
+    ),
+    reviewsAsHost: Number(
+      host.REVIEWS_HOST ??
+        host.reviews_host ??
+        host.REVIEWS ??
+        host.reviews ??
+        0
+    ),
     ratingAsJoiner: Number(host.RATING_JOINER ?? host.rating_joiner ?? 0),
-    reviewsAsJoiner:Number(host.REVIEWS_JOINER ?? host.reviews_joiner ?? 0),
-  }
-})
+    reviewsAsJoiner: Number(host.REVIEWS_JOINER ?? host.reviews_joiner ?? 0),
+  };
+});
 const imgSrc = computed(() =>
   imageUrl(activity.value?.ACTIVITY_IMG || activity.value?.activity_img || "")
 );
@@ -141,25 +154,25 @@ const toggleLike = (id) => {
 
 const router = useRouter();
 const gotoSignup = () => {
-  const a = activity.value
-  if (!a) return
+  const a = activity.value;
+  if (!a) return;
 
-  const status = a.ACTIVITY_STATUS ?? a.activity_status ?? ''
-  const isCancelled = status === '已取消'
-  const isFinished  = status === '已完成'
-  const ddl = a.REGISTRATION_DEADLINE ?? a.registration_deadline
-  const isDeadlinePassed = ddl ? new Date() > new Date(ddl) : false
+  const status = a.ACTIVITY_STATUS ?? a.activity_status ?? "";
+  const isCancelled = status === "已取消";
+  const isFinished = status === "已完成";
+  const ddl = a.REGISTRATION_DEADLINE ?? a.registration_deadline;
+  const isDeadlinePassed = ddl ? new Date() > new Date(ddl) : false;
 
   if (isCancelled || isFinished || isDeadlinePassed) {
-    alert('此活動目前不可報名')
-    return
+    alert("此活動目前不可報名");
+    return;
   }
 
-  const actNo = a.ACTIVITY_NO ?? a.activity_no
+  const actNo = a.ACTIVITY_NO ?? a.activity_no;
   // 依你的路由設定擇一：
-  router.push(`/group/group-signup/${actNo}`)
+  router.push(`/group/group-signup/${actNo}`);
   // 或 router.push({ name: 'activity-signup', params: { activity_id: actNo } })
-}
+};
 
 // === 第三步：在 aloha 函式的正下方，貼上所有「新的邏輯」 ===
 // --- 按鈕切換 & 鍵盤監聽 ---
@@ -185,8 +198,8 @@ onUnmounted(() => {
 const isRatingModalVisible = ref(false); // 評價彈窗的「開關」
 
 const openRatingModal = () => {
-  if (!canRate.value || hasRated.value) return
-  isRatingModalVisible.value = true
+  if (!canRate.value || hasRated.value) return;
+  isRatingModalVisible.value = true;
 };
 
 const closeRatingModal = () => {
@@ -196,7 +209,11 @@ const closeRatingModal = () => {
 async function submitRatings(payload) {
   try {
     // 允許「沒選任何人就關閉」
-    if (!payload || !Array.isArray(payload.items) || payload.items.length === 0) {
+    if (
+      !payload ||
+      !Array.isArray(payload.items) ||
+      payload.items.length === 0
+    ) {
       closeRatingModal();
       return;
     }
@@ -204,15 +221,17 @@ async function submitRatings(payload) {
     const body = {
       activity_no: Number(payload.activity_no || activity.value?.ACTIVITY_NO),
       items: payload.items
-        .map(x => ({
+        .map((x) => ({
           ratee_id: Number(x.ratee_id),
-          ratee_role: x.ratee_role,                 // '主揪' 或 '參與者'
+          ratee_role: x.ratee_role, // '主揪' 或 '參與者'
           rating_score: Number(x.rating_score),
         }))
-        .filter(x =>
-          Number.isFinite(x.ratee_id) &&
-          (x.ratee_role === '主揪' || x.ratee_role === '參與者') &&
-          x.rating_score >= 1 && x.rating_score <= 5
+        .filter(
+          (x) =>
+            Number.isFinite(x.ratee_id) &&
+            (x.ratee_role === "主揪" || x.ratee_role === "參與者") &&
+            x.rating_score >= 1 &&
+            x.rating_score <= 5
         ),
     };
 
@@ -221,35 +240,39 @@ async function submitRatings(payload) {
       return;
     }
 
-    console.log('rate payload:', body);
+    console.log("rate payload:", body);
 
     const { data } = await axios.post(
       `${VITE_API_BASE}/activities/rate.php`,
       body,
       {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true, 
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
       }
     );
 
-    console.log('rate response:', data);
+    console.log("rate response:", data);
     alert(data?.message || `評分完成`);
     closeRatingModal();
     detail.value = {
       ...detail.value,
       ratings: {
         ...(detail.value?.ratings ?? {}),
-        mine: { score: 5, at: new Date().toISOString() } // 真實內容可用 data 回傳覆蓋
-      }
-    }
+        mine: { score: 5, at: new Date().toISOString() }, // 真實內容可用 data 回傳覆蓋
+      },
+    };
     await loadDetail();
   } catch (err) {
     // 把完整錯誤印出來，方便你在 console 看
-    console.error('rate error full:', err);
+    console.error("rate error full:", err);
     if (err?.response) {
-      console.error('rate error response:', err.response.status, err.response.data);
+      console.error(
+        "rate error response:",
+        err.response.status,
+        err.response.data
+      );
     }
-    const msg = err?.response?.data?.error || err?.message || '評分失敗';
+    const msg = err?.response?.data?.error || err?.message || "評分失敗";
     alert(msg);
   }
 }
@@ -313,7 +336,7 @@ async function handleCancelSubmit(payload) {
     isCancelModalVisible.value = false;
     modalResetKey.value++;
     alert(data?.message || "取消成功");
-    await loadDetail(); 
+    await loadDetail();
   } catch (err) {
     const msg =
       err?.response?.data?.message ||
@@ -375,7 +398,9 @@ function getActivityComments(activityId) {
         id: c.ACTIVITY_COMMENT_NO,
         userid: c.MEMBER_ID,
         author: c.MEMBER_NICKNAME || "匿名",
-        avatar: c.MEMBER_AVATAR || `https://i.pravatar.cc/150?u=${c.MEMBER_ID}`,
+        avatar: c.MEMBER_AVATAR
+          ? `${VITE_API_BASE}/upload/member/${c.MEMBER_AVATAR}`
+          : defaultImg,
         timestamp: c.CREATED_AT,
         content: c.COMMENT_CONTENT,
         likenum: Number(c.LIKE_COUNT || 0),
@@ -459,7 +484,7 @@ const swiperModules = [Pagination];
       <template v-if="!meLoading && (isHost || isJoiner)">
         <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
         <Button
-        type="button"
+          type="button"
           @click="openCancelModal"
           theme="cancel"
           isOutline
@@ -469,19 +494,19 @@ const swiperModules = [Pagination];
           >取消</Button
         >
         <Button
-        type="button"
+          type="button"
           @click="openRatingModal"
           theme="primary"
           size="md"
           :isDisabled="!canRate"
           :title="!canRate ? '活動未完成，暫不可評分' : ''"
-          >{{ hasRated ? '已評價' : '評價' }}</Button
+          >{{ hasRated ? "已評價" : "評價" }}</Button
         >
       </template>
 
       <template v-else>
         <Button
-        type="button"
+          type="button"
           @click.stop.prevent="gotoSignup()"
           theme="primary"
           size="md"
@@ -523,9 +548,7 @@ const swiperModules = [Pagination];
           <div class="info-row">
             <strong>揪團人數</strong>
             <span
-              >{{ participantsCount }}/{{
-                activity?.MAX_PARTICIPANT
-              }}人</span
+              >{{ participantsCount }}/{{ activity?.MAX_PARTICIPANT }}人</span
             >
           </div>
         </div>
@@ -548,35 +571,54 @@ const swiperModules = [Pagination];
       </div>
     </section>
 
-    
     <section class="host-info" v-if="hosterInfo">
       <div class="host-title">主揪</div>
       <div class="host-content">
-       
-        <img
-          :src="hosterInfo.avatar"
-          alt=""
-          class="host-avatar"
-        />
+        <img :src="hosterInfo.avatar" alt="" class="host-avatar" />
         <div class="host-details">
-          <div class="host-name">{{hosterInfo.name}}</div>
-         <div class="rating-line">
-        <div class="stars stars-yellow">
-          <i v-for="n in 5" :key="'h'+n"
-             :class="n <= Math.round(hosterInfo.ratingAsHost) ? 'fa-solid fa-star' : 'fa-regular fa-star'"/>
-        </div>
-        <span>{{ Number(hosterInfo.ratingAsHost ?? 0).toFixed(1) }} ({{ hosterInfo.reviewsAsHost ?? 0 }})</span>
-      </div>
+          <div class="host-name">{{ hosterInfo.name }}</div>
+          <div class="rating-line">
+            <div class="stars stars-yellow">
+              <i
+                v-for="n in 5"
+                :key="'h' + n"
+                :class="
+                  n <= Math.round(hosterInfo.ratingAsHost)
+                    ? 'fa-solid fa-star'
+                    : 'fa-regular fa-star'
+                "
+              />
+            </div>
+            <span
+              >{{ Number(hosterInfo.ratingAsHost ?? 0).toFixed(1) }} ({{
+                hosterInfo.reviewsAsHost ?? 0
+              }})</span
+            >
+          </div>
 
-      <div class="rating-line" v-if="hosterInfo.reviewsAsJoiner > 0">
-        <div class="stars stars-blue">
-          <i v-for="n in 5" :key="'j'+n"
-             :class="n <= Math.round(hosterInfo.ratingAsJoiner) ? 'fa-solid fa-star' : 'fa-regular fa-star'"/>
-        </div>
-        <span>{{ hosterInfo.ratingAsJoiner.toFixed(1) }}({{ hosterInfo.reviewsAsJoiner }})</span>
-      </div>
+          <div class="rating-line" v-if="hosterInfo.reviewsAsJoiner > 0">
+            <div class="stars stars-blue">
+              <i
+                v-for="n in 5"
+                :key="'j' + n"
+                :class="
+                  n <= Math.round(hosterInfo.ratingAsJoiner)
+                    ? 'fa-solid fa-star'
+                    : 'fa-regular fa-star'
+                "
+              />
+            </div>
+            <span
+              >{{ hosterInfo.ratingAsJoiner.toFixed(1) }}({{
+                hosterInfo.reviewsAsJoiner
+              }})</span
+            >
+          </div>
 
-          <div class="host-bio">{{ hosterInfo.city }} | {{ hosterInfo.age ?? '—' }}歲 | {{ hosterInfo.role }}</div>
+          <div class="host-bio">
+            {{ hosterInfo.city }} | {{ hosterInfo.age ?? "—" }}歲 |
+            {{ hosterInfo.role }}
+          </div>
         </div>
       </div>
     </section>
