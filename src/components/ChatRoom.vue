@@ -6,7 +6,7 @@ import Swal from 'sweetalert2'
 import { userImg } from '@/assets/utils/normalize'
 import defaultAvatar from '@/assets/img/chat/avatar-default.jpg'
 
-// 設定 axios 預設傳送 cookie（取得 PHP session）
+// 設定 axios 傳送 cookie（取得 PHP session）
 axios.defaults.withCredentials = true
 
 // 會員資料
@@ -15,8 +15,7 @@ const userProfile = ref({})
 const userAvatarUrl = ref('')
 const isUserReady = ref(false)
 
-
-// 對話資料與輸入
+// 訊息與輸入
 const inputText = ref('')
 
 // 禁忌詞清單
@@ -31,12 +30,11 @@ const containsBannedWords = text => {
     return bannedWords.some(word => text.toLowerCase().includes(word))
 }
 
-// 將 useChat 的呼叫移到 setup 的頂層
+// Chat hook
 const { messages, send, boxRef } = useChat(currentUserId)
 
 // 發送訊息
 function handleSend() {
-    // 在發送前再次檢查狀態，確保邏輯嚴謹
     if (!isUserReady.value) {
         Swal.fire('請稍候', '會員資料尚未載入', 'info')
         return
@@ -50,7 +48,6 @@ function handleSend() {
         return
     }
 
-// 傳遞一個完整的物件給 send 函式
     send({
         text: trimmed,
         senderId: currentUserId.value,
@@ -63,13 +60,12 @@ function handleSend() {
     inputText.value = ''
 }
 
-// 掛載時取得會員資料
+// 掛載後取得會員資料
 onMounted(async () => {
     try {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE}/users/profile-get.php`)
         const data = res.data.data
-        
-
+        console.log('會員資料', data)
 
         if (!data?.MEMBER_ID) throw new Error('未登入')
 
@@ -77,28 +73,25 @@ onMounted(async () => {
         localStorage.setItem('uid', data.MEMBER_ID)
 
         userProfile.value = {
-            id: data.MEMBER_ID,
-            nickname: data.MEMBER_NICKNAME,
-            avatar: data.MEMBER_AVATAR
+        id: data.MEMBER_ID,
+        nickname: data.MEMBER_NICKNAME,
+        avatar: data.MEMBER_AVATAR
         }
 
-        if (data.MEMBER_AVATAR) {
-        userAvatarUrl.value = userImg(data.MEMBER_AVATAR)
-        } else {
-        userAvatarUrl.value = defaultAvatar
-        }
-
+        userAvatarUrl.value = data.MEMBER_AVATAR
+        ? userImg(data.MEMBER_AVATAR)
+        : defaultAvatar
 
         isUserReady.value = true
-        
     } catch (err) {
         console.error('會員驗證失敗', err)
         Swal.fire('未登入', '請先登入會員才能使用聊天室', 'warning').then(() => {
-            window.location.href = `${import.meta.env.BASE_URL}login`
+        window.location.href = `${import.meta.env.BASE_URL}login`
         })
     }
 })
 </script>
+
 
 <template>
     <section class="chat">
@@ -115,9 +108,10 @@ onMounted(async () => {
                 >
                     <div class="avatar-section">
                         <div class="avatar">
-                            <img :src="userImg(msg.senderAvatar)" @error="e => e.target.src = defaultAvatar" />
+                            <img :src="msg.senderAvatar || defaultAvatar"
+                                @error="e => e.target.src = defaultAvatar"
+                                alt="使用者大頭貼" />
                         </div>
-
                         <span class="name">
                             {{ msg.senderId === currentUserId ? '你' : (msg.senderName || msg.senderId) }}
                         </span>
