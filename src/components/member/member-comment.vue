@@ -76,7 +76,7 @@ async function loadArticles() {
       date: formatDate(row.CREATED_AT),    // ➜ 顯示用日期
       title: row.POST_TITLE,
       content: row.POST_CONTENT,           // 你用 v-html，請確認內容來源可信
-      image: `${API_BASE}${row.POST_IMG.replace('..', '')}`
+      image: `${API_BASE}${row.POST_IMG.replace('..', '/')}`
       // 如果你之後需要 userid 再補
     }));
   } catch (e) {
