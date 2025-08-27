@@ -76,7 +76,7 @@ async function loadArticles() {
       date: formatDate(row.CREATED_AT),    // ➜ 顯示用日期
       title: row.POST_TITLE,
       content: row.POST_CONTENT,           // 你用 v-html，請確認內容來源可信
-      image: `${API_BASE}${row.POST_IMG}`,
+      image: `${API_BASE}${row.POST_IMG.replace('..', '')}`
       // 如果你之後需要 userid 再補
     }));
   } catch (e) {
@@ -112,9 +112,11 @@ onMounted(() => {
       :key="article.postid"
       class="article-item"
     >
+      <router-link :to="`/article/${article.postid}`" class="article-text-link">
       <div class="article-img">
-        <img :src="article.image" :alt="article.title" />
+          <img :src="article.image" :alt="article.title" />
       </div>
+      </router-link>
 
       <router-link :to="`/article/${article.postid}`" class="article-text-link">
         <div class="article-text">
@@ -151,7 +153,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .article-item {
-  margin-bottom: 10px ;
+  margin-bottom: 15px ;
   display: flex;
   justify-items: start;
   flex-direction: column;

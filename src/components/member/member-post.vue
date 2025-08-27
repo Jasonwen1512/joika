@@ -115,9 +115,11 @@ const visibleCount = ref(2); // 預設電腦是 2 張
       :key="article.postid"
       class="article-item"
     >
-      <div class="article-img">
-        <img :src="article.image" :alt="article.title" />
-      </div>
+      <router-link :to="`/article/${article.postid}`" class="article-text-link">
+        <div class="article-img">
+          <img :src="article.image" :alt="article.title" />
+        </div>
+      </router-link>
       <router-link :to="`/article/${article.postid}`" class="article-text-link">
         <div class="article-text">
           <div class="articleHeader">
@@ -152,6 +154,7 @@ const visibleCount = ref(2); // 預設電腦是 2 張
 //這邊開始是文章樣式
 
 .article-item {
+  margin-bottom: 15px ;
   display: flex;
   justify-items: start;
   flex-direction: column;
@@ -172,17 +175,13 @@ const visibleCount = ref(2); // 預設電腦是 2 張
   width: 100%;
   height: auto;
   overflow: hidden;
-
   flex-direction: column;
+  @include desktop() {
+    max-width: 285px;
+    max-height: 190px;
+  }
+}
 
-  max-width: 285px;
-  max-height: 190px;
-}
-.article-img img {
-  max-width: 270px;
-  height: auto;
-  padding: 10px;
-}
 //文章只顯示2行
 .article-body p {
   overflow: hidden;

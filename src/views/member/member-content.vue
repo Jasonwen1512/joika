@@ -412,6 +412,7 @@ if (!hasData) await fetchActivities(type);
 }
 .member-header {
     border: 2px solid $black;
+    max-width: 1200px;
     border-radius: 3px;
     padding: 20px;
     margin-bottom: 25px;
