@@ -16,6 +16,7 @@ const routes = [
   },
   {
     path: "/member/member-content",
+    name: "member",
     component: () => import("@/views/member/member-content.vue"),
     meta: { requiresAuth: true }
   },

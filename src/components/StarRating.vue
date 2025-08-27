@@ -91,7 +91,6 @@ function getStarType(i, score) {
   }
 
   .no-score {
-    margin-left: 8px;
     color: #999;
     font-style: italic;
   }

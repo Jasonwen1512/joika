@@ -557,6 +557,7 @@ flex-wrap: wrap;
 @media (min-width: 768px) {
     .member-header {
         width: 100%;
+        max-width: 1200px;
         margin: 0 auto 100px;
         flex-direction: row;
         justify-content: space-between;
@@ -630,7 +631,6 @@ flex-wrap: wrap;
 
     .rate{
         display: flex;
-        justify-content: center;
         gap: 10px;
     }
 
