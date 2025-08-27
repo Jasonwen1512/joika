@@ -70,6 +70,7 @@ const host = computed(() => {
       hoster.MEMBER_AVATAR ??
       hoster.AVATAR ??
       hoster.avatar ??
+      hoster.member_avatar ??
       `https://i.pravatar.cc/150?u=${id}`,
     city: hoster.CITY_NAME ?? hoster.city ?? "—",
     age: hoster.AGE ?? hoster.age ?? null,
