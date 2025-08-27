@@ -509,14 +509,14 @@ const swiperModules = [Pagination];
       </template>
 
       <template v-else>
-        <Button
+        <!-- <Button
           type="button"
           @click.stop.prevent="gotoSignup()"
           theme="primary"
           size="md"
         >
           我要跟團!
-        </Button>
+        </Button> -->
         <Button
           type="button"
           @click.stop.prevent="handleJoinButtonClick"
