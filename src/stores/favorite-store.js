@@ -29,7 +29,7 @@ export const useFavoriteStore = defineStore('favorites', () => {
       const res = await axios.get(`${VITE_API_BASE}/favorites/list.php?memberId=${memberId}`);
 
        // --- 請在這裡加上這一行，這是最重要的除錯步驟！ ---
-    console.log('後端回傳的原始資料:', res.data); 
+    // console.log('後端回傳的原始資料:', res.data); 
     // ----------------------------------------------------
 
 
