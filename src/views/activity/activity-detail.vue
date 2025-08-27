@@ -250,20 +250,17 @@ async function submitRatings(payload) {
         withCredentials: true,
       }
     );
-
-    console.log("rate response:", data);
     alert(data?.message || `評分完成`);
     closeRatingModal();
     detail.value = {
       ...detail.value,
       ratings: {
         ...(detail.value?.ratings ?? {}),
-        mine: { score: 5, at: new Date().toISOString() }, // 真實內容可用 data 回傳覆蓋
+        mine: { score: 5, at: new Date().toISOString() }, 
       },
     };
     await loadDetail();
   } catch (err) {
-    // 把完整錯誤印出來，方便你在 console 看
     console.error("rate error full:", err);
     if (err?.response) {
       console.error(
@@ -687,7 +684,7 @@ const swiperModules = [Pagination];
       :show="isRatingModalVisible"
       :activity="activity"
       :participants="participantsForModal"
-      :hoster="hoster"
+      :hoster="hosterInfo"
       :current-user-id="currentUserId"
       :is-host="isHost"
       :is-joiner="isJoiner"
