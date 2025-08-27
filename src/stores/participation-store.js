@@ -5,7 +5,6 @@ import { authState } from '@/assets/data/authState.js';
 import router from '@/router';
 
 const VITE_API_BASE = import.meta.env.VITE_API_BASE;
-let pollingTimer = null;
 
 export const useParticipationStore = defineStore('participation', () => {
   const joinedActivities = ref(new Set());
@@ -43,28 +42,50 @@ export const useParticipationStore = defineStore('participation', () => {
     joinedActivities.value.add(String(activityNo));
   }
 
-  // function startPolling() {
-  //   if (pollingTimer) clearInterval(pollingTimer);
-  //   pollingTimer = setInterval(() => {
-  //     fetchJoinedActivities();
-  //   }, 5000);
-  // }
-
-  // function stopPolling() {
-  //   if (pollingTimer) {
-  //     clearInterval(pollingTimer);
-  //     pollingTimer = null;
-  //   }
-  // }
-
   function reset() {
     joinedActivities.value = new Set();
     isLoading.value = false;
-    // stopPolling();
   }
 
   async function handleJoinProcess(activityNo) {
-    // === 關鍵修正：只檢查最可靠的 authState.user 物件 ===
+    // 步驟 1: 呼叫後端 API，進行精細的前置狀態檢查
+    try {
+      const res = await axios.get(
+        `${VITE_API_BASE}/activities/get-user-participations.php`,
+        {
+          params: {
+            action: 'check_prerequisites',
+            memberId: authState.user?.id || 0,
+            activityNo: activityNo,
+          },
+        }
+      );
+
+      console.log(res.data.status)
+      switch (res.data.status) {
+        case 'activity_pending':
+          alert("該活動審核中，目前無法報名");
+          return;
+        case 'activity_cancelled':
+          alert("主揪已取消活動，無法報名");
+          return;
+        // case 'joiner_pending':
+        //   alert("你已經報名此活動，等待審核通過中");
+        //   return;
+        case 'can_proceed':
+          break; 
+        default:
+          alert("發生未知狀態，請稍後再試。");
+          return;
+      }
+
+    } catch (error) {
+      console.error("檢查活動狀態失敗:", error);
+      alert("檢查時發生錯誤，請稍後再試。");
+      return;
+    }
+
+    // 步驟 2: 如果通過了所有前置檢查，才開始處理登入與跳轉
     if (!authState.user?.id) {
       const redirectPath = router.currentRoute.value.path;
       router.push({ 
@@ -77,12 +98,8 @@ export const useParticipationStore = defineStore('participation', () => {
       });
       return;
     }
-
-    if (isJoined(activityNo)) {
-      alert("您已經參加此活動！");
-      return;
-    }
     
+    // 步驟 3: (已登入) 跳轉到報名頁
     router.push(`/group/group-signup/${activityNo}`);
   }
 
@@ -102,7 +119,6 @@ export const useParticipationStore = defineStore('participation', () => {
       fetchJoinedActivities().then(() => {
         executePostLoginAction();
       });
-      // startPolling();
     } else {
       reset();
     }

@@ -6,6 +6,9 @@ import InterestSelector from "@/components/auth/Interestselector.vue";
 
 const currentStep = ref(1);
 const avatarUrl = ref("");
+const avatarFile = ref(null); // 新增：用來存儲檔案本身
+const isSubmitting = ref(false); // 新增：防止重複提交
+
 const genderOptions = [
   { label: "男性", value: "M" },
   { label: "女性", value: "F" },
@@ -45,9 +48,8 @@ const errors = ref({
   location: "",
   occupation: "",
   interests: "",
+  avatar: "", // 新增 avatar 錯誤處理
 });
-
-const selectedInterests = ref([]); // v-model 綁定多選興趣
 
 onMounted(async () => {
   try {
@@ -152,8 +154,11 @@ const validateStepOne = async () => {
   }
 };
 
-// step2
+// step2 - 修改後的函數
 async function handleStepTwoSubmit() {
+  // 檢查是否正在提交中，如果是，則直接返回
+  if (isSubmitting.value) return;
+
   // 清空錯誤
   Object.keys(errors.value).forEach((key) => (errors.value[key] = ""));
 
@@ -190,6 +195,10 @@ async function handleStepTwoSubmit() {
 
   if (hasError) return;
 
+  // 開始提交，鎖定狀態
+  isSubmitting.value = true;
+
+  // 建立要傳送的 FormData
   const payload = new FormData();
   payload.append("step", 2);
   payload.append("tmp_id", tmpId.value);
@@ -199,32 +208,31 @@ async function handleStepTwoSubmit() {
   payload.append("birthdate", form.value.birthdate);
   payload.append("location", form.value.location);
   payload.append("occupation", form.value.occupation);
-  form.value.interests.forEach((i) => payload.append("interests[]", i));
 
-  const avatarUrl = computed(() => {
-    const base = import.meta.env.VITE_API_BASE; // e.g. http://localhost:8888/JOIKA_PHP
-    const avatar = member.value?.MEMBER_AVATAR;
+  // 直接新增 interest_no 陣列
+  if (form.value.interests.length > 0) {
+    form.value.interests.forEach((id) => {
+      payload.append("interests[]", id);
+    });
+  } else {
+    payload.append("interests[]", ""); // 若使用者取消了所有興趣，則回傳空值
+  }
 
-    if (!avatar) return ""; // 沒有上傳 → 空字串
-
-    // 只給檔名時，固定拼上 /upload/avatars/
-    return `${base.replace(/\/$/, "")}/upload/member/${encodeURIComponent(avatar)}`;
-  });
-
-  // avatar
-  const fileInput = document.getElementById("avatar-input");
-  if (fileInput && fileInput.files[0]) {
-    const file = fileInput.files[0];
+  // avatar - 使用與更新資料頁面相同的邏輯
+  if (avatarFile.value) {
+    const file = avatarFile.value;
     const maxSize = 5 * 1024 * 1024; // 限制 5MB
     const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
 
     if (!allowedTypes.includes(file.type)) {
       errors.value.avatar = "僅允許 JPEG / PNG / GIF 圖檔";
+      isSubmitting.value = false; // 解除鎖定
       return;
     }
 
     if (file.size > maxSize) {
       errors.value.avatar = "檔案需小於 5MB";
+      isSubmitting.value = false; // 解除鎖定
       return;
     }
 
@@ -245,13 +253,18 @@ async function handleStepTwoSubmit() {
     }
   } catch (err) {
     console.error("Step2 註冊失敗", err);
+  } finally {
+    // 解除鎖定
+    isSubmitting.value = false;
   }
 }
 
+// 修改後的 handleAvatarChange 函數
 const handleAvatarChange = (e) => {
   const file = e.target.files[0];
   if (file) {
-    avatarUrl.value = URL.createObjectURL(file);
+    avatarUrl.value = URL.createObjectURL(file); // 用於預覽
+    avatarFile.value = file; // 儲存檔案本身
   }
 };
 
@@ -342,14 +355,14 @@ const getStepState = (step) => {
           <p v-if="errors.agreed" class="error-text">{{ errors.agreed }}</p>
 
           <div class="button-group">
-            <Button size="md" theme="primary">送出</Button>
+            <Button size="md" theme="primary" type="submit">送出</Button>
           </div>
         </form>
       </section>
 
       <!-- 步驟 2-->
       <section v-show="currentStep === 2" class="form-step">
-        <form @submit.prevent="handleStepTwoSubmit">
+        <form>
           <div class="avatar-upload">
             <label for="avatar-input" class="avatar-label">
               <div class="avatar-circle">
@@ -367,7 +380,6 @@ const getStepState = (step) => {
 
           <InputField id="gender" label="性別" type="select" :options="genderOptions" v-model="form.gender" :error="errors.gender" />
 
-          <!-- <InputField id="birthdate" label="生日" type="date" v-model="form.birthdate" :error="errors.birthdate" /> -->
           <div class="form-group">
             <label class="form-label" for="birthdate">生日</label>
             <el-date-picker id="birthdate" v-model="form.birthdate" type="date" value-format="YYYY-MM-DD" placeholder="請選擇出生年月日" class="custom-date" />
@@ -381,7 +393,7 @@ const getStepState = (step) => {
           <InterestSelector v-model="form.interests" :options="interestOptions" :error="errors.interests" :max="3" />
 
           <div class="button-group">
-            <Button size="md" theme="primary" @click="handleStepTwoSubmit">下一步</Button>
+            <Button size="md" theme="primary" @click="handleStepTwoSubmit" :disabled="isSubmitting">下一步</Button>
           </div>
         </form>
       </section>
