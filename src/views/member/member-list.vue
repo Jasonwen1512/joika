@@ -1,14 +1,20 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+// ✅ 匯入要用到的全部東西
+import { ref, onMounted, watch, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Button from "@/components/Button.vue";
+import StarRating from "@/components/StarRating.vue";
 
+// 路由 / Router
 const router = useRouter();
 const route = useRoute();
 
-// 活動 ID：路由參數優先，沒有就先用預設
-const activityId = route.params.id ?? "ACT00001";
+// ✅ 支援 params 或 query 帶活動編號
+// 例：/front/member/member-list/ACT00001  或  ?activity_no=ACT00001
+const activityId = computed(() =>
+    String(route.params.id || route.query.activity_no || route.query.id || "")
+);
 
 // 後端 API base
 const API_BASE = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
@@ -18,90 +24,169 @@ const activeTab = ref("list"); // 'list' | 'applying'
 const loading = ref(false);
 const error = ref("");
 
-// 由 API 取得的資料
-const memberList = ref([]);  // 已參加（approved）
-const pendingList = ref([]); // 申請中（pending）
-const pendingLoaded = ref(false); // 是否已載入過申請中
+// 資料
+const memberList = ref([]);   // 已參加（approved）
+const pendingList = ref([]);  // 申請中（pending）
+const pendingLoaded = ref(false);
+const canReview = ref(false);
 
-const DEFAULT_AVATAR = "/img/default-avatar.png";
 
-// 後端回傳欄位 → 映射到卡片顯示欄位
+// 後端 → 前端卡片映射
 function mapRowToCard(row) {
+    const avatar = `${API_BASE}/upload/member/${row.MEMBER_AVATAR}`;
     return {
+        role: row.role,
         userid: String(row.member_id),
-        name: row.MEMBER_NICKNAME || "匿名",
-        image: row.MEMBER_AVATAR || DEFAULT_AVATAR,
-        rating: Number(row.rating ?? 0),       // 後端已算好
-        reviews: Number(row.reviews ?? 0),     // 後端已算好
+        name: row.MEMBER_NICKNAME ,
+        image: avatar,
+        rating: Number(row.rating ?? 0),
+        reviews: Number(row.reviews ?? 0),
         location: row.MEMBER_CITY_NAME || "—",
-        age: row.AGE ?? "—",                   // 後端用 TIMESTAMPDIFF 算好
+        age: row.AGE ?? "—",
         occupation: row.MEMBER_OCCUPATION_NAME || "—",
     };
 }
 
-// 叫後端 API 取得成員
-async function fetchMembers(status /* 'approved' | 'pending' */) {
-    const u = new URL(`${API_BASE}/users/joind-member.php`);
-    u.searchParams.set("activity_no", activityId);
-    u.searchParams.set("status", status);
+// 查權限：只有主揪可審核
+async function checkPermission() {
+    if (!activityId.value) { canReview.value = false; return; }
     try {
-        const res = await fetch(u.toString(), {
-        method: "GET",
-        credentials: "include", // ✅ 一定要帶 session cookie
-        });
+        const u = new URL(`${API_BASE}/users/activity-permission.php`);
+        u.searchParams.set("activity_no", activityId.value);
+        const res = await fetch(u.toString(), { credentials: "include" });
         const data = await res.json();
-        if (!res.ok || data.code !== "0000") {
-        throw new Error(data?.msg || `HTTP ${res.status}`);
-        }
-        const rows = Array.isArray(data.data) ? data.data : [];
-        const cards = rows.map(mapRowToCard);
-        if (status === "approved") {
-        memberList.value = cards;
-        } else {
-        pendingList.value = cards;
-        pendingLoaded.value = true;
-        }
-    } catch (e) {
-        console.error(e);
-        error.value = e.message || "載入失敗";
-        if (status === "approved") memberList.value = [];
-        else pendingList.value = [];
+        canReview.value = data?.code === "0000" && !!data?.is_host;
+    } catch {
+        canReview.value = false;
     }
+}
+
+// 抓資料（已參加／申請中）
+async function fetchMembers(status /* 'approved' | 'pending' */) {
+  if (!activityId.value) {
+    error.value = "缺少活動編號，無法載入團員列表";
+    if (status === "approved") memberList.value = [];
+    else pendingList.value = [];
+    return;
+  }
+  const u = new URL(`${API_BASE}/users/joind-member.php`);
+  u.searchParams.set("activity_no", activityId.value);
+  u.searchParams.set("status", status);
+  try {
+    const res = await fetch(u.toString(), {
+      method: "GET",
+      credentials: "include", // ✅ 帶上 PHPSESSID
+    });
+    const data = await res.json();
+    if (!res.ok || data.code !== "0000") {
+      throw new Error(data?.msg || `HTTP ${res.status}`);
     }
+    const rows = Array.isArray(data.data) ? data.data : [];
+    const cards = rows.map(mapRowToCard);
+    if (status === "approved") {
+      memberList.value = cards;
+    } else {
+      pendingList.value = cards;
+      pendingLoaded.value = true;
+    }
+  } catch (e) {
+    console.error(e);
+    error.value = e.message || "載入失敗";
+    if (status === "approved") memberList.value = [];
+    else pendingList.value = [];
+  }
+}
 
 // 首次載入：先抓「已參加」
 onMounted(async () => {
-    loading.value = true;
-    error.value = "";
-    await fetchMembers("approved");
-    loading.value = false;
-    });
+  loading.value = true;
+  error.value = "";
+  await checkPermission();
+  await fetchMembers("approved");
+  loading.value = false;
+});
 
-// 切到「申請中」才去抓 pending（只抓一次）
+// 切到「申請中」再抓 pending（且必須是主揪）
 watch(activeTab, async (tab) => {
-    if (tab === "applying" && !pendingLoaded.value) {
+    if (tab === "applying" && canReview.value && !pendingLoaded.value) {
         loading.value = true;
         await fetchMembers("pending");
         loading.value = false;
     }
 });
 
-// ====== 你原本的接受/拒絕（先保留前端移動；之後再改成呼叫審核 API） ======
-function handleAccept(userId) {
-    const idx = pendingList.value.findIndex((u) => u.userid === userId);
-    if (idx === -1) return;
-    const [accepted] = pendingList.value.splice(idx, 1);
-    memberList.value.push(accepted);
-}
-function handleReject(userId) {
-    const idx = pendingList.value.findIndex((u) => u.userid === userId);
-    if (idx === -1) return;
-    pendingList.value.splice(idx, 1);
+// 切到不同活動時，重查權限與名單
+watch(activityId, async (id, old) => {
+    if (!id || id === old) return;
+    pendingLoaded.value = false;
+    loading.value = true;
+    await checkPermission();
+    await fetchMembers("approved");
+    if (activeTab.value === "applying" && canReview.value) {
+        await fetchMembers("pending");
+    }
+    loading.value = false;
+});
+async function handleAccept(userId) {
+    try {
+        const res = await fetch(`${API_BASE}/users/joiner-review.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+            activity_no: activityId.value,
+            participant_id: userId,
+            action: "accept"
+        })
+        });
+        const data = await res.json();
+        if (data.code === "0000") {
+        // 從 pending 移到已參加
+        const idx = pendingList.value.findIndex(u => u.userid === userId);
+        if (idx > -1) {
+            const [accepted] = pendingList.value.splice(idx, 1);
+            memberList.value.push(accepted);
+        }
+        } else {
+        alert("接受失敗: " + data.msg);
+        }
+    } catch (e) {
+        alert("API error: " + e.message);
+    }
 }
 
+async function handleReject(userId) {
+    try {
+        const res = await fetch(`${API_BASE}/users/joiner-review.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+            activity_no: activityId.value,
+            participant_id: userId,
+            action: "delete"
+        })
+        });
+        const data = await res.json();
+        if (data.code === "0000") {
+        // 從列表移除
+        const idx = pendingList.value.findIndex(u => u.userid === userId);
+        if (idx > -1) pendingList.value.splice(idx, 1);
+        // 若你也允許刪「已參加」的，記得把 memberList 也找找看
+        } else {
+        alert("刪除失敗: " + data.msg);
+        }
+    } catch (e) {
+        alert("API error: " + e.message);
+    }
+}
+
+
+// 導航
 function backbtn() { router.back(); }
-function gotoActivity() { router.push(`/activity/${activityId}`); }
+function gotoActivity() { router.push(`/activity/${activityId.value}`); }
 </script>
+
 
 
 <template>
@@ -115,7 +200,7 @@ function gotoActivity() { router.push(`/activity/${activityId}`); }
                     <h3>團員列表</h3>
                 </button>
             </li>
-            <li>
+            <li v-if="canReview">
                 <button
                     :class="{ active: activeTab === 'applying' }"
                     @click="activeTab = 'applying'"
@@ -141,24 +226,18 @@ function gotoActivity() { router.push(`/activity/${activityId}`); }
                             class="profile-image"
                         />
                         <div class="member-text">
-                            <div class="name">{{ member.name }}</div>
+                            <div class="name">
+                                {{ member.name }}
+                                <span v-if="member.role === 'host'" class="role-badge">(主揪)</span>
+                            </div>
                             <div class="rating-line">
-                                <div class="stars stars-blue">
-                                    <i
-                                        v-for="n in 5"
-                                        :key="n"
-                                        :class="
-                                            n <= Math.round(member.rating)
-                                                ? 'fa-solid fa-star'
-                                                : 'fa-regular fa-star'
-                                        "
-                                    ></i>
-                                </div>
-                                <span
-                                    >{{ member.rating.toFixed(1) }}({{
-                                        member.reviews
-                                    }})</span
-                                >
+                                <StarRating
+                                    :score="member.rating"
+                                    :count="member.reviews"
+                                    :color="member.role === 'host' ? 'yellow' : 'blue'"
+                                    showScore
+                                    class="score"
+                                />
                             </div>
                             <div class="details">
                                 {{ member.location }} | {{ member.age }}歲 |
@@ -198,22 +277,13 @@ function gotoActivity() { router.push(`/activity/${activityId}`); }
                             <div class="member-text">
                                 <div class="name">{{ member.name }}</div>
                                 <div class="rating-line">
-                                    <div class="stars stars-blue">
-                                        <i
-                                            v-for="n in 5"
-                                            :key="n"
-                                            :class="
-                                                n <= Math.round(member.rating)
-                                                    ? 'fa-solid fa-star'
-                                                    : 'fa-regular fa-star'
-                                            "
-                                        ></i>
-                                    </div>
-                                    <span
-                                        >{{ member.rating.toFixed(1) }}({{
-                                            member.reviews
-                                        }})</span
-                                    >
+                                    <StarRating
+                                    :score="member.rating"
+                                    :count="member.reviews"
+                                    color="blue"
+                                    showScore
+                                    class="score"
+                                />
                                 </div>
                                 <div class="details">
                                     {{ member.location }} | {{ member.age }}歲 |
@@ -222,21 +292,14 @@ function gotoActivity() { router.push(`/activity/${activityId}`); }
                             </div>
                         </div>
                         <div class="action-buttons">
-                            <Button
-                                theme="primary"
-                                size="sm"
-                                class="approve-btn"
-                                @click="handleAccept(member.userid)"
-                                >接受</Button
-                            >
-                            <Button
-                                theme="secondary"
-                                isOutline="true"
-                                size="sm"
-                                class="reject-btn"
-                                @click="handleReject(member.userid)"
-                                >拒絕</Button
-                            >
+                            <template v-if="canReview">
+                                <Button 
+                                    theme="primary" size="sm" class="approve-btn" 
+                                    @click="handleAccept(member.userid)">接受
+                                </Button>
+                                <Button 
+                                    theme="secondary" :isOutline="true" size="sm" class="reject-btn" @click="handleReject(member.userid)">拒絕</Button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -346,38 +409,16 @@ function gotoActivity() { router.push(`/activity/${activityId}`); }
 .name {
     font-size: 1.25rem;
 }
-.rating-line {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1rem;
-}
 
-.stars {
-    display: flex;
-    gap: 4px; /* 星星之間的間距 */
-    font-size: 16px; /* 星星的大小 */
-
-    /* 控制空心星星的顏色 */
-    .fa-regular {
-        color: #dcdcdc;
-    }
-}
-
-/* 控制藍色實心星星的顏色 */
-.stars-blue .fa-solid {
-    color: #5ea8a8; /* 沿用前一份元件的藍色，確保視覺統一 */
+.role-badge {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #888;
 }
 
 .details {
     color: #333;
     font-size: 1rem;
-}
-
-.placeholder-text {
-    text-align: center;
-    color: #888;
-    padding-top: 50px;
 }
 
 .tab-content {

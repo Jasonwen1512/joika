@@ -151,6 +151,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .article-item {
+  margin-bottom: 10px ;
   display: flex;
   justify-items: start;
   flex-direction: column;

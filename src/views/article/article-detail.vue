@@ -52,8 +52,8 @@ async function fetchCurrentUser() {
       currentUser.value.avatar =
         res.data.user.avatar ||
         `https://i.pravatar.cc/150?u=${res.data.user.id}`;
-      console.log("取得登入者資料：", res.data);
-      console.log("currentUser:", currentUser.value);
+      // console.log("取得登入者資料：", res.data);
+      // console.log("currentUser:", currentUser.value);
     }
   } catch (err) {
     console.error("取得登入者資料失敗", err);
@@ -211,12 +211,12 @@ watch(
 
 // 函式：獲取文章內容
 async function fetchArticle() {
-  console.log("fetchArticle 函式已開始執行..."); // 偵錯用
+  // console.log("fetchArticle 函式已開始執行..."); // 偵錯用
 
   // 【關鍵修改】如果是預覽模式，就直接結束，不發送 API 請求
   if (props.isPreview) {
     postIsLoading.value = false;
-    console.log("正在預覽模式"); // 偵錯用
+    // console.log("正在預覽模式"); // 偵錯用
 
     return;
   }
@@ -245,11 +245,21 @@ async function fetchArticle() {
       const cleanedPath = backendImagePath.replace(/^\.\.\//, "");
       fullImageUrl = `${import.meta.env.VITE_API_BASE}/${cleanedPath}`;
     }
+    // 處理會員頭像路徑
+    let avatarUrl = defaultImg;
+    if (raw.MEMBER_AVATAR && typeof raw.MEMBER_AVATAR === "string") {
+      // 假設後端存放頭像在
+      avatarUrl = `${import.meta.env.VITE_API_BASE}/upload/member/${
+        raw.MEMBER_AVATAR
+      }`;
+    }
+
     apiArticleData.value = {
       postid: raw.POST_NO,
       title: raw.POST_TITLE,
       post_user_id: raw.MEMBER_ID,
       nickname: raw.MEMBER_NICKNAME,
+      avatar: avatarUrl,
       content: raw.POST_CONTENT,
       image: fullImageUrl,
       date: raw.CREATED_AT,
@@ -285,6 +295,7 @@ function EditArticle() {
 }
 
 async function submitArticle() {
+  // console.log("預覽模式 event:", previewStore.previewData.event);
   // 取得預覽資料
   const previewData = previewStore.previewData;
 
@@ -307,10 +318,13 @@ async function submitArticle() {
   const categoryIndex = categories.indexOf(previewData.event);
   const categoryNo = categoryIndex >= 0 ? categoryIndex + 1 : null;
 
-  // if (!categoryNo) {
-  //   alert("請選擇有效的分類");
-  //   return;
-  // }
+  if (!categoryNo) {
+    alert("請選擇有效的分類");
+    return;
+  }
+  // 偵錯 log
+  // console.log("送出 event:", previewData.event);
+  // console.log("送出 categoryNo:", categoryNo);
 
   const formData = new FormData();
   formData.append("category_no", categoryNo);
@@ -338,6 +352,8 @@ async function submitArticle() {
       headers: { "Content-Type": "multipart/form-data" },
       withCredentials: true,
     });
+    // console.log("API 回傳：", res.data);
+
     if (res.data.ok) {
       alert(mode.value === "edit" ? "文章更新成功！" : "文章發表成功！");
       router.push("/article/article");
@@ -516,8 +532,10 @@ async function fetchComments() {
           id: c.POST_COMMENT_NO,
           userid: c.MEMBER_ID,
           author: c.MEMBER_NICKNAME || "匿名",
-          avatar:
-            c.MEMBER_AVATAR || `https://i.pravatar.cc/150?u=${c.MEMBER_ID}`,
+          avatar: c.MEMBER_AVATAR
+            ? `${VITE_API_BASE}/upload/member/${c.MEMBER_AVATAR}`
+            : defaultImg,
+
           timestamp: c.CREATED_AT,
           content: c.COMMENT_CONTENT,
           likenum: Number(c.LIKE_COUNT || 0),
@@ -585,7 +603,7 @@ onUnmounted(() => {
       <div v-if="article" class="avatar">
         <img
           class="avatar-img"
-          src="/src/assets/img/member/headshot.jpg"
+          :src="article.avatar || defaultImg"
           alt="Member Headshot"
         />
         <p>{{ article.nickname }}</p>
