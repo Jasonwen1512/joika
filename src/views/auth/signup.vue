@@ -47,8 +47,6 @@ const errors = ref({
   interests: "",
 });
 
-const selectedInterests = ref([]); // v-model 綁定多選興趣
-
 onMounted(async () => {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/get-registration-options.php`);
@@ -201,16 +199,6 @@ async function handleStepTwoSubmit() {
   payload.append("occupation", form.value.occupation);
   form.value.interests.forEach((i) => payload.append("interests[]", i));
 
-  const avatarUrl = computed(() => {
-    const base = import.meta.env.VITE_API_BASE; // e.g. http://localhost:8888/JOIKA_PHP
-    const avatar = member.value?.MEMBER_AVATAR;
-
-    if (!avatar) return ""; // 沒有上傳 → 空字串
-
-    // 只給檔名時，固定拼上 /upload/avatars/
-    return `${base.replace(/\/$/, "")}/upload/member/${encodeURIComponent(avatar)}`;
-  });
-
   // avatar
   const fileInput = document.getElementById("avatar-input");
   if (fileInput && fileInput.files[0]) {
@@ -342,14 +330,14 @@ const getStepState = (step) => {
           <p v-if="errors.agreed" class="error-text">{{ errors.agreed }}</p>
 
           <div class="button-group">
-            <Button size="md" theme="primary">送出</Button>
+            <Button size="md" theme="primary" type="submit">送出</Button>
           </div>
         </form>
       </section>
 
       <!-- 步驟 2-->
       <section v-show="currentStep === 2" class="form-step">
-        <form @submit.prevent="handleStepTwoSubmit">
+        <form>
           <div class="avatar-upload">
             <label for="avatar-input" class="avatar-label">
               <div class="avatar-circle">
@@ -367,7 +355,6 @@ const getStepState = (step) => {
 
           <InputField id="gender" label="性別" type="select" :options="genderOptions" v-model="form.gender" :error="errors.gender" />
 
-          <!-- <InputField id="birthdate" label="生日" type="date" v-model="form.birthdate" :error="errors.birthdate" /> -->
           <div class="form-group">
             <label class="form-label" for="birthdate">生日</label>
             <el-date-picker id="birthdate" v-model="form.birthdate" type="date" value-format="YYYY-MM-DD" placeholder="請選擇出生年月日" class="custom-date" />

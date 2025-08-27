@@ -1,30 +1,38 @@
 <script setup>
-import { ref, watch, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import Button from "@/components/Button.vue";
 import InputField from "@/components/auth/Inputfield.vue";
 import InterestSelector from "@/components/auth/Interestselector.vue";
 
 const currentStep = ref(2);
 const avatarUrl = ref("");
+const avatarFile = ref(null);
+const isSubmitting = ref(false);
+
 const genderOptions = [
   { label: "男性", value: "M" },
   { label: "女性", value: "F" },
   { label: "其他", value: "O" },
   { label: "不透露", value: "N" },
 ];
-const cityOptions = ref([]); // 縣市
-const occupationOptions = ref([]); // 職業
-const interestOptions = ref([]); // 興趣
 
-const form = ref({
+const formData = ref({
   name: "",
   nickname: "",
   gender: "",
   birthdate: "",
-  location: "",
-  occupation: "",
+  location: null,
+  occupation: null,
+  avatar: "",
+});
+
+const allOptions = ref({
+  cities: [],
+  occupations: [],
   interests: [],
 });
+
+const selectedInterestIds = ref([]);
 
 const errors = ref({
   name: "",
@@ -36,125 +44,115 @@ const errors = ref({
   interests: "",
 });
 
-const selectedInterests = ref([]); // v-model 綁定多選興趣
-
 onMounted(async () => {
-  // 接收 API 回傳的會員資料
   try {
-    // 先載入表單選項
-    const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/get-registration-options.php`);
-    const data = await res.json();
-    if (data.success) {
-      cityOptions.value = data.data.cities;
-      occupationOptions.value = data.data.occupations;
-      interestOptions.value = data.data.interests;
+    // console.log("--- 開始載入資料 ---");
+
+    const [optionsRes, profileRes] = await Promise.all([fetch(`${import.meta.env.VITE_API_BASE}/users/get-registration-options.php`), fetch(`${import.meta.env.VITE_API_BASE}/users/profile-origin.php`, { credentials: "include" })]);
+
+    const optionsData = await optionsRes.json();
+    const profileData = await profileRes.json();
+
+    // console.log("【API 回應 1】 所有選項資料:", optionsData);
+    // console.log("【API 回應 2】 會員個人資料:", profileData);
+
+    if (optionsData.success) {
+      allOptions.value = optionsData.data;
+      // console.log("【步驟 A】 allOptions 已賦值:", allOptions.value);
     }
 
-    // 再載入會員資料
-    const res2 = await fetch(`${import.meta.env.VITE_API_BASE}/users/profile-origin.php`, { credentials: "include" });
-    const formData = await res2.json();
+    if (profileData.success) {
+      const user = profileData.data;
 
-    if (formData.success && formData.data) {
-      const city = cityOptions.value.find((c) => c.value === formData.data.cityNo);
-      const occupation = occupationOptions.value.find((o) => o.value === formData.data.occupationNo);
+      formData.value.name = user.name;
+      formData.value.nickname = user.nickname;
+      formData.value.gender = user.gender;
+      formData.value.birthdate = user.birthdate;
+      formData.value.location = user.cityNo;
+      formData.value.occupation = user.occupationNo;
+      // console.log("【步驟 B】 formData 已賦值:", formData.value);
 
-      form.value = {
-        name: formData.data.name || "",
-        nickname: formData.data.nickname || "",
-        gender: formData.data.gender || "",
-        birthdate: formData.data.birthdate || "",
-        location: city ? String(city.value) : "",
-        occupation: occupation ? String(occupation.value) : "",
-        interests: formData.data.interests || [],
-      };
+      if (user.avatar) {
+        avatarUrl.value = `${import.meta.env.VITE_API_BASE}/upload/member/${encodeURIComponent(user.avatar)}`;
+      }
+
+      if (user.interests && user.interests.length > 0) {
+        selectedInterestIds.value = user.interests.map((interest) => interest.id);
+        // console.log("【步驟 C】 selectedInterestIds 已賦值 (應為數字陣列):", selectedInterestIds.value);
+      }
     }
-
-    // 帶入 avatar
-    if (formData.data.avatar) {
-      avatarUrl.value = `${import.meta.env.VITE_API_BASE}/upload/member/${encodeURIComponent(formData.data.avatar)}`;
-    }
+    // console.log("--- 資料載入完畢 ---");
   } catch (err) {
     console.error("會員資料載入失敗", err);
   }
 });
 
-// 自動清除錯誤
-function setupAutoClearError(dataRef, errorRef) {
-  Object.keys(dataRef.value).forEach((key) => {
-    watch(
-      () => dataRef.value[key],
-      (val) => {
-        if (errorRef.value[key] && val) {
-          errorRef.value[key] = "";
-        }
-      }
-    );
-  });
-}
-
 // step2
 async function handleStepTwoSubmit() {
+  // 檢查是否正在提交中，如果是，則直接返回
+  if (isSubmitting.value) return;
+
   // 清空錯誤
   Object.keys(errors.value).forEach((key) => (errors.value[key] = ""));
 
   // 基本驗證
   let hasError = false;
-  if (!form.value.name) {
+  if (!formData.value.name) {
     errors.value.name = "請輸入姓名";
     hasError = true;
   }
-  if (!form.value.nickname) {
+  if (!formData.value.nickname) {
     errors.value.nickname = "請輸入暱稱";
     hasError = true;
   }
-  if (!form.value.gender) {
+  if (!formData.value.gender) {
     errors.value.gender = "請選擇性別";
     hasError = true;
   }
-  if (!form.value.birthdate) {
+  if (!formData.value.birthdate) {
     errors.value.birthdate = "請選擇生日";
     hasError = true;
   }
-  if (!form.value.location) {
+  if (!formData.value.location) {
     errors.value.location = "請選擇居住城市";
     hasError = true;
   }
-  if (!form.value.occupation) {
+  if (!formData.value.occupation) {
     errors.value.occupation = "請選擇職業";
     hasError = true;
   }
-  if (!form.value.interests || form.value.interests.length === 0) {
+  if (!selectedInterestIds.value || selectedInterestIds.value.length === 0) {
     errors.value.interests = "請至少選擇一個興趣";
     hasError = true;
   }
 
   if (hasError) return;
 
+  // 開始提交，鎖定狀態
+  isSubmitting.value = true;
+
+  // 建立要傳送的 FormData
   const payload = new FormData();
   payload.append("step", 2);
-  payload.append("tmp_id", tmpId.value);
-  payload.append("name", form.value.name);
-  payload.append("nickname", form.value.nickname);
-  payload.append("gender", form.value.gender);
-  payload.append("birthdate", form.value.birthdate);
-  payload.append("location", form.value.location);
-  payload.append("occupation", form.value.occupation);
-  form.value.interests.forEach((i) => payload.append("interests[]", i));
+  payload.append("name", formData.value.name);
+  payload.append("nickname", formData.value.nickname);
+  payload.append("gender", formData.value.gender);
+  payload.append("birthdate", formData.value.birthdate);
+  payload.append("location", formData.value.location);
+  payload.append("occupation", formData.value.occupation);
 
-  const avatarUrl = computed(() => {
-    const base = import.meta.env.VITE_API_BASE; // e.g. http://localhost:8888/JOIKA_PHP
-    const avatar = member.value?.MEMBER_AVATAR;
-
-    if (!avatar) return ""; // 沒有上傳 → 空字串
-
-    // 只給檔名時，固定拼上 /upload/avatars/
-    return `${base.replace(/\/$/, "")}/upload/member/${encodeURIComponent(avatar)}`;
-  });
+  // 直接新增 interest_no 陣列
+  if (selectedInterestIds.value.length > 0) {
+    selectedInterestIds.value.forEach((id) => {
+      payload.append("interests[]", id);
+    });
+  } else {
+    payload.append("interests[]", ""); // 若使用者取消了所有興趣，則回傳空值
+  }
 
   // avatar
-  const fileInput = document.getElementById("avatar-input");
-  if (fileInput && fileInput.files[0]) {
-    const file = fileInput.files[0];
+  if (avatarFile.value) {
+    const file = avatarFile.value;
     const maxSize = 5 * 1024 * 1024; // 限制 5MB
     const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
 
@@ -172,30 +170,32 @@ async function handleStepTwoSubmit() {
   }
 
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/register.php`, {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE}/users/profile-update.php`, {
       method: "POST",
       credentials: "include",
       body: payload,
     });
     const data = await res.json();
     if (data.success) {
-      currentStep.value = 3; // 註冊完成
+      currentStep.value = 3; // 更新完成
     } else if (data.errors) {
       Object.assign(errors.value, data.errors);
     }
   } catch (err) {
-    console.error("Step2 註冊失敗", err);
+    console.error("資料更新失敗", err);
+  } finally {
+    // 解除鎖定
+    isSubmitting.value = false;
   }
 }
 
 const handleAvatarChange = (e) => {
   const file = e.target.files[0];
   if (file) {
-    avatarUrl.value = URL.createObjectURL(file);
+    avatarUrl.value = URL.createObjectURL(file); // 用於預覽
+    avatarFile.value = file; // <--- 新增這一行，儲存檔案本身
   }
 };
-
-setupAutoClearError(form, errors);
 
 const getStepState = (step) => {
   if (currentStep.value > step) return "completed";
@@ -223,7 +223,7 @@ const getStepState = (step) => {
 
       <!-- 步驟 2-->
       <section v-show="currentStep === 2" class="form-step">
-        <form @submit.prevent="handleStepTwoSubmit">
+        <form>
           <div class="avatar-upload">
             <label for="avatar-input" class="avatar-label">
               <div class="avatar-circle">
@@ -235,26 +235,26 @@ const getStepState = (step) => {
             <input type="file" id="avatar-input" accept="image/*" @change="handleAvatarChange" hidden />
           </div>
 
-          <InputField id="name" label="姓名" type="text" v-model="form.name" :error="errors.name" />
+          <InputField id="name" label="姓名" type="text" v-model="formData.name" :error="errors.name" />
 
-          <InputField id="nickname" label="暱稱" type="text" v-model="form.nickname" :error="errors.nickname" />
+          <InputField id="nickname" label="暱稱" type="text" v-model="formData.nickname" :error="errors.nickname" />
 
-          <InputField id="gender" label="性別" type="select" :options="genderOptions" v-model="form.gender" :error="errors.gender" />
+          <InputField id="gender" label="性別" type="select" :options="genderOptions" v-model="formData.gender" :error="errors.gender" />
 
           <div class="form-group">
             <label class="form-label" for="birthdate">生日</label>
-            <el-date-picker id="birthdate" v-model="form.birthdate" type="date" value-format="YYYY-MM-DD" placeholder="請選擇出生年月日" class="custom-date" />
+            <el-date-picker id="birthdate" v-model="formData.birthdate" type="date" value-format="YYYY-MM-DD" placeholder="請選擇出生年月日" class="custom-date" />
             <p v-if="errors.birthdate" class="error-text birthdate-error-text">{{ errors.birthdate }}</p>
           </div>
 
-          <InputField id="location" label="居住地" type="select" :options="cityOptions" v-model="form.location" :error="errors.location" />
+          <InputField id="location" label="居住地" type="select" :options="allOptions.cities" v-model="formData.location" :error="errors.location" />
 
-          <InputField id="occupation" label="職業" type="select" :options="occupationOptions" v-model="form.occupation" :error="errors.occupation" />
+          <InputField id="occupation" label="職業" type="select" :options="allOptions.occupations" v-model="formData.occupation" :error="errors.occupation" />
 
-          <InterestSelector v-model="form.interests" :options="interestOptions" :error="errors.interests" :max="3" />
+          <InterestSelector v-model="selectedInterestIds" :options="allOptions.interests" :error="errors.interests" :max="3" />
 
           <div class="button-group">
-            <Button size="md" theme="primary" @click="handleStepTwoSubmit">下一步</Button>
+            <Button size="md" theme="primary" @click="handleStepTwoSubmit" :disabled="isSubmitting">下一步</Button>
           </div>
         </form>
       </section>
