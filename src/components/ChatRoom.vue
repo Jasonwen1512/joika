@@ -65,7 +65,7 @@ onMounted(async () => {
     try {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE}/users/profile-get.php`)
         const data = res.data.data
-        console.log('會員資料', data)
+        
 
         if (!data?.MEMBER_ID) throw new Error('未登入')
 
