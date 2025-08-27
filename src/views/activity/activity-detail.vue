@@ -481,9 +481,8 @@ const swiperModules = [Pagination];
 
     <!-- === 第四步：用這段「新的按鈕區塊」取代您原本的 === -->
     <div class="activity-button-wrap">
-      <!-- 狀態二：已經跟團 (直接使用現有的 Button 元件) -->
-      <template v-if="!meLoading && (isHost || isJoiner)">
-        <!-- === 修改：新增取消按鈕，並綁定 openCancelModal 事件 === -->
+      <!-- === 關鍵修改：讓它同時參考後端API的情報和前端Store的情報 === -->
+      <template v-if="!meLoading && (isHost || participationStore.isJoined(activityNo))">
         <Button
           type="button"
           @click="openCancelModal"
