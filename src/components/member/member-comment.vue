@@ -25,7 +25,7 @@ const eventColorMap = {
 const GetEventColor = (eventName) => eventColorMap[eventName] || "#adb5bd";
 
 // ====== 狀態 ======
-const articles = ref([]);         // 從後端撈回並轉好的資料
+const articles = ref([]); // 從後端撈回並轉好的資料
 const loading = ref(false);
 const error = ref("");
 
@@ -55,7 +55,7 @@ async function loadArticles() {
     const res = await fetch(`${API_BASE}/users/post-comment-get.php`, {
       method: "GET",
       credentials: "include", // 🔴 關鍵：帶上 PHPSESSID
-      headers: { "Accept": "application/json" },
+      headers: { Accept: "application/json" },
     });
 
     if (!res.ok) {
@@ -71,12 +71,12 @@ async function loadArticles() {
     // 從後端欄位 ➜ 映射成前端要的欄位
     // 後端：POST_NO, CATEGORY_NAME, POST_TITLE, CREATED_AT, POST_CONTENT, POST_IMG
     articles.value = json.data.map((row) => ({
-      postid: row.POST_NO,                 // ➜ 你的 router-link 用這個
-      event: row.CATEGORY_NAME,            // ➜ 類別
-      date: formatDate(row.CREATED_AT),    // ➜ 顯示用日期
+      postid: row.POST_NO, // ➜ 你的 router-link 用這個
+      event: row.CATEGORY_NAME, // ➜ 類別
+      date: formatDate(row.CREATED_AT), // ➜ 顯示用日期
       title: row.POST_TITLE,
-      content: row.POST_CONTENT,           // 你用 v-html，請確認內容來源可信
-      image: `${API_BASE}${row.POST_IMG.replace('..', '/')}`
+      content: row.POST_CONTENT, // 你用 v-html，請確認內容來源可信
+      image: `${API_BASE}${row.POST_IMG.replace("..", "/")}`,
       // 如果你之後需要 userid 再補
     }));
   } catch (e) {
@@ -113,9 +113,9 @@ onMounted(() => {
       class="article-item"
     >
       <router-link :to="`/article/${article.postid}`" class="article-text-link">
-      <div class="article-img">
+        <div class="article-img">
           <img :src="article.image" :alt="article.title" />
-      </div>
+        </div>
       </router-link>
 
       <router-link :to="`/article/${article.postid}`" class="article-text-link">
@@ -153,7 +153,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .article-item {
-  margin-bottom: 15px ;
+  margin-bottom: 15px;
   display: flex;
   justify-items: start;
   flex-direction: column;
@@ -176,10 +176,13 @@ onMounted(() => {
   height: auto;
   overflow: hidden;
   flex-direction: column;
-  @include desktop() {
-    max-width: 285px;
-    max-height: 190px;
-  }
+  max-width: 285px;
+  max-height: 190px;
+}
+.article-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* 文章只顯示2行 */
@@ -216,7 +219,7 @@ onMounted(() => {
 .router-link-active,
 .router-link-exact-active,
 .article-text-link {
-    text-decoration: none;
-    color: inherit;
+  text-decoration: none;
+  color: inherit;
 }
 </style>

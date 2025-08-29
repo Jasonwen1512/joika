@@ -154,7 +154,7 @@ const visibleCount = ref(2); // 預設電腦是 2 張
 //這邊開始是文章樣式
 
 .article-item {
-  margin-bottom: 15px ;
+  margin-bottom: 15px;
   display: flex;
   justify-items: start;
   flex-direction: column;
@@ -176,10 +176,15 @@ const visibleCount = ref(2); // 預設電腦是 2 張
   height: auto;
   overflow: hidden;
   flex-direction: column;
-  @include desktop() {
-    max-width: 285px;
-    max-height: 190px;
-  }
+
+  max-width: 285px;
+  max-height: 190px;
+}
+.article-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
 }
 
 //文章只顯示2行
