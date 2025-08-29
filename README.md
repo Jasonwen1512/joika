@@ -1,5 +1,56 @@
-# Vue 3 + Vite
+# JOIKA 揪團平台
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+一個以 **Vue 3 + Vite** 為核心開發的揪團平台，整合 **前台活動揪團功能** 與 **後台管理系統**。</br>
+前端提供揪團探索、我要揪團、幫助中心等頁面；後端提供會員、活動與檢舉管理等功能。
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## 🔗 專案連結
+- 前台：[點此前往](https://tibamef2e.com/cjd101/g2/front/home)  
+- 後台：[點此前往](https://tibamef2e.com/cjd101/g2/admin/)  
+
+## 👤 個人負責內容
+
+### 前置作業
+- 前台、後台資料結構建立  
+- 撰寫團隊開發規範  
+
+### 前端切版
+- Header、Footer  
+- 首頁 Banner 微調  
+- 幫助中心  
+- 跟團表單頁面  
+- 揪團探索頁面（Banner 與台灣區塊）  
+- 後台切版  
+
+### 開發功能
+- 首頁活動 API 撰寫與串接  
+- Header 登入狀態判斷  
+- **後台完整功能開發**：  
+  - 登入系統  
+  - 會員管理  
+  - 檢舉管理  
+  - 揪團管理  
+  - 聯絡表單邏輯  
+  - 相關 API 撰寫與串接  
+
+### 團隊協作
+- 擔任**技術長**，負責技術決策  
+- 負責全團隊 Git 分支管理與版本控制，確保團隊協作順暢  
+
+## 🛠️ 使用技術
+- **前端框架**：Vue 3 + Vite  
+- **狀態管理**：Pinia  
+- **動畫與互動**：GSAP、Swiper.js  
+- **版面設計**：Bootstrap、RWD 響應式設計  
+- **前端工具**：Axios、SweetAlert2  
+- **後端技術**：PHP、MySQL  
+
+## ✨ 專案亮點
+- 利用 **GSAP、Swiper.js** 打造首頁與揪團探索頁面的互動效果  
+- 使用 **Pinia** 進行狀態管理，實現資料與組件的即時同步  
+- 採用 **模組化 API 設計**，前端透過 Axios 串接，後端 PHP 負責邏輯處理  
+- 完整的 **前後台功能**（活動、會員、檢舉、揪團、聯絡表單）  
+- 建立團隊 **Git Flow 開發流程**，確保版本控管與協作效率  
+
+---
+
+📌 本專案展現了 **從前端互動到後端邏輯的完整開發能力**，並結合團隊協作經驗，具備實際產品導向的開發流程。
