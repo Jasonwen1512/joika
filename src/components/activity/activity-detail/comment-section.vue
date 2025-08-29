@@ -117,6 +117,18 @@ const isMainCommentAnimating = ref(false);
 const newReplyText = ref("");
 // 處理發送留言的函式
 function postComment() {
+  //檢查是否登入
+  if (!currentUser.value.member_id) {
+    Swal.fire({
+      icon: "warning",
+      title: "請先登入",
+      text: "登入後才能留言喔！",
+      confirmButtonText: "前往登入",
+    }).then(() => {
+      router.push("/auth/login");
+    });
+    return;
+  }
   if (!newComment.value.trim()) {
     return;
   }
@@ -273,18 +285,6 @@ const likeIt = async (comment) => {
     comment.animateLike = false;
   }, 300);
 
-  // 步驟 2: 「樂觀更新 (Optimistic Update)」 - 先假設 API 會成功，立即更新畫面
-  // 這樣使用者體驗會更好，不用等待網路延遲
-  const originalLiked = comment.liked;
-  const originalLikeNum = comment.likenum;
-
-  if (comment.liked) {
-    comment.likenum--;
-  } else {
-    comment.likenum++;
-  }
-  comment.liked = !comment.liked;
-
   try {
     // 步驟 3: 準備要發送到後端的資料
     const payload = {
@@ -426,7 +426,10 @@ function ReportIt(commentId) {
             <div class="comment-actions">
               <div
                 class="action-icon like"
-                :class="{ animate: comment.animateLike }"
+                :class="[
+                  { animate: comment.animateLike },
+                  { liked: comment.liked },
+                ]"
                 @click="likeIt(comment)"
               >
                 <img :src="like" />

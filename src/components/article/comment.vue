@@ -125,6 +125,18 @@ const isMainCommentAnimating = ref(false);
 const newReplyText = ref("");
 // 處理發送留言的函式
 function postComment() {
+  // 檢查是否登入
+  if (!currentUser.value.member_id) {
+    Swal.fire({
+      icon: "warning",
+      title: "請先登入",
+      text: "登入後才能留言喔！",
+      confirmButtonText: "前往登入",
+    }).then(() => {
+      router.push("/auth/login");
+    });
+    return;
+  }
   if (!newComment.value.trim()) {
     return;
   }
@@ -297,17 +309,17 @@ const likeIt = async (comment) => {
     comment.animateLike = false;
   }, 300);
 
-  // 步驟 2: 「樂觀更新 (Optimistic Update)」 - 先假設 API 會成功，立即更新畫面
+  //  步驟 2: 「樂觀更新 (Optimistic Update)」 - 先假設 API 會成功，立即更新畫面
   // 這樣使用者體驗會更好，不用等待網路延遲
-  const originalLiked = comment.liked;
-  const originalLikeNum = comment.likenum;
+  // const originalLiked = comment.liked;
+  // const originalLikeNum = comment.likenum;
 
-  if (comment.liked) {
-    comment.likenum--;
-  } else {
-    comment.likenum++;
-  }
-  comment.liked = !comment.liked;
+  // // if (comment.liked) {
+  // //   comment.likenum--;
+  // // } else {
+  // //   comment.likenum++;
+  // // }
+  // comment.liked = !comment.liked;
 
   try {
     // 步驟 3: 準備要發送到後端的資料
@@ -450,7 +462,10 @@ export default {
             <div class="comment-actions">
               <div
                 class="action-icon like"
-                :class="{ animate: comment.animateLike }"
+                :class="[
+                  { animate: comment.animateLike },
+                  { liked: comment.liked },
+                ]"
                 @click="likeIt(comment)"
               >
                 <img :src="like" />
@@ -749,6 +764,14 @@ export default {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+.like.liked img {
+  filter: brightness(0) saturate(100%) invert(41%) sepia(97%) saturate(749%)
+    hue-rotate(320deg) brightness(97%) contrast(101%);
+  /* 或直接 color: #ff3b3b; 依你的 icon 支援度 */
+}
+.like.liked {
+  color: #ff8c86;
 }
 .action-icon.animate img {
   animation: pop 0.3s ease;
